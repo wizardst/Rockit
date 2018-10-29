@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Rockit" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="src\rt_base\;" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Rockit" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DOS_WINDOWS -DHAS_PTHREAD -D__MSVCRT__ -D_STAT_DEFINED" />
+					<Add directory="../../include" />
+					<Add directory="../../src/rt_base/include" />
+					<Add directory="../../src/rt_node/include" />
+					<Add directory="../../src/rt_task/include" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Rockit" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-DOS_WINDOWS -DHAS_PTHREAD -D__MSVCRT_VERSION__=0x900" />
+					<Add directory="../../include" />
+					<Add directory="../../src/rt_base/include" />
+					<Add directory="../../src/rt_node/include" />
+					<Add directory="../../src/rt_task/include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="../main.cpp" />
+		<Unit filename="../../include/rt_base_header.h" />
+		<Unit filename="../../include/rt_common.h" />
+		<Unit filename="../../include/rt_debug.h" />
+		<Unit filename="../../include/rt_error.h" />
+		<Unit filename="../../include/rt_header.h" />
+		<Unit filename="../../include/rt_task_header.h" />
+		<Unit filename="../../include/rt_type.h" />
+		<Unit filename="../../src/rt_base/include/rt_array_list.h" />
+		<Unit filename="../../src/rt_base/include/rt_cpu_info.h" />
+		<Unit filename="../../src/rt_base/include/rt_dequeue.h" />
+		<Unit filename="../../src/rt_base/include/rt_hash_table.h" />
+		<Unit filename="../../src/rt_base/include/rt_kernel_list.h" />
+		<Unit filename="../../src/rt_base/include/rt_linked_list.h" />
+		<Unit filename="../../src/rt_base/include/rt_log.h" />
+		<Unit filename="../../src/rt_base/include/rt_mem.h" />
+		<Unit filename="../../src/rt_base/include/rt_mem_service.h" />
+		<Unit filename="../../src/rt_base/include/rt_mutex.h" />
+		<Unit filename="../../src/rt_base/include/rt_thread.h" />
+		<Unit filename="../../src/rt_base/include/rt_time.h" />
+		<Unit filename="../../src/rt_base/linux/rt_os_cpu_info.cpp" />
+		<Unit filename="../../src/rt_base/linux/rt_os_mutex.cpp" />
+		<Unit filename="../../src/rt_base/linux/rt_os_thread.cpp" />
+		<Unit filename="../../src/rt_base/linux/rt_os_time.cpp" />
+		<Unit filename="../../src/rt_base/rt_array_list.cpp" />
+		<Unit filename="../../src/rt_base/rt_dequeue.cpp" />
+		<Unit filename="../../src/rt_base/rt_hash_table.cpp" />
+		<Unit filename="../../src/rt_base/rt_linked_list.cpp" />
+		<Unit filename="../../src/rt_base/rt_log.cpp" />
+		<Unit filename="../../src/rt_base/rt_mem.cpp" />
+		<Unit filename="../../src/rt_base/rt_mem_service.cpp" />
+		<Unit filename="../../src/rt_base/rt_os_log.h" />
+		<Unit filename="../../src/rt_base/rt_os_mem.h" />
+		<Unit filename="../../src/rt_base/windows/rt_os_cpu_info.cpp" />
+		<Unit filename="../../src/rt_base/windows/rt_os_log.cpp" />
+		<Unit filename="../../src/rt_base/windows/rt_os_mem.cpp" />
+		<Unit filename="../../src/rt_base/windows/rt_os_mutex.cpp" />
+		<Unit filename="../../src/rt_base/windows/rt_os_thread.cpp" />
+		<Unit filename="../../src/rt_base/windows/rt_os_time.cpp" />
+		<Unit filename="../../src/rt_node/ff_node/ff_node_codec.cpp" />
+		<Unit filename="../../src/rt_node/ff_node/ff_node_codec.h" />
+		<Unit filename="../../src/rt_node/ff_node/ff_node_demuxer.h" />
+		<Unit filename="../../src/rt_node/ff_node/ff_node_filter.cpp" />
+		<Unit filename="../../src/rt_node/ff_node/ff_node_filterr.h" />
+		<Unit filename="../../src/rt_node/ff_node/ff_node_muxer.h" />
+		<Unit filename="../../src/rt_node/ff_node/ff_node_parser.cpp" />
+		<Unit filename="../../src/rt_node/ff_node/ff_node_parser.h" />
+		<Unit filename="../../src/rt_node/include/rt_node.h" />
+		<Unit filename="../../src/rt_node/include/rt_node_codec.h" />
+		<Unit filename="../../src/rt_node/include/rt_node_filter.h" />
+		<Unit filename="../../src/rt_node/include/rt_node_macro.h" />
+		<Unit filename="../../src/rt_node/include/rt_node_manager.h" />
+		<Unit filename="../../src/rt_node/include/rt_node_parser.h" />
+		<Unit filename="../../src/rt_node/rt_node.cpp" />
+		<Unit filename="../../src/rt_node/rt_node_codec.cpp" />
+		<Unit filename="../../src/rt_node/rt_node_filter.cpp" />
+		<Unit filename="../../src/rt_node/rt_node_manager.cpp" />
+		<Unit filename="../../src/rt_node/rt_node_parser.cpp" />
+		<Unit filename="../../src/rt_task/RtTask.cpp" />
+		<Unit filename="../../src/rt_task/RtTaskPool.cpp" />
+		<Unit filename="../../src/rt_task/include/rt_event.h" />
+		<Unit filename="../../src/rt_task/include/rt_event_bus.h" />
+		<Unit filename="../../src/rt_task/include/rt_task.h" />
+		<Unit filename="../../src/rt_task/include/rt_taskpool.h" />
+		<Unit filename="../../src/rt_task/rt_event.cpp" />
+		<Unit filename="../../src/rt_task/rt_event_bus.cpp" />
+		<Unit filename="../../src/tests/test_base_container.h" />
+		<Unit filename="../../src/tests/test_base_rebust.h" />
+		<Unit filename="../../src/tests/test_base_thread.h" />
+		<Unit filename="../../src/tests/test_node_basic.h" />
+		<Unit filename="../../src/tests/test_task_taskpool.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

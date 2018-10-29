@@ -1,0 +1,6 @@
+# Ignore the Specified File
+
+
+# Ignore the Specified Folder
+build/CodeBlock/bin
+build/CodeBlock/obj
