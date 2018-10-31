@@ -13,7 +13,7 @@ RtArrayList* array_list_create_with_capacity(UINT32 min_capacity) {
     if(RT_NULL == alist) {
         return RT_NULL;
     }
-    if(min_capacity <= INITIAL_CAPACITY/2) {
+    if(min_capacity <= INITIAL_CAPACITY / 2) {
         min_capacity = INITIAL_CAPACITY;
     }
     alist->size         = 0;
@@ -41,9 +41,9 @@ INT8 array_list_insert_at(RtArrayList* self, UINT32 index, void* element) {
     }
 
     // increase capacity
-    if((self->size+1) >= self->capacity) {
+    if((self->size + 1) >= self->capacity) {
         // shrink array memory
-        UINT32 new_capacity = self->capacity*2;
+        UINT32 new_capacity = self->capacity * 2;
         self->entries = (RtArrayListEntry*)rt_mem_realloc(__FUNCTION__,
                                         self->entries, sizeof(RtArrayListEntry)*new_capacity);
         if(RT_NULL == self->entries) {
@@ -134,10 +134,10 @@ INT8 array_list_set(RtArrayList* self, UINT32 index, void* element) {
     return RT_ERR_OUTOF_RANGE;
 }
 
-INT8 array_list_destroy(RtArrayList* self) {
-    rt_mem_free(__FUNCTION__, self->entries);
-    self->entries = RT_NULL;
-    rt_mem_free(__FUNCTION__, self);
-    self = RT_NULL;
+INT8 array_list_destroy(RtArrayList **self) {
+    rt_mem_free(__FUNCTION__, (*self)->entries);
+    (*self)->entries = RT_NULL;
+    rt_mem_free(__FUNCTION__, *self);
+    *self = RT_NULL;
     return RT_OK;
 }

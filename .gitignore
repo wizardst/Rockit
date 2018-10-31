@@ -4,3 +4,6 @@
 # Ignore the Specified Folder
 build/CodeBlock/bin
 build/CodeBlock/obj
+
+#Ignore cmake cache
+build/android/

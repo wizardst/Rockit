@@ -45,6 +45,6 @@ RT_BOOL      array_list_contains(RtArrayList* self, void* element);
 UINT32       array_list_get_size(RtArrayList* self);
 void*        array_list_get(RtArrayList* self, size_t index);
 INT8         array_list_set(RtArrayList* self, size_t index, void* element);
-INT8         array_list_destroy(RtArrayList* self);
+INT8         array_list_destroy(RtArrayList **self);
 
 #endif // _RT_ARRAY_LIST_H

@@ -23,6 +23,7 @@
 #include "rt_os_mem.h"
 #include "rt_mem_service.h"
 #include <string.h>
+#include <stdio.h>
 
 #ifdef LOG_TAG
 #undef LOG_TAG
@@ -41,7 +42,7 @@
 #define MEM_ALIGNED(x)          (((x) + MEM_ALIGN) & (~MEM_ALIGN_MASK))
 #define MEM_HEAD_ROOM(debug)    ((debug & MEM_EXT_ROOM) ? (MEM_ALIGN) : (0))
 
-static UINT8 debug = MEM_EXT_ROOM;
+static UINT8 debug = 0;
 static rt_mem_service mem_records;
 
 void *rt_mem_malloc (const char *caller, UINT32 size) {
@@ -50,7 +51,9 @@ void *rt_mem_malloc (const char *caller, UINT32 size) {
     UINT32 size_align = MEM_ALIGNED(size);
     UINT32 size_real = (debug & MEM_EXT_ROOM) ? (size_align + 2 * MEM_ALIGN) :
                        (size_align);
-    void *ptr;
+    void *ptr = NULL;
+    printf("rt_mem_malloc size: %d size_align: %d size_real: %d\n", 
+        size, size_align, size_real);
 
     rt_os_malloc(&ptr, MEM_ALIGN, size_real);
 
