@@ -49,7 +49,7 @@ static void rt_log_full(rt_log_callback log_cb, const char *tag,
 void rt_log(const char *tag, const char *fmt, const char *fname,
                              const UINT16 row, ...) {
     va_list args;
-    va_start(args, fname);
+    va_start(args, row);
     rt_log_full(rt_os_log, tag, fmt, fname, row, args);
     va_end(args);
 }
@@ -57,7 +57,7 @@ void rt_log(const char *tag, const char *fmt, const char *fname,
 void rt_err(const char *tag, const char *fmt, const char *fname,
                             const UINT16 row, ...) {
     va_list args;
-    va_start(args, fname);
+    va_start(args, row);
     rt_log_full(rt_os_err, tag, fmt, fname, row, args);
     va_end(args);
 }

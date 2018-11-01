@@ -13,8 +13,8 @@ typedef struct rt_hash_node {
 }RtHashNode;
 
 struct rt_hash {
-    unsigned int        buckets;//bucket count
-    hash_func_t         hash_func;// hash function ptr
+    unsigned int        buckets;   // bucket count
+    hash_func_t         hash_func; // hash function ptr
     RtHashNode        **nodes;
 };
 
