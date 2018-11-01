@@ -41,7 +41,7 @@ INT8 linked_list_add(RtLinkedList* self, void* entry, RT_BOOL header/*=RT_FALSE*
 INT8 linked_list_insert_at(RtLinkedList* self, UINT32 index, void* data) {
     RT_ASSERT(RT_NULL != self);
 
-    RtLinkedEntry* dst_entry = linked_list_get(self, index);
+    RtLinkedEntry* dst_entry = linked_list_get_entry(self, index);
     if (RT_NULL != dst_entry) {
         RtLinkedEntry* new_entry = (RtLinkedEntry*)rt_mem_malloc(__FUNCTION__,
                                                         sizeof(RtLinkedEntry));
@@ -50,6 +50,8 @@ INT8 linked_list_insert_at(RtLinkedList* self, UINT32 index, void* data) {
         new_entry->data = data;
         new_entry->prev = dst_entry->prev;
         new_entry->next = dst_entry;
+        dst_entry->prev->next = new_entry;
+        dst_entry->prev = new_entry;
         if(RT_NULL == dst_entry->prev) {
             self->head = new_entry;
         }else if(RT_NULL == dst_entry->next) {
@@ -74,8 +76,20 @@ INT8 linked_list_remove(RtLinkedList* self, void* data) {
         }
     }
     if(RT_NULL != entry) {
-        entry->prev = entry->next;
+        if (RT_NULL != entry->prev) {
+            entry->prev->next = entry->next;
+        } else {
+            self->head = entry->next;
+        }
+        if (RT_NULL != entry->next) {
+            entry->next->prev = entry->prev;
+        } else {
+            self->tail = entry->prev;
+        }
         rt_mem_free(__FUNCTION__, entry);
+        self->size--;
+    }  else {
+        return RT_ERR_NULL_PTR;
     }
 
     return RT_OK;
@@ -84,14 +98,23 @@ INT8 linked_list_remove(RtLinkedList* self, void* data) {
 INT8 linked_list_remove_at(RtLinkedList* self, UINT32 index){
     RT_ASSERT(RT_NULL != self);
 
-    RtLinkedEntry* entry = linked_list_get(self, index);
+    RtLinkedEntry* entry = linked_list_get_entry(self, index);
     if(RT_NULL != entry) {
         RtLinkedEntry* temp = entry;
-        entry->prev = entry->next;
-        if(RT_NULL != temp->data) {
-            rt_mem_free(__FUNCTION__, temp->data);
+        if (RT_NULL != entry->prev) {
+            entry->prev->next = entry->next;
+        } else {
+            self->head = entry->next;
+        }
+        if (RT_NULL != entry->next) {
+            entry->next->prev = entry->prev;
+        } else {
+            self->tail = entry->prev;
         }
         rt_mem_free(__FUNCTION__, temp);
+        self->size--;
+    } else {
+        return RT_ERR_NULL_PTR;
     }
     return RT_OK;
 }
@@ -104,9 +127,6 @@ INT8 linked_list_remove_all(RtLinkedList* self) {
         while(entry != RT_NULL) {
             RtLinkedEntry* temp = entry;
             entry = entry->next;
-            if(RT_NULL != temp->data) {
-                rt_mem_free(__FUNCTION__, temp->data);
-            }
             rt_mem_free(__FUNCTION__, temp);
         }
     }
@@ -136,10 +156,10 @@ UINT32 linked_list_get_size(RtLinkedList* self) {
     return self->size;
 }
 
-RtLinkedEntry* linked_list_get(RtLinkedList* self, size_t index) {
+RtLinkedEntry* linked_list_get_entry(RtLinkedList* self, size_t index) {
     RT_ASSERT(RT_NULL != self);
 
-    if((index < 0)||(index>=self->size)) {
+    if((index < 0)||(index >= self->size)) {
         return RT_NULL;
     }
 
@@ -151,15 +171,38 @@ RtLinkedEntry* linked_list_get(RtLinkedList* self, size_t index) {
         }
     } else {
         entry = self->tail;
-        for (UINT32 i = self->size-1; i > index; i--) {
+        for (UINT32 i = self->size - 1; i > index; i--) {
             entry = entry->prev;
         }
     }
     return entry;
 }
 
+void* linked_list_get_data(RtLinkedList* self, size_t index) {
+    RT_ASSERT(RT_NULL != self);
+
+    if((index < 0)||(index >= self->size)) {
+        return RT_NULL;
+    }
+
+    RtLinkedEntry* entry = RT_NULL;
+    if (index < (self->size / 2)) {
+        entry = self->head;
+        for (UINT32 i = 1; i <= index; i++) {
+            entry = entry->next;
+        }
+    } else {
+        entry = self->tail;
+        for (UINT32 i = self->size - 1; i > index; i--) {
+            entry = entry->prev;
+        }
+    }
+    return entry->data;
+}
+
+
 INT8 linked_list_set(RtLinkedList* self, size_t index, void* data) {
-    RtLinkedEntry* entry = linked_list_get(self, index);
+    RtLinkedEntry* entry = linked_list_get_entry(self, index);
     if(RT_NULL == entry){
         return RT_ERR_OUTOF_RANGE;
     }
@@ -168,11 +211,10 @@ INT8 linked_list_set(RtLinkedList* self, size_t index, void* data) {
 
 }
 
-INT8 linked_list_destroy(RtLinkedList* self) {
-   RT_ASSERT(RT_NULL != self);
-
-   linked_list_remove_all(self);
-   rt_mem_free(__FUNCTION__, self);
-   self = RT_NULL;
+INT8 linked_list_destroy(RtLinkedList **self) {
+   RT_ASSERT(RT_NULL != *self);
+   linked_list_remove_all(*self);
+   rt_mem_free(__FUNCTION__, *self);
+   *self = RT_NULL;
    return RT_OK;
 }

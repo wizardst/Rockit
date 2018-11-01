@@ -20,7 +20,7 @@
 #ifndef __RT_ERROR_H__
 #define __RT_ERROR_H__
 
-typedef enum _RT_ERR{
+typedef enum _RT_RET{
     RT_OK                      = 0,
 
     RT_ERR_BAD                 = -1,
@@ -40,6 +40,6 @@ typedef enum _RT_ERR{
     RT_ERR_FATAL_THREAD        = RT_ERR_BASE - 2,
     RT_ERR_NOMEM               = RT_ERR_BASE - 3,
     RT_ERR_OUTOF_RANGE         = RT_ERR_BASE - 4,
-} RT_ERR;
+} RT_RET;
 
 #endif // __RT_ERROR_H__
