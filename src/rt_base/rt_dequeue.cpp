@@ -27,28 +27,31 @@ RT_Deque* deque_create(UINT8 max_size) {
     return list;
 }
 
-void deque_destory(RT_Deque *list) {
-    RT_ASSERT(RT_NULL != list);
+void deque_destory(RT_Deque **list) {
+    RT_ASSERT(RT_NULL != *list);
 
-    RT_DequeEntry* entry = list->head;
+    RT_DequeEntry* entry = (*list)->head;
     RT_DequeEntry* next;
     while(entry){
         next = entry->next;
         rt_free(entry);
         entry = next;
     }
-    rt_memset(list, 0, sizeof(RT_Deque));
+    rt_memset(*list, 0, sizeof(RT_Deque));
+
+    rt_free(*list);
+    *list = RT_NULL;
 }
 
 RT_DequeEntry* deque_entry_malloc(RT_Deque *list) {
     RT_ASSERT(RT_NULL != list);
     RT_DequeEntry *entry = RT_NULL;
-    if( RT_NULL != list->entries ) {
+    if(RT_NULL != list->entries) {
         if(list->size < list->max_size) {
             for(int idx = 0; idx < list->max_size; idx++) {
                 entry = &(list->entries[idx]);
                 // found entry in unused pre-malloc entries
-                if((RT_NULL == entry->data)||(ENTRY_FLAG_UNUSE == entry->flag)) {
+                if((RT_NULL == entry->data) && (ENTRY_FLAG_UNUSE == entry->flag)) {
                     break;
                 }
             }
@@ -61,13 +64,19 @@ RT_DequeEntry* deque_entry_malloc(RT_Deque *list) {
     return entry;
 }
 
-RT_DequeEntry* deque_pop(RT_Deque *list) {
+RT_DequeEntry deque_pop(RT_Deque *list) {
     RT_ASSERT(RT_NULL != list);
-    RT_DequeEntry *entry = RT_NULL;
+    RT_DequeEntry entry;
+    memset(&entry, 0, sizeof(RT_DequeEntry));
     if (deque_size(list) > 0) {
-        entry      = list->head;
-        list->head = entry->next;
-        list->size = (list->size>0)?(list->size-1):0;
+        memcpy(&entry, list->head, sizeof(RT_DequeEntry));
+        if (!list->entries) {
+            rt_free(list->head);
+        } else {
+            memset(list->head, 0, sizeof(RT_DequeEntry));
+        }
+        list->head = entry.next;
+        list->size = (list->size > 0) ? (list->size - 1) : 0;
     }
     return entry;
 }
@@ -93,7 +102,7 @@ INT8  deque_push(RT_Deque *list, const void *data, RT_BOOL header/*=RT_FALSE*/) 
             head->prev         = entry;
             entry->next        = head;
             list->head         = entry;
-        }else{
+        } else {
             RT_DequeEntry* tail = list->tail;
             tail->next         = entry;
             entry->prev        = tail;
@@ -117,7 +126,7 @@ INT8  deque_push_head(RT_Deque *list, const void *data) {
 void*  deque_get(RT_Deque *list, int index) {
     RT_DequeEntry* entry = list->head;
     while(RT_NULL != entry){
-        if(index==0) break;
+        if(index == 0) break;
         index--;
         entry = entry->next;
     }

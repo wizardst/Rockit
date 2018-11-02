@@ -65,6 +65,7 @@ INT8 array_list_insert_at(RtArrayList* self, UINT32 index, void* element) {
 
     return RT_OK;
 }
+
 INT8 array_list_remove(RtArrayList* self, void* element) {
     for(UINT32 ii = 0; ii < self->size; ii++) {
         if(self->entries[ii].data == element) {
@@ -89,7 +90,8 @@ INT8 array_list_remove_at(RtArrayList* self, UINT32 index) {
         /* shrink array memory */
         UINT32 new_capacity = self->capacity/2;
         self->entries = (RtArrayListEntry*)rt_mem_realloc(__FUNCTION__,
-                                        self->entries, sizeof(RtArrayListEntry)*new_capacity);
+                                        self->entries,
+                                        sizeof(RtArrayListEntry) * new_capacity);
         if(RT_NULL == self->entries) {
             self->size     = 0;
             self->capacity = INITIAL_CAPACITY;
@@ -100,15 +102,18 @@ INT8 array_list_remove_at(RtArrayList* self, UINT32 index) {
     }
     return RT_OK;
 }
+
 INT8 array_list_remove_all(RtArrayList* self) {
     self->size     = 0;
 
     /* shrink array memory to min_capacity*/
     self->entries  = (RtArrayListEntry*)rt_mem_realloc(__FUNCTION__,
-                                        self->entries, sizeof(RtArrayListEntry)*self->min_capacity);
+                                        self->entries,
+                                        sizeof(RtArrayListEntry) * self->min_capacity);
     self->capacity = self->min_capacity;
     return RT_OK;
 }
+
 RT_BOOL array_list_contains(RtArrayList* self, void* element) {
     for(UINT32 ii = 0; ii < self->size; ii++) {
         if(self->entries[ii].data == element) {
@@ -117,15 +122,26 @@ RT_BOOL array_list_contains(RtArrayList* self, void* element) {
     }
     return RT_FALSE;
 }
+
 UINT32 array_list_get_size(RtArrayList* self) {
     return self->size;
 }
-void* array_list_get(RtArrayList* self, UINT32 index) {
+
+void* array_list_get_data(RtArrayList* self, UINT32 index) {
     if(index < self->size) {
         return self->entries[index].data;
     }
     return RT_NULL;
 }
+
+RtArrayListEntry* array_list_get_entry(RtArrayList* self, UINT32 index) {
+    if(index < self->size) {
+        return &(self->entries[index]);
+    }
+    return RT_NULL;
+}
+
+
 INT8 array_list_set(RtArrayList* self, UINT32 index, void* element) {
     if(index < self->size) {
         self->entries[index].data = element;

@@ -10,6 +10,7 @@ set(RT_BASE_SRC
     rt_log.cpp
     linux/rt_os_mem.cpp
     linux/rt_os_log.cpp
+    linux/rt_os_time.cpp
 )
 
 add_library(${RT_BASE_STATIC} STATIC ${RT_BASE_SRC})

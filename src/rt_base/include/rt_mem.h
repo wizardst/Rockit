@@ -31,7 +31,7 @@
 #define rt_malloc_array(type, count)  \
     (type*)rt_mem_malloc(__FUNCTION__, sizeof(type) * (count))
 
-#define rt_malloc_size_1(type, size)  \
+#define rt_malloc_size(type, size)  \
     (type*)rt_mem_malloc(__FUNCTION__, size)
 
 #define rt_calloc_size(type, size)  \

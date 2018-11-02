@@ -31,12 +31,12 @@
     void                   *data;
     struct rt_deque_entry  *prev;
     struct rt_deque_entry  *next;
-    UINT8                   flag;
+    UINT32                  flag;
 } RT_DequeEntry;
 
 typedef struct rt_deque {
-    UINT8             size;
-    UINT8             max_size;
+    UINT32             size;
+    UINT32             max_size;
     RT_DequeEntry     *head;
     RT_DequeEntry     *tail;
     RT_DequeEntry     *entries;
@@ -44,9 +44,9 @@ typedef struct rt_deque {
 
 RT_Deque*      deque_create();
 RT_Deque*      deque_create(UINT8 max_size);
-void           deque_destory(RT_Deque *list);
+void           deque_destory(RT_Deque **list);
 RT_DequeEntry* deque_entry_malloc(RT_Deque *list);
-RT_DequeEntry* deque_pop(RT_Deque *list);
+RT_DequeEntry  deque_pop(RT_Deque *list);
 void*          deque_get(RT_Deque *list, int index);
 INT8           deque_push(RT_Deque *list, const void *data, RT_BOOL header=RT_FALSE);
 INT8           deque_push_tail(RT_Deque *list, const void *data);

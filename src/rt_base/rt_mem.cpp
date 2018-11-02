@@ -52,8 +52,6 @@ void *rt_mem_malloc (const char *caller, UINT32 size) {
     UINT32 size_real = (debug & MEM_EXT_ROOM) ? (size_align + 2 * MEM_ALIGN) :
                        (size_align);
     void *ptr = NULL;
-    printf("rt_mem_malloc size: %d size_align: %d size_real: %d\n", 
-        size, size_align, size_real);
 
     rt_os_malloc(&ptr, MEM_ALIGN, size_real);
 

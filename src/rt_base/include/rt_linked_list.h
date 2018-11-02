@@ -35,16 +35,17 @@ typedef struct rt_linked_list {
     RtLinkedEntry *tail;
 } RtLinkedList;
 
-RtLinkedList* linked_list_create();
-INT8         linked_list_add(RtLinkedList* self, void* entry, RT_BOOL header=RT_FALSE);
-INT8         linked_list_insert_at(RtLinkedList* self, UINT32 index, void* data);
-INT8         linked_list_remove(RtLinkedList* self, void* data);
-INT8         linked_list_remove_at(RtLinkedList* self, UINT32 index);
-INT8         linked_list_remove_all(RtLinkedList* self);
-RT_BOOL      linked_list_contains(RtLinkedList* self, void* data);
-UINT32       linked_list_get_size(RtLinkedList* self);
-RtLinkedEntry* linked_list_get(RtLinkedList* self, size_t index);
-INT8         linked_list_set(RtLinkedList* self, size_t index, void* data);
-INT8         linked_list_destroy(RtLinkedList* self);
+RtLinkedList*   linked_list_create();
+INT8            linked_list_add(RtLinkedList* self, void* entry, RT_BOOL header=RT_FALSE);
+INT8            linked_list_insert_at(RtLinkedList* self, UINT32 index, void* data);
+INT8            linked_list_remove(RtLinkedList* self, void* data);
+INT8            linked_list_remove_at(RtLinkedList* self, UINT32 index);
+INT8            linked_list_remove_all(RtLinkedList* self);
+RT_BOOL         linked_list_contains(RtLinkedList* self, void* data);
+UINT32          linked_list_get_size(RtLinkedList* self);
+RtLinkedEntry*  linked_list_get_entry(RtLinkedList* self, size_t index);
+void*           linked_list_get_data(RtLinkedList* self, size_t index);
+INT8            linked_list_set(RtLinkedList* self, size_t index, void* data);
+INT8            linked_list_destroy(RtLinkedList **self);
 
 #endif // _RT_LINKED_LIST_H

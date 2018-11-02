@@ -17,11 +17,11 @@
  *   date: 2018/07/19
  */
 
-#include "rt_time.h"
-
 #ifdef OS_LINUX
 #include <sys/time.h>
 #include <time.h>
+
+#include "rt_time.h"
 
 void RtTime::getDateTime(DateTime* dt)
 {
@@ -32,13 +32,13 @@ void RtTime::getDateTime(DateTime* dt)
         struct tm* tstruct;
         tstruct = localtime(&m_time);
 
-        dt->fYear       = RtToU16(tstruct->tm_year);
-        dt->fMonth      = RtToU8(tstruct->tm_mon + 1);
-        dt->fDayOfWeek  = RtToU8(tstruct->tm_wday);
-        dt->fDay        = RtToU8(tstruct->tm_mday);
-        dt->fHour       = RtToU8(tstruct->tm_hour);
-        dt->fMinute     = RtToU8(tstruct->tm_min);
-        dt->fSecond     = RtToU8(tstruct->tm_sec);
+        dt->mYear       = RtToU16(tstruct->tm_year);
+        dt->mMonth      = RtToU8(tstruct->tm_mon + 1);
+        dt->mDayOfWeek  = RtToU8(tstruct->tm_wday);
+        dt->mDay        = RtToU8(tstruct->tm_mday);
+        dt->mHour       = RtToU8(tstruct->tm_hour);
+        dt->mMinute     = RtToU8(tstruct->tm_min);
+        dt->mSecond     = RtToU8(tstruct->tm_sec);
     }
 }
 
