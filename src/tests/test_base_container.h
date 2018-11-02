@@ -57,7 +57,7 @@ void unit_test_link_list() {
         //RT_LOGE("linked_list_get[%d] = %p heat = %d", i, entry->data, entry->heat);
     }
     linked_list_remove_all(list);
-    linked_list_destroy(list);
+    linked_list_destroy(&list);
 }
 
 typedef struct _mem_record{

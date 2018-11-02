@@ -67,13 +67,13 @@ RT_DequeEntry* deque_entry_malloc(RT_Deque *list) {
 RT_DequeEntry deque_pop(RT_Deque *list) {
     RT_ASSERT(RT_NULL != list);
     RT_DequeEntry entry;
-    memset(&entry, 0, sizeof(RT_DequeEntry));
+    rt_memset(&entry, 0, sizeof(RT_DequeEntry));
     if (deque_size(list) > 0) {
-        memcpy(&entry, list->head, sizeof(RT_DequeEntry));
+        rt_memcpy(&entry, list->head, sizeof(RT_DequeEntry));
         if (!list->entries) {
             rt_free(list->head);
         } else {
-            memset(list->head, 0, sizeof(RT_DequeEntry));
+            rt_memset(list->head, 0, sizeof(RT_DequeEntry));
         }
         list->head = entry.next;
         list->size = (list->size > 0) ? (list->size - 1) : 0;

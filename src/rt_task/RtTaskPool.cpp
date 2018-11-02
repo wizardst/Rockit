@@ -106,15 +106,28 @@ void rt_taskpool_resume(RtTaskPool *taskpool) {
 }
 
 void rt_taskpool_wait(  RtTaskPool *taskpool) {
-    RT_Deque* list   = taskpool->pthreads;
+    // Destory Thread Deque
+    RT_Deque* threads   = taskpool->pthreads;
     taskpool->state = kWaiting_State;
-    for(int idx = 0; idx < list->size; idx++) {
-        RtThread* thread = (RtThread*)deque_get(list, idx);
+    for(UINT32 idx = 0; idx < threads->size; idx++) {
+        RtThread* thread = (RtThread*)deque_get(threads, idx);
         thread->join();
-        RT_LOGT("Thread[%p %02d/%02d] joined, then delete", thread, idx+1, list->size);
+        RT_LOGT("Thread[%p %02d/%02d] joined, then delete", thread, idx+1, threads->size);
         delete thread;
     }
-    deque_destory(list);
+    deque_destory(&threads);
+
+    // Destory Task Deque
+    RT_Deque* tasks = taskpool->tasks;
+    deque_destory(&tasks);
+
+    // Destory Lock
+    if(RT_NULL != taskpool->task_lock) {
+        delete taskpool->task_lock;
+        taskpool->task_lock = NULL;
+    }
+
+    rt_free(taskpool);
 }
 
 void rt_taskpool_dump(  RtTaskPool *taskpool) {
@@ -133,6 +146,7 @@ void* rt_taskpool_loop(void* args) {
             return NULL;
         }
         if ((kRunning_State == taskpool->state)&&(taskpool->cur_task_num==0)) {
+            // TODO: use elegant mechanisms to sleep
             RtTime::sleepUs(5000);
             RT_LOGT("Task Pool is Empty...cur_task_num=%d", taskpool->cur_task_num);
             continue;
@@ -140,14 +154,15 @@ void* rt_taskpool_loop(void* args) {
 
         // We have to be holding the lock to read the queue and to call wait.
         taskpool->task_lock->lock();
-        RtTask*       task  = RT_NULL;
-        RT_DequeEntry* entry = deque_pop(taskpool->tasks);
-        if(RT_NULL != entry) {
-            task = (RtTask*)entry->data;
-            entry->data  = RT_NULL;
-            entry->flag  = ENTRY_FLAG_UNUSE;
+        RtTask*       task   = RT_NULL;
+        RT_DequeEntry entry = deque_pop(taskpool->tasks);
+        if(RT_NULL != entry.data) {
+            task = (RtTask*)entry.data;
+            entry.data  = RT_NULL;
+            entry.flag  = ENTRY_FLAG_UNUSE;
             taskpool->cur_task_num--;
         } else {
+            // TODO: use elegant mechanisms to sleep
             RtTime::sleepUs(5000);
             RT_LOGT("Task Pool is Empty...cur_task_num=%d", taskpool->cur_task_num);
             taskpool->task_lock->unlock();

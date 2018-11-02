@@ -115,6 +115,10 @@ void *rt_memset(void *str, int c, size_t n) {
     return memset(str, c, n);
 }
 
+void *rt_memcpy(void *dst, void *src, size_t n){
+    return memcpy(dst, src, n);
+}
+
 void rt_mem_record_dump() {
     // TODO : debug memory
     mem_records.dump();
