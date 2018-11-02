@@ -20,6 +20,7 @@
 #ifdef OS_LINUX
 #include <sys/time.h>
 #include <time.h>
+#include <unistd.h> 
 
 #include "rt_time.h"
 
@@ -53,6 +54,13 @@ UINT64 RtTime::getNowTimeUs() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return (UINT64) (tv.tv_sec * 1000000 + tv.tv_usec); /* microseconds */
+}
+
+void RtTime::sleepMs(UINT64 time) {
+    usleep(time*1000);
+}
+void RtTime::sleepUs(UINT64 time) {
+    usleep(time);
 }
 
 #endif

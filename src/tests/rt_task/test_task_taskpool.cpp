@@ -8,9 +8,10 @@
 
 #include "rt_task.h"
 #include "rt_taskpool.h"
+#include "rt_task_tests.h"
 
 #include <unistd.h> /*rand and usleep*/
-#include <windows.h>
+//#include <windows.h>
 
 class UnitTestTask : public RtTask {
 public:
@@ -33,7 +34,7 @@ public:
      }
 
      virtual char* get_name() {
-         return "Task: UnitTestTask";
+         return (char*)"Task: UnitTestTask";
      }
 
      virtual bool shouldSkip() const {return false;}
@@ -47,7 +48,7 @@ UINT8 unit_test_task() {
     return RT_OK;
 }
 
-UINT8 unit_test_taskpool(UINT32 max_thread, UINT32 max_task, UINT32 num_task) {
+UINT8 unit_test_taskpool_inner(UINT32 max_thread, UINT32 max_task, UINT32 num_task) {
     RtTaskPool* taskpool = rt_taskpool_init(max_thread, max_task);
     for(UINT32 idx = 0; idx < num_task; idx++) {
         rt_taskpool_push_tail(taskpool, new UnitTestTask(idx+1));
@@ -56,6 +57,11 @@ UINT8 unit_test_taskpool(UINT32 max_thread, UINT32 max_task, UINT32 num_task) {
     rt_taskpool_wait(taskpool);
     RT_LOGT("done");
     return RT_OK;
+}
+
+RT_RET  unit_test_taskpool(INT32 index, INT32 total) {
+    unit_test_taskpool_inner(10, 100, 80);
+    unit_test_taskpool_inner(10, 100, 200);
 }
 
 #endif // __TEST_TASK_THREAD_POOL_H__

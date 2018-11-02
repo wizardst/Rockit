@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rockchip Electronics Co. LTD
+ * Copyright 2018 The Rockit Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng
- *   date: 20180704
+ * author: martin.cheng@rock-chips.com
+ *   date: 2018/11/05
  */
 
-#ifndef INCLUDES_H_INCLUDED
-#define INCLUDES_H_INCLUDED
-
-#include "rt_error.h"
-#include "rt_type.h"
-#include "rt_node.h"
-#include "rt_debug.h"
-#include "rt_log.h"
-#include "rt_time.h"
-#include "rt_mem.h"
-#include "rt_mutex.h"
+#include "rt_base/rt_base_tests.h"
+#include "rt_node/rt_node_tests.h"
+#include "rt_task/rt_task_tests.h"
 #include "rt_check.h"
 
-#endif // INCLUDES_H_INCLUDED
+RT_RET unit_test_best_practice() {
+    rt_mem_record_reset();
+    unit_test_hash_table(0,0);
+    rt_mem_record_dump();
+}
+
+int main(int argc, char **argv)
+{
+    return unit_test_best_practice();
+}

@@ -29,9 +29,9 @@
 
 #include "rt_mutex.h"
 #include "rt_thread.h"
+#include "rt_base_tests.h"
 
-UINT8 unit_test_mutex() {
-    RT_LOGE("Fail to unit_test_mutex()");
+RT_RET unit_test_mutex(INT32 index, INT32 total_index) {
     RtMutex *lock = new RtMutex();
     lock->lock();
     lock->unlock();
@@ -46,7 +46,7 @@ void* unit_test_thread_loop(void*) {
    return NULL;
 }
 
-UINT8 unit_test_thread() {
+RT_RET unit_test_thread(INT32 index, INT32 total_index) {
     RtThread* td = new RtThread(unit_test_thread_loop, NULL);
     td->start();
     td->join();

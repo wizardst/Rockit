@@ -17,22 +17,23 @@
  *   date: 2018/07/05
  */
 
-#ifndef __TEST_BASE_REBUST_H__
-#define __TEST_BASE_REBUST_H__
+#ifndef __TEST_BASE_MEMORY_H__
+#define __TEST_BASE_MEMORY_H__
 
 #ifdef LOG_TAG
 #undef LOG_TAG
 #endif
-#define LOG_TAG "test_base_rebust"
+#define LOG_TAG "test_base_memory"
 
 #include "rt_header.h"
+#include "rt_base_tests.h"
 
 typedef struct _person{
     int   age;
     char *name;
 } Person;
 
-INT8 unit_test_memery() {
+RT_RET unit_test_memory(INT32 index, INT32 total_index){
     UINT32 idx = 0;
     for(idx = 0; idx < 100; idx++) {
         Person* martin = RT_NULL;
@@ -47,12 +48,9 @@ INT8 unit_test_memery() {
         }
     }
     if(idx == 100) {
-        RT_LOGT("Success to unit_test_memery()");
         return RT_OK;
-    }else{
-        RT_LOGE("Fail to unit_test_memery()");
     }
     return RT_ERR_MALLOC;
 }
 
-#endif //__TEST_BASE_REBUST_H__
+#endif //__TEST_BASE_MEMORY_H__

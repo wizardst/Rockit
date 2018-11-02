@@ -43,7 +43,6 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="../main.cpp" />
 		<Unit filename="../../include/rt_base_header.h" />
 		<Unit filename="../../include/rt_common.h" />
 		<Unit filename="../../include/rt_debug.h" />
@@ -101,19 +100,28 @@
 		<Unit filename="../../src/rt_node/rt_node_filter.cpp" />
 		<Unit filename="../../src/rt_node/rt_node_manager.cpp" />
 		<Unit filename="../../src/rt_node/rt_node_parser.cpp" />
-		<Unit filename="../../src/rt_task/RtTask.cpp" />
-		<Unit filename="../../src/rt_task/RtTaskPool.cpp" />
 		<Unit filename="../../src/rt_task/include/rt_event.h" />
 		<Unit filename="../../src/rt_task/include/rt_event_bus.h" />
 		<Unit filename="../../src/rt_task/include/rt_task.h" />
 		<Unit filename="../../src/rt_task/include/rt_taskpool.h" />
 		<Unit filename="../../src/rt_task/rt_event.cpp" />
 		<Unit filename="../../src/rt_task/rt_event_bus.cpp" />
-		<Unit filename="../../src/tests/test_base_container.h" />
-		<Unit filename="../../src/tests/test_base_rebust.h" />
-		<Unit filename="../../src/tests/test_base_thread.h" />
-		<Unit filename="../../src/tests/test_node_basic.h" />
-		<Unit filename="../../src/tests/test_task_taskpool.h" />
+		<Unit filename="../../src/rt_task/rt_task.cpp" />
+		<Unit filename="../../src/rt_task/rt_taskpool.cpp" />
+		<Unit filename="../../src/tests/main.cpp" />
+		<Unit filename="../../src/tests/rt_base/rt_base_tests.h" />
+		<Unit filename="../../src/tests/rt_base/test_base_array_list.cpp" />
+		<Unit filename="../../src/tests/rt_base/test_base_deque.cpp" />
+		<Unit filename="../../src/tests/rt_base/test_base_hash_table.cpp" />
+		<Unit filename="../../src/tests/rt_base/test_base_linked_list.cpp" />
+		<Unit filename="../../src/tests/rt_base/test_base_memory.cpp" />
+		<Unit filename="../../src/tests/rt_base/test_base_mutex_thread.cpp" />
+		<Unit filename="../../src/tests/rt_node/rt_node_tests.h" />
+		<Unit filename="../../src/tests/rt_node/test_node_basic.cpp" />
+		<Unit filename="../../src/tests/rt_node/test_node_bus.cpp" />
+		<Unit filename="../../src/tests/rt_node/test_node_data_flow.cpp" />
+		<Unit filename="../../src/tests/rt_task/rt_task_tests.h" />
+		<Unit filename="../../src/tests/rt_task/test_task_taskpool.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

@@ -7,5 +7,6 @@ include_directories(rt_task/include)
 add_subdirectory(rt_base)
 add_subdirectory(rt_node)
 add_subdirectory(rt_task)
+add_subdirectory(tests)
 
-message(STATUS "cmake version ${CMAKE_VERSION}")
+message(STATUS "cmake version ${CMAKE_VERSION} [@@]config source codes")

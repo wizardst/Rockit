@@ -13,21 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng
- *   date: 20180704
+ * author: martin.cheng@rock-chips.com
+ *   date: 2018/11/05
  */
 
-#ifndef INCLUDES_H_INCLUDED
-#define INCLUDES_H_INCLUDED
+#ifndef __RT_NODE_BUS_H__
+#define __RT_NODE_BUS_H__
 
-#include "rt_error.h"
-#include "rt_type.h"
 #include "rt_node.h"
-#include "rt_debug.h"
-#include "rt_log.h"
-#include "rt_time.h"
-#include "rt_mem.h"
-#include "rt_mutex.h"
-#include "rt_check.h"
+#include "rt_node_tests.h"
 
-#endif // INCLUDES_H_INCLUDED
+RT_RET unit_test_node_bus(INT32 index, INT32 total)
+{
+    return RT_OK;
+}
+
+#endif /*__RT_NODE_BUS_H__*/
+

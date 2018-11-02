@@ -8,14 +8,16 @@ set(RT_BASE_SRC
     rt_mem.cpp
     rt_mem_service.cpp
     rt_log.cpp
-    linux/rt_os_mem.cpp
+    rt_test.cpp
+    linux/rt_os_cpu_info.cpp
     linux/rt_os_log.cpp
+    linux/rt_os_mem.cpp
+    linux/rt_os_mutex.cpp
+    linux/rt_os_thread.cpp
     linux/rt_os_time.cpp
 )
 
 add_library(${RT_BASE_STATIC} STATIC ${RT_BASE_SRC})
 set_target_properties(${RT_BASE_STATIC} PROPERTIES FOLDER "rt_base")
 
-add_subdirectory(test)
-
-message(STATUS "cmake version ${CMAKE_VERSION}")
+message(STATUS "cmake version ${CMAKE_VERSION} [@@]config library: rt_base")
