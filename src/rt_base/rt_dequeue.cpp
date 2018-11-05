@@ -1,10 +1,29 @@
+/*
+ * Copyright 2018 Rockchip Electronics Co. LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * author: rimon.xu@rock-chips.com
+ *   date: 20181102
+ */
+
 #include "rt_dequeue.h"
 #include "rt_header.h"
 #include "rt_mem.h"
 
 RT_Deque* deque_create() {
-    RT_Deque* list = (RT_Deque*)rt_mem_malloc(__FUNCTION__, sizeof(RT_Deque));
-    if(RT_NULL != list) {
+    RT_Deque* list = rt_malloc(RT_Deque);
+    if (RT_NULL != list) {
         list->size = 0;
         list->head = RT_NULL;
         list->tail = RT_NULL;
@@ -20,7 +39,7 @@ RT_Deque* deque_create(UINT8 max_size) {
     list->max_size = max_size;
     list->entries   = rt_malloc_array(RT_DequeEntry, max_size);
     RT_ASSERT(RT_NULL != list->entries);
-    for(int idx = 0; idx < max_size; idx++) {
+    for (UINT32 idx = 0; idx < max_size; idx++) {
         RT_DequeEntry entry = list->entries[idx];
         rt_memset(&entry, RT_NULL, sizeof(RT_DequeEntry));
     }
@@ -32,7 +51,7 @@ void deque_destory(RT_Deque **list) {
 
     RT_DequeEntry* entry = (*list)->head;
     RT_DequeEntry* next;
-    while(entry){
+    while (entry) {
         next = entry->next;
         rt_free(entry);
         entry = next;
@@ -51,7 +70,8 @@ RT_DequeEntry* deque_entry_malloc(RT_Deque *list) {
             for(UINT32 idx = 0; idx < list->max_size; idx++) {
                 entry = &(list->entries[idx]);
                 // found entry in unused pre-malloc entries
-                if((RT_NULL == entry->data) && (ENTRY_FLAG_UNUSE == entry->flag)) {
+                if ((RT_NULL == entry->data)
+                        && (ENTRY_FLAG_UNUSE == entry->flag)) {
                     break;
                 }
             }
@@ -81,14 +101,16 @@ RT_DequeEntry deque_pop(RT_Deque *list) {
     return entry;
 }
 
-INT8  deque_push(RT_Deque *list, const void *data, RT_BOOL header/*=RT_FALSE*/) {
+INT8  deque_push(RT_Deque *list,
+                     const void *data,
+                     RT_BOOL header /* =RT_FALSE */) {
     RT_ASSERT(RT_NULL != list);
 
     RT_DequeEntry *entry = deque_entry_malloc(list);
     if (RT_NULL == entry)
        return RT_ERR_BAD;
 
-    entry->data = (void *)data;
+    entry->data = const_cast<void *> (data);
     entry->flag = ENTRY_FLAG_USE;
     entry->next = RT_NULL;
     if (deque_size(list) == 0) {
@@ -97,7 +119,7 @@ INT8  deque_push(RT_Deque *list, const void *data, RT_BOOL header/*=RT_FALSE*/) 
         list->head = entry;
         list->tail = entry;
     } else {
-        if(RT_TRUE==header){
+        if (RT_TRUE == header) {
             RT_DequeEntry* head = list->head;
             head->prev         = entry;
             entry->next        = head;
@@ -125,12 +147,12 @@ INT8  deque_push_head(RT_Deque *list, const void *data) {
 
 void*  deque_get(RT_Deque *list, int index) {
     RT_DequeEntry* entry = list->head;
-    while(RT_NULL != entry){
-        if(index == 0) break;
+    while (RT_NULL != entry) {
+        if (index == 0) break;
         index--;
         entry = entry->next;
     }
-    if(RT_NULL == entry) {
+    if (RT_NULL == entry) {
         return RT_NULL;
     }
     return entry->data;

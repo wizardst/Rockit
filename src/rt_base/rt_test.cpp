@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: rimon.xu
+ * author: rimon.xu@rock-chips.com
  *   date: 20181102
- * e-mail: rimon.xu@rock-chips.com
  */
 
 #include "rt_test_header.h"
@@ -25,8 +24,7 @@
 static RT_RET rt_test_impl(UINT32 index,
                            UINT32 total_index,
                            TestFunc func,
-                           char *name)
-{
+                           char *name) {
     CHECK_IS_NULL(name);
     PRINT_TEST_BEGIN(index, total_index, name);
 
@@ -41,15 +39,14 @@ __FAILED:
     return RT_ERR_UNKNOWN;
 }
 
-RtTestCtx *rt_tests_init(char *name)
-{
+RtTestCtx *rt_tests_init(char *name) {
     RtTestCtx *ctx = rt_malloc(RtTestCtx);
     CHECK_IS_NULL(ctx);
     memset(ctx, 0, sizeof(RtTestCtx));
 
     /* init params */
     CHECK_IS_NULL(name);
-    strcpy(ctx->name, name);
+    snprintf(ctx->name, sizeof(ctx->name), "%s", name);
     ctx->list = array_list_create();
     CHECK_IS_NULL(ctx->list);
 
@@ -59,8 +56,7 @@ __FAILED:
     return RT_NULL;
 }
 
-RT_RET rt_tests_run(RtTestCtx *ctx, RT_BOOL mem_dump)
-{
+RT_RET rt_tests_run(RtTestCtx *ctx, RT_BOOL mem_dump) {
     RT_RET ret = RT_OK;
     int total_count = 0;
 
@@ -72,10 +68,12 @@ RT_RET rt_tests_run(RtTestCtx *ctx, RT_BOOL mem_dump)
         RtTestNode *node = NULL;
         char full_name[256];
         memset(full_name, 0, 256);
-        node = (RtTestNode *)array_list_get_data(ctx->list, 0);
+        node = reinterpret_cast<RtTestNode *>
+                   (array_list_get_data(ctx->list, 0));
         CHECK_IS_NULL(node);
 
-        sprintf(full_name, "%s#%s", ctx->name, node->name);
+        snprintf(full_name, sizeof(full_name), "%s#%s", ctx->name, node->name);
+
         UINT64 start = RtTime::getNowTimeUs();
         if(RT_TRUE == mem_dump) {
             rt_mem_record_reset();
@@ -86,7 +84,8 @@ RT_RET rt_tests_run(RtTestCtx *ctx, RT_BOOL mem_dump)
         }
         UINT64 end = RtTime::getNowTimeUs();
         UINT64 space_time = end - start;
-        RT_LOGE("test space time: %lld.%lld ms\n\n", space_time / 1000, space_time % 1000);
+        RT_LOGE("test space time: %lld.%lld ms\n\n",
+                    space_time / 1000, space_time % 1000);
         CHECK_EQ(array_list_remove_at(ctx->list, 0),  RT_OK);
         rt_free(node);
         node = NULL;
@@ -98,8 +97,7 @@ __FAILED:
     return RT_ERR_UNKNOWN;
 }
 
-RT_RET rt_tests_add(RtTestCtx *ctx, TestFunc func, char *name)
-{
+RT_RET rt_tests_add(RtTestCtx *ctx, TestFunc func, char *name) {
     RT_RET ret = RT_OK;
     RtTestNode *node = NULL;
 
@@ -110,9 +108,9 @@ RT_RET rt_tests_add(RtTestCtx *ctx, TestFunc func, char *name)
     node = rt_malloc(RtTestNode);
     CHECK_IS_NULL(node);
     node->func = func;
-    strcpy(node->name, name);
+    snprintf(node->name, sizeof(node->name), "%s", name);
 
-    ret = (RT_RET)array_list_add(ctx->list, (void *)node);
+    ret = (RT_RET)array_list_add(ctx->list, reinterpret_cast<void *>(node));
     ctx->count = array_list_get_size(ctx->list);
 
 __RET:
@@ -121,9 +119,7 @@ __FAILED:
     return RT_ERR_UNKNOWN;
 }
 
-RT_RET rt_tests_deinit(RtTestCtx **ctx)
-
-{
+RT_RET rt_tests_deinit(RtTestCtx **ctx) {
     RT_RET ret = RT_OK;
 
     CHECK_IS_NULL(ctx);

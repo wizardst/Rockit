@@ -1,3 +1,26 @@
+/*
+ * Copyright 2018 Rockchip Electronics Co. LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * author: rimon.xu@rock-chips.com
+ *   date: 20181102
+ *
+ * author: martin.cheng@rock-chips.com
+ *   date: 20181107
+ * update: replaced by universal hash table api.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -136,7 +159,7 @@ void rt_hash_table_insert (struct RtHashTable *ht, const void *key, void *data) 
     insert_at_head(& ht->buckets[bucket], node);
 }
 
-bool   rt_hash_table_replace(struct RtHashTable *ht, const void *key, void *data) {
+bool rt_hash_table_replace(struct RtHashTable *ht, const void *key, void *data) {
     const UINT32 hash_value = (*ht->hash)(ht->num_buckets, key);
     const UINT32 bucket     = hash_value % ht->num_buckets;
 
@@ -153,7 +176,7 @@ bool   rt_hash_table_replace(struct RtHashTable *ht, const void *key, void *data
     return false;
 }
 
-void   rt_hash_table_remove (struct RtHashTable *ht, const void *key) {
+void rt_hash_table_remove (struct RtHashTable *ht, const void *key) {
    struct rt_hash_node *node = (struct rt_hash_node *) get_node(ht, key);
    if (node != NULL) {
       remove_from_list(node);

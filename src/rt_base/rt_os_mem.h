@@ -17,8 +17,8 @@
  *   date: 20180704
  */
 
-#ifndef __RT_OS_MEM_H__
-#define __RT_OS_MEM_H__
+#ifndef SRC_RT_BASE_RT_OS_MEM_H_
+#define SRC_RT_BASE_RT_OS_MEM_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,6 +36,5 @@ void rt_os_free(void *ptr);
 }
 #endif
 
-#endif /*__RT_OS_MEM_H__*/
-
+#endif  // SRC_RT_BASE_RT_OS_MEM_H_
 

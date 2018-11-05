@@ -17,8 +17,8 @@
  *   date: 20180704
  */
 
-#ifndef __RT_OS_LOG_H__
-#define __RT_OS_LOG_H__
+#ifndef SRC_RT_BASE_RT_OS_LOG_H_
+#define SRC_RT_BASE_RT_OS_LOG_H_
 
 #define MAX_LINE_LEN 256
 
@@ -33,4 +33,4 @@ void rt_os_err(const char* tag, const char* msg, va_list list);
 }
 #endif
 
-#endif /*__RT_LOG_H__*/
+#endif  // SRC_RT_BASE_RT_OS_LOG_H_

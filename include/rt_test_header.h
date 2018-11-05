@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: rimon.xu
+ * author: rimon.xu@rock-chips.com
  *   date: 20181102
- * e-mail: rimon.xu@rock-chips.com
  */
 
 #ifndef __RT_TEST_HEADER_H__

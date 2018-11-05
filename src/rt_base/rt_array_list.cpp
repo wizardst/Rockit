@@ -1,4 +1,23 @@
-#include "rt_array_list.h"
+/*
+ * Copyright 2018 Rockchip Electronics Co. LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * author: rimon.xu@rock-chips.com
+ *   date: 20181102
+ */
+
+#include "include/rt_array_list.h"
 #include "rt_error.h"
 #include "rt_mem.h"
 
@@ -9,19 +28,19 @@ RtArrayList* array_list_create() {
 }
 
 RtArrayList* array_list_create_with_capacity(UINT32 min_capacity) {
-    RtArrayList* alist = (RtArrayList*)rt_mem_malloc(__FUNCTION__, sizeof(RtArrayList));
-    if(RT_NULL == alist) {
+    RtArrayList* alist = rt_malloc(RtArrayList);
+    if (RT_NULL == alist) {
         return RT_NULL;
     }
-    if(min_capacity <= INITIAL_CAPACITY / 2) {
+    if (min_capacity <= INITIAL_CAPACITY / 2) {
         min_capacity = INITIAL_CAPACITY;
     }
     alist->size         = 0;
     alist->capacity     = min_capacity;
     alist->min_capacity = min_capacity;
-    alist->entries      = (RtArrayListEntry*)rt_mem_malloc(__FUNCTION__, sizeof(RtArrayListEntry)*alist->capacity);
-    if(RT_NULL == alist->entries) {
-        rt_mem_free(__FUNCTION__, alist);
+    alist->entries      = rt_malloc_array(RtArrayListEntry, alist->capacity);
+    if (RT_NULL == alist->entries) {
+        rt_free(alist);
         alist = RT_NULL;
         return RT_NULL;
     }
@@ -36,17 +55,18 @@ INT8 array_list_insert_at(RtArrayList* self, UINT32 index, void* element) {
     UINT32 ii = 0;
 
     // check out of range
-    if((index < 0)||(index>self->size)) {
+    if ((index < 0) || (index > self->size)) {
         return RT_ERR_OUTOF_RANGE;
     }
 
     // increase capacity
-    if((self->size + 1) >= self->capacity) {
+    if ((self->size + 1) >= self->capacity) {
         // shrink array memory
         UINT32 new_capacity = self->capacity * 2;
-        self->entries = (RtArrayListEntry*)rt_mem_realloc(__FUNCTION__,
-                                        self->entries, sizeof(RtArrayListEntry)*new_capacity);
-        if(RT_NULL == self->entries) {
+        self->entries = rt_realloc(self->entries,
+                                   RtArrayListEntry,
+                                   new_capacity);
+        if (RT_NULL == self->entries) {
             self->size     = 0;
             self->capacity = INITIAL_CAPACITY;
             return RT_ERR_NOMEM;
@@ -67,8 +87,8 @@ INT8 array_list_insert_at(RtArrayList* self, UINT32 index, void* element) {
 }
 
 INT8 array_list_remove(RtArrayList* self, void* element) {
-    for(UINT32 ii = 0; ii < self->size; ii++) {
-        if(self->entries[ii].data == element) {
+    for (UINT32 ii = 0; ii < self->size; ii++) {
+        if (self->entries[ii].data == element) {
             return array_list_remove_at(self, ii);
         }
     }
@@ -76,23 +96,24 @@ INT8 array_list_remove(RtArrayList* self, void* element) {
 }
 
 INT8 array_list_remove_at(RtArrayList* self, UINT32 index) {
-    for(UINT32 ii = index; ii < self->size; ii++) {
+    for (UINT32 ii = index; ii < self->size; ii++) {
        self->entries[ii].data = self->entries[ii+1].data;
        self->entries[ii].heat = self->entries[ii+1].heat;
     }
-    if(self->size>0){
+    if (self->size > 0) {
        self->entries[self->size-1].data = NULL;
        self->entries[self->size-1].heat = 0;
        self->size--;
     }
 
-    if (self->capacity > self->min_capacity && self->size <= self->capacity / 4) {
+    if (self->capacity > self->min_capacity
+            && self->size <= self->capacity / 4) {
         /* shrink array memory */
         UINT32 new_capacity = self->capacity/2;
-        self->entries = (RtArrayListEntry*)rt_mem_realloc(__FUNCTION__,
-                                        self->entries,
-                                        sizeof(RtArrayListEntry) * new_capacity);
-        if(RT_NULL == self->entries) {
+        self->entries = rt_realloc(self->entries,
+                           RtArrayListEntry,
+                           new_capacity);
+        if (RT_NULL == self->entries) {
             self->size     = 0;
             self->capacity = INITIAL_CAPACITY;
             return RT_ERR_NOMEM;
@@ -107,16 +128,17 @@ INT8 array_list_remove_all(RtArrayList* self) {
     self->size     = 0;
 
     /* shrink array memory to min_capacity*/
-    self->entries  = (RtArrayListEntry*)rt_mem_realloc(__FUNCTION__,
-                                        self->entries,
-                                        sizeof(RtArrayListEntry) * self->min_capacity);
+    self->entries = rt_realloc(self->entries,
+                       RtArrayListEntry,
+                       self->min_capacity);
+
     self->capacity = self->min_capacity;
     return RT_OK;
 }
 
 RT_BOOL array_list_contains(RtArrayList* self, void* element) {
-    for(UINT32 ii = 0; ii < self->size; ii++) {
-        if(self->entries[ii].data == element) {
+    for (UINT32 ii = 0; ii < self->size; ii++) {
+        if (self->entries[ii].data == element) {
             return RT_TRUE;
         }
     }
@@ -128,14 +150,14 @@ UINT32 array_list_get_size(RtArrayList* self) {
 }
 
 void* array_list_get_data(RtArrayList* self, UINT32 index) {
-    if(index < self->size) {
+    if (index < self->size) {
         return self->entries[index].data;
     }
     return RT_NULL;
 }
 
 RtArrayListEntry* array_list_get_entry(RtArrayList* self, UINT32 index) {
-    if(index < self->size) {
+    if (index < self->size) {
         return &(self->entries[index]);
     }
     return RT_NULL;
@@ -143,7 +165,7 @@ RtArrayListEntry* array_list_get_entry(RtArrayList* self, UINT32 index) {
 
 
 INT8 array_list_set(RtArrayList* self, UINT32 index, void* element) {
-    if(index < self->size) {
+    if (index < self->size) {
         self->entries[index].data = element;
         return RT_OK;
     }
@@ -151,9 +173,9 @@ INT8 array_list_set(RtArrayList* self, UINT32 index, void* element) {
 }
 
 INT8 array_list_destroy(RtArrayList **self) {
-    rt_mem_free(__FUNCTION__, (*self)->entries);
+    rt_free((*self)->entries);
     (*self)->entries = RT_NULL;
-    rt_mem_free(__FUNCTION__, *self);
+    rt_free(*self);
     *self = RT_NULL;
     return RT_OK;
 }

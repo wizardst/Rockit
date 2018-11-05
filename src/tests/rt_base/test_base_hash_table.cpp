@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: rimon.xu
+ * author: rimon.xu@rock-chips.com
  *   date: 20181031
- * e-mail: rimon.xu@rock-chips.com
  *
  * author: martin.cheng@rock-chips.com
  *   date: 20181107

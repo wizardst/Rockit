@@ -40,14 +40,12 @@
 #define MEM_MAX_INDEX           (0x7fffffff)
 #define MEM_ALIGN_MASK          (MEM_ALIGN - 1)
 #define MEM_ALIGNED(x)          (((x) + MEM_ALIGN) & (~MEM_ALIGN_MASK))
-#define MEM_HEAD_ROOM(debug)    ((debug & MEM_EXT_ROOM) ? (MEM_ALIGN) : (0))
+#define MEM_HEAD_ROOM(debug)    (((debug) & MEM_EXT_ROOM) ? (MEM_ALIGN) : (0))
 
 static UINT8 debug = 0;
 static rt_mem_service mem_records;
 
-void *rt_mem_malloc (const char *caller, UINT32 size) {
-    //AutoMutex auto_lock(&service.lock);
-
+void *rt_mem_malloc(const char *caller, UINT32 size) {
     UINT32 size_align = MEM_ALIGNED(size);
     UINT32 size_real = (debug & MEM_EXT_ROOM) ? (size_align + 2 * MEM_ALIGN) :
                        (size_align);
@@ -55,13 +53,13 @@ void *rt_mem_malloc (const char *caller, UINT32 size) {
 
     rt_os_malloc(&ptr, MEM_ALIGN, size_real);
 
-    // TODO : debug memory
+    // TODO(debug) : debug memory
     mem_records.add_node(caller, ptr, size);
 
     return ptr;
 }
 
-void *rt_mem_calloc (const char *caller, UINT32 size) {
+void *rt_mem_calloc(const char *caller, UINT32 size) {
     void *ptr = rt_mem_malloc(caller, size);
     if (ptr)
         memset(ptr, 0, size);
@@ -69,7 +67,6 @@ void *rt_mem_calloc (const char *caller, UINT32 size) {
 }
 
 void *rt_mem_realloc(const char *caller, void *ptr, UINT32 size) {
-    //AutoMutex auto_lock(&service.lock);
     void *ret;
 
     if (NULL == ptr)
@@ -81,34 +78,31 @@ void *rt_mem_realloc(const char *caller, void *ptr, UINT32 size) {
     }
 
     size_t size_align = MEM_ALIGNED(size);
-    //size_t size_real = (debug & MEM_EXT_ROOM) ? (size_align + 2 * MEM_ALIGN) :
-    //                   (size_align);
-    void *ptr_real = (UINT8 *)ptr - MEM_HEAD_ROOM(debug);
+    void *ptr_real = reinterpret_cast<UINT8 *>(ptr) - MEM_HEAD_ROOM(debug);
 
     rt_os_realloc(ptr_real, &ret, MEM_ALIGN, size_align);
 
-    // TODO : debug memory
+    // TODO(debug) : debug memory
     // mem_service::dump(args)
 
     return ret;
 }
 
 void rt_mem_free(const char *caller, void *ptr) {
-    //AutoMutex auto_lock(&service.lock);
     if (NULL == ptr)
         return;
-    if (ptr < (void*)0xFFF) {
+    if (ptr < reinterpret_cast<void*>(0xFFF)) {
         RT_LOGE("rt_mem_free caller=%s, ptr=%p", caller, ptr);
-        return ;
+        return;
     }
 
     rt_os_free(ptr);
 
-    // TODO : debug memory
+    // TODO(debug) : debug memory
     UINT32 size;
     mem_records.remove_node(ptr, &size);
 
-    return ;
+    return;
 }
 
 void rt_mem_safe_free(const char *caller, void **ptr) {
@@ -127,15 +121,15 @@ void *rt_memcpy(void *dst, void *src, size_t n){
 }
 
 void rt_mem_record_dump() {
-    // TODO : debug memory
+    // TODO(debug) : debug memory
     mem_records.dump();
 
-    return ;
+    return;
 }
 
 void rt_mem_record_reset() {
-    // TODO : debug memory
+    // TODO(debug) : debug memory
     mem_records.reset();
 
-    return ;
+    return;
 }
