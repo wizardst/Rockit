@@ -21,14 +21,18 @@
 #define SRC_RT_BASE_INCLUDE_RT_LOG_H_
 
 #include "rt_header.h" // NOLINT
-#include <string>
+#include <string> // NOLINT
 
 #ifndef LOG_TAG
 #define LOG_TAG NULL
 #endif
 
 //! super macro.
+#define RT_LOGX(flag, format, ...) if (flag > 0) LOG_TRACE(format, ##__VA_ARGS__)
+
+//! super macro.
 #define RT_LOGT(format, ...) LOG_TRACE(format, ##__VA_ARGS__)
+#define RT_LOGD(format, ...) LOG_TRACE(format, ##__VA_ARGS__)
 #define RT_LOGE(format, ...) LOG_ERROR(format, ##__VA_ARGS__)
 
 //! super macro.

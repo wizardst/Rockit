@@ -24,19 +24,23 @@
 
 #define RT_NULL 0
 
+#define TO_DO_FLAG 0
+
 #define RT_BOOL  char
 #define RT_TRUE  1
 #define RT_FALSE 0
 
-typedef int8_t                  INT8;
-typedef int16_t                 INT16;
-typedef int32_t                 INT32;
-typedef int64_t                 INT64;
+typedef int8_t       INT8;
+typedef int16_t      INT16;
+typedef int32_t      INT32;
+typedef int64_t      INT64;
 
-typedef uint8_t                 UINT8;
-typedef uint16_t                UINT16;
-typedef uint32_t                UINT32;
-typedef uint64_t                UINT64;
+typedef uint8_t      UINT8;
+typedef uint16_t     UINT16;
+typedef uint32_t     UINT32;
+typedef uint64_t     UINT64;
+
+typedef void         RT_PTR;
 
 #define RtToBool(cond)  ((cond) != 0)
 #define RtToS8(x)     ((INT8)(x))

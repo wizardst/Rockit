@@ -14,19 +14,39 @@
  * limitations under the License.
  *
  * author: martin.cheng@rock-chips.com
- *   date: 2018/11/05
+ *   date: 20181126
  */
 
-#ifndef SRC_TESTS_RT_TASK_RT_TASK_TESTS_H_
-#define SRC_TESTS_RT_TASK_RT_TASK_TESTS_H_
+#ifndef SRC_RT_TASK_INCLUDE_RT_MSG_HANDLER_H_
+#define SRC_RT_TASK_INCLUDE_RT_MSG_HANDLER_H_
 
 #include "rt_header.h" // NOLINT
-#include "rt_test_header.h" // NOLINT
 
-RT_RET  unit_test_taskpool(INT32 index, INT32 total);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-RT_RET  unit_test_msgqueue(INT32 index, INT32 total);
+struct RTMessage;
+struct RTLooper;
 
-RT_RET  unit_test_message(INT32 index, INT32 total);
+struct RTMsgHandler {
+ public:
+    RTMsgHandler() : mID(0) {}
 
-#endif  // SRC_TESTS_RT_TASK_RT_TASK_TESTS_H_
+ protected:
+    virtual ~RTMsgHandler() {}
+    virtual void onMessageReceived(struct RTMessage* msg) = 0;
+
+ private:
+    friend struct RTMessage;  // deliverMessage()
+
+    UINT32 mID;
+
+    RT_RET deliverMessage(struct RTMessage* msg);
+};
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif  // SRC_RT_TASK_INCLUDE_RT_MSG_HANDLER_H_

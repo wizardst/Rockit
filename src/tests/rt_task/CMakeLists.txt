@@ -6,6 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set(RT_TASK_TEST_SRC
     rt_task_main.cpp
     test_task_taskpool.cpp
+    test_msg_queue.cpp
 )
 
 add_executable(rt_task_test ${RT_TASK_TEST_SRC})

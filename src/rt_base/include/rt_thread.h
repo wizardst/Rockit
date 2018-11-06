@@ -44,6 +44,12 @@ class RtThread  {
     RT_BOOL start();
 
     /**
+     * Set and Get Thread Name.
+     */
+    void setName(const char* name);
+    const char* getName();
+
+    /**
      * Waits for the thread to finish.
      * If the thread has not started, returns immediately.
      */
@@ -54,7 +60,7 @@ class RtThread  {
     static INT32 get_tid();
 
  private:
-    void* fData;
+    void* mData;
 };
 
 #endif  // SRC_RT_BASE_INCLUDE_RT_THREAD_H_

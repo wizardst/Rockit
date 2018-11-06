@@ -51,6 +51,7 @@ void*          deque_get(RT_Deque *list, int index);
 INT8           deque_push(RT_Deque *list,
                               const void *data,
                               RT_BOOL header = RT_FALSE);
+INT8           deque_insert(RT_Deque *list, RT_DequeEntry* entry, const void *data);
 INT8           deque_push_tail(RT_Deque *list, const void *data);
 INT8           deque_push_head(RT_Deque *list, const void *data);
 

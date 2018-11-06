@@ -81,8 +81,8 @@ class RtCondition {
     INT32 wait(RtMutex* rtMutex);
 
     /*returns with the timeout error*/
-    INT32 timedwait(const RtMutex& rtMutex, UINT64 timeout);
-    INT32 timedwait(RtMutex* rtMutex, UINT64 timeout);
+    INT32 timedwait(const RtMutex& rtMutex, UINT64 timeout_us);
+    INT32 timedwait(RtMutex* rtMutex, UINT64 timeout_us);
 
     /*This wakes up at least one thread blocked on the condition variable*/
     INT32 signal();

@@ -8,6 +8,7 @@ set(RT_BASE_SRC
     rt_mem.cpp
     rt_mem_service.cpp
     rt_log.cpp
+    rt_string_utils.cpp
     rt_test.cpp
     linux/rt_os_cpu_info.cpp
     linux/rt_os_log.cpp

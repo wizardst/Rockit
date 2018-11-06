@@ -23,66 +23,100 @@
 #include "rt_thread.h" // NOLINT
 #include "rt_log.h" // NOLINT
 #include "rt_mem.h" // NOLINT
+#include "rt_string_utils.h" // NOLINT
+
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "os_pthread"
+
+#ifdef LOG_FLAG
+#undef LOG_FLAG
+#endif
+#define LOG_FLAG 0x1
+
+#define MAX_THREAD_NAME_LEN 12
 
 typedef struct _rt_pthread_data {
-    pthread_t      fPThread;
-    RT_BOOL        fValid;
-    pthread_attr_t fAttr;
-    void*          fData;
-    RtThread::RTThreadProc fThreadProc;
+    pthread_t      mTid;
+    RT_BOOL        mValid;
+    pthread_attr_t mAttr;
+    void*          mPtrData;
+    char           mName[MAX_THREAD_NAME_LEN];
+    RtThread::RTThreadProc mLoopProc;
 } RtThreadData;
 
 static void* thread_looping(void* arg) {
-    RtThreadData* thread_data = static_cast<RtThreadData*>(arg);
+    RtThreadData* data = static_cast<RtThreadData*>(arg);
     // Call entry point only if thread was not canceled before starting.
-    thread_data->fThreadProc(thread_data->fData);
+    INT32 tid = (INT32)(data->mTid);
+    RT_LOGX(LOG_FLAG, "pthread(name:%-010s tid:%03d) Loop Start...", data->mName, tid);
+    data->mLoopProc(data->mPtrData);
+    RT_LOGX(LOG_FLAG, "pthread(name:%-010s tid:%03d) Loop DONE!", data->mName, tid);
     return NULL;
 }
 
-RtThread::RtThread(RTThreadProc entryPoint, void* data) {
-    fData = RT_NULL;
-    RtThreadData  *thread_data = rt_malloc(RtThreadData);
-    if (RT_NULL != thread_data) {
-        thread_data->fThreadProc = entryPoint;
-        thread_data->fData       = data;
-        thread_data->fValid      = RT_FALSE;
-        fData                    = thread_data;
+RtThread::RtThread(RTThreadProc entryPoint, void* ptr_data) {
+    mData = RT_NULL;
+    RtThreadData  *data = rt_malloc(RtThreadData);
+    if (RT_NULL != data) {
+        data->mLoopProc   = entryPoint;
+        data->mPtrData    = ptr_data;
+        data->mValid      = RT_FALSE;
+        mData             = data;
     }
+    this->setName("name-??");
 }
 
 RtThread::~RtThread() {
-    if (RT_NULL != fData) {
-        RtThreadData* thread_data = static_cast<RtThreadData*>(fData);
-        if (thread_data->fValid) {
+    if (RT_NULL != mData) {
+        RtThreadData* data = static_cast<RtThreadData*>(mData);
+        if (data->mValid) {
             this->join();
         }
-        rt_free(thread_data);
-        fData = RT_NULL;
+        rt_safe_free(mData);
     }
 }
 
 RT_BOOL RtThread::start() {
-    if (RT_NULL != fData) {
-        RtThreadData* thread_data = static_cast<RtThreadData*>(fData);
-        int err = pthread_create(&(thread_data->fPThread), RT_NULL,
-                                 thread_looping, thread_data);
-        thread_data->fValid = (0 == err);
-        return thread_data->fValid;
+    if (RT_NULL != mData) {
+        RtThreadData* data = static_cast<RtThreadData*>(mData);
+        int err = pthread_create(&(data->mTid), RT_NULL,
+                                 thread_looping, data);
+        data->mValid = (0 == err);
+        return data->mValid;
     }
     return RT_FALSE;
 }
 
 void RtThread::join() {
-    if (RT_NULL != fData) {
-        RtThreadData* thread_data = static_cast<RtThreadData*>(fData);
-        if (!thread_data->fValid) {
+    if (RT_NULL != mData) {
+        RtThreadData* data = static_cast<RtThreadData*>(mData);
+        if (!data->mValid) {
             return;
         }
-
-        pthread_join(thread_data->fPThread, RT_NULL);
-        thread_data->fPThread = 0;
-        thread_data->fValid   = RT_FALSE;
+        INT32 tid = (INT32)(data->mTid);
+        RT_LOGX(LOG_FLAG, "pthread(name:%-010s tid:%03d) Joining...", data->mName, tid);
+        pthread_join(data->mTid, RT_NULL);
+        RT_LOGX(LOG_FLAG, "pthread(name:%-010s tid:%03d) Join DONE",  data->mName, tid);
+        data->mTid   = 0;
+        data->mValid = RT_FALSE;
     }
+}
+
+void RtThread::setName(const char* name) {
+    if (RT_NULL != mData) {
+        RtThreadData* data = static_cast<RtThreadData*>(mData);
+        rt_str_snprintf(data->mName, MAX_THREAD_NAME_LEN, "%s", name);
+    }
+}
+
+const char* RtThread::getName() {
+    if (RT_NULL != mData) {
+        RtThreadData* data = static_cast<RtThreadData*>(mData);
+        return data->mName;
+    }
+    return "name-??";
 }
 
 INT32 RtThread::get_tid() {

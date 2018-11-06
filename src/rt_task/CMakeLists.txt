@@ -1,6 +1,9 @@
 cmake_minimum_required( VERSION 2.8.8 )
 
 set(RT_TASK_SRC
+    rt_message.cpp
+    rt_msg_handler.cpp
+    rt_msg_looper.cpp
     rt_task.cpp
     rt_taskpool.cpp
 )

@@ -100,19 +100,19 @@ INT32 RtCondition::wait(RtMutex* RtMutex) {
     return pthread_cond_wait(&(cond_data->mCond), &(lock_data->mMutex));
 }
 
-INT32 RtCondition::timedwait(const RtMutex& rtMutex, UINT64 timeout) {
-    return timedwait(const_cast<RtMutex *>(&rtMutex), timeout);
+INT32 RtCondition::timedwait(const RtMutex& rtMutex, UINT64 timeout_us) {
+    return timedwait(const_cast<RtMutex *>(&rtMutex), timeout_us);
 }
 
-INT32 RtCondition::timedwait(RtMutex* RtMutex, UINT64 timeout) {
+INT32 RtCondition::timedwait(RtMutex* RtMutex, UINT64 timeout_us) {
     struct timespec ts;
 
     UINT64 now_us = RtTime::getNowTimeUs();
 
     ts.tv_sec = now_us/1000000;
     ts.tv_nsec = (now_us%1000000)*1000;
-    ts.tv_sec += timeout / 1000;
-    ts.tv_nsec += (timeout % 1000) * 1000000;
+    ts.tv_sec += timeout_us / 1000000;
+    ts.tv_nsec += (timeout_us % 1000000) * 1000;
     /* Prevent the out of range at nanoseconds field */
     ts.tv_sec += ts.tv_nsec / 1000000000;
     ts.tv_nsec %= 1000000000;

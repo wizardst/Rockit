@@ -140,6 +140,22 @@ INT8  deque_push(RT_Deque *list,
     return RT_OK;
 }
 
+INT8 deque_insert(RT_Deque *list, RT_DequeEntry* entry, const void *data) {
+    RT_ASSERT(RT_NULL != list);
+
+    RT_DequeEntry *new_entry = deque_entry_malloc(list);
+    if (RT_NULL == new_entry)
+       return RT_ERR_BAD;
+
+    new_entry->data = const_cast<void *> (data);
+    new_entry->flag = ENTRY_FLAG_USE;
+    new_entry->next = entry->next;
+    new_entry->prev = entry;
+    list->size++;
+
+    return RT_OK;
+}
+
 INT8  deque_push_tail(RT_Deque *list, const void *data) {
     RT_BOOL header =  RT_FALSE;
     return deque_push(list, data, header);
