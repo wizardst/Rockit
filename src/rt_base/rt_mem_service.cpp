@@ -82,3 +82,20 @@ void rt_mem_service::dump(){
         }
     }
 }
+
+
+INT32 rt_mem_service::find_node(const char *caller, void* ptr, UINT32*size) {
+    UINT32 result = 100;
+    MemNode *node = mem_nodes;
+    if(node->size  == 0) RT_LOGE("the node you search is NULL!");
+
+    for(UINT32 i = 0; i < nodes_max; i++, node++) {
+        if(node->ptr == ptr) {
+            result = i ;
+            RT_LOGE("find the node ,and the node_No is %d",result);
+            return result;
+        }
+    }
+    RT_LOGE("the node you search doesn't exist!");
+    return -1 ;
+}

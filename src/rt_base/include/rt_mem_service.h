@@ -17,6 +17,7 @@ public:
     void remove_node(void* ptr, UINT32 *size);
     void reset();
     void dump();
+    INT32 find_node(const char *caller, void* ptr, UINT32 *size);
 public:
     MemNode *mem_nodes;
     UINT32  nodes_max;

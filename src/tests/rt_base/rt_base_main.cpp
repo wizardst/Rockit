@@ -44,6 +44,8 @@ int main(int argc, char **argv)
      *    author: rimon.xu@rock-chips.com
      */
     rt_tests_add(test_ctx, unit_test_memory, (char *)"UnitTest-Memory");
+    rt_tests_add(test_ctx, unit_test_mem_service, (char *)"UnitTest-Mem-Service");
+
     rt_tests_add(test_ctx, unit_test_mutex,  (char *)"UnitTest-Mutex");
     rt_tests_add(test_ctx, unit_test_thread, (char *)"UnitTest-Thread");
 

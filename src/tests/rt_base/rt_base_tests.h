@@ -31,6 +31,7 @@ RT_RET  unit_test_deque_limit(INT32 index, INT32 total_index);
 RT_RET unit_test_deque_normal(INT32 index, INT32 total_index);
 
 RT_RET       unit_test_memory(INT32 index, INT32 total_index);
+RT_RET  unit_test_mem_service(INT32 index, INT32 total_index);
 RT_RET        unit_test_mutex(INT32 index, INT32 total_index);
 RT_RET       unit_test_thread(INT32 index, INT32 total_index);
 #endif
