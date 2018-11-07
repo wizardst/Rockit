@@ -9,6 +9,6 @@ set(RT_NODE_TEST_SRC
 )
 
 add_executable(rt_node_test ${RT_NODE_TEST_SRC})
-target_link_libraries(rt_node_test ${RT_BASE_STATIC})
+target_link_libraries(rt_node_test ${RT_BASE_STATIC} ${RT_NODE_STATIC})
 
 message(STATUS "cmake version ${CMAKE_VERSION} [@@]config testcases for rt_node")

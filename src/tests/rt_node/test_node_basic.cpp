@@ -21,11 +21,39 @@
 #define __RT_NODE_BASIC_H__
 
 #include "rt_node.h"
+#include "rt_node_header.h"
 #include "rt_node_tests.h"
+
+RT_RET unit_test_demuxer() {
+    RT_LOGE("%s ptr = %p", __FUNCTION__, &ff_node_parser);
+    RT_Node* demuxer =  &ff_node_parser;
+    demuxer->init();
+
+    void *data   = RT_NULL;
+    UINT32 *size = 0;
+    demuxer->pull(data, size);
+    demuxer->push(data, size);
+    demuxer->release();
+    return RT_OK;
+}
+
+RT_RET unit_test_muxer() {
+    RT_LOGE("%s ptr = %p", __FUNCTION__, &ff_node_parser);
+    RT_Node* muxer =  &ff_node_parser;
+    muxer->init();
+
+    void *data   = RT_NULL;
+    UINT32 *size = 0;
+    muxer->pull(data, size);
+    muxer->push(data, size);
+    muxer->release();
+    return RT_OK;
+}
 
 RT_RET unit_test_node_basic(INT32 index, INT32 total)
 {
-    return RT_OK;
+    unit_test_demuxer();
+	return unit_test_muxer();
 }
 
 #endif /*__RT_NODE_BASIC_H__*/

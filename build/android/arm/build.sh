@@ -7,6 +7,7 @@ then
     exit 1
 fi
 
+ANDROID_NDK=/disk2/cmc/android_projects/android_build_env/android-ndk-r10d
 ANDROID_NDK=~/ndk10/android-ndk-r10e/
 
 PLATFORM=$ANDROID_NDK/platforms/android-21/arch-arm

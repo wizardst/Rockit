@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng
+ * author: martin.cheng@rock-chips.com
  *   date: 20180704
  */
 
@@ -41,8 +41,9 @@ extern "C" {
 
 typedef enum _RT_NODE_TYPE
 {
-    NODE_TYPE_UNKOWN    = -1,
-    NODE_TYPE_EXTRACTOR = 0,
+    // ! basic nodes
+    NODE_TYPE_BASE      = 2000,
+    NODE_TYPE_EXTRACTOR,
     NODE_TYPE_DEMUXER,
     NODE_TYPE_MUXER,
     NODE_TYPE_DECODER,
@@ -50,6 +51,9 @@ typedef enum _RT_NODE_TYPE
     NODE_TYPE_FILTER,
     NODE_TYPE_RENDER,
     NODE_TYPE_DEVICE,
+
+    // !
+    NODE_TYPE_MAX,
 } RT_NODE_TYPE;
 
 typedef struct rt_node_type_entry_t {
@@ -68,29 +72,60 @@ static const rt_node_type_entry node_type_entries[] = {
     { NODE_TYPE_DEVICE,    "   Media Device" },
 };
 
+typedef enum _RT_NODE_CMD {
+    RT_NODE_CMD_BASE  = 400,
+    RT_NODE_CMD_INIT,
+    RT_NODE_CMD_PREPARE,
+    RT_NODE_CMD_START,
+    RT_NODE_CMD_STOP,
+    RT_NODE_CMD_CAPS_CHANGE,
+    RT_NODE_CMD_SEEK,
+    RT_NODE_CMD_RESET,
+    RT_NODE_CMD_REINIT,
+    RT_NODE_CMD_NAVIGATION,
+    RT_NODE_CMD_DRAIN,
+
+    // QOS and debug cmd
+    RT_NODE_CMD_LATENCY,
+    RT_NODE_CMD_STAT,
+    RT_NODE_CMD_QOS,
+    RT_NODE_CMD_DUMP,
+} RT_NODE_CMD;
+
+typedef enum _RT_NODE_MSG{
+    RT_NODE_MSG_BASE = 500,
+    RT_NODE_MSG_CAPS,
+    RT_NODE_MSG_SEGMENT,
+    RT_NODE_MSG_BUFFERSIZE,
+    RT_NODE_MSG_EOS,
+    RT_NODE_MSG_SINK,
+} RT_NODE_MSG;
+
 #define RT_NODE_CONTEXT void*
 
 typedef struct _RT_Node {
     // public api
-    RT_NODE_CONTEXT init() const;
-    INT8 release(RT_NODE_CONTEXT ctx) const;
-    INT8 read(RT_NODE_CONTEXT ctx, void *data,  UINT32 *size) const;
-    INT8 write(RT_NODE_CONTEXT ctx, void *data, UINT32 *size) const;
-    INT8 dump(RT_NODE_CONTEXT ctx) const;
-    INT8 log_error(INT8 err, const char* func_name) const;
+    INT8 init();
+    INT8 release();
+    INT8 pull(void *data, UINT32 *size);
+    INT8 push(void *data, UINT32 *size);
+    INT8 run_cmd(RT_NODE_CMD cmd, UINT32 data_int, void* data_void);
 
-    // node context
-    UINT8    type;
-    char*    name;
+    // private
+    const INT32 type;
+    const char* name;
+    const char* version;
+    void* node_ctx;
 
     // private api
-    INT8   (*impl_init   )(void **ctx);
-    INT8   (*impl_release)(void **ctx);
-    INT8   (*impl_read   )(void *ctx, void *data, UINT32 *size);
-    INT8   (*impl_write  )(void *ctx, void *data, UINT32 *size);
-    INT8   (*impl_dump   )(void *ctx);
-    INT8   (*impl_subinit)(void *ctx);
+    INT8   (*impl_init   )(void** ctx);
+    INT8   (*impl_release)(void** ctx);
+    INT8   (*impl_pull   )(void* ctx, void *data, UINT32 *size);
+    INT8   (*impl_push   )(void* ctx, void *data, UINT32 *size);
+    INT8   (*impl_run_cmd)(void* ctx, RT_NODE_CMD cmd, UINT32 data_int, void* data_void);
 } RT_Node;
+
+INT8 check_err(const RT_Node node, INT8 err, const char* func_name);
 
 #ifdef __cplusplus
 }

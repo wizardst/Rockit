@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng
- *   date: 20180704
+ * Author: martin.cheng@rock-chips.com
+ *   Date: 2018/11/03
+ *   Task: stable api for media node
  */
 
 #include "rt_header.h"
@@ -24,48 +25,49 @@
 #endif
 #define LOG_TAG "RT_Node"
 
-RT_NODE_CONTEXT RT_Node::init() const {
-    RT_NODE_CONTEXT ctx;
-    INT32 err = impl_init(&ctx);
-    err       = impl_subinit(ctx);
-
-    RT_LOGT("node_context=%p", ctx);
-
-    return ctx;
-}
-
-INT8 RT_Node::release(RT_NODE_CONTEXT ctx) const{
-    INT32 err = impl_release(&ctx);
-
-    RT_LOGT("node_context=%p", ctx);
-
-    return log_error(err, "release");
-}
-
-INT8 RT_Node::read(RT_NODE_CONTEXT ctx, void *data,  UINT32 *size) const{
-    INT32 err = RT_ERR_BAD;
-    err = impl_read(ctx, data, size);
-
-    return log_error(err, "read");
-}
-
-INT8 RT_Node::write(RT_NODE_CONTEXT ctx, void *data, UINT32 *size) const{
-    INT32 err = RT_ERR_BAD;
-    err = impl_write(ctx, data, size);
-
-    return log_error(err, "write");
-}
-
-INT8 RT_Node::dump(RT_NODE_CONTEXT ctx) const{
-    INT32 err = RT_ERR_BAD;
-    err = impl_dump(ctx);
-
-    return log_error(err, "dump");
-}
-
-INT8 RT_Node::log_error(INT8 err, const char* func_name) const{
-    if(RT_ERR_UNKNOWN == err) {
-        RT_LOGE("%15.15s:  errno=%02d, Fail to %s", name, err, func_name);
+INT8 check_err(const RT_Node *node, INT8 err, const char* func_name){
+    if(RT_OK != err) {
+        RT_LOGE("RTNode(Name=%15.15s, ctx=%p):  errno=%02d, Fail to %s",
+                node->name, node->node_ctx, err, func_name);
     }
     return err;
+}
+
+#define CHECK_ERR(err) check_err(this, err, __FUNCTION__)
+
+INT8 RT_Node::init() {
+    node_ctx = RT_NULL;
+    INT8 err = RT_OK;
+    err = impl_init(&node_ctx);
+
+    return CHECK_ERR(err);
+}
+
+INT8 RT_Node::release() {
+    INT8 err = RT_OK;
+    err = impl_release(&node_ctx);
+    node_ctx = RT_NULL;
+
+    return CHECK_ERR(err);
+}
+
+INT8 RT_Node::pull(void *data,  UINT32 *size) {
+    INT8 err = RT_OK;
+    err  = impl_pull(node_ctx, data, size);
+
+    return CHECK_ERR(err);
+}
+
+INT8 RT_Node::push(void *data, UINT32 *size) {
+    INT32 err = RT_OK;
+    err = impl_push(node_ctx, data, size);
+
+    return CHECK_ERR(err);
+}
+
+INT8 RT_Node::run_cmd(RT_NODE_CMD cmd, UINT32 data_int, void* data_void) {
+    INT32 err = RT_OK;
+    err = impl_run_cmd(node_ctx, cmd, data_int, data_void);
+
+    return CHECK_ERR(err);
 }

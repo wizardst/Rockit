@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng
- *   date: 20180803
- *   Task: node_parsers for <muxer and demuxer>
+ * Author: martin.cheng@rock-chips.com
+ *   Date: 2018/11/03
+ *   Task: use ffmpeg as demuxer and muxer
  */
 
 #ifdef LOG_TAG
@@ -24,59 +24,56 @@
 #define LOG_TAG "FFNodeParser"
 
 #include "rt_node.h"
-#include "rt_node_parser.h"
+#include "ff_node_parser.h"
 #include "rt_mem.h"
 
-typedef struct _FF_PARSER_SUB_CONTEXT {
+typedef struct _FF_PARSER_CONTEXT {
     UINT32 pull_cnt;
     UINT32 push_cnt;
-} FF_PARSER_SUB_CONTEXT;
+} FF_PARSER_CONTEXT;
 
-INT8   ff_parser_pull(void *sub_ctx, void *data, UINT32 *size) {
-    FF_PARSER_SUB_CONTEXT* ff_sub_ctx = (FF_PARSER_SUB_CONTEXT*)sub_ctx;
-    RT_ASSERT(RT_NULL != ff_sub_ctx);
-    ff_sub_ctx->pull_cnt++;
-    RT_LOGT("pull_cnt = %03d", ff_sub_ctx->pull_cnt);
-    return RT_ERR_UNKNOWN;
+INT8 node_ff_parser_init(void **ctx) {
+    *ctx = rt_malloc(FF_PARSER_CONTEXT);
+    rt_memset(*ctx, 0, sizeof(FF_PARSER_CONTEXT));
+    return RT_OK;
 }
 
-INT8   ff_parser_push(void *sub_ctx, void *data, UINT32 *size) {
-    FF_PARSER_SUB_CONTEXT* ff_sub_ctx = (FF_PARSER_SUB_CONTEXT*)sub_ctx;
-    RT_ASSERT(RT_NULL != ff_sub_ctx);
-    ff_sub_ctx->push_cnt++;
-    RT_LOGT("push_cnt = %03d", ff_sub_ctx->push_cnt);
-    return RT_ERR_UNKNOWN;
+INT8 node_ff_parser_release(void **ctx){
+    rt_safe_free(*ctx);
+    return RT_OK;
 }
 
-INT8   ff_parser_dump(void *sub_ctx) {
-    return RT_ERR_UNKNOWN;
+INT8 node_ff_parser_pull(void *ctx, void *data, UINT32 *size) {
+    FF_PARSER_CONTEXT* parser_ctx = (FF_PARSER_CONTEXT*)ctx;
+    RT_ASSERT(RT_NULL != parser_ctx);
+    parser_ctx->pull_cnt++;
+    RT_LOGE("pull_cnt = %03d", parser_ctx->pull_cnt);
+    return RT_OK;
 }
 
-/*
-      Task: impliment callback
- * Prototype: INT8 (*impl_subinit)(void *ctx);
- */
-INT8 ff_node_parser_subinit(void *ctx) {
-    RT_NODE_PARSER_CONTEXT* parser_ctx = (RT_NODE_PARSER_CONTEXT*)(ctx);
-    RT_ASSERT(parser_ctx);
-    parser_ctx->name           = "<muxer/demuxer>";
-    parser_ctx->sub_ctx        = rt_malloc(FF_PARSER_SUB_CONTEXT);
-    rt_memset(parser_ctx->sub_ctx, 0, sizeof(FF_PARSER_SUB_CONTEXT));
-    // install callbacks
-    parser_ctx->fp_parser_pull = ff_parser_pull;
-    parser_ctx->fp_parser_push = ff_parser_push;
-    parser_ctx->fp_parser_dump = ff_parser_dump;
+INT8 node_ff_parser_push(void *ctx, void *data, UINT32 *size) {
+    FF_PARSER_CONTEXT* parser_ctx = (FF_PARSER_CONTEXT*)ctx;
+    RT_ASSERT(RT_NULL != parser_ctx);
+    parser_ctx->push_cnt++;
+    RT_LOGE("push_cnt = %03d", parser_ctx->push_cnt);
+    return RT_OK;
+}
 
-    return RT_ERR_UNKNOWN;
+INT8 node_ff_parser_run_cmd(void* ctx, RT_NODE_CMD cmd,
+                            UINT32 data_int, void* data_void) {
+    FF_PARSER_CONTEXT* parser_ctx = (FF_PARSER_CONTEXT*)ctx;
+    RT_ASSERT(RT_NULL != parser_ctx);
+    return RT_OK;
 }
 
  RT_Node ff_node_parser = {
      .type         = NODE_TYPE_DEMUXER,
-     .name         = (char*)"node_parser",
-     .impl_init    = node_parser_init,
-     .impl_release = node_parser_release,
-     .impl_read    = node_parser_pull,
-     .impl_write   = node_parser_push,
-     .impl_dump    = node_parser_dump,
-     .impl_subinit = ff_node_parser_subinit
+     .name         = "ff_demuxer",
+     .version      = "v1.0",
+     .node_ctx     = RT_NULL,
+     .impl_init    = node_ff_parser_init,
+     .impl_release = node_ff_parser_release,
+     .impl_pull    = node_ff_parser_pull,
+     .impl_push    = node_ff_parser_push,
+     .impl_run_cmd = node_ff_parser_run_cmd,
  };

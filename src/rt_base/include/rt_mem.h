@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Rockit Open Source Project
+ * Copyright 2018 Rockchip Electronics Co. LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng
+ * author: martin.cheng@rock-chips.com
  *   date: 20180704
  */
 
@@ -46,6 +46,9 @@
 #define rt_free(ptr) \
     rt_mem_free(__FUNCTION__, ptr)
 
+#define rt_safe_free(ptr) \
+    rt_mem_safe_free(__FUNCTION__, (void**)&(ptr))
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -54,6 +57,7 @@ void *rt_mem_malloc (const char *caller, size_t size);
 void *rt_mem_calloc (const char *caller, size_t size);
 void *rt_mem_realloc(const char *caller, void *ptr, size_t size);
 void     rt_mem_free(const char *caller, void *ptr);
+void rt_mem_safe_free(const char *caller, void **ptr);
 void      *rt_memset(void *ptr, int c, size_t n);
 void      *rt_memcpy(void *dst, void *src, size_t n);
 

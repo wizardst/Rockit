@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng@rock-chips.com
- *   date: 2018/11/05
+ * Author: TOD - UNKOWN
+ *   Date: 2018/11/03
+ *   Task: use ffmpeg as filters
  */
 
-#ifndef __RT_TASK_TESTS_H__
-#define __RT_TASK_TESTS_H__
+#ifndef __FF_NODE_MUXER_H__
+#define __FF_NODE_MUXER_H__
 
-#include "rt_header.h"
-#include "rt_test_header.h"
-
-RT_RET  unit_test_taskpool(INT32 index, INT32 total);
-
-#endif
+#endif // __FF_NODE_DEMUXER_H__

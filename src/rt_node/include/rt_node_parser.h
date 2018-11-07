@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng
+ * author: martin.cheng@rock-chips.com
  *   date: 2018/07/05
  */
 
@@ -25,24 +25,6 @@
 #ifdef  __cplusplus
 extern "C" {
 #endif
-
-typedef struct _RT_NODE_PARSER_CONTEXT {
-   const char* name;
-   void* sub_ctx;
-
-    // parser operations
-    INT8   (*fp_parser_pull)(void *sub_ctx, void *data, UINT32 *size);
-    INT8   (*fp_parser_push)(void *sub_ctx, void *data, UINT32 *size);
-    INT8   (*fp_parser_dump)(void *sub_ctx);
-} RT_NODE_PARSER_CONTEXT;
-
-INT8 node_parser_init(void **ctx);
-INT8 node_parser_release(void **ctx);
-INT8 node_parser_pull(void *ctx, void *data, UINT32 *size);
-INT8 node_parser_push(void *ctx, void *data, UINT32 *size);
-INT8 node_parser_dump(void *ctx);
-
-extern RT_Node ff_node_parser;
 
 #ifdef  __cplusplus
 }

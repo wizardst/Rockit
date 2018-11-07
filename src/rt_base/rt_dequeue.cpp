@@ -48,7 +48,7 @@ RT_DequeEntry* deque_entry_malloc(RT_Deque *list) {
     RT_DequeEntry *entry = RT_NULL;
     if(RT_NULL != list->entries) {
         if(list->size < list->max_size) {
-            for(int idx = 0; idx < list->max_size; idx++) {
+            for(UINT32 idx = 0; idx < list->max_size; idx++) {
                 entry = &(list->entries[idx]);
                 // found entry in unused pre-malloc entries
                 if((RT_NULL == entry->data) && (ENTRY_FLAG_UNUSE == entry->flag)) {

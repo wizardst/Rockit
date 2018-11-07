@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Rockit Open Source Project
+ * Copyright 2018 Rockchip Electronics Co. LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng
+ * author: martin.cheng@rock-chips.com
  *   date: 20180719
  */
 
@@ -21,6 +21,7 @@
 #define __RT_NODE_HEADER_H__
 
 /*header in src/rt_node/include*/
+#include "../ff_node/ff_node_parser.h"
 #include "rt_node_parser.h"
 #include "rt_node_codec.h"
 #include "rt_node_filter.h"

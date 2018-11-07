@@ -1,5 +1,6 @@
 # Ignore the Specified File
-
+build/CodeBlock/Rockit.depend
+build/CodeBlock/Rockit.layout
 
 # Ignore the Specified Folder
 build/CodeBlock/bin

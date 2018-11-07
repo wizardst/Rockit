@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng
- *   date: 20180803
- *   Task: node_codecs for <encoder and decoder>
+ * Author: TODO - UNKNOWN
+ *   Date: 2018/XX/XX
+ *   Task: use ffmpeg as encoder and decoder
  */

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng
- *   date: 20180803
- *   Task: node_filters for <opengl, slow_speed>
+ * Author: TOD - UNKOWN
+ *   Date: 2018/11/03
+ *   Task: use ffmpeg as filters
  */
 
 #ifdef LOG_TAG

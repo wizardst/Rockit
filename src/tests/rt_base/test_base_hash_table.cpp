@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Rockit Open Source Project
+ * Copyright 2018 Rockchip Electronics Co. LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,54 +16,66 @@
  * author: rimon.xu
  *   date: 20181031
  * e-mail: rimon.xu@rock-chips.com
+ *
+ * author: martin.cheng@rock-chips.com
+ *   date: 20181107
+ * update: replaced by universal hash table api.
  */
 
 #include "rt_base_tests.h"
 #include "rt_hash_table.h"
 
-UINT32 hash_func(UINT32 bucktes, void *key)
-{
-    return *((UINT32 *)(key)) % bucktes;
-}
-
-typedef struct test_struct_t {
+typedef struct _fake_hash_node {
     UINT32 key;
     UINT32 value;
-} testStruct;
+} fake_hash_node;
 
 RT_RET unit_test_hash_table(INT32 index, INT32 total_index)
 {
-    /*
-     * init array
-     */
-    testStruct test_arry[1000];
-    rt_memset(test_arry, 0, sizeof(testStruct) * 1000);
+    // ! Fake 1000 hash nodes
+    fake_hash_node test_nodes[1000];
+    rt_memset(test_nodes, 0, sizeof(fake_hash_node) * 1000);
     for (INT32 i = 0; i < 1000; i++) {
-        test_arry[i].key = i;
-        test_arry[i].value = 1000 - i;
+        test_nodes[i].key = i;
+        test_nodes[i].value = 1000 - i;
     }
 
-    RtHash *hash = rt_hash_alloc(100, hash_func);
-    INT32 size = sizeof(test_arry) / sizeof(test_arry[0]);
-    for (INT32 i = 0; i < size; i++) {
-        rt_hash_add(hash, &test_arry[i].key, sizeof(test_arry[i].key),
-                    &(test_arry[i]), sizeof((test_arry[i])));
+    RtHashTable *hash = rt_hash_table_init(100, hash_ptr_func, hash_ptr_compare);
+    INT32 num_nodes = sizeof(test_nodes) / sizeof(test_nodes[0]);
+    RT_LOGE("num_nodes = %d", num_nodes);
+    for (INT32 i = 0; i < num_nodes; i++) {
+        rt_hash_table_insert(hash, (void*)test_nodes[i].key, (void*)(&test_nodes[i]));
     }
 
-    testStruct *st = NULL;
-    for (INT32 i = 0; i < size; i++) {
-        st = (testStruct *)rt_hash_lookup(hash, &test_arry[999 - i].key, sizeof(test_arry[999 - i].key));
-        CHECK_UE(st, RT_NULL);
-        CHECK_EQ(st->value, i + 1);
+    // rt_hash_table_dump(hash);
+
+    fake_hash_node *hn = NULL;
+    for (INT32 i = 0; i < num_nodes; i++) {
+        hn = (fake_hash_node*)rt_hash_table_find(hash, (void*)test_nodes[i].key);
+        #if 0
+        RT_ASSERT(RT_NULL != st);
+        RT_ASSERT(st->value == (1000-i));
+        #else
+        CHECK_UE(hn, RT_NULL);
+        CHECK_EQ(hn->value, (1000-i));
+        #endif
     }
-    for (INT32 i = 0; i < size; i++) {
-        rt_hash_free(hash, &test_arry[i].key, sizeof(test_arry[i].key));
+    for (INT32 i = 0; i < num_nodes; i++) {
+        rt_hash_table_remove (hash, (void*)test_nodes[i].key);
     }
 
-    for (INT32 i = 0; i < size; i++) {
-        st = (testStruct *)rt_hash_lookup(hash, &test_arry[i].key, sizeof(test_arry[i].key));
-        CHECK_EQ(st, RT_NULL);
+    for (INT32 i = 0; i < num_nodes; i++) {
+        fake_hash_node* hn = (fake_hash_node*)rt_hash_table_find(hash, (void*)test_nodes[i].key);
+        #if 0
+        RT_ASSERT(RT_NULL != hn);
+        #else
+        CHECK_EQ(hn, RT_NULL);
+        #endif
     }
+
+    rt_hash_table_dump(hash);
+    rt_hash_table_destory(hash);
+    hash = RT_NULL;
 
 __RET:
     return RT_OK;
