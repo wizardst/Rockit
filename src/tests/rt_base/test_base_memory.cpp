@@ -17,9 +17,6 @@
  *   date: 2018/11/07
  */
 
-#ifndef __TEST_BASE_MEMORY_H__
-#define __TEST_BASE_MEMORY_H__
-
 #ifdef LOG_TAG
 #undef LOG_TAG
 #endif
@@ -28,8 +25,6 @@
 #include "rt_header.h"
 #include "rt_base_tests.h"
 #include "rt_mem_service.h"
-#define add_node_test 1
-#define remove_node_test 0
 
 typedef struct _person{
     int   age;
@@ -82,26 +77,26 @@ RT_RET unit_test_mem_service(INT32 index, INT32 total_index) {
         Person* prince = RT_NULL;
         prince = (Person*)rt_mem_malloc(__FUNCTION__, sizeof(Person));
         prince->age  = idx;
-        prince->name = (char*)"martin";
-        mem_record->add_node(__FUNCTION__,prince,sizeof(prince));
+        prince->name = (char*)"prince";
+        mem_record->add_node(__FUNCTION__, prince, sizeof(prince));
     }
     mem_record->dump();
 
     RT_LOGE("Case: find mem node, then remove ...");
     MemNode *node = mem_record->mem_nodes;
-    UINT32  *node_size;
-    while(RT_NULL != node) {
-        if(RT_NULL != node->ptr) {
-            UINT32 score = mem_record->find_node(__FUNCTION__, node->ptr, node_size);
-            mem_record->remove_node(node->ptr, node_size);
-            rt_mem_free(__FUNCTION__, node->ptr);
-            node++;
-        }else{
+    UINT32  node_size;
+    for (UINT32 i = 0; i < mem_record->nodes_max; i++, node++) {
+        if((RT_NULL != node->ptr)&&(0 != node->size)) {
+            void *ptr = node->ptr;
+            mem_record->find_node(__FUNCTION__, node->ptr, &node_size);
+            mem_record->remove_node(node->ptr, &node_size);
+        } else {
             break;
         }
     }
     mem_record->dump();
+    delete mem_record;
+    mem_record = RT_NULL;
     RT_LOGE("Done ...");
+    return RT_OK;
 }
-
-#endif //__TEST_BASE_REBUST_H__
