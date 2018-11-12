@@ -108,7 +108,7 @@ void rt_mem_free(const char *caller, void *ptr) {
 void rt_mem_safe_free(const char *caller, void **ptr) {
     if(ptr&&(*ptr)) {
         rt_mem_free(caller, *ptr);
-        *ptr=RT_NULL;
+        *ptr = RT_NULL;
     }
 }
 

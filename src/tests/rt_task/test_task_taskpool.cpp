@@ -81,6 +81,7 @@ UINT8 unit_test_taskpool_inner(UINT32 max_thread, UINT32 max_task, UINT32 num_ta
 RT_RET  unit_test_taskpool(INT32 index, INT32 total) {
     unit_test_taskpool_inner(10, 100, 80);
     unit_test_taskpool_inner(10, 100, 200);
+    return RT_OK;
 }
 
 #endif // __TEST_TASK_THREAD_POOL_H__

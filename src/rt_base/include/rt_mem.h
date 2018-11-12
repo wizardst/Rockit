@@ -49,6 +49,10 @@
 #define rt_safe_free(ptr) \
     rt_mem_safe_free(__FUNCTION__, (void**)&(ptr))
 
+#ifndef rt_safe_delete
+#define rt_safe_delete(p) { if(p){delete(p);  (p)=NULL;} }
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,7 +60,7 @@ extern "C" {
 void *rt_mem_malloc (const char *caller, size_t size);
 void *rt_mem_calloc (const char *caller, size_t size);
 void *rt_mem_realloc(const char *caller, void *ptr, size_t size);
-void     rt_mem_free(const char *caller, void *ptr);
+void      rt_mem_free(const char *caller, void *ptr);
 void rt_mem_safe_free(const char *caller, void **ptr);
 void      *rt_memset(void *ptr, int c, size_t n);
 void      *rt_memcpy(void *dst, void *src, size_t n);

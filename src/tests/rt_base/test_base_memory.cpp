@@ -87,7 +87,6 @@ RT_RET unit_test_mem_service(INT32 index, INT32 total_index) {
     UINT32  node_size;
     for (UINT32 i = 0; i < mem_record->nodes_max; i++, node++) {
         if((RT_NULL != node->ptr)&&(0 != node->size)) {
-            void *ptr = node->ptr;
             mem_record->find_node(__FUNCTION__, node->ptr, &node_size);
             mem_record->remove_node(node->ptr, &node_size);
         } else {

@@ -48,6 +48,9 @@ int main(int argc, char **argv)
     rt_tests_add(test_ctx, unit_test_mutex,  (char *)"UnitTest-Mutex");
     rt_tests_add(test_ctx, unit_test_thread, (char *)"UnitTest-Thread");
 
+    rt_tests_add(test_ctx, unit_test_lock_unlock, (char *)"UnitTest-Lock-Unlock");
+    rt_tests_add(test_ctx, unit_test_cond_lock, (char *)"UnitTest-Cond-Lock");
+
     // ! run all testcases
     rt_tests_run(test_ctx, /*mem_dump=*/RT_TRUE);
 

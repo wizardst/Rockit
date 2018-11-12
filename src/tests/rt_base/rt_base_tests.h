@@ -33,4 +33,8 @@ RT_RET       unit_test_memory(INT32 index, INT32 total_index);
 RT_RET  unit_test_mem_service(INT32 index, INT32 total_index);
 RT_RET        unit_test_mutex(INT32 index, INT32 total_index);
 RT_RET       unit_test_thread(INT32 index, INT32 total_index);
+RT_RET  unit_test_lock_unlock(INT32 index, INT32 total_index);
+RT_RET    unit_test_cond_lock(INT32 index, INT32 total_index);
+
+
 #endif
