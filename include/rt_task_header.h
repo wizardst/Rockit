@@ -17,13 +17,13 @@
  *   date: 20180719
  */
 
-#ifndef __RT_TASK_HEADER_H__
-#define __RT_TASK_HEADER_H__
+#ifndef INCLUDE_RT_TASK_HEADER_H_
+#define INCLUDE_RT_TASK_HEADER_H_
 
 /*header in src/rt_node/include*/
-#include "rt_event.h"
-#include "rt_event_bus.h"
-#include "rt_task.h"
-#include "rt_task_pool.h"
+#include "rt_event.h" // NOLINT
+#include "rt_event_bus.h" // NOLINT
+#include "rt_task.h" // NOLINT
+#include "rt_task_pool.h" // NOLINT
 
-#endif /*__RT_NODE_HEADER_H__*/
+#endif  // INCLUDE_RT_TASK_HEADER_H_

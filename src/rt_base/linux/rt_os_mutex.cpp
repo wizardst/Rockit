@@ -17,7 +17,6 @@
  *   date: 20180719
  */
 
-#define HAS_PTHREAD
 #ifdef HAS_PTHREAD
 
 #include <semaphore.h>
@@ -25,10 +24,10 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-#include "rt_header.h"
-#include "rt_mutex.h"
-#include "rt_mem.h"
-#include "rt_time.h"
+#include "rt_header.h" // NOLINT
+#include "rt_mutex.h" // NOLINT
+#include "rt_mem.h" // NOLINT
+#include "rt_time.h" // NOLINT
 
 typedef struct rt_mutex_data {
     pthread_mutex_t mMutex;
@@ -48,28 +47,28 @@ RtMutex::RtMutex() {
     pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
     pthread_mutex_init(&(data->mMutex), &attr);
     pthread_mutexattr_destroy(&attr);
-    mData = (void*)data;
+    mData = reinterpret_cast<void*>(data);
 }
 
 RtMutex::~RtMutex() {
-    RtMutexData* data = (RtMutexData*)mData;
+    RtMutexData* data = reinterpret_cast<RtMutexData*>(mData);
     pthread_mutex_destroy(&(data->mMutex));
     rt_free(data);
     mData = RT_NULL;
 }
 
 void RtMutex::lock() {
-    RtMutexData* data = (RtMutexData*)mData;
+    RtMutexData* data = reinterpret_cast<RtMutexData*>(mData);
     pthread_mutex_lock(&(data->mMutex));
 }
 
 void RtMutex::unlock() {
-    RtMutexData* data = (RtMutexData*)mData;
+    RtMutexData* data = reinterpret_cast<RtMutexData*>(mData);
     pthread_mutex_unlock(&(data->mMutex));
 }
 
 int RtMutex::trylock() {
-    RtMutexData* data = (RtMutexData*)mData;
+    RtMutexData* data = reinterpret_cast<RtMutexData*>(mData);
     return pthread_mutex_trylock(&(data->mMutex));
 }
 
@@ -79,30 +78,30 @@ int RtMutex::trylock() {
 RtCondition::RtCondition() {
     RtConditionData* data = rt_malloc(RtConditionData);
     pthread_cond_init(&(data->mCond), NULL);
-    mData = (void*)data;
+    mData = reinterpret_cast<void*>(data);
 }
 
 RtCondition::~RtCondition() {
-    RtConditionData* data = (RtConditionData*)mData;
+    RtConditionData* data = reinterpret_cast<RtConditionData*>(mData);
     pthread_cond_destroy(&(data->mCond));
     rt_free(data);
     mData = RT_NULL;
 }
 
-INT32 RtCondition::wait(RtMutex& RtMutex) {
-    RtConditionData* cond_data = (RtConditionData*)mData;
-    RtMutexData*     lock_data = (RtMutexData*)(RtMutex.mData);
+INT32 RtCondition::wait(const RtMutex& RtMutex) {
+    RtConditionData* cond_data = reinterpret_cast<RtConditionData*>(mData);
+    RtMutexData*     lock_data = reinterpret_cast<RtMutexData*>(RtMutex.mData);
     return pthread_cond_wait(&(cond_data->mCond), &(lock_data->mMutex));
 }
 
 INT32 RtCondition::wait(RtMutex* RtMutex) {
-    RtConditionData* cond_data = (RtConditionData*)mData;
-    RtMutexData*     lock_data = (RtMutexData*)(RtMutex->mData);
+    RtConditionData* cond_data = reinterpret_cast<RtConditionData*>(mData);
+    RtMutexData*     lock_data = reinterpret_cast<RtMutexData*>(RtMutex->mData);
     return pthread_cond_wait(&(cond_data->mCond), &(lock_data->mMutex));
 }
 
-INT32 RtCondition::timedwait(RtMutex& RtMutex, UINT64 timeout) {
-    return timedwait(&RtMutex, timeout);
+INT32 RtCondition::timedwait(const RtMutex& rtMutex, UINT64 timeout) {
+    return timedwait(const_cast<RtMutex *>(&rtMutex), timeout);
 }
 
 INT32 RtCondition::timedwait(RtMutex* RtMutex, UINT64 timeout) {
@@ -118,18 +117,18 @@ INT32 RtCondition::timedwait(RtMutex* RtMutex, UINT64 timeout) {
     ts.tv_sec += ts.tv_nsec / 1000000000;
     ts.tv_nsec %= 1000000000;
 
-    RtConditionData* cond_data = (RtConditionData*)mData;
-    RtMutexData*     lock_data = (RtMutexData*)(RtMutex->mData);
+    RtConditionData* cond_data = reinterpret_cast<RtConditionData*>(mData);
+    RtMutexData*     lock_data = reinterpret_cast<RtMutexData*>(RtMutex->mData);
     return pthread_cond_timedwait(&(cond_data->mCond), &(lock_data->mMutex), &ts);
 }
 
 INT32 RtCondition::signal() {
-    RtConditionData* data = (RtConditionData*)mData;
+    RtConditionData* data = reinterpret_cast<RtConditionData*>(mData);
     return pthread_cond_signal(&(data->mCond));
 }
 
 INT32 RtCondition::broadcast() {
-    RtConditionData* data = (RtConditionData*)mData;
+    RtConditionData* data = reinterpret_cast<RtConditionData*>(mData);
     return pthread_cond_broadcast(&(data->mCond));
 }
 

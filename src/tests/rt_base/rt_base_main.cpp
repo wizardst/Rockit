@@ -17,39 +17,38 @@
  *   date: 20181102
  */
 
-#include "rt_base_tests.h"
-#include "rt_check.h"
+#include "rt_base_tests.h" // NOLINT
+#include "rt_check.h" // NOLINT
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     RT_LOGE("rockit base test begin..\n");
 
     TestFunc *func = NULL;
-    RtTestCtx *test_ctx = rt_tests_init((char *)"RockitBaseTest");
+    RtTestCtx *test_ctx = rt_tests_init(const_cast<char *>("RockitBaseTest"));
     CHECK_IS_NULL(test_ctx);
 
     /*
      * testcases: standard containers which store a collection of other objects 
      *    author: rimon.xu@rock-chips.com
      */
-    rt_tests_add(test_ctx, unit_test_array_list,   (char *)"UnitTest-ArrayList");
-    rt_tests_add(test_ctx, unit_test_deque_normal, (char *)"UnitTest-DequeNormal");
-    rt_tests_add(test_ctx, unit_test_deque_limit,  (char *)"UnitTest-DequeLimit");
-    rt_tests_add(test_ctx, unit_test_linked_list,  (char *)"UnitTest-LinkedList");
-    rt_tests_add(test_ctx, unit_test_hash_table,   (char *)"UnitTest-HashTable");
+    rt_tests_add(test_ctx, unit_test_array_list, const_cast<char *>("UnitTest-ArrayList"));
+    rt_tests_add(test_ctx, unit_test_deque_normal, const_cast<char *>("UnitTest-DequeNormal"));
+    rt_tests_add(test_ctx, unit_test_deque_limit, const_cast<char *>("UnitTest-DequeLimit"));
+    rt_tests_add(test_ctx, unit_test_linked_list, const_cast<char *>("UnitTest-LinkedList"));
+    rt_tests_add(test_ctx, unit_test_hash_table, const_cast<char *>("UnitTest-HashTable"));
 
     /*
      * testcases: unit tests for OS Adaptive Layer(OSAL) 
      *    author: rimon.xu@rock-chips.com
      */
-    rt_tests_add(test_ctx, unit_test_memory, (char *)"UnitTest-Memory");
-    rt_tests_add(test_ctx, unit_test_mem_service, (char *)"UnitTest-Mem-Service");
+    rt_tests_add(test_ctx, unit_test_memory, const_cast<char *>("UnitTest-Memory"));
+    rt_tests_add(test_ctx, unit_test_mem_service, const_cast<char *>("UnitTest-Mem-Service"));
 
-    rt_tests_add(test_ctx, unit_test_mutex,  (char *)"UnitTest-Mutex");
-    rt_tests_add(test_ctx, unit_test_thread, (char *)"UnitTest-Thread");
+    rt_tests_add(test_ctx, unit_test_mutex, const_cast<char *>("UnitTest-Mutex"));
+    rt_tests_add(test_ctx, unit_test_thread, const_cast<char *>("UnitTest-Thread"));
 
-    rt_tests_add(test_ctx, unit_test_lock_unlock, (char *)"UnitTest-Lock-Unlock");
-    rt_tests_add(test_ctx, unit_test_cond_lock, (char *)"UnitTest-Cond-Lock");
+    rt_tests_add(test_ctx, unit_test_lock_unlock, const_cast<char *>("UnitTest-Lock-Unlock"));
+    rt_tests_add(test_ctx, unit_test_cond_lock, const_cast<char *>("UnitTest-Cond-Lock"));
 
     // ! run all testcases
     rt_tests_run(test_ctx, /*mem_dump=*/RT_TRUE);

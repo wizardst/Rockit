@@ -17,3 +17,5 @@
  *   Date: 2018/XX/XX
  *   Task: use ffmpeg as encoder and decoder
  */
+
+#include "ff_node_codec.h" // NOLINT

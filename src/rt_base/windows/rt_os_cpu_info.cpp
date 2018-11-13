@@ -17,9 +17,9 @@
  *   date: 20180801
  */
 
-#include "../include/rt_cpu_info.h"
-
 #ifdef OS_WINDOWS
+
+#include "../include/rt_cpu_info.h"
 
 #include <windows.h>
 
@@ -31,4 +31,5 @@ UINT32 rt_cpu_count(void) {
     return count;
 }
 
-#endif // OS_WINDOWS
+#endif  // OS_WINDOWS
+

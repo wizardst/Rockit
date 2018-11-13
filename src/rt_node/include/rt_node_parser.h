@@ -17,10 +17,10 @@
  *   date: 2018/07/05
  */
 
-#ifndef __RT_NODE_PARSER__
-#define __RT_NODE_PARSER__
+#ifndef SRC_RT_NODE_INCLUDE_RT_NODE_PARSER_H_
+#define SRC_RT_NODE_INCLUDE_RT_NODE_PARSER_H_
 
-#include "rt_node.h"
+#include "rt_node.h" // NOLINT
 
 #ifdef  __cplusplus
 extern "C" {
@@ -30,5 +30,5 @@ extern "C" {
 }
 #endif
 
-#endif // __RT_NODE_PARSER__
+#endif  // SRC_RT_NODE_INCLUDE_RT_NODE_PARSER_H_
 

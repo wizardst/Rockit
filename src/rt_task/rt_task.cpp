@@ -17,9 +17,8 @@
  *   date: 20180719
  */
 
-#include "rt_task.h"
+#include "rt_task.h" // NOLINT
 
-void RtTask::run(void* args)
-{
+void RtTask::run(void* args) {
     run_impl(args);
 }

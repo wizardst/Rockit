@@ -17,10 +17,10 @@
  *   date: 20180704
  */
 
-#ifndef __RT_LOG_H__
-#define __RT_LOG_H__
+#ifndef SRC_RT_BASE_INCLUDE_RT_LOG_H_
+#define SRC_RT_BASE_INCLUDE_RT_LOG_H_
 
-#include "rt_header.h"
+#include "rt_header.h" // NOLINT
 #include <string>
 
 #ifndef LOG_TAG
@@ -28,12 +28,14 @@
 #endif
 
 //! super macro.
-#define RT_LOGT( format, ... ) LOG_TRACE( format, ##__VA_ARGS__ )
-#define RT_LOGE( format, ... ) LOG_ERROR( format, ##__VA_ARGS__ )
+#define RT_LOGT(format, ...) LOG_TRACE(format, ##__VA_ARGS__)
+#define RT_LOGE(format, ...) LOG_ERROR(format, ##__VA_ARGS__)
 
 //! super macro.
-#define LOG_TRACE(fmt, ...) rt_log(LOG_TAG, fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__)
-#define LOG_ERROR(fmt, ...) rt_err(LOG_TAG, fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define LOG_TRACE(fmt, ...) \
+        rt_log(LOG_TAG, fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define LOG_ERROR(fmt, ...) \
+        rt_err(LOG_TAG, fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__)
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,4 +50,4 @@ void rt_err(const char *tag, const char *fmt, const char *fname,
 #ifdef __cplusplus
 }
 #endif
-#endif // RBASELOG_H
+#endif  // SRC_RT_BASE_INCLUDE_RT_LOG_H_

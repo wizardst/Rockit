@@ -23,15 +23,13 @@
 
 #include "../rt_os_log.h"
 
-void rt_os_log(const char* tag, const char* msg, va_list list)
-{
+void rt_os_log(const char* tag, const char* msg, va_list list) {
     char line[MAX_LINE_LEN] = {0};
     _snprintf(line, sizeof(line), "%16s: %s", tag, msg);
     vfprintf(stdout, line, list);
 }
 
-void rt_os_err(const char* tag, const char* msg, va_list list)
-{
+void rt_os_err(const char* tag, const char* msg, va_list list) {
     char line[MAX_LINE_LEN] = {0};
     _snprintf(line, sizeof(line), "%16s: %s", tag, msg);
     vfprintf(stderr, line, list);

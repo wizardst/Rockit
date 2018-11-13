@@ -23,9 +23,9 @@
 #endif
 #define LOG_TAG "FFNodeParser"
 
-#include "rt_node.h"
-#include "ff_node_parser.h"
-#include "rt_mem.h"
+#include "rt_node.h" // NOLINT
+#include "ff_node_parser.h" // NOLINT
+#include "rt_mem.h" // NOLINT
 
 typedef struct _FF_PARSER_CONTEXT {
     UINT32 pull_cnt;
@@ -38,13 +38,13 @@ INT8 node_ff_parser_init(void **ctx) {
     return RT_OK;
 }
 
-INT8 node_ff_parser_release(void **ctx){
+INT8 node_ff_parser_release(void **ctx) {
     rt_safe_free(*ctx);
     return RT_OK;
 }
 
 INT8 node_ff_parser_pull(void *ctx, void *data, UINT32 *size) {
-    FF_PARSER_CONTEXT* parser_ctx = (FF_PARSER_CONTEXT*)ctx;
+    FF_PARSER_CONTEXT* parser_ctx = reinterpret_cast<FF_PARSER_CONTEXT*>(ctx);
     RT_ASSERT(RT_NULL != parser_ctx);
     parser_ctx->pull_cnt++;
     RT_LOGE("pull_cnt = %03d", parser_ctx->pull_cnt);
@@ -52,7 +52,7 @@ INT8 node_ff_parser_pull(void *ctx, void *data, UINT32 *size) {
 }
 
 INT8 node_ff_parser_push(void *ctx, void *data, UINT32 *size) {
-    FF_PARSER_CONTEXT* parser_ctx = (FF_PARSER_CONTEXT*)ctx;
+    FF_PARSER_CONTEXT* parser_ctx = reinterpret_cast<FF_PARSER_CONTEXT*>(ctx);
     RT_ASSERT(RT_NULL != parser_ctx);
     parser_ctx->push_cnt++;
     RT_LOGE("push_cnt = %03d", parser_ctx->push_cnt);
@@ -61,19 +61,19 @@ INT8 node_ff_parser_push(void *ctx, void *data, UINT32 *size) {
 
 INT8 node_ff_parser_run_cmd(void* ctx, RT_NODE_CMD cmd,
                             UINT32 data_int, void* data_void) {
-    FF_PARSER_CONTEXT* parser_ctx = (FF_PARSER_CONTEXT*)ctx;
+    FF_PARSER_CONTEXT* parser_ctx = reinterpret_cast<FF_PARSER_CONTEXT*>(ctx);
     RT_ASSERT(RT_NULL != parser_ctx);
     return RT_OK;
 }
 
- RT_Node ff_node_parser = {
-     .type         = NODE_TYPE_DEMUXER,
-     .name         = "ff_demuxer",
-     .version      = "v1.0",
-     .node_ctx     = RT_NULL,
-     .impl_init    = node_ff_parser_init,
-     .impl_release = node_ff_parser_release,
-     .impl_pull    = node_ff_parser_pull,
-     .impl_push    = node_ff_parser_push,
-     .impl_run_cmd = node_ff_parser_run_cmd,
- };
+RT_Node ff_node_parser = {
+    .type         = NODE_TYPE_DEMUXER,
+    .name         = "ff_demuxer",
+    .version      = "v1.0",
+    .node_ctx     = RT_NULL,
+    .impl_init    = node_ff_parser_init,
+    .impl_release = node_ff_parser_release,
+    .impl_pull    = node_ff_parser_pull,
+    .impl_push    = node_ff_parser_push,
+    .impl_run_cmd = node_ff_parser_run_cmd,
+};

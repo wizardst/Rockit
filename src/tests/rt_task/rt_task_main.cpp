@@ -17,22 +17,24 @@
  *   date: 2018/11/05
  */
 
-#include "rt_task_tests.h"
-#include "rt_check.h"
+#include "rt_task_tests.h" // NOLINT
+#include "rt_check.h" // NOLINT
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     RT_LOGE("rockit base test begin..\n");
 
     TestFunc *func = NULL;
-    RtTestCtx *test_ctx = rt_tests_init((char *)"Rockit-Task-Test");
+    RtTestCtx *test_ctx =
+        rt_tests_init(const_cast<char *>("Rockit-Task-Test"));
     CHECK_IS_NULL(test_ctx);
 
     /*
      * testcases: unit tests for node&nodebus 
      *    author: martin.cheng@rock-chips.com
      */
-    rt_tests_add(test_ctx, unit_test_taskpool, (char *)"UnitTest-TaskPool");
+    rt_tests_add(test_ctx,
+                 unit_test_taskpool,
+                 const_cast<char *>("UnitTest-TaskPool"));
 
     // ! run all testcases
     rt_tests_run(test_ctx, /*mem_dump=*/RT_TRUE);

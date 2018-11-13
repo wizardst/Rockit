@@ -17,37 +17,37 @@
  *   date: 20180719
  */
 
-#ifndef __RT_TASK_H__
-#define __RT_TASK_H__
+#ifndef SRC_RT_TASK_INCLUDE_RT_TASK_H_
+#define SRC_RT_TASK_INCLUDE_RT_TASK_H_
 
 #define TASK_PRIOTRY_FIFO 0
 #define TASK_PRIOTRY_RT   1   /*message, audio, vsync*/
 
-#include "rt_header.h"
+#include "rt_header.h" // NOLINT
 
 template <typename T>
 struct RtTRunnable {
-    virtual ~RtTRunnable() {};
+    virtual ~RtTRunnable() {}
     virtual void run(T&);
     virtual void run_impl(T&) = 0;
 };
 
 template <>
 struct RtTRunnable<void> {
-    virtual ~RtTRunnable() {};
+    virtual ~RtTRunnable() {}
     virtual void run() = 0;
 };
 
 struct RtTask {
-    virtual ~RtTask() {};
+    virtual ~RtTask() {}
     virtual void run(void* args);
     virtual void run_impl(void* args) = 0;
     virtual void* get_args() = 0;
     virtual char* get_name() = 0;
-    virtual UINT32 get_id() {return mID;};
-    virtual UINT32 get_priority(){return mPriority;};
+    virtual UINT32 get_id() { return mID; }
+    virtual UINT32 get_priority() { return mPriority; }
     UINT32 mPriority;
     UINT32 mID;
 };
 
-#endif
+#endif  // SRC_RT_TASK_INCLUDE_RT_TASK_H_

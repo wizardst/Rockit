@@ -17,11 +17,11 @@
  *   date: 20180704
  */
 
-#include "rt_header.h"
-#include "rt_mem.h"
-#include "rt_log.h"
-#include "rt_os_mem.h"
-#include "rt_mem_service.h"
+#include "rt_header.h" // NOLINT
+#include "rt_mem.h" // NOLINT
+#include "rt_log.h" // NOLINT
+#include "rt_os_mem.h" // NOLINT
+#include "rt_mem_service.h" // NOLINT
 #include <string.h>
 #include <stdio.h>
 
@@ -106,7 +106,7 @@ void rt_mem_free(const char *caller, void *ptr) {
 }
 
 void rt_mem_safe_free(const char *caller, void **ptr) {
-    if(ptr&&(*ptr)) {
+    if (ptr && (*ptr)) {
         rt_mem_free(caller, *ptr);
         *ptr = RT_NULL;
     }
@@ -116,7 +116,7 @@ void *rt_memset(void *str, int c, size_t n) {
     return memset(str, c, n);
 }
 
-void *rt_memcpy(void *dst, void *src, size_t n){
+void *rt_memcpy(void *dst, void *src, size_t n) {
     return memcpy(dst, src, n);
 }
 

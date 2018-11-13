@@ -21,8 +21,8 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "rt_header.h"
-#include "rt_os_log.h"
+#include "rt_header.h" // NOLINT
+#include "rt_os_log.h" // NOLINT
 
 typedef void (*rt_log_callback)(const char*, const char*, va_list);
 

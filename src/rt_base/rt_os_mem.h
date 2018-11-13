@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include "rt_type.h"
+#include "rt_type.h" // NOLINT
 
 #define MEM_ALIGN               32
 

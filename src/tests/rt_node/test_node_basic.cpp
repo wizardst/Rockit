@@ -17,12 +17,9 @@
  *   date: 2018/11/05
  */
 
-#ifndef __RT_NODE_BASIC_H__
-#define __RT_NODE_BASIC_H__
-
-#include "rt_node.h"
-#include "rt_node_header.h"
-#include "rt_node_tests.h"
+#include "rt_node.h" // NOLINT
+#include "rt_node_header.h" // NOLINT
+#include "rt_node_tests.h" // NOLINT
 
 RT_RET unit_test_demuxer() {
     RT_LOGE("%s ptr = %p", __FUNCTION__, &ff_node_parser);
@@ -50,11 +47,9 @@ RT_RET unit_test_muxer() {
     return RT_OK;
 }
 
-RT_RET unit_test_node_basic(INT32 index, INT32 total)
-{
+RT_RET unit_test_node_basic(INT32 index, INT32 total) {
     unit_test_demuxer();
-	return unit_test_muxer();
+    return unit_test_muxer();
 }
 
-#endif /*__RT_NODE_BASIC_H__*/
 

@@ -17,27 +17,31 @@
  *   date: 20180903
  */
 
-#ifndef _RT_LINKED_LIST_H
-#define _RT_LINKED_LIST_H
+#ifndef SRC_RT_BASE_INCLUDE_RT_LINKED_LIST_H_
+#define SRC_RT_BASE_INCLUDE_RT_LINKED_LIST_H_
 
-#include "rt_header.h"
+#include "rt_header.h" // NOLINT
 
- typedef struct rt_linked_entry {
-    void          *data;
+typedef struct rt_linked_entry {
+    void                   *data;
     struct rt_linked_entry *next;
     struct rt_linked_entry *prev;
-    UINT16        heat;
+    UINT16                  heat;
 } RtLinkedEntry;
 
 typedef struct rt_linked_list {
-    UINT32        size;
-    RtLinkedEntry *head;
-    RtLinkedEntry *tail;
+    UINT32                  size;
+    RtLinkedEntry          *head;
+    RtLinkedEntry          *tail;
 } RtLinkedList;
 
 RtLinkedList*   linked_list_create();
-INT8            linked_list_add(RtLinkedList* self, void* entry, RT_BOOL header=RT_FALSE);
-INT8            linked_list_insert_at(RtLinkedList* self, UINT32 index, void* data);
+INT8            linked_list_add(RtLinkedList* self,
+                                      void* entry,
+                                      RT_BOOL header = RT_FALSE);
+INT8            linked_list_insert_at(RtLinkedList* self,
+                                               UINT32 index,
+                                               void* data);
 INT8            linked_list_remove(RtLinkedList* self, void* data);
 INT8            linked_list_remove_at(RtLinkedList* self, UINT32 index);
 INT8            linked_list_remove_all(RtLinkedList* self);
@@ -48,4 +52,4 @@ void*           linked_list_get_data(RtLinkedList* self, size_t index);
 INT8            linked_list_set(RtLinkedList* self, size_t index, void* data);
 INT8            linked_list_destroy(RtLinkedList **self);
 
-#endif // _RT_LINKED_LIST_H
+#endif  // SRC_RT_BASE_INCLUDE_RT_LINKED_LIST_H_

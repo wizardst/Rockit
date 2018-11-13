@@ -22,7 +22,7 @@
 #endif
 #define LOG_TAG "NodeDemuxer"
 
-#include "rt_node.h"
+#include "rt_node.h" // NOLINT
 
 INT8 node_codec_init(void *ctx) {
     return RT_ERR_UNKNOWN;

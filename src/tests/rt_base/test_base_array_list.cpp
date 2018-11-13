@@ -17,11 +17,10 @@
  *   date: 20181031
  */
 
-#include "rt_base_tests.h"
-#include "rt_array_list.h"
+#include "rt_base_tests.h" // NOLINT
+#include "rt_array_list.h" // NOLINT
 
-RT_RET unit_test_array_list(INT32 index, INT32 total_index)
-{
+RT_RET unit_test_array_list(INT32 index, INT32 total_index) {
     RtArrayList *rt_list = RT_NULL;
     rt_list = array_list_create();
     CHECK_UE(rt_list, RT_NULL);
@@ -34,7 +33,7 @@ RT_RET unit_test_array_list(INT32 index, INT32 total_index)
     }
     CHECK_EQ(array_list_get_size(rt_list), 1000);
 
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 234)), 234);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 234))), 234);
 
     /* now list is:
        index: 0, 1, 2 .... 233 234 235 236 237 ...
@@ -45,10 +44,10 @@ RT_RET unit_test_array_list(INT32 index, INT32 total_index)
     INT32_array[1001] = 1001;
     array_list_insert_at(rt_list, 234, &INT32_array[1000]);
     array_list_insert_at(rt_list, 234, &INT32_array[1001]);
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 233)), 233);
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 234)), 1001);
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 235)), 1000);
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 236)), 234);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 233))), 233);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 234))), 1001);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 235))), 1000);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 236))), 234);
 
     /* now list is:
        index: 0, 1, 2 .... 233  234  235 236 237 ...
@@ -63,8 +62,8 @@ RT_RET unit_test_array_list(INT32 index, INT32 total_index)
        value: 0, 1, 2 .... 233 234 235 234 235 ...
     */
 
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 234)), 234);
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 235)), 235);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 234))), 234);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 235))), 235);
 
     array_list_remove_at(rt_list, 234);
     array_list_remove_at(rt_list, 234);
@@ -76,8 +75,8 @@ RT_RET unit_test_array_list(INT32 index, INT32 total_index)
        value: 0, 1, 2 .... 233 236 237 238 239 ...
     */
 
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 234)), 236);
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 235)), 237);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 234))), 236);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 235))), 237);
 
     CHECK_EQ(array_list_contains(rt_list, &INT32_array[234]), RT_FALSE);
     CHECK_EQ(array_list_contains(rt_list, &INT32_array[235]), RT_FALSE);
@@ -91,8 +90,8 @@ RT_RET unit_test_array_list(INT32 index, INT32 total_index)
        index: 0, 1, 2 .... 233 234 235 236 237 ...
        value: 0, 1, 2 .... 233 238 239 240 241 ...
     */
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 234)), 238);
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 235)), 239);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 234))), 238);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 235))), 239);
 
     CHECK_EQ(array_list_get_size(rt_list), 996);
 
@@ -108,8 +107,8 @@ RT_RET unit_test_array_list(INT32 index, INT32 total_index)
        value: 1, 2, 3 .... 238 239 240 241 242 ... 998
     */
 
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 0)), 1);
-    CHECK_EQ(*((INT32 *)array_list_get_data(rt_list, 993)), 998);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 0))), 1);
+    CHECK_EQ(*(reinterpret_cast<INT32 *>(array_list_get_data(rt_list, 993))), 998);
 
     array_list_remove_all(rt_list);
     CHECK_EQ(array_list_get_size(rt_list), 0);
@@ -119,8 +118,8 @@ RT_RET unit_test_array_list(INT32 index, INT32 total_index)
 
     CHECK_EQ(rt_list, RT_NULL);
 
-__RET:
     return RT_OK;
+
 __FAILED:
     return RT_ERR_UNKNOWN;
 }

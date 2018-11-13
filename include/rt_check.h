@@ -17,10 +17,10 @@
  *   date: 20181102
  */
 
-#ifndef __RT_CHECK_H__
-#define __RT_CHECK_H__
+#ifndef INCLUDE_RT_CHECK_H_
+#define INCLUDE_RT_CHECK_H_
 
-#include "rt_header.h"
+#include "rt_header.h" // NOLINT
 
 #define CHECK_OP(name, op, actual, exp) \
     do { \
@@ -31,7 +31,7 @@
                      __FUNCTION__, __LINE__, name, actual, exp); \
             goto __FAILED; \
         } \
-   } while (0)
+    } while (0)
 
 #define CHECK_EQ(actual, exp) CHECK_OP("CHECK_EQ", ==, actual, exp)
 #define CHECK_UE(actual, exp) CHECK_OP("CHECK_UE", !=, actual, exp)
@@ -44,4 +44,4 @@
 
 #define CHECK_IS_NULL(value) CHECK_OP("CHECK_IS_NULL", !=, value, RT_NULL)
 
-#endif
+#endif  // INCLUDE_RT_CHECK_H_

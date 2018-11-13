@@ -17,13 +17,13 @@
  *   date: 20180719
  */
 
-#ifndef __RT_NODE_HEADER_H__
-#define __RT_NODE_HEADER_H__
+#ifndef SRC_RT_NODE_INCLUDE_RT_NODE_HEADER_H_
+#define SRC_RT_NODE_INCLUDE_RT_NODE_HEADER_H_
 
 /*header in src/rt_node/include*/
-#include "../ff_node/ff_node_parser.h"
-#include "rt_node_parser.h"
-#include "rt_node_codec.h"
-#include "rt_node_filter.h"
+#include "../ff_node/ff_node_parser.h" // NOLINT
+#include "rt_node_parser.h" // NOLINT
+#include "rt_node_codec.h" // NOLINT
+#include "rt_node_filter.h" // NOLINT
 
-#endif /*__RT_NODE_HEADER_H__*/
+#endif  // SRC_RT_NODE_INCLUDE_RT_NODE_HEADER_H_

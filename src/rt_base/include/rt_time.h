@@ -17,14 +17,14 @@
  *   date: 2018/07/05
  */
 
-#ifndef __RT_TIME_H__
-#define __RT_TIME_H__
+#ifndef SRC_RT_BASE_INCLUDE_RT_TIME_H_
+#define SRC_RT_BASE_INCLUDE_RT_TIME_H_
 
-#include "rt_header.h"
-#include "rt_log.h"
+#include "rt_header.h" // NOLINT
+#include "rt_log.h" // NOLINT
 
 class RtTime {
-public:
+ public:
     struct DateTime {
         UINT16 mYear;          //!< e.g. 2005
         UINT8  mMonth;         //!< 1..12
@@ -43,25 +43,25 @@ public:
 };
 
 class RtAutoTimeoutLog {
-public:
+ public:
     // The label is not deep-copied, so its address must remain valid for the
     // lifetime of this object
-    inline RtAutoTimeoutLog(const char* label = RT_NULL, UINT64 timeout_ms = 0) : mLabel(label)
-    {
+    inline RtAutoTimeoutLog(const char* label = RT_NULL,
+                                   UINT64 timeout_ms = 0)
+            : mLabel(label) {
         mNow     = RtTime::getNowTimeMs();
         mTimeOut = timeout_ms;
     }
-    inline ~RtAutoTimeoutLog()
-    {
+    inline ~RtAutoTimeoutLog() {
         UINT64 duration = RtTime::getNowTimeMs() - mNow;
         if (duration >= mTimeOut) {
             RT_LOGE("%s [perf:%lld ms]\n", mLabel ? mLabel : "", duration);
         }
     }
-private:
+ private:
     const char* mLabel;
     UINT64      mNow;
     UINT64      mTimeOut;
 };
 
-#endif
+#endif  // SRC_RT_BASE_INCLUDE_RT_TIME_H_

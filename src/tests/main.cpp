@@ -17,10 +17,10 @@
  *   date: 2018/11/05
  */
 
-#include "rt_base/rt_base_tests.h"
-#include "rt_node/rt_node_tests.h"
-#include "rt_task/rt_task_tests.h"
-#include "rt_check.h"
+#include "rt_base/rt_base_tests.h" // NOLINT
+#include "rt_node/rt_node_tests.h" // NOLINT
+#include "rt_task/rt_task_tests.h" // NOLINT
+#include "rt_check.h" // NOLINT
 
 RT_RET unit_test_best_practice() {
     rt_mem_record_reset();
@@ -29,7 +29,6 @@ RT_RET unit_test_best_practice() {
     rt_mem_record_dump();
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     return unit_test_best_practice();
 }

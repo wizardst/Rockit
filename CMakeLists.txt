@@ -12,6 +12,10 @@ if (OS_LINUX)
     add_definitions(-DOS_LINUX)
 endif (OS_LINUX)
 
+if (HAS_PTHREAD)
+    add_definitions(-DHAS_PTHREAD)
+endif (HAS_PTHREAD)
+
 include_directories(include)
 add_subdirectory(src)
 

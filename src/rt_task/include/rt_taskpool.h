@@ -26,17 +26,29 @@
   *  06.32s with 07 threads;  05.66s with 08 threads;
   */
 
-#ifndef __RT_TASKPOOL_H__
-#define __RT_TASKPOOL_H__
+#ifndef SRC_RT_TASK_INCLUDE_RT_TASKPOOL_H_
+#define SRC_RT_TASK_INCLUDE_RT_TASKPOOL_H_
 
-#include "rt_header.h"
-#include "rt_dequeue.h"
+#include "rt_header.h" // NOLINT
+#include "rt_dequeue.h" // NOLINT
 
 typedef enum taskpool_state {
-    kRunning_State,  // Normal case.  We've been constructed and no one has called wait().
-    kWaiting_State,  // wait has been called, but there still might be work to do or being done.
-    kHalting_State,  // There's no work to do and no thread is busy.  All threads can shut down.
-    kPausing_State,  // Pausing
+    /* Normal case.
+     * We've been constructed and no one has called wait().
+     */
+    kRunning_State,
+    /*
+     * wait has been called,
+     * but there still might be work to do or being done.
+     */
+    kWaiting_State,
+    /*
+     * There's no work to do and no thread is busy.
+     * All threads can shut down.
+     */
+    kHalting_State,
+    /* Pausing */
+    kPausing_State,
 } RtPoolState;
 
 class RtMutex;
@@ -54,14 +66,16 @@ typedef struct rt_taskpool {
 } RtTaskPool;
 
 RtTaskPool* rt_taskpool_init(UINT32 max_thread_num, UINT32 max_task_num);
-INT8 rt_taskpool_push(RtTaskPool *taskpool, RtTask *task, RT_BOOL tail=RT_TRUE);
+INT8 rt_taskpool_push(RtTaskPool *taskpool,
+                            RtTask *task,
+                            RT_BOOL tail = RT_TRUE);
 INT8 rt_taskpool_push_head(RtTaskPool *taskpool, RtTask *task);
 INT8 rt_taskpool_push_tail(RtTaskPool *taskpool, RtTask *task);
-void rt_taskpool_pop( RtTaskPool *taskpool);
+void rt_taskpool_pop(RtTaskPool *taskpool);
 void rt_taskpool_resume(RtTaskPool *taskpool);
-void rt_taskpool_wait(  RtTaskPool *taskpool);
-void rt_taskpool_dump(  RtTaskPool *taskpool);
+void rt_taskpool_wait(RtTaskPool *taskpool);
+void rt_taskpool_dump(RtTaskPool *taskpool);
 static void* rt_taskpool_loop(void*);
 
-#endif
+#endif  // SRC_RT_TASK_INCLUDE_RT_TASKPOOL_H_
 

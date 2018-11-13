@@ -18,13 +18,12 @@
 ```
 # 使用cpplint检查代码风格(!强烈推荐)
 $ cd Rockit
-$ git clone https://github.com/google/styleguide
-$ ./styleguide/cpplint/cpplint.py ./src/rt_base/*
+$ ./tools/cpplint/check_style.sh
 
-# 使用astyle检查代码风格(!不推荐)
-$ cd Rockit/tools
+# Check Code Styles with astyle(!NOT Recommended)
+$ cd Rockit/tools/AStyle
 $ chmod 777 astyle
-$ ./tools/mpp_astyle.sh
+$ ./tools/rt_astyle.sh
 ```
 
 ## 4 项目示例

@@ -17,9 +17,9 @@
  *   date: 20181102
  */
 
-#include "rt_linked_list.h"
-#include "rt_error.h"
-#include "rt_mem.h"
+#include "rt_linked_list.h" // NOLINT
+#include "rt_error.h" // NOLINT
+#include "rt_mem.h" // NOLINT
 
 RtLinkedList* linked_list_create() {
     RtLinkedList* alist = rt_malloc(RtLinkedList);

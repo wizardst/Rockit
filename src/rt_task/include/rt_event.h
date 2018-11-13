@@ -17,7 +17,7 @@
  *   date: 20180719
  */
 
- #ifndef __RT_EVENT_H__
- #define __RT_EVENT_H__
+#ifndef SRC_RT_TASK_INCLUDE_RT_EVENT_H_
+#define SRC_RT_TASK_INCLUDE_RT_EVENT_H_
 
- #endif
+#endif  // SRC_RT_TASK_INCLUDE_RT_EVENT_H_

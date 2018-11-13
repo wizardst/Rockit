@@ -21,11 +21,12 @@
 
 #ifdef OS_LINUX
 
-//#include <sysconf.h>
+//  #include <sysconf.h>
 #include <unistd.h>
 UINT32 rt_cpu_count(void) {
     UINT32 count = sysconf(_SC_NPROCESSORS_CONF);
     return count;
 }
 
-#endif // OS_LINUX
+#endif  // OS_LINUX
+

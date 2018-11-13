@@ -17,21 +17,19 @@
  *   date: 2018/09/19
  */
 
-#ifndef __TEST_BASE_THREAD_H__
-#define __TEST_BASE_THREAD_H__
-
 #ifdef LOG_TAG
 #undef LOG_TAG
 #endif
 #define LOG_TAG "base_thread"
 
-#include <unistd.h> /*rand and usleep*/
+/*rand and usleep*/
+#include <unistd.h>
 
-#include "rt_mutex.h"
-#include "rt_thread.h"
-#include "rt_base_tests.h"
+#include "rt_mutex.h" // NOLINT
+#include "rt_thread.h" // NOLINT
+#include "rt_base_tests.h" // NOLINT
 
-typedef struct _fake_lock_context{
+typedef struct _fake_lock_context {
     RtMutex     *lock0;
     RtMutex     *lock1;
     RtCondition *rt_cond;
@@ -48,7 +46,6 @@ void utils_lock_ctx_init(FakeLockContext *ctx) {
 }
 
 void utils_lock_ctx_deinit(FakeLockContext *ctx) {
-
     #if 1
     rt_safe_delete(ctx->lock0);
     RT_ASSERT(RT_NULL == ctx->lock0);
@@ -79,14 +76,14 @@ RT_RET unit_test_mutex(INT32 index, INT32 total_index) {
 }
 
 void* unit_test_thread_loop(void*) {
-   int rand_sleep = (rand()%1000)*10000;
+    int rand_sleep = (rand() % 1000) * 10000; // NOLINT
     UINT32 count = 0;
-    while(count++ < 5) {
-        RT_LOGE("start,count is %d",count);
+    while (count++ < 5) {
+        RT_LOGE("start, count is %d", count);
         usleep(rand_sleep);
-        RT_LOGE("done,count is %d",count);
+        RT_LOGE("done, count is %d", count);
     }
-   return NULL;
+    return NULL;
 }
 
 RT_RET unit_test_thread(INT32 index, INT32 total_index) {
@@ -98,10 +95,10 @@ RT_RET unit_test_thread(INT32 index, INT32 total_index) {
 }
 
 void* callback_lock_unlock(void* fake_ctx) {
-    FakeLockContext *ctx = (FakeLockContext *)fake_ctx;
+    FakeLockContext *ctx = reinterpret_cast<FakeLockContext *>(fake_ctx);
     UINT32 idx = 0, cnt_lock = 0, cnt_auto = 0, cnt_test = 1024;
-    for(idx = 0; idx < cnt_test; idx++) {
-        if((idx%2) == 0) {
+    for (idx = 0; idx < cnt_test; idx++) {
+        if ((idx % 2) == 0) {
             RtAutoMutex autolock(ctx->lock0);
             cnt_lock++;
         } else {
@@ -109,7 +106,7 @@ void* callback_lock_unlock(void* fake_ctx) {
             cnt_auto++;
             ctx->lock1->unlock();
         }
-        if(idx % (cnt_test/10) == 0) {
+        if (idx % (cnt_test / 10) == 0) {
             RT_LOGE("stats: [pid=%d; cnt_lock=%03d; cnt_auto=%03d; pass=%03d/%03d]",
                            RtThread::get_tid(), cnt_lock, cnt_auto, idx+1, cnt_test);
         }
@@ -121,32 +118,32 @@ void* callback_lock_unlock(void* fake_ctx) {
 }
 
 void* callback_cond_lock(void* fake_ctx) {
-    FakeLockContext *ctx = (FakeLockContext *)fake_ctx;
+    FakeLockContext *ctx = reinterpret_cast<FakeLockContext *>(fake_ctx);
     UINT32 idx = 0, cnt_sig = 0, cnt_test = 1024;
     ctx->lock0->lock();
     RT_BOOL wait = ctx->wait;
     ctx->wait    = RT_FALSE;
     ctx->lock0->unlock();
-    for(idx = 0; (idx < cnt_test)||(ctx->wait_cnt < cnt_test); idx++) {
-        if(RT_TRUE == wait) {
-            if( 0 == ctx->lock0->trylock()){
-                //RT_LOGE("stats: [pid=%d; idx=%3d]", RtThread::get_tid(), idx);
+    for (idx = 0; (idx < cnt_test) || (ctx->wait_cnt < cnt_test); idx++) {
+        if (RT_TRUE == wait) {
+            if (0 == ctx->lock0->trylock()) {
+                // RT_LOGE("stats: [pid=%d; idx=%3d]", RtThread::get_tid(), idx);
                 ctx->rt_cond->wait(ctx->lock1);
                 ctx->wait_cnt++;
                 ctx->lock0->unlock();
             }
         } else {
-            if( 0 != ctx->lock0->trylock()){
-                //RT_LOGE("stats: [pid=%d; idx=%3d]", RtThread::get_tid(), idx);
+            if (0 != ctx->lock0->trylock()) {
+                // RT_LOGE("stats: [pid=%d; idx=%3d]", RtThread::get_tid(), idx);
                 ctx->rt_cond->signal();
                 cnt_sig++;
             } else {
                 ctx->lock0->unlock();
             }
         }
-        if(ctx->wait_cnt % (cnt_test/10) == 0) {
+        if (ctx->wait_cnt % (cnt_test / 10) == 0) {
             RT_LOGE("stats: [pid=%d; cnt_wait=%03d; cnt_sig=%03d; pass=%03d/%03d]",
-                           RtThread::get_tid(), ctx->wait_cnt, cnt_sig, idx+1, cnt_test);
+                           RtThread::get_tid(), ctx->wait_cnt, cnt_sig, idx + 1, cnt_test);
         }
         RtTime::sleepMs(1);
     }
@@ -187,4 +184,3 @@ RT_RET unit_test_cond_lock(INT32 index, INT32 total_index) {
     return RT_OK;
 }
 
-#endif

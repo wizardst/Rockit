@@ -20,11 +20,10 @@
 #ifndef __RT_NODE_BUS_H__
 #define __RT_NODE_BUS_H__
 
-#include "rt_node.h"
-#include "rt_node_tests.h"
+#include "rt_node.h" // NOLINT
+#include "rt_node_tests.h" // NOLINT
 
-RT_RET unit_test_node_bus(INT32 index, INT32 total)
-{
+RT_RET unit_test_node_bus(INT32 index, INT32 total) {
     return RT_OK;
 }
 

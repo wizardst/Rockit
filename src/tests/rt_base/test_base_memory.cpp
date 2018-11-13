@@ -22,45 +22,45 @@
 #endif
 #define LOG_TAG "test_base_memory"
 
-#include "rt_header.h"
-#include "rt_base_tests.h"
-#include "rt_mem_service.h"
+#include "rt_header.h" // NOLINT
+#include "rt_base_tests.h" // NOLINT
+#include "rt_mem_service.h" // NOLINT
 
-typedef struct _person{
+typedef struct _person {
     int   age;
     char *name;
 } Person;
 
-RT_RET unit_test_memory(INT32 index, INT32 total_index){
-    UINT32 idx = 0, case_idx=0, count=0;
-    for(idx = 0; idx < 100; idx++) {
+RT_RET unit_test_memory(INT32 index, INT32 total_index) {
+    UINT32 idx = 0, case_idx = 0, count = 0;
+    for (idx = 0; idx < 100; idx++) {
         Person* martin = RT_NULL;
-        case_idx = idx%3;
-        switch(case_idx) {
+        case_idx = idx % 3;
+        switch (case_idx) {
         case 0:
-            martin = (Person*)rt_mem_malloc(__FUNCTION__, sizeof(Person)); //test pass
+            martin = rt_malloc(Person);  // test pass
             break;
         case 1:
-            martin = (Person*)rt_mem_calloc(__FUNCTION__, sizeof(Person));//test pass
+            martin = rt_calloc(Person, 1);  // test pass
             break;
         case 2:
-            martin = (Person*)rt_mem_realloc(__FUNCTION__, martin, sizeof(Person));//test pass
+            martin = rt_realloc(martin, Person, 1);  // test pass
             break;
         default:
             break;
         }
-        if(RT_NULL != martin){
+        if (RT_NULL != martin) {
             martin->age  = idx;
-            martin->name = (char*)"martin";
-            rt_mem_free(__FUNCTION__, martin);
+            martin->name = const_cast<char *>("martin");
+            rt_free(martin);
             martin = RT_NULL;
             count++;
-        }else{
+        } else {
             break;
         }
     }
     RT_LOGE("Success:%02d, Testcase:%02d", count, idx);
-    if(idx == 100) {
+    if (idx == 100) {
         return RT_OK;
     }
     return RT_ERR_MALLOC;
@@ -68,16 +68,16 @@ RT_RET unit_test_memory(INT32 index, INT32 total_index){
 
 RT_RET unit_test_mem_service(INT32 index, INT32 total_index) {
     RT_LOGE("Enter ...");
-    UINT32 idx ;
+    UINT32 idx = 0;
     rt_mem_service * mem_record = new rt_mem_service();
     mem_record->reset();
 
     RT_LOGE("Case: memory leakage ...");
-    for(idx = 0; idx < 10; idx++) {
+    for (idx = 0; idx < 10; idx++) {
         Person* prince = RT_NULL;
-        prince = (Person*)rt_mem_malloc(__FUNCTION__, sizeof(Person));
+        prince = rt_malloc(Person);
         prince->age  = idx;
-        prince->name = (char*)"prince";
+        prince->name = const_cast<char*>("prince");
         mem_record->add_node(__FUNCTION__, prince, sizeof(prince));
     }
     mem_record->dump();
@@ -86,7 +86,7 @@ RT_RET unit_test_mem_service(INT32 index, INT32 total_index) {
     MemNode *node = mem_record->mem_nodes;
     UINT32  node_size;
     for (UINT32 i = 0; i < mem_record->nodes_max; i++, node++) {
-        if((RT_NULL != node->ptr)&&(0 != node->size)) {
+        if ((RT_NULL != node->ptr) && (0 != node->size)) {
             mem_record->find_node(__FUNCTION__, node->ptr, &node_size);
             mem_record->remove_node(node->ptr, &node_size);
         } else {

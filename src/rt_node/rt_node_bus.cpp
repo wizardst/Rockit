@@ -18,30 +18,27 @@
  *   Task: construct and manage pipeline of media node
  */
 
-#include "rt_node_bus.h"
-#include "rt_node_parser.h"
-#include "rt_node_codec.h"
+#include "rt_node_bus.h" // NOLINT
+#include "rt_node_parser.h" // NOLINT
+#include "rt_node_codec.h" // NOLINT
 
-UINT32  node_hash_func(UINT32 bucktes, const void *key)
-{
-    return *((UINT32 *)(key)) % (bucktes);
+UINT32  node_hash_func(UINT32 bucktes, const void *key) {
+    void *tmp_key = const_cast<void *>(key);
+    return *(reinterpret_cast<UINT32 *>(tmp_key)) % (bucktes);
 }
 
 // ! life cycles of node_bus
-INT32 rt_node_bus_init(NodeBusContext* ctx)
-{
-   ctx->node_bus = array_list_create();
-   ctx->node_all = rt_hash_table_init((NODE_TYPE_MAX - NODE_TYPE_BASE), node_hash_func, RT_NULL);
-   return RT_OK;
-}
-
-INT32 rt_node_bus_build(NodeBusContext* ctx)
-{
+INT32 rt_node_bus_init(NodeBusContext* ctx) {
+    ctx->node_bus = array_list_create();
+    ctx->node_all = rt_hash_table_init((NODE_TYPE_MAX - NODE_TYPE_BASE), node_hash_func, RT_NULL);
     return RT_OK;
 }
 
-INT32 rt_node_bus_release(NodeBusContext* ctx)
-{
+INT32 rt_node_bus_build(NodeBusContext* ctx) {
+    return RT_OK;
+}
+
+INT32 rt_node_bus_release(NodeBusContext* ctx) {
     array_list_destroy(&ctx->node_bus);
     rt_hash_table_destory(ctx->node_all);
     ctx->node_all = RT_NULL;
@@ -49,30 +46,27 @@ INT32 rt_node_bus_release(NodeBusContext* ctx)
     return RT_OK;
 }
 
-INT32 rt_node_bus_summary(NodeBusContext* ctx, RT_BOOL full)
-{
-   rt_hash_table_dump(ctx->node_all);
-   return RT_OK;
+INT32 rt_node_bus_summary(NodeBusContext* ctx, RT_BOOL full) {
+    rt_hash_table_dump(ctx->node_all);
+    return RT_OK;
 }
 
-INT32 rt_node_register_all(NodeBusContext *bus)
-{
+INT32 rt_node_register_all(NodeBusContext *bus) {
     rt_node_register(bus, RT_NULL);
     rt_node_register(bus, RT_NULL);
     return RT_OK;
 }
 
-INT32 rt_node_register(NodeBusContext *bus, RT_Node *node)
-{
+INT32 rt_node_register(NodeBusContext *bus, RT_Node *node) {
     INT32 node_type = node->type;
-    rt_hash_table_insert(bus->node_all, (void*)(node_type), node);
+    rt_hash_table_insert(bus->node_all, reinterpret_cast<void*>(node_type), node);
     return RT_OK;
 }
 
-RT_Node* rt_node_find(NodeBusContext *bus, UINT8 node_type, UINT8 node_id)
-{
-    void* data = rt_hash_table_find(bus->node_all, (void*)node_type);
-    if(RT_NULL != data) {
+RT_Node* rt_node_find(NodeBusContext *bus, UINT8 node_type, UINT8 node_id) {
+    void* data = rt_hash_table_find(bus->node_all,
+                     reinterpret_cast<void *>(node_type));
+    if (RT_NULL != data) {
         // node = node->next;
     }
     return RT_NULL;

@@ -16,19 +16,19 @@
  * author: martin.cheng@rock-chips.com
  *   date: 20180719
  */
- 
-#ifndef __RT_EVENT_BUS__
-#define __RT_EVENT_BUS__
 
-typedef enum RTMediaEventType{
-   RT_EVENT_TYPE_QOS,
-   RT_EVENT_TYPE_OPT,
+#ifndef SRC_RT_TASK_INCLUDE_RT_EVENT_BUS_H_
+#define SRC_RT_TASK_INCLUDE_RT_EVENT_BUS_H_
+
+typedef enum RTMediaEventType {
+    RT_EVENT_TYPE_QOS,
+    RT_EVENT_TYPE_OPT,
 } RTMediaEventType;
 
-typedef struct RTMediaEvent{
-   RTMediaEventType event_type;
-   int   event_subtype;
-   void* event_data;
+typedef struct RTMediaEvent {
+    RTMediaEventType event_type;
+    int   event_subtype;
+    void* event_data;
 } MTMediaEvent;
 
-#endif
+#endif  // SRC_RT_TASK_INCLUDE_RT_EVENT_BUS_H_

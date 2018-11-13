@@ -17,9 +17,9 @@
  *   date: 20181102
  */
 
-#include "rt_dequeue.h"
-#include "rt_header.h"
-#include "rt_mem.h"
+#include "rt_dequeue.h" // NOLINT
+#include "rt_header.h" // NOLINT
+#include "rt_mem.h" // NOLINT
 
 RT_Deque* deque_create() {
     RT_Deque* list = rt_malloc(RT_Deque);
@@ -65,9 +65,9 @@ void deque_destory(RT_Deque **list) {
 RT_DequeEntry* deque_entry_malloc(RT_Deque *list) {
     RT_ASSERT(RT_NULL != list);
     RT_DequeEntry *entry = RT_NULL;
-    if(RT_NULL != list->entries) {
-        if(list->size < list->max_size) {
-            for(UINT32 idx = 0; idx < list->max_size; idx++) {
+    if (RT_NULL != list->entries) {
+        if (list->size < list->max_size) {
+            for (UINT32 idx = 0; idx < list->max_size; idx++) {
                 entry = &(list->entries[idx]);
                 // found entry in unused pre-malloc entries
                 if ((RT_NULL == entry->data)

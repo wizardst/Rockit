@@ -17,4 +17,4 @@
  *   date: 20180719
  */
 
- #include "rt_event.h"
+#include "rt_event.h" // NOLINT

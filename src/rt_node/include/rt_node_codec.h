@@ -17,20 +17,20 @@
  *   date: 2018/07/05
  */
 
-#ifndef __RT_NODE_CODEC__
-#define __RT_NODE_CODEC__
+#ifndef SRC_RT_NODE_INCLUDE_RT_NODE_CODEC_H_
+#define SRC_RT_NODE_INCLUDE_RT_NODE_CODEC_H_
 
-#include "rt_node.h"
+#include "rt_node.h" // NOLINT
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-// TODO
+// TODO(none)
 
 #ifdef  __cplusplus
 }
 #endif
 
-#endif // __RT_NODE_CODEC__
+#endif  // SRC_RT_NODE_INCLUDE_RT_NODE_CODEC_H_
 

@@ -30,17 +30,16 @@
   *      |              |    release     |
   */
 
-#ifndef __RT_NODE_H__
-#define __RT_NODE_H__
+#ifndef SRC_RT_NODE_INCLUDE_RT_NODE_H_
+#define SRC_RT_NODE_INCLUDE_RT_NODE_H_
 
-#include "rt_header.h"
+#include "rt_header.h" // NOLINT
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum _RT_NODE_TYPE
-{
+typedef enum _RT_NODE_TYPE {
     // ! basic nodes
     NODE_TYPE_BASE      = 2000,
     NODE_TYPE_EXTRACTOR,
@@ -92,7 +91,7 @@ typedef enum _RT_NODE_CMD {
     RT_NODE_CMD_DUMP,
 } RT_NODE_CMD;
 
-typedef enum _RT_NODE_MSG{
+typedef enum _RT_NODE_MSG {
     RT_NODE_MSG_BASE = 500,
     RT_NODE_MSG_CAPS,
     RT_NODE_MSG_SEGMENT,
@@ -131,4 +130,4 @@ INT8 check_err(const RT_Node node, INT8 err, const char* func_name);
 }
 #endif
 
-#endif // __RT_NODE_H__
+#endif  // SRC_RT_NODE_INCLUDE_RT_NODE_H_

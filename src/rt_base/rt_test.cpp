@@ -17,9 +17,9 @@
  *   date: 20181102
  */
 
-#include "rt_test_header.h"
-#include "rt_check.h"
-#include "rt_mem.h"
+#include "rt_test_header.h" // NOLINT
+#include "rt_check.h" // NOLINT
+#include "rt_mem.h" // NOLINT
 
 static RT_RET rt_test_impl(UINT32 index,
                            UINT32 total_index,
@@ -75,7 +75,7 @@ RT_RET rt_tests_run(RtTestCtx *ctx, RT_BOOL mem_dump) {
         snprintf(full_name, sizeof(full_name), "%s#%s", ctx->name, node->name);
 
         UINT64 start = RtTime::getNowTimeUs();
-        if(RT_TRUE == mem_dump) {
+        if (RT_TRUE == mem_dump) {
             rt_mem_record_reset();
             rt_test_impl(i, total_count, node->func, full_name);
             rt_mem_record_dump();

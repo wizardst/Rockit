@@ -17,10 +17,10 @@
  *   date: 2018/07/05
  */
 
-#include "rt_mem_service.h"
-#include "rt_os_mem.h"
-#include "rt_mem.h"
-#include "rt_log.h"
+#include "rt_mem_service.h" // NOLINT
+#include "rt_os_mem.h" // NOLINT
+#include "rt_mem.h" // NOLINT
+#include "rt_log.h" // NOLINT
 
 #ifdef LOG_TAG
 #undef LOG_TAG
@@ -103,15 +103,14 @@ void rt_mem_service::dump() {
     }
 }
 
-
 INT32 rt_mem_service::find_node(const char *caller, void* ptr, UINT32*size) {
     MemNode *node = mem_nodes;
 
-    for(UINT32 i = 0; i < nodes_max; i++, node++) {
-        if(node->ptr == ptr) {
+    for (UINT32 i = 0; i < nodes_max; i++, node++) {
+        if (node->ptr == ptr) {
             RT_LOGE("nodes[%03d] is found, ptr=%p", i, ptr);
             return i;
         }
     }
-    return -1 ;
+    return -1;
 }

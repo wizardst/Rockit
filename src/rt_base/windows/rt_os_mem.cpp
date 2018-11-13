@@ -22,8 +22,7 @@
 #include "../rt_os_mem.h"
 
 #define WITH_ALIGNED_MEM 0
-int rt_os_malloc(void **memptr, size_t alignment, size_t size)
-{
+int rt_os_malloc(void **memptr, size_t alignment, size_t size) {
     #if WITH_ALIGNED_MEM
     *memptr = _aligned_malloc(size, alignment);
     #else
@@ -32,8 +31,7 @@ int rt_os_malloc(void **memptr, size_t alignment, size_t size)
     return (*memptr) ? (0) : (-1);
 }
 
-int rt_os_realloc(void *src, void **dst, size_t alignment, size_t size)
-{
+int rt_os_realloc(void *src, void **dst, size_t alignment, size_t size) {
     #if WITH_ALIGNED_MEM
     *dst = _aligned_realloc(src, size, alignment);
     #else
@@ -43,8 +41,7 @@ int rt_os_realloc(void *src, void **dst, size_t alignment, size_t size)
     return (*dst) ? (0) : (-1);
 }
 
-void rt_os_free(void *ptr)
-{
+void rt_os_free(void *ptr) {
     #if WITH_ALIGNED_MEM
     _aligned_free(ptr);
     #else

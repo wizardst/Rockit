@@ -17,8 +17,10 @@
  *   date: 20180704
  */
 
-#ifndef BASETYPES_H_INCLUDED
-#define BASETYPES_H_INCLUDED
+#ifndef INCLUDE_RT_TYPE_H_
+#define INCLUDE_RT_TYPE_H_
+
+#include <stdint.h>
 
 #define RT_NULL 0
 
@@ -26,24 +28,15 @@
 #define RT_TRUE  1
 #define RT_FALSE 0
 
-typedef signed char     INT8;
-typedef short int       INT16;
-typedef int             INT32;
-# if __WORDSIZE == 64
-typedef long int        INT64;
-# else
-typedef long long int   INT64;
-# endif
+typedef int8_t                  INT8;
+typedef int16_t                 INT16;
+typedef int32_t                 INT32;
+typedef int64_t                 INT64;
 
-typedef unsigned char           UINT8;
-typedef unsigned short int      UINT16;
-typedef unsigned int            UINT32;
-#if __WORDSIZE == 64
-typedef unsigned long int       UINT64;
-#else
-__extension__
-typedef unsigned long long int  UINT64;
-#endif
+typedef uint8_t                 UINT8;
+typedef uint16_t                UINT16;
+typedef uint32_t                UINT32;
+typedef uint64_t                UINT64;
 
 #define RtToBool(cond)  ((cond) != 0)
 #define RtToS8(x)     ((INT8)(x))
@@ -72,4 +65,4 @@ typedef unsigned long long int  UINT64;
 #define RtAlign8(x)     (((x) + 7) >> 3 << 3)
 #define RtIsAlign8(x)   (0 == ((x) & 7))
 
-#endif // BASETYPES_H_INCLUDED
+#endif  // INCLUDE_RT_TYPE_H_

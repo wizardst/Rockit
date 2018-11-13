@@ -22,6 +22,6 @@
 #endif
 #define LOG_TAG "RTNodeParser"
 
-#include "rt_node.h"
-#include "rt_node_parser.h"
-#include "rt_mem.h"
+#include "rt_node.h" // NOLINT
+#include "rt_node_parser.h" // NOLINT
+#include "rt_mem.h" // NOLINT

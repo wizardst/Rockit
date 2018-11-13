@@ -17,16 +17,15 @@
  *   date: 20180714
  */
 
-#ifndef __RT_NODE_BUS_H__
-#define __RT_NODE_BUS_H__
+#ifndef SRC_RT_NODE_INCLUDE_RT_NODE_BUS_H_
+#define SRC_RT_NODE_INCLUDE_RT_NODE_BUS_H_
 
-#include "rt_header.h"
-#include "rt_node.h"
-#include "rt_hash_table.h"
-#include "rt_array_list.h"
+#include "rt_header.h" // NOLINT
+#include "rt_node.h" // NOLINT
+#include "rt_hash_table.h" // NOLINT
+#include "rt_array_list.h" // NOLINT
 
-typedef struct node_bus_context
-{
+typedef struct node_bus_context {
     RtArrayList *node_bus;
     RtHashTable *node_all;
 } NodeBusContext;
@@ -42,4 +41,4 @@ INT32    rt_node_register_all(NodeBusContext* ctx);
 INT32        rt_node_register(NodeBusContext* ctx, RT_Node *node);
 RT_Node*         rt_node_find(NodeBusContext* ctx, UINT8 node_type, UINT8 node_id);
 
-#endif // __RT_NODE_BUS_H__
+#endif  // SRC_RT_NODE_INCLUDE_RT_NODE_BUS_H_

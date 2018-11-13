@@ -17,11 +17,11 @@
  *   date: 20180720
  */
 
-#ifndef __RT_CPU_INFO__
-#define __RT_CPU_INFO__
+#ifndef SRC_RT_BASE_INCLUDE_RT_CPU_INFO_H_
+#define SRC_RT_BASE_INCLUDE_RT_CPU_INFO_H_
 
-#include "rt_type.h"
+#include "rt_type.h" // NOLINT
 
 UINT32 rt_cpu_count(void);
 
-#endif // __RT_CPU_INFO__
+#endif  // SRC_RT_BASE_INCLUDE_RT_CPU_INFO_H_

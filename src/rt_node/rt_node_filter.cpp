@@ -22,7 +22,7 @@
 #endif
 #define LOG_TAG "NodeFilter"
 
-#include "rt_node.h"
+#include "rt_node.h" // NOLINT
 
 #ifdef __cplusplus
 extern "C" {

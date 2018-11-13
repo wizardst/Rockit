@@ -18,7 +18,7 @@
  *   Task: use ffmpeg as encoder and decoder
  */
 
-#ifndef __FF_NODE_CODEC_H__
-#define __FF_NODE_CODEC_H__
+#ifndef SRC_RT_NODE_FF_NODE_FF_NODE_CODEC_H_
+#define SRC_RT_NODE_FF_NODE_FF_NODE_CODEC_H_
 
-#endif // __FF_NODE_CODEC_H__
+#endif  // SRC_RT_NODE_FF_NODE_FF_NODE_CODEC_H_

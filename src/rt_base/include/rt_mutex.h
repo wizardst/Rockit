@@ -17,10 +17,10 @@
  *   date: 20180719
  */
 
-#include "rt_header.h"
+#include "rt_header.h" // NOLINT
 
-#ifndef __RT_MUTEX_H__
-#define __RT_MUTEX_H__
+#ifndef SRC_RT_BASE_INCLUDE_RT_MUTEX_H_
+#define SRC_RT_BASE_INCLUDE_RT_MUTEX_H_
 
 typedef void *(*RTPthreadCallback)(void *);
 
@@ -30,9 +30,8 @@ class RtCondition;
 /*
  * for shorter type name and function name
  */
-class RtMutex
-{
-public:
+class RtMutex {
+ public:
     RtMutex();
     ~RtMutex();
 
@@ -40,17 +39,23 @@ public:
     void unlock();
     int  trylock();
 
-    class RtAutolock
-    {
-    public:
-        inline RtAutolock(RtMutex& RtMutex) : mLock(RtMutex)  { mLock.lock(); }
-        inline RtAutolock(RtMutex* RtMutex) : mLock(*RtMutex) { mLock.lock(); }
+    class RtAutolock {
+     public:
+        explicit inline RtAutolock(RtMutex rtMutex)
+                : mLock(rtMutex) {
+            mLock.lock();
+        }
+        explicit inline RtAutolock(RtMutex* rtMutex)
+                : mLock(*rtMutex) {
+            mLock.lock();
+        }
         inline ~RtAutolock() { mLock.unlock(); }
-    private:
+
+     private:
         RtMutex& mLock;
     };
 
-private:
+ private:
     friend class RtCondition;
 
     void* mData;
@@ -64,21 +69,20 @@ typedef RtMutex::RtAutolock RtAutoMutex;
 /*
  * for shorter type name and function name
  */
-class RtCondition
-{
-public:
+class RtCondition {
+ public:
     RtCondition();
-    RtCondition(int type);
+    explicit RtCondition(int type);
     ~RtCondition();
 
     /*These functions atomically release mutex,
       but block on the condition variable*/
-    INT32 wait(RtMutex& RtMutex);
-    INT32 wait(RtMutex* RtMutex);
+    INT32 wait(const RtMutex& rtMutex);
+    INT32 wait(RtMutex* rtMutex);
 
     /*returns with the timeout error*/
-    INT32 timedwait(RtMutex& RtMutex, UINT64 timeout);
-    INT32 timedwait(RtMutex* RtMutex, UINT64 timeout);
+    INT32 timedwait(const RtMutex& rtMutex, UINT64 timeout);
+    INT32 timedwait(RtMutex* rtMutex, UINT64 timeout);
 
     /*This wakes up at least one thread blocked on the condition variable*/
     INT32 signal();
@@ -86,8 +90,9 @@ public:
     /*This wakes up all of the threads blocked on the condition variable*/
     INT32 broadcast();
 
-private:
+ private:
     void* mData;
 };
 
-#endif
+#endif  // SRC_RT_BASE_INCLUDE_RT_MUTEX_H_
+

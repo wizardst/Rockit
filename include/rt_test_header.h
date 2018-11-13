@@ -17,11 +17,11 @@
  *   date: 20181102
  */
 
-#ifndef __RT_TEST_HEADER_H__
-#define __RT_TEST_HEADER_H__
+#ifndef INCLUDE_RT_TEST_HEADER_H_
+#define INCLUDE_RT_TEST_HEADER_H_
 
-#include "rt_header.h"
-#include "rt_array_list.h"
+#include "rt_header.h" // NOLINT
+#include "rt_array_list.h" // NOLINT
 
 #define PRINT_TEST_BEGIN(index, total_index, content, ...) \
     do { \
@@ -31,7 +31,10 @@
 #define PRINT_TEST_END(index, total_index, content, result, ...) \
     do { \
         RT_LOGE("[%d/%d] %s [%s]\n", \
-                index + 1, total_index, content, result == RT_OK ? "succes" : "failed"); \
+                index + 1, \
+                total_index, \
+                content, \
+                result == RT_OK ? "succes" : "failed"); \
     } while (0)
 
 typedef RT_RET (*TestFunc)(INT32 index, INT32 total_index);
@@ -52,4 +55,4 @@ RT_RET          rt_tests_add(RtTestCtx *ctx, TestFunc func, char *name);
 RT_RET          rt_tests_run(RtTestCtx *ctx, RT_BOOL mem_dump);
 RT_RET          rt_tests_deinit(RtTestCtx **ctx);
 
-#endif
+#endif  // INCLUDE_RT_TEST_HEADER_H_

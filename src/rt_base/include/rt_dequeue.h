@@ -19,15 +19,15 @@
  *    ref: https://zhuanlan.zhihu.com/p/38176759
  */
 
-#ifndef __RT_DEQUEUE_H__
-#define __RT_DEQUEUE_H__
+#ifndef SRC_RT_BASE_INCLUDE_RT_DEQUEUE_H_
+#define SRC_RT_BASE_INCLUDE_RT_DEQUEUE_H_
 
 #define ENTRY_FLAG_USE   1
 #define ENTRY_FLAG_UNUSE 0
 
-#include "rt_header.h"
+#include "rt_header.h" // NOLINT
 
- typedef struct rt_deque_entry {
+typedef struct rt_deque_entry {
     void                   *data;
     struct rt_deque_entry  *prev;
     struct rt_deque_entry  *next;
@@ -48,7 +48,9 @@ void           deque_destory(RT_Deque **list);
 RT_DequeEntry* deque_entry_malloc(RT_Deque *list);
 RT_DequeEntry  deque_pop(RT_Deque *list);
 void*          deque_get(RT_Deque *list, int index);
-INT8           deque_push(RT_Deque *list, const void *data, RT_BOOL header=RT_FALSE);
+INT8           deque_push(RT_Deque *list,
+                              const void *data,
+                              RT_BOOL header = RT_FALSE);
 INT8           deque_push_tail(RT_Deque *list, const void *data);
 INT8           deque_push_head(RT_Deque *list, const void *data);
 
@@ -61,4 +63,4 @@ INT8           deque_push_head(RT_Deque *list, const void *data);
 #define deque_next(element) ((element)->next)
 #define deque_prev(element) ((element)->prev)
 
-#endif
+#endif  // SRC_RT_BASE_INCLUDE_RT_DEQUEUE_H_

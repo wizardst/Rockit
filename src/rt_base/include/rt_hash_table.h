@@ -17,10 +17,10 @@
  *   date: 20180903
  */
 
-#ifndef _RT_HASH_TABLE_H
-#define _RT_HASH_TABLE_H
+#ifndef SRC_RT_BASE_INCLUDE_RT_HASH_TABLE_H_
+#define SRC_RT_BASE_INCLUDE_RT_HASH_TABLE_H_
 
-#include "rt_header.h"
+#include "rt_header.h" // NOLINT
 
 struct RtHashTable;
 
@@ -36,14 +36,21 @@ UINT32 hash_string_func(UINT32 bucktes, const void *key);
 UINT32 hash_string_compare(const void *key1, const void *key2);
 
 // ! Operations for RT_HASH_TABLE
-struct RtHashTable *rt_hash_table_init(UINT32 num_buckets, rt_hash_func hash, rt_hash_comp_func compare);
+struct RtHashTable *rt_hash_table_init(UINT32 num_buckets,
+                                               rt_hash_func hash,
+                                               rt_hash_comp_func compare);
 void   rt_hash_table_destory(struct RtHashTable *hash);
-void   rt_hash_table_dump   (struct RtHashTable *hash);
-void   rt_hash_table_clear  (struct RtHashTable *hash);
-void  *rt_hash_table_find   (struct RtHashTable *hash, const void *key);
-void   rt_hash_table_insert (struct RtHashTable *hash, const void *key, void *data);
-bool   rt_hash_table_replace(struct RtHashTable *hash, const void *key, void *data);
-void   rt_hash_table_remove (struct RtHashTable *hash, const void *key);
+void   rt_hash_table_dump(struct RtHashTable *hash);
+void   rt_hash_table_clear(struct RtHashTable *hash);
+void  *rt_hash_table_find(struct RtHashTable *hash,
+                                 const void *key);
+void   rt_hash_table_insert(struct RtHashTable *hash,
+                                    const void *key,
+                                    void *data);
+bool   rt_hash_table_replace(struct RtHashTable *hash,
+                                      const void *key, void *data);
+void   rt_hash_table_remove(struct RtHashTable *hash,
+                                    const void *key);
 UINT32 rt_hash_table_string_hash(const void *key);
 
-#endif
+#endif  // SRC_RT_BASE_INCLUDE_RT_HASH_TABLE_H_

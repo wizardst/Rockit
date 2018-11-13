@@ -2,12 +2,12 @@
 
 out_file="./fmt_df.txt"
 cur_dir=$(pwd)
-script_dir=tools/
+script_dir=tools/ASytle
 
-echo "[git-hook]: before commit, format code use mpp_astyle.sh ..."
+echo "[git-hook]: before commit, format code use rt_astyle.sh ..."
 
 cd $script_dir
-./mpp_astyle.sh
+./rt_astyle.sh
 
 cd $cur_dir
 

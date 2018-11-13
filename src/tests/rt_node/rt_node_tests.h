@@ -17,14 +17,14 @@
  *   date: 2018/11/05
  */
 
-#ifndef __RT_NODE_TESTS_H__
-#define __RT_NODE_TESTS_H__
+#ifndef SRC_TESTS_RT_NODE_RT_NODE_TESTS_H_
+#define SRC_TESTS_RT_NODE_RT_NODE_TESTS_H_
 
-#include "rt_header.h"
-#include "rt_test_header.h"
+#include "rt_header.h" // NOLINT
+#include "rt_test_header.h" // NOLINT
 
-RT_RET     unit_test_node_basic(INT32 index, INT32 total);
-RT_RET       unit_test_node_bus(INT32 index, INT32 total);
+RT_RET unit_test_node_basic(INT32 index, INT32 total);
+RT_RET unit_test_node_bus(INT32 index, INT32 total);
 RT_RET unit_test_node_data_flow(INT32 index, INT32 total);
 
-#endif
+#endif  // SRC_TESTS_RT_NODE_RT_NODE_TESTS_H_

@@ -17,14 +17,13 @@
  *   date: 2018/07/19
  */
 
-#include "rt_time.h"
+#include "rt_time.h" // NOLINT
 #include <windows.h>
 #include <unistd.h>
 
 #ifdef OS_WINDOWS
 
-void RtTime::getDateTime(DateTime* dt)
-{
+void RtTime::getDateTime(DateTime* dt) {
     if (dt) {
         SYSTEMTIME      st;
         GetSystemTime(&st);
@@ -39,13 +38,11 @@ void RtTime::getDateTime(DateTime* dt)
     }
 }
 
-UINT64 RtTime::getNowTimeMs()
-{
+UINT64 RtTime::getNowTimeMs() {
     return getNowTimeUs()/1000;
 }
 
-UINT64 RtTime::getNowTimeUs()
-{
+UINT64 RtTime::getNowTimeUs() {
     LARGE_INTEGER curTime, freq;
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&curTime);

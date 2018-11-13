@@ -17,8 +17,8 @@
  *   Date: 2018/11/03
  *   Task: use ffmpeg as demuxer
  */
- 
-#ifndef __FF_NODE_DEMUXER_H__
-#define __FF_NODE_DEMUXER_H__
 
-#endif // __FF_NODE_DEMUXER_H__
+#ifndef SRC_RT_NODE_FF_NODE_FF_NODE_DEMUXER_H_
+#define SRC_RT_NODE_FF_NODE_FF_NODE_DEMUXER_H_
+
+#endif  // SRC_RT_NODE_FF_NODE_FF_NODE_DEMUXER_H_

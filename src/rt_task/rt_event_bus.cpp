@@ -17,4 +17,4 @@
  *   date: 20180719
  */
 
-#include "rt_event_bus.h"
+#include "rt_event_bus.h" //NOLINT

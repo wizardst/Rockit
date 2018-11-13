@@ -16,16 +16,15 @@
  *   date: 20180719
  */
 
-#define HAS_PTHREAD
 #ifdef  HAS_PTHREAD
 
 #include <pthread.h>
 
-#include "rt_thread.h"
-#include "rt_log.h"
-#include "rt_mem.h"
+#include "rt_thread.h" // NOLINT
+#include "rt_log.h" // NOLINT
+#include "rt_mem.h" // NOLINT
 
-typedef struct _rt_pthread_data{
+typedef struct _rt_pthread_data {
     pthread_t      fPThread;
     RT_BOOL        fValid;
     pthread_attr_t fAttr;
@@ -33,7 +32,7 @@ typedef struct _rt_pthread_data{
     RtThread::RTThreadProc fThreadProc;
 } RtThreadData;
 
- static void* thread_looping(void* arg) {
+static void* thread_looping(void* arg) {
     RtThreadData* thread_data = static_cast<RtThreadData*>(arg);
     // Call entry point only if thread was not canceled before starting.
     thread_data->fThreadProc(thread_data->fData);
@@ -43,7 +42,7 @@ typedef struct _rt_pthread_data{
 RtThread::RtThread(RTThreadProc entryPoint, void* data) {
     fData = RT_NULL;
     RtThreadData  *thread_data = rt_malloc(RtThreadData);
-    if(RT_NULL != thread_data) {
+    if (RT_NULL != thread_data) {
         thread_data->fThreadProc = entryPoint;
         thread_data->fData       = data;
         thread_data->fValid      = RT_FALSE;
@@ -63,7 +62,7 @@ RtThread::~RtThread() {
 }
 
 RT_BOOL RtThread::start() {
-    if(RT_NULL != fData) {
+    if (RT_NULL != fData) {
         RtThreadData* thread_data = static_cast<RtThreadData*>(fData);
         int err = pthread_create(&(thread_data->fPThread), RT_NULL,
                                  thread_looping, thread_data);
@@ -74,7 +73,7 @@ RT_BOOL RtThread::start() {
 }
 
 void RtThread::join() {
-    if(RT_NULL != fData) {
+    if (RT_NULL != fData) {
         RtThreadData* thread_data = static_cast<RtThreadData*>(fData);
         if (!thread_data->fValid) {
             return;

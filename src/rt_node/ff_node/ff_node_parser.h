@@ -18,10 +18,10 @@
  *   Task: use ffmpeg as demuxer and muxer
  */
 
-#ifndef __FF_NODE_PARSER__
-#define __FF_NODE_PARSER__
+#ifndef SRC_RT_NODE_FF_NODE_FF_NODE_PARSER_H_
+#define SRC_RT_NODE_FF_NODE_FF_NODE_PARSER_H_
 
-#include "rt_node.h"
+#include "rt_node.h" // NOLINT
 
 #ifdef  __cplusplus
 extern "C" {
@@ -40,4 +40,4 @@ extern RT_Node ff_node_parser;
 }
 #endif
 
-#endif // __FF_NODE_PARSER__
+#endif  // SRC_RT_NODE_FF_NODE_FF_NODE_PARSER_H_

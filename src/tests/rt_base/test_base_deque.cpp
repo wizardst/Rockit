@@ -17,11 +17,10 @@
  *   date: 20181031
  */
 
-#include "rt_base_tests.h"
-#include "rt_dequeue.h"
+#include "rt_base_tests.h" // NOLINT
+#include "rt_dequeue.h" // NOLINT
 
-RT_RET unit_test_deque_limit(int index, int total_index)
-{
+RT_RET unit_test_deque_limit(int index, int total_index) {
     RT_Deque *rt_deque = RT_NULL;
     int int_array[1002];
     rt_memset(int_array, 0, sizeof(int) * 1002);
@@ -51,7 +50,7 @@ RT_RET unit_test_deque_limit(int index, int total_index)
 
     for (int i = 0; i < 1000; i++) {
         if (i < 100) {
-            CHECK_EQ(*((int *)deque_get(rt_deque, i)), i);
+            CHECK_EQ(*(reinterpret_cast<int *>(deque_get(rt_deque, i))), i);
         } else {
             CHECK_EQ(deque_get(rt_deque, i), RT_NULL);
         }
@@ -63,7 +62,7 @@ RT_RET unit_test_deque_limit(int index, int total_index)
         if (i < 100) {
             entry = deque_pop(rt_deque);
             CHECK_UE(entry.data, RT_NULL);
-            CHECK_EQ(*((int *)(entry.data)), i);
+            CHECK_EQ(*(reinterpret_cast<int *>(entry.data)), i);
         } else {
             CHECK_EQ(deque_pop(rt_deque).data, RT_NULL);
         }
@@ -76,7 +75,6 @@ RT_RET unit_test_deque_limit(int index, int total_index)
         } else {
             CHECK_UE(deque_push_head(rt_deque, &int_array[i]), RT_OK);
         }
-
     }
     CHECK_EQ(deque_size(rt_deque), 100);
 
@@ -85,25 +83,23 @@ RT_RET unit_test_deque_limit(int index, int total_index)
         if (i < 100) {
             entry = deque_pop(rt_deque);
             CHECK_UE(entry.data, RT_NULL);
-            CHECK_EQ(*((int *)(entry.data)), 99 - i);
+            CHECK_EQ(*(reinterpret_cast<int *>(entry.data)), 99 - i);
         } else {
             CHECK_EQ(deque_pop(rt_deque).data, RT_NULL);
         }
-
     }
     CHECK_EQ(deque_size(rt_deque), 0);
 
     deque_destory(&rt_deque);
     CHECK_EQ(rt_deque, RT_NULL);
 
-__RET:
     return RT_OK;
+
 __FAILED:
     return RT_ERR_UNKNOWN;
 }
 
-RT_RET unit_test_deque_normal(int index, int total_index)
-{
+RT_RET unit_test_deque_normal(int index, int total_index) {
     RT_Deque *rt_deque = RT_NULL;
     int int_array[1002];
     rt_memset(int_array, 0, sizeof(int) * 1002);
@@ -125,7 +121,7 @@ RT_RET unit_test_deque_normal(int index, int total_index)
     */
 
     for (int i = 0; i < 1000; i++) {
-        CHECK_EQ(*((int *)deque_get(rt_deque, i)), i);
+        CHECK_EQ(*(reinterpret_cast<int *>(deque_get(rt_deque, i))), i);
     }
     CHECK_EQ(deque_size(rt_deque), 1000);
 
@@ -133,7 +129,7 @@ RT_RET unit_test_deque_normal(int index, int total_index)
         RT_DequeEntry entry;
         entry = deque_pop(rt_deque);
         CHECK_UE(entry.data, RT_NULL);
-        CHECK_EQ(*((int *)(entry.data)), i);
+        CHECK_EQ(*(reinterpret_cast<int *>(entry.data)), i);
     }
     CHECK_EQ(deque_size(rt_deque), 0);
 
@@ -147,7 +143,7 @@ RT_RET unit_test_deque_normal(int index, int total_index)
     */
 
     for (int i = 0; i < 1000; i++) {
-        CHECK_EQ(*((int *)deque_get(rt_deque, 999 - i)), i);
+        CHECK_EQ(*(reinterpret_cast<int *>(deque_get(rt_deque, 999 - i))), i);
     }
     CHECK_EQ(deque_size(rt_deque), 1000);
 
@@ -155,15 +151,15 @@ RT_RET unit_test_deque_normal(int index, int total_index)
         RT_DequeEntry entry;
         entry = deque_pop(rt_deque);
         CHECK_UE(entry.data, RT_NULL);
-        CHECK_EQ(*((int *)(entry.data)), 999 - i);
+        CHECK_EQ(*(reinterpret_cast<int *>(entry.data)), 999 - i);
     }
     CHECK_EQ(deque_size(rt_deque), 0);
 
     deque_destory(&rt_deque);
     CHECK_EQ(rt_deque, RT_NULL);
 
-__RET:
     return RT_OK;
+
 __FAILED:
     return RT_ERR_UNKNOWN;
 }

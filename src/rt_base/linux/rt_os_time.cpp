@@ -20,18 +20,16 @@
 #ifdef OS_LINUX
 #include <sys/time.h>
 #include <time.h>
-#include <unistd.h> 
+#include <unistd.h>
 
-#include "rt_time.h"
+#include "rt_time.h" // NOLINT
 
-void RtTime::getDateTime(DateTime* dt)
-{
-    if (dt)
-    {
+void RtTime::getDateTime(DateTime* dt) {
+    if (dt) {
         time_t m_time;
         time(&m_time);
         struct tm* tstruct;
-        tstruct = localtime(&m_time);
+        localtime_r(&m_time, tstruct);
 
         dt->mYear       = RtToU16(tstruct->tm_year);
         dt->mMonth      = RtToU8(tstruct->tm_mon + 1);
@@ -43,8 +41,7 @@ void RtTime::getDateTime(DateTime* dt)
     }
 }
 
-UINT64 RtTime::getNowTimeMs()
-{
+UINT64 RtTime::getNowTimeMs() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return (UINT64) (tv.tv_sec * 1000 + tv.tv_usec / 1000 );  /* milliseconds */

@@ -17,30 +17,24 @@
  *   date: 2018/11/05
  */
 
-#ifndef __TEST_TASK_THREAD_POOL_H__
-#define __TEST_TASK_THREAD_POOL_H__
-
 #ifdef LOG_TAG
 #undef LOG_TAG
 #endif
 #define LOG_TAG "test_taskpool"
 
-#include "rt_task.h"
-#include "rt_taskpool.h"
-#include "rt_task_tests.h"
-
-#include <unistd.h> /*rand and usleep*/
-//#include <windows.h>
+#include "rt_task.h" // NOLINT
+#include "rt_taskpool.h" // NOLINT
+#include "rt_task_tests.h" // NOLINT
 
 class UnitTestTask : public RtTask {
-public:
-     UnitTestTask(UINT32 idx){
+ public:
+     explicit UnitTestTask(UINT32 idx) {
          mPriority = TASK_PRIOTRY_FIFO;
          mID       = idx;
          // RT_LOGT("Task(%p,Id=%d) ++++Constructor", this, mID);
      }
 
-     ~UnitTestTask( ){
+     ~UnitTestTask() {
          // RT_LOGT("Task(%p,Id=%d) ----Destructor", this, mID);
      }
 
@@ -53,7 +47,7 @@ public:
      }
 
      virtual char* get_name() {
-         return (char*)"Task: UnitTestTask";
+         return const_cast<char*>("Task: UnitTestTask");
      }
 
      virtual bool shouldSkip() const {return false;}
@@ -67,9 +61,12 @@ UINT8 unit_test_task() {
     return RT_OK;
 }
 
-UINT8 unit_test_taskpool_inner(UINT32 max_thread, UINT32 max_task, UINT32 num_task) {
+UINT8 unit_test_taskpool_inner(
+        UINT32 max_thread,
+        UINT32 max_task,
+        UINT32 num_task) {
     RtTaskPool* taskpool = rt_taskpool_init(max_thread, max_task);
-    for(UINT32 idx = 0; idx < num_task; idx++) {
+    for (UINT32 idx = 0; idx < num_task; idx++) {
         rt_taskpool_push_tail(taskpool, new UnitTestTask(idx+1));
     }
     RT_LOGE("------rt_taskpool_wait-------");
@@ -84,4 +81,3 @@ RT_RET  unit_test_taskpool(INT32 index, INT32 total) {
     return RT_OK;
 }
 
-#endif // __TEST_TASK_THREAD_POOL_H__

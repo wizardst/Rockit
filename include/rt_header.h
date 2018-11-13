@@ -17,17 +17,17 @@
  *   date: 20180704
  */
 
-#ifndef INCLUDES_H_INCLUDED
-#define INCLUDES_H_INCLUDED
+#ifndef INCLUDE_RT_HEADER_H_
+#define INCLUDE_RT_HEADER_H_
 
-#include "rt_error.h"
-#include "rt_type.h"
-#include "rt_node.h"
-#include "rt_debug.h"
-#include "rt_log.h"
-#include "rt_time.h"
-#include "rt_mem.h"
-#include "rt_mutex.h"
-#include "rt_check.h"
+#include "rt_error.h" // NOLINT
+#include "rt_type.h" // NOLINT
+#include "rt_node.h" // NOLINT
+#include "rt_debug.h" // NOLINT
+#include "rt_log.h" // NOLINT
+#include "rt_time.h" // NOLINT
+#include "rt_mem.h" // NOLINT
+#include "rt_mutex.h" // NOLINT
+#include "rt_check.h" // NOLINT
 
-#endif // INCLUDES_H_INCLUDED
+#endif  // INCLUDE_RT_HEADER_H_

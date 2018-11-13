@@ -18,7 +18,7 @@
  *   Task: use ffmpeg as filters
  */
 
-#ifndef __FF_NODE_MUXER_H__
-#define __FF_NODE_MUXER_H__
+#ifndef SRC_RT_NODE_FF_NODE_FF_NODE_FILTER_H_
+#define SRC_RT_NODE_FF_NODE_FF_NODE_FILTER_H_
 
-#endif // __FF_NODE_DEMUXER_H__
+#endif  // SRC_RT_NODE_FF_NODE_FF_NODE_FILTER_H_

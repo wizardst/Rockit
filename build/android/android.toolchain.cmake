@@ -186,9 +186,6 @@
 
 cmake_minimum_required( VERSION 2.8.8 )
 
-set(MPP_PROJECT_NAME mpp)
-set(VPU_PROJECT_NAME vpu)
-
 if( DEFINED CMAKE_CROSSCOMPILING )
  # subsequent toolchain loading is not really needed
  return()

@@ -18,13 +18,12 @@
 ```
 # Check Code Styles with cpplint(!Recommended)
 $ cd Rockit
-$ git clone https://github.com/google/styleguide
-$ ./styleguide/cpplint/cpplint.py ./src/rt_base/*
+$ ./tools/cpplint/check_style.sh
 
 # Check Code Styles with astyle(!NOT Recommended)
-$ cd Rockit/tools
+$ cd Rockit/tools/AStyle
 $ chmod 777 astyle
-$ ./tools/mpp_astyle.sh
+$ ./tools/rt_astyle.sh
 ```
 
 ## 4 Samples

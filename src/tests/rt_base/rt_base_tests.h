@@ -17,24 +17,23 @@
  *   date: 20181102
  */
 
-#ifndef __RT_BASE_TESTS_H__
-#define __RT_BASE_TESTS_H__
+#ifndef SRC_TESTS_RT_BASE_RT_BASE_TESTS_H_
+#define SRC_TESTS_RT_BASE_RT_BASE_TESTS_H_
 
-#include "rt_header.h"
-#include "rt_test_header.h"
+#include "rt_header.h" // NOLINT
+#include "rt_test_header.h" // NOLINT
 
-RT_RET   unit_test_hash_table(INT32 index, INT32 total_index);
-RT_RET   unit_test_array_list(INT32 index, INT32 total_index);
-RT_RET  unit_test_linked_list(INT32 index, INT32 total_index);
-RT_RET  unit_test_deque_limit(INT32 index, INT32 total_index);
+RT_RET unit_test_hash_table(INT32 index, INT32 total_index);
+RT_RET unit_test_array_list(INT32 index, INT32 total_index);
+RT_RET unit_test_linked_list(INT32 index, INT32 total_index);
+RT_RET unit_test_deque_limit(INT32 index, INT32 total_index);
 RT_RET unit_test_deque_normal(INT32 index, INT32 total_index);
 
-RT_RET       unit_test_memory(INT32 index, INT32 total_index);
-RT_RET  unit_test_mem_service(INT32 index, INT32 total_index);
-RT_RET        unit_test_mutex(INT32 index, INT32 total_index);
-RT_RET       unit_test_thread(INT32 index, INT32 total_index);
-RT_RET  unit_test_lock_unlock(INT32 index, INT32 total_index);
-RT_RET    unit_test_cond_lock(INT32 index, INT32 total_index);
+RT_RET unit_test_memory(INT32 index, INT32 total_index);
+RT_RET unit_test_mem_service(INT32 index, INT32 total_index);
+RT_RET unit_test_mutex(INT32 index, INT32 total_index);
+RT_RET unit_test_thread(INT32 index, INT32 total_index);
+RT_RET unit_test_lock_unlock(INT32 index, INT32 total_index);
+RT_RET unit_test_cond_lock(INT32 index, INT32 total_index);
 
-
-#endif
+#endif  // SRC_TESTS_RT_BASE_RT_BASE_TESTS_H_

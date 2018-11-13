@@ -17,12 +17,12 @@
  *   date: 2018/11/05
  */
 
-#ifndef __RT_TASK_TESTS_H__
-#define __RT_TASK_TESTS_H__
+#ifndef SRC_TESTS_RT_TASK_RT_TASK_TESTS_H_
+#define SRC_TESTS_RT_TASK_RT_TASK_TESTS_H_
 
-#include "rt_header.h"
-#include "rt_test_header.h"
+#include "rt_header.h" // NOLINT
+#include "rt_test_header.h" // NOLINT
 
 RT_RET  unit_test_taskpool(INT32 index, INT32 total);
 
-#endif
+#endif  // SRC_TESTS_RT_TASK_RT_TASK_TESTS_H_

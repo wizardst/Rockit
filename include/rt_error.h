@@ -17,10 +17,10 @@
  *   date: 20180704
  */
 
-#ifndef __RT_ERROR_H__
-#define __RT_ERROR_H__
+#ifndef INCLUDE_RT_ERROR_H_
+#define INCLUDE_RT_ERROR_H_
 
-typedef enum _RT_RET{
+typedef enum _RT_RET {
     RT_OK                      = 0,
 
     RT_ERR_BAD                 = -1,
@@ -42,4 +42,4 @@ typedef enum _RT_RET{
     RT_ERR_OUTOF_RANGE         = RT_ERR_BASE - 4,
 } RT_RET;
 
-#endif // __RT_ERROR_H__
+#endif  // INCLUDE_RT_ERROR_H_

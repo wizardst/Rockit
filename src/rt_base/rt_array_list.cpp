@@ -17,9 +17,9 @@
  *   date: 20181102
  */
 
-#include "include/rt_array_list.h"
-#include "rt_error.h"
-#include "rt_mem.h"
+#include "include/rt_array_list.h" // NOLINT
+#include "rt_error.h" // NOLINT
+#include "rt_mem.h" // NOLINT
 
 #define INITIAL_CAPACITY 16
 

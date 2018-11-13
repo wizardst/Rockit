@@ -17,16 +17,10 @@
  *   date: 2018/11/05
  */
 
-#ifndef __RT_NODE_BUS_H__
-#define __RT_NODE_BUS_H__
+#include "rt_node.h" // NOLINT
+#include "rt_node_tests.h" // NOLINT
 
-#include "rt_node.h"
-#include "rt_node_tests.h"
-
-RT_RET unit_test_node_data_flow(INT32 index, INT32 total)
-{
+RT_RET unit_test_node_data_flow(INT32 index, INT32 total) {
     return RT_OK;
 }
-
-#endif /*__RT_NODE_BUS_H__*/
 

@@ -18,15 +18,15 @@
  *   Task: stable api for media node
  */
 
-#include "rt_header.h"
+#include "rt_header.h" // NOLINT
 
 #ifdef LOG_TAG
 #undef LOG_TAG
 #endif
 #define LOG_TAG "RT_Node"
 
-INT8 check_err(const RT_Node *node, INT8 err, const char* func_name){
-    if(RT_OK != err) {
+INT8 check_err(const RT_Node *node, INT8 err, const char* func_name) {
+    if (RT_OK != err) {
         RT_LOGE("RTNode(Name=%15.15s, ctx=%p):  errno=%02d, Fail to %s",
                 node->name, node->node_ctx, err, func_name);
     }

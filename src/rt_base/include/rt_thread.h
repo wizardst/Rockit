@@ -17,21 +17,21 @@
  *   date: 20180719
  */
 
-#include "rt_header.h"
+#include "rt_header.h" // NOLINT
 
-#ifndef __RT_THREAD_H__
-#define __RT_THREAD_H__
+#ifndef SRC_RT_BASE_INCLUDE_RT_THREAD_H_
+#define SRC_RT_BASE_INCLUDE_RT_THREAD_H_
 
 struct RtRunnable {
-    virtual ~RtRunnable() {};
+    virtual ~RtRunnable() {}
     virtual void run(void* args) = 0;
 };
 
 class RtThread  {
-public:
+ public:
     typedef void* (*RTThreadProc)(void*);
 
-    RtThread(RTThreadProc entryPoint, void* data = NULL);
+    explicit RtThread(RTThreadProc entryPoint, void* data = NULL);
 
     /**
      * Non-virtual, do not subclass.
@@ -49,10 +49,12 @@ public:
      */
     void join();
     int mIndex;
-public:
+
+ public:
     static INT32 get_tid();
-private:
+
+ private:
     void* fData;
 };
 
-#endif // __RT_THREAD_H__
+#endif  // SRC_RT_BASE_INCLUDE_RT_THREAD_H_

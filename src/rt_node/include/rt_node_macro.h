@@ -17,22 +17,21 @@
  *   date: 20180802
  */
 
-#ifndef __RT_NODE_MACRO_H__
-#define __RT_NODE_MACRO_H__
+#ifndef SRC_RT_NODE_INCLUDE_RT_NODE_MACRO_H_
+#define SRC_RT_NODE_INCLUDE_RT_NODE_MACRO_H_
 
 /**
  * \file
  * This file implements node (module) macros used to define a rt_node.
  */
 
-enum rt_node_properties
-{
+enum rt_node_properties {
     RT_NODE_CREATE,
     RT_CONFIG_CREATE,
 
     /* DO NOT EVER REMOVE, INSERT OR REPLACE ANY ITEM! It would break the ABI!
      * Append new items at the end ONLY. */
-    RT_NODE_CPU_REQUIREMENT=0x100,
+    RT_NODE_CPU_REQUIREMENT = 0x100,
     RT_NODE_SHORTCUT,
     RT_NODE_CAPABILITY,
     RT_NODE_SCORE,
@@ -48,7 +47,7 @@ enum rt_node_properties
 
     /* DO NOT EVER REMOVE, INSERT OR REPLACE ANY ITEM! It would break the ABI!
      * Append new items at the end ONLY. */
-    RT_CONFIG_NAME=0x1000,
+    RT_CONFIG_NAME = 0x1000,
     /* command line name (args=const char *) */
 
     RT_CONFIG_VALUE,
@@ -183,7 +182,7 @@ enum rt_node_properties
 /**
  * Current plugin ABI version
  */
-# define MODULE_SYMBOL 4_0_3
-# define MODULE_SUFFIX "__4_0_3"
+#define MODULE_SYMBOL 4_0_3
+#define MODULE_SUFFIX "__4_0_3"
 
-#endif // __RT_NODE_MACRO_H__
+#endif  // SRC_RT_NODE_INCLUDE_RT_NODE_MACRO_H_

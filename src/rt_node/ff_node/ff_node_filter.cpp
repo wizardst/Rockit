@@ -22,3 +22,5 @@
 #undef LOG_TAG
 #endif
 #define LOG_TAG "FFNodeFilter"
+
+#include "ff_node_filter.h" // NOLINT
