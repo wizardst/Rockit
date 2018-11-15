@@ -14,6 +14,7 @@
 ## 3 代码风格指南
 
 - [Style guides for Google-originated open-source projects](https://github.com/google/styleguide)
+- [Rockit项目C/C++代码风格规范](./cn/v31-code-style-standards.md)
 
 ```
 # 使用cpplint检查代码风格(!强烈推荐)
