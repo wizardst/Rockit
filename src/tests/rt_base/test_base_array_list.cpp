@@ -114,7 +114,7 @@ RT_RET unit_test_array_list(INT32 index, INT32 total_index) {
     CHECK_EQ(array_list_get_size(rt_list), 0);
     CHECK_EQ(array_list_get_data(rt_list, 0), RT_NULL);
 
-    array_list_destroy(&rt_list);
+    array_list_destroy(rt_list);
 
     CHECK_EQ(rt_list, RT_NULL);
 

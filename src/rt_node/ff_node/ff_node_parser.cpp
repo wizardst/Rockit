@@ -67,7 +67,7 @@ INT8 node_ff_parser_run_cmd(void* ctx, RT_NODE_CMD cmd,
 }
 
 RT_Node ff_node_parser = {
-    .type         = NODE_TYPE_DEMUXER,
+    .type         = RT_NODE_TYPE_DEMUXER,
     .name         = "ff_demuxer",
     .version      = "v1.0",
     .node_ctx     = RT_NULL,

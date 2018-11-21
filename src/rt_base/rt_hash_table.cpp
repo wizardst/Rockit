@@ -28,12 +28,10 @@
 #include "rt_hash_table.h" // NOLINT
 #include "rt_mem.h" // NOLINT
 
-struct rt_hash_node {
-    struct rt_hash_node *next;
-    struct rt_hash_node *prev;
-    const void  *key;
-    void        *data;
-};
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "rt_hash_table"
 
 struct RtHashTable {
     rt_hash_func      hash;
@@ -43,7 +41,7 @@ struct RtHashTable {
     struct rt_hash_node buckets[1];
 };
 
-struct RtHashTable *rt_hash_table_init(UINT32 num_buckets,
+struct RtHashTable *rt_hash_table_create(UINT32 num_buckets,
                                 rt_hash_func hash, rt_hash_comp_func compare) {
     struct RtHashTable *ht;
     unsigned i;
@@ -72,7 +70,7 @@ struct RtHashTable *rt_hash_table_init(UINT32 num_buckets,
 
 void rt_hash_table_destory(struct RtHashTable *ht) {
     rt_hash_table_clear(ht);
-    rt_free(ht);
+    rt_safe_free(ht);
 }
 
 #define foreach_list(ptr, list)     \
@@ -96,10 +94,12 @@ do {                        \
 
 
 void rt_hash_table_clear(struct RtHashTable *ht) {
-    struct rt_hash_node *node;
+    struct rt_hash_node *node, *next, *list;
 
     for (UINT32 i = 0; i < ht->num_buckets; i++) {
-        foreach_list(node, & ht->buckets[i]) {
+        list = & ht->buckets[i];
+        for (node = (list)->next; node != list; node = next) {
+            next = (node)->next;
             remove_from_list(node);
             rt_free(node);
         }
@@ -182,11 +182,22 @@ bool rt_hash_table_replace(
 
 void rt_hash_table_remove(struct RtHashTable *ht, const void *key) {
     struct rt_hash_node *node = (struct rt_hash_node *) get_node(ht, key);
-    if (node != NULL) {
+    if (RT_NULL != node) {
         remove_from_list(node);
         rt_free(node);
         return;
     }
+}
+
+UINT32 rt_hash_table_get_num_buckets(struct RtHashTable *hash) {
+    return hash->num_buckets;
+}
+
+struct rt_hash_node* rt_hash_table_get_bucket(struct RtHashTable *hash, UINT32 idx) {
+    if (idx < hash->num_buckets) {
+        return & hash->buckets[idx];
+    }
+    return RT_NULL;
 }
 
 UINT32 hash_string_func(const void *key) {

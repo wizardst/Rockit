@@ -125,7 +125,7 @@ RT_RET rt_tests_deinit(RtTestCtx **ctx) {
     CHECK_IS_NULL(ctx);
     CHECK_IS_NULL(*ctx);
 
-    array_list_destroy(&((*ctx)->list));
+    array_list_destroy((*ctx)->list);
 
 __RET:
     rt_free(*ctx);

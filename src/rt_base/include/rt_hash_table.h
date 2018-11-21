@@ -24,6 +24,13 @@
 
 struct RtHashTable;
 
+struct rt_hash_node {
+    struct rt_hash_node *next;
+    struct rt_hash_node *prev;
+    const void  *key;
+    void        *data;
+};
+
 // ! Callbacks for RT_HASH_TABLE
 typedef UINT32 (*rt_hash_func)(UINT32 num_buckets, const void *key);
 typedef UINT32 (*rt_hash_comp_func)(const void *key1, const void *key2);
@@ -36,7 +43,7 @@ UINT32 hash_string_func(UINT32 bucktes, const void *key);
 UINT32 hash_string_compare(const void *key1, const void *key2);
 
 // ! Operations for RT_HASH_TABLE
-struct RtHashTable *rt_hash_table_init(UINT32 num_buckets,
+struct RtHashTable *rt_hash_table_create(UINT32 num_buckets,
                                                rt_hash_func hash,
                                                rt_hash_comp_func compare);
 void   rt_hash_table_destory(struct RtHashTable *hash);
@@ -51,6 +58,8 @@ bool   rt_hash_table_replace(struct RtHashTable *hash,
                                       const void *key, void *data);
 void   rt_hash_table_remove(struct RtHashTable *hash,
                                     const void *key);
+UINT32 rt_hash_table_get_num_buckets(struct RtHashTable *hash);
+struct rt_hash_node* rt_hash_table_get_bucket(struct RtHashTable *hash, UINT32 idx);
 UINT32 rt_hash_table_string_hash(const void *key);
 
 #endif  // SRC_RT_BASE_INCLUDE_RT_HASH_TABLE_H_

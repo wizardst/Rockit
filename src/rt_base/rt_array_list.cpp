@@ -23,6 +23,11 @@
 
 #define INITIAL_CAPACITY 16
 
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "rt_array_list"
+
 RtArrayList* array_list_create() {
     return array_list_create_with_capacity(INITIAL_CAPACITY);
 }
@@ -172,10 +177,9 @@ INT8 array_list_set(RtArrayList* self, UINT32 index, void* element) {
     return RT_ERR_OUTOF_RANGE;
 }
 
-INT8 array_list_destroy(RtArrayList **self) {
-    rt_free((*self)->entries);
-    (*self)->entries = RT_NULL;
-    rt_free(*self);
-    *self = RT_NULL;
+INT8 array_list_destroy(RtArrayList *self) {
+    rt_free(self->entries);
+    self->entries = RT_NULL;
+    rt_safe_free(self);
     return RT_OK;
 }

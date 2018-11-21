@@ -24,9 +24,12 @@
 
 RT_RET unit_test_best_practice() {
     rt_mem_record_reset();
-    unit_test_memory(0, 0);
-    unit_test_mem_service(0, 0);
+
+    /* your unit test */
+    unit_test_node_bus(0, 0);
+
     rt_mem_record_dump();
+    return RT_OK;
 }
 
 int main(int argc, char **argv) {

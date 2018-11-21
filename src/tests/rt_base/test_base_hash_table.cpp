@@ -29,19 +29,21 @@ typedef struct _fake_hash_node {
     UINT32 value;
 } fake_hash_node;
 
+#define MAX_NUM_NODE 1000
+
 RT_RET unit_test_hash_table(INT32 index, INT32 total_index) {
     // ! Fake 1000 hash nodes
-    fake_hash_node test_nodes[1000];
-    rt_memset(test_nodes, 0, sizeof(fake_hash_node) * 1000);
-    for (INT32 i = 0; i < 1000; i++) {
+    fake_hash_node test_nodes[MAX_NUM_NODE];
+    rt_memset(test_nodes, 0, sizeof(fake_hash_node) * MAX_NUM_NODE);
+    for (INT32 i = 0; i < MAX_NUM_NODE; i++) {
         test_nodes[i].key = i;
-        test_nodes[i].value = 1000 - i;
+        test_nodes[i].value = MAX_NUM_NODE - i;
     }
 
-    RtHashTable *hash = rt_hash_table_init(100, hash_ptr_func, hash_ptr_compare);
-    INT32 num_nodes = sizeof(test_nodes) / sizeof(test_nodes[0]);
+    RtHashTable *hash = rt_hash_table_create(20, hash_ptr_func, hash_ptr_compare);
+    UINT32 num_nodes = sizeof(test_nodes) / sizeof(test_nodes[0]);
     RT_LOGE("num_nodes = %d", num_nodes);
-    for (INT32 i = 0; i < num_nodes; i++) {
+    for (UINT32 i = 0; i < num_nodes; i++) {
         rt_hash_table_insert(hash,
                             reinterpret_cast<void*>(test_nodes[i].key),
                             reinterpret_cast<void*>(&test_nodes[i]));
@@ -50,22 +52,23 @@ RT_RET unit_test_hash_table(INT32 index, INT32 total_index) {
     // rt_hash_table_dump(hash);
 
     fake_hash_node *hn = NULL;
-    for (INT32 i = 0; i < num_nodes; i++) {
+    for (UINT32 i = 0; i < num_nodes; i++) {
         hn = reinterpret_cast<fake_hash_node*>(
                  rt_hash_table_find(hash, reinterpret_cast<void*>(test_nodes[i].key)));
         #if 0
         RT_ASSERT(RT_NULL != st);
-        RT_ASSERT(st->value == (1000-i));
+        RT_ASSERT(st->value == (MAX_NUM_NODE-i));
         #else
         CHECK_UE(hn, RT_NULL);
-        CHECK_EQ(hn->value, (1000-i));
+        CHECK_EQ(hn->value, (MAX_NUM_NODE-i));
         #endif
     }
-    for (INT32 i = 0; i < num_nodes; i++) {
+
+    for (UINT32 i = 0; i < num_nodes; i++) {
         rt_hash_table_remove(hash, reinterpret_cast<void*>(test_nodes[i].key));
     }
 
-    for (INT32 i = 0; i < num_nodes; i++) {
+    for (UINT32 i = 0; i < num_nodes; i++) {
         fake_hash_node* hn = reinterpret_cast<fake_hash_node*>(
                 rt_hash_table_find(hash, reinterpret_cast<void*>(test_nodes[i].key)));
         #if 0

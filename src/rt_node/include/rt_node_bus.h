@@ -25,20 +25,17 @@
 #include "rt_hash_table.h" // NOLINT
 #include "rt_array_list.h" // NOLINT
 
-typedef struct node_bus_context {
-    RtArrayList *node_bus;
-    RtHashTable *node_all;
-} NodeBusContext;
+struct NodeBusContext;
 
 // ! life cycles of node_bus
-INT32       rt_node_bus_build(NodeBusContext* ctx);
-INT32        rt_node_bus_init(NodeBusContext* ctx);
-INT32     rt_node_bus_release(NodeBusContext* ctx);
-INT32     rt_node_bus_summary(NodeBusContext* ctx, RT_BOOL full);
+struct NodeBusContext* rt_node_bus_create();
+INT32     rt_node_bus_destory(struct NodeBusContext* bus);
+INT32       rt_node_bus_build(struct NodeBusContext* bus);
+INT32     rt_node_bus_summary(struct NodeBusContext* bus, RT_BOOL full);
 
 // ! node operations of node_bus
-INT32    rt_node_register_all(NodeBusContext* ctx);
-INT32        rt_node_register(NodeBusContext* ctx, RT_Node *node);
-RT_Node*         rt_node_find(NodeBusContext* ctx, UINT8 node_type, UINT8 node_id);
+INT32  rt_node_bus_register_all(struct NodeBusContext* bus);
+INT32      rt_node_bus_register(struct NodeBusContext* bus, RT_Node *node);
+RT_Node*       rt_node_bus_find(struct NodeBusContext* bus, RT_NODE_TYPE node_type, UINT8 node_id);
 
 #endif  // SRC_RT_NODE_INCLUDE_RT_NODE_BUS_H_

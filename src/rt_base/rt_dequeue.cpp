@@ -21,6 +21,11 @@
 #include "rt_header.h" // NOLINT
 #include "rt_mem.h" // NOLINT
 
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "rt_dequeue"
+
 RT_Deque* deque_create() {
     RT_Deque* list = rt_malloc(RT_Deque);
     if (RT_NULL != list) {

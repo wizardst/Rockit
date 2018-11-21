@@ -34,71 +34,12 @@
 #define SRC_RT_NODE_INCLUDE_RT_NODE_H_
 
 #include "rt_header.h" // NOLINT
+#include "rt_node_define.h" // NOLINT
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum _RT_NODE_TYPE {
-    // ! basic nodes
-    NODE_TYPE_BASE      = 2000,
-    NODE_TYPE_EXTRACTOR,
-    NODE_TYPE_DEMUXER,
-    NODE_TYPE_MUXER,
-    NODE_TYPE_DECODER,
-    NODE_TYPE_ENCODER,
-    NODE_TYPE_FILTER,
-    NODE_TYPE_RENDER,
-    NODE_TYPE_DEVICE,
-
-    // !
-    NODE_TYPE_MAX,
-} RT_NODE_TYPE;
-
-typedef struct rt_node_type_entry_t {
-    UINT32      type;
-    const char *name;
-} rt_node_type_entry;
-
-static const rt_node_type_entry node_type_entries[] = {
-    { NODE_TYPE_EXTRACTOR, "Media Extractor" },
-    { NODE_TYPE_DEMUXER,   "  Media Demuxer" },
-    { NODE_TYPE_MUXER,     "    Media Muxer" },
-    { NODE_TYPE_DECODER,   "  Media Decoder" },
-    { NODE_TYPE_ENCODER,   "  Media Encoder" },
-    { NODE_TYPE_FILTER,    "   Media Filter" },
-    { NODE_TYPE_RENDER,    "   Media Render" },
-    { NODE_TYPE_DEVICE,    "   Media Device" },
-};
-
-typedef enum _RT_NODE_CMD {
-    RT_NODE_CMD_BASE  = 400,
-    RT_NODE_CMD_INIT,
-    RT_NODE_CMD_PREPARE,
-    RT_NODE_CMD_START,
-    RT_NODE_CMD_STOP,
-    RT_NODE_CMD_CAPS_CHANGE,
-    RT_NODE_CMD_SEEK,
-    RT_NODE_CMD_RESET,
-    RT_NODE_CMD_REINIT,
-    RT_NODE_CMD_NAVIGATION,
-    RT_NODE_CMD_DRAIN,
-
-    // QOS and debug cmd
-    RT_NODE_CMD_LATENCY,
-    RT_NODE_CMD_STAT,
-    RT_NODE_CMD_QOS,
-    RT_NODE_CMD_DUMP,
-} RT_NODE_CMD;
-
-typedef enum _RT_NODE_MSG {
-    RT_NODE_MSG_BASE = 500,
-    RT_NODE_MSG_CAPS,
-    RT_NODE_MSG_SEGMENT,
-    RT_NODE_MSG_BUFFERSIZE,
-    RT_NODE_MSG_EOS,
-    RT_NODE_MSG_SINK,
-} RT_NODE_MSG;
 
 #define RT_NODE_CONTEXT void*
 
@@ -111,7 +52,7 @@ typedef struct _RT_Node {
     INT8 run_cmd(RT_NODE_CMD cmd, UINT32 data_int, void* data_void);
 
     // private
-    const INT32 type;
+    const RT_NODE_TYPE type;
     const char* name;
     const char* version;
     void* node_ctx;

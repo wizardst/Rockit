@@ -21,6 +21,11 @@
 #include "rt_error.h" // NOLINT
 #include "rt_mem.h" // NOLINT
 
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "rt_link_list"
+
 RtLinkedList* linked_list_create() {
     RtLinkedList* alist = rt_malloc(RtLinkedList);
     RT_ASSERT(RT_NULL != alist);

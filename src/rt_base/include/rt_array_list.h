@@ -50,6 +50,6 @@ RtArrayListEntry*   array_list_get_entry(RtArrayList* self, size_t index);
 INT8                array_list_set(RtArrayList* self,
                                          size_t index,
                                          void* element);
-INT8                array_list_destroy(RtArrayList **self);
+INT8                array_list_destroy(RtArrayList *self);
 
 #endif  // SRC_RT_BASE_INCLUDE_RT_ARRAY_LIST_H_

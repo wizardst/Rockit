@@ -4,6 +4,7 @@ set(RT_NODE_SRC
     rt_node.cpp
     rt_node_bus.cpp
     rt_node_parser.cpp
+    rt_node_define.cpp
     ff_node/ff_node_parser.cpp
 )
 

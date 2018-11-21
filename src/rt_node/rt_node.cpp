@@ -25,6 +25,10 @@
 #endif
 #define LOG_TAG "RT_Node"
 
+#define DEBUG_NODE_CMD   1
+#define DEBUG_NODE_MSG   1
+#define DEBUG_NODE_EVENT 1
+
 INT8 check_err(const RT_Node *node, INT8 err, const char* func_name) {
     if (RT_OK != err) {
         RT_LOGE("RTNode(Name=%15.15s, ctx=%p):  errno=%02d, Fail to %s",
@@ -68,6 +72,11 @@ INT8 RT_Node::push(void *data, UINT32 *size) {
 INT8 RT_Node::run_cmd(RT_NODE_CMD cmd, UINT32 data_int, void* data_void) {
     INT32 err = RT_OK;
     err = impl_run_cmd(node_ctx, cmd, data_int, data_void);
+    #if DEBUG_NODE_CMD
+    RT_LOGE("node: %-10s exec cmd:%-10s",
+                  rt_node_type_name(this->type),
+                  rt_node_cmd_name(cmd));
+    #endif
 
     return CHECK_ERR(err);
 }
