@@ -6,5 +6,8 @@ build/CodeBlock/Rockit.layout
 build/CodeBlock/bin
 build/CodeBlock/obj
 
-#Ignore cmake cache
+# Ignore cmake cache
 build/android/
+
+# Ignore ffpeg
+third-party/ffmpeg-dev
