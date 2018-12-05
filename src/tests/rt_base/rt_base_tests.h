@@ -28,6 +28,7 @@ RT_RET unit_test_array_list(INT32 index, INT32 total_index);
 RT_RET unit_test_linked_list(INT32 index, INT32 total_index);
 RT_RET unit_test_deque_limit(INT32 index, INT32 total_index);
 RT_RET unit_test_deque_normal(INT32 index, INT32 total_index);
+RT_RET unit_test_metadata(INT32 index, INT32 total_index);
 
 RT_RET unit_test_memory(INT32 index, INT32 total_index);
 RT_RET unit_test_mem_service(INT32 index, INT32 total_index);

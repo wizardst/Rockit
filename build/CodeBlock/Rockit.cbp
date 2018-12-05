@@ -73,8 +73,10 @@
 		<Unit filename="../../src/rt_base/rt_log.cpp" />
 		<Unit filename="../../src/rt_base/rt_mem.cpp" />
 		<Unit filename="../../src/rt_base/rt_mem_service.cpp" />
+		<Unit filename="../../src/rt_base/rt_metadata.cpp" />
 		<Unit filename="../../src/rt_base/rt_os_log.h" />
 		<Unit filename="../../src/rt_base/rt_os_mem.h" />
+		<Unit filename="../../src/rt_base/rt_string_utils.cpp" />
 		<Unit filename="../../src/rt_base/windows/rt_os_cpu_info.cpp" />
 		<Unit filename="../../src/rt_base/windows/rt_os_log.cpp" />
 		<Unit filename="../../src/rt_base/windows/rt_os_mem.cpp" />
@@ -116,6 +118,7 @@
 		<Unit filename="../../src/tests/rt_base/test_base_hash_table.cpp" />
 		<Unit filename="../../src/tests/rt_base/test_base_linked_list.cpp" />
 		<Unit filename="../../src/tests/rt_base/test_base_memory.cpp" />
+		<Unit filename="../../src/tests/rt_base/test_base_meta_data.cpp" />
 		<Unit filename="../../src/tests/rt_base/test_base_mutex_thread.cpp" />
 		<Unit filename="../../src/tests/rt_node/rt_node_tests.h" />
 		<Unit filename="../../src/tests/rt_node/test_node_basic.cpp" />

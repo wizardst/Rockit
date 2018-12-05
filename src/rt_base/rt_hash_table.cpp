@@ -68,8 +68,8 @@ struct RtHashTable *rt_hash_table_create(UINT32 num_buckets,
     return ht;
 }
 
-void rt_hash_table_destory(struct RtHashTable *ht) {
-    rt_hash_table_clear(ht);
+void rt_hash_table_destory(struct RtHashTable *ht, RT_BOOL free_data) {
+    rt_hash_table_clear(ht, free_data);
     rt_safe_free(ht);
 }
 
@@ -93,7 +93,7 @@ do {                        \
 }while (0)
 
 
-void rt_hash_table_clear(struct RtHashTable *ht) {
+void rt_hash_table_clear(struct RtHashTable *ht, RT_BOOL free_data) {
     struct rt_hash_node *node, *next, *list;
 
     for (UINT32 i = 0; i < ht->num_buckets; i++) {
@@ -101,6 +101,9 @@ void rt_hash_table_clear(struct RtHashTable *ht) {
         for (node = (list)->next; node != list; node = next) {
             next = (node)->next;
             remove_from_list(node);
+            if (free_data && NULL != node->data) {
+                rt_free(node->data);
+            }
             rt_free(node);
         }
 
@@ -160,7 +163,7 @@ void rt_hash_table_insert(
     insert_at_head(& ht->buckets[bucket], node);
 }
 
-bool rt_hash_table_replace(
+RT_BOOL rt_hash_table_replace(
         struct RtHashTable *ht,
         const void *key,
         void *data) {
@@ -172,20 +175,26 @@ bool rt_hash_table_replace(
        hn = (struct rt_hash_node *) node;
        if ((*ht->compare)(hn->key, key) == 0) {
            hn->data = data;
-           return true;
+           return RT_TRUE;
        }
     }
     rt_hash_table_insert(ht, key, data);
 
-    return false;
+    return RT_FALSE;
 }
 
-void rt_hash_table_remove(struct RtHashTable *ht, const void *key) {
-    struct rt_hash_node *node = (struct rt_hash_node *) get_node(ht, key);
+RT_BOOL rt_hash_table_remove(struct RtHashTable *ht, const void *key, RT_BOOL free_data) {
+    struct rt_hash_node *node = (struct rt_hash_node *)get_node(ht, key);
     if (RT_NULL != node) {
         remove_from_list(node);
+        if (free_data && NULL != node->data) {
+            rt_free(node->data);
+        }
         rt_free(node);
-        return;
+        return RT_TRUE;
+    } else {
+        RT_LOGE("don't find node from the key!");
+        return RT_FALSE;
     }
 }
 

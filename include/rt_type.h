@@ -40,7 +40,7 @@ typedef uint16_t     UINT16;
 typedef uint32_t     UINT32;
 typedef uint64_t     UINT64;
 
-typedef void         RT_PTR;
+typedef void *       RT_PTR;
 
 #define RtToBool(cond)  ((cond) != 0)
 #define RtToS8(x)     ((INT8)(x))
@@ -68,5 +68,7 @@ typedef void         RT_PTR;
 
 #define RtAlign8(x)     (((x) + 7) >> 3 << 3)
 #define RtIsAlign8(x)   (0 == ((x) & 7))
+
+#define MKTAG(a, b, c, d) ((a) | ((b) << 8) | ((c) << 16) | ((unsigned)(d) << 24))
 
 #endif  // INCLUDE_RT_TYPE_H_

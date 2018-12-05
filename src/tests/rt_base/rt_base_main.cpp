@@ -36,6 +36,7 @@ int main(int argc, char **argv) {
     rt_tests_add(test_ctx, unit_test_deque_limit, const_cast<char *>("UnitTest-DequeLimit"));
     rt_tests_add(test_ctx, unit_test_linked_list, const_cast<char *>("UnitTest-LinkedList"));
     rt_tests_add(test_ctx, unit_test_hash_table, const_cast<char *>("UnitTest-HashTable"));
+    rt_tests_add(test_ctx, unit_test_metadata, const_cast<char *>("UnitTest-MetaData"));
 
     /*
      * testcases: unit tests for OS Adaptive Layer(OSAL) 

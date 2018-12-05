@@ -9,6 +9,7 @@ set(RT_BASE_TEST_SRC
     test_base_linked_list.cpp
     test_base_memory.cpp
     test_base_mutex_thread.cpp
+    test_base_meta_data.cpp
 )
 
 add_executable(rt_base_test ${RT_BASE_TEST_SRC})

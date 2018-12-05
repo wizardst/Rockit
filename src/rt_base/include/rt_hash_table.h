@@ -46,18 +46,19 @@ UINT32 hash_string_compare(const void *key1, const void *key2);
 struct RtHashTable *rt_hash_table_create(UINT32 num_buckets,
                                                rt_hash_func hash,
                                                rt_hash_comp_func compare);
-void   rt_hash_table_destory(struct RtHashTable *hash);
+void   rt_hash_table_destory(struct RtHashTable *hash, RT_BOOL free_data = RT_FALSE);
 void   rt_hash_table_dump(struct RtHashTable *hash);
-void   rt_hash_table_clear(struct RtHashTable *hash);
+void   rt_hash_table_clear(struct RtHashTable *hash, RT_BOOL free_data = RT_FALSE);
 void  *rt_hash_table_find(struct RtHashTable *hash,
                                  const void *key);
 void   rt_hash_table_insert(struct RtHashTable *hash,
                                     const void *key,
                                     void *data);
-bool   rt_hash_table_replace(struct RtHashTable *hash,
+RT_BOOL   rt_hash_table_replace(struct RtHashTable *hash,
                                       const void *key, void *data);
-void   rt_hash_table_remove(struct RtHashTable *hash,
-                                    const void *key);
+RT_BOOL   rt_hash_table_remove(struct RtHashTable *hash,
+                                    const void *key,
+                                    RT_BOOL free_data = RT_FALSE);
 UINT32 rt_hash_table_get_num_buckets(struct RtHashTable *hash);
 struct rt_hash_node* rt_hash_table_get_bucket(struct RtHashTable *hash, UINT32 idx);
 UINT32 rt_hash_table_string_hash(const void *key);

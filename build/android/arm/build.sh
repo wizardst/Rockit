@@ -49,8 +49,9 @@ echo "Code Style Check using cpplint ..."
 ROCKIT_ROOT=../../..
 if [ -f ${ROCKIT_ROOT}/tools/cpplint/cpplint.py ]
 then
-    find ${ROCKIT_ROOT} -name *.cpp | xargs ${ROCKIT_ROOT}/tools/cpplint/cpplint.py --linelength=120 --root=${ROCKIT_ROOT}
-    find ${ROCKIT_ROOT} -name *.h | xargs ${ROCKIT_ROOT}/tools/cpplint/cpplint.py --linelength=120 --root=${ROCKIT_ROOT}
+    find ${ROCKIT_ROOT}/src -name *.cpp | xargs ${ROCKIT_ROOT}/tools/cpplint/cpplint.py --linelength=120 --root=${ROCKIT_ROOT}
+    find ${ROCKIT_ROOT}/src -name *.h | xargs ${ROCKIT_ROOT}/tools/cpplint/cpplint.py --linelength=120 --root=${ROCKIT_ROOT}
+    find ${ROCKIT_ROOT}/include -name *.h | xargs ${ROCKIT_ROOT}/tools/cpplint/cpplint.py --linelength=120 --root=${ROCKIT_ROOT}
 fi
 echo -e "Code Style Check using cpplint ...DONE!\r\n"
 
