@@ -11,6 +11,7 @@ $ git clone ssh://cmc@10.10.10.100:29418/Rockit Rockit.git
 $ cd Rockit.git
 $ git remote add github https://github.com/media-tm/Rockit
 $ git remote -v
+$ git fetch github
 $ git checkout github/master -b github_master
 $ git push origin github_master:master  # push github/master to origin/master branch
 $ git checkout origin/master -b origin_master
