@@ -67,7 +67,7 @@ void *rt_mem_realloc(const char *caller, void *ptr, size_t size);
 void      rt_mem_free(const char *caller, void *ptr);
 void rt_mem_safe_free(const char *caller, void **ptr);
 void      *rt_memset(void *ptr, int c, size_t n);
-void      *rt_memcpy(void *dst, void *src, size_t n);
+void      *rt_memcpy(void *dst, const void *src, size_t n);
 
 void rt_mem_record_dump();
 void rt_mem_record_reset();

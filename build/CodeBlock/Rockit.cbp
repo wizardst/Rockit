@@ -64,12 +64,16 @@
 		<Unit filename="../../include/rt_task_header.h" />
 		<Unit filename="../../include/rt_type.h" />
 		<Unit filename="../../src/rt_base/include/rt_array_list.h" />
+		<Unit filename="../../src/rt_base/include/rt_buffer.h" />
+		<Unit filename="../../src/rt_base/include/rt_buffer_tag.h" />
 		<Unit filename="../../src/rt_base/include/rt_cpu_info.h" />
 		<Unit filename="../../src/rt_base/include/rt_dequeue.h" />
 		<Unit filename="../../src/rt_base/include/rt_hash_table.h" />
 		<Unit filename="../../src/rt_base/include/rt_kernel_list.h" />
 		<Unit filename="../../src/rt_base/include/rt_linked_list.h" />
 		<Unit filename="../../src/rt_base/include/rt_log.h" />
+		<Unit filename="../../src/rt_base/include/rt_media_frame.h" />
+		<Unit filename="../../src/rt_base/include/rt_media_packet.h" />
 		<Unit filename="../../src/rt_base/include/rt_mem.h" />
 		<Unit filename="../../src/rt_base/include/rt_mem_service.h" />
 		<Unit filename="../../src/rt_base/include/rt_mutex.h" />
@@ -80,6 +84,9 @@
 		<Unit filename="../../src/rt_base/linux/rt_os_thread.cpp" />
 		<Unit filename="../../src/rt_base/linux/rt_os_time.cpp" />
 		<Unit filename="../../src/rt_base/rt_array_list.cpp" />
+		<Unit filename="../../src/rt_base/rt_buffer/rt_buffer.cpp" />
+		<Unit filename="../../src/rt_base/rt_buffer/rt_media_frame.cpp" />
+		<Unit filename="../../src/rt_base/rt_buffer/rt_media_packet.cpp" />
 		<Unit filename="../../src/rt_base/rt_dequeue.cpp" />
 		<Unit filename="../../src/rt_base/rt_hash_table.cpp" />
 		<Unit filename="../../src/rt_base/rt_linked_list.cpp" />
