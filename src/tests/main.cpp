@@ -19,6 +19,7 @@
 
 #include "rt_base/rt_base_tests.h" // NOLINT
 #include "rt_node/rt_node_tests.h" // NOLINT
+#include "rt_node/rt_ffmpeg_tests.h" // NOLINT
 #include "rt_task/rt_task_tests.h" // NOLINT
 #include "rt_check.h" // NOLINT
 

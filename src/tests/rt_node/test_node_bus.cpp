@@ -17,9 +17,6 @@
  *   date: 2018/11/05
  */
 
-#ifndef __RT_NODE_BUS_H__
-#define __RT_NODE_BUS_H__
-
 #include "rt_node.h" // NOLINT
 #include "rt_node_bus.h" // NOLINT
 #include "rt_node_tests.h" // NOLINT
@@ -60,6 +57,4 @@ RT_RET unit_test_node_bus(INT32 index, INT32 total) {
     rt_node_bus_destory(bus);
     return RT_OK;
 }
-
-#endif /*__RT_NODE_BUS_H__*/
 
