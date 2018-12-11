@@ -14,12 +14,25 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-DOS_WINDOWS -DHAS_PTHREAD -D__MSVCRT__ -D_STAT_DEFINED" />
+					<Add option="-DOS_WINDOWS -DHAS_PTHREAD -D__MSVCRT__ -D_STAT_DEFINED -D__STDC_CONSTANT_MACROS" />
 					<Add directory="../../include" />
 					<Add directory="../../src/rt_base/include" />
 					<Add directory="../../src/rt_node/include" />
 					<Add directory="../../src/rt_task/include" />
+					<Add directory="../../third-party/prebuilt/headers/ffmpeg-4.0/include" />
 				</Compiler>
+				<Linker>
+					<Add option="-lavformat -lavcodec -lavfilter -lavutil" />
+					<Add library="${BUILT_WIN32}/avcodec.lib" />
+					<Add library="${BUILT_WIN32}/avfilter.lib" />
+					<Add library="${BUILT_WIN32}/avformat.lib" />
+					<Add library="${BUILT_WIN32}/avutil.lib" />
+					<Add library="${BUILT_WIN32}/avdevice.lib" />
+					<Add directory="../../third-party/prebuilt/win32" />
+				</Linker>
+				<Environment>
+					<Variable name="BUILT_WIN32" value="..\..\third-party\prebuilt\win32" />
+				</Environment>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/Rockit" prefix_auto="1" extension_auto="1" />
@@ -120,12 +133,18 @@
 		<Unit filename="../../src/tests/rt_base/test_base_memory.cpp" />
 		<Unit filename="../../src/tests/rt_base/test_base_meta_data.cpp" />
 		<Unit filename="../../src/tests/rt_base/test_base_mutex_thread.cpp" />
+		<Unit filename="../../src/tests/rt_node/rt_ffmpeg_tests.h" />
 		<Unit filename="../../src/tests/rt_node/rt_node_tests.h" />
+		<Unit filename="../../src/tests/rt_node/test_ffmpeg_camera.cpp" />
+		<Unit filename="../../src/tests/rt_node/test_ffmpeg_format.cpp" />
 		<Unit filename="../../src/tests/rt_node/test_node_basic.cpp" />
 		<Unit filename="../../src/tests/rt_node/test_node_bus.cpp" />
 		<Unit filename="../../src/tests/rt_node/test_node_data_flow.cpp" />
 		<Unit filename="../../src/tests/rt_task/rt_task_tests.h" />
 		<Unit filename="../../src/tests/rt_task/test_task_taskpool.cpp" />
+		<Unit filename="../../third-party/prebuilt/headers/ffmpeg-4.0/include/libavformat/avformat.h" />
+		<Unit filename="../../third-party/prebuilt/headers/ffmpeg-4.0/include/libavformat/avio.h" />
+		<Unit filename="../../third-party/prebuilt/headers/ffmpeg-4.0/include/libavformat/version.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

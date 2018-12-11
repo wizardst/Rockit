@@ -25,16 +25,21 @@ extern "C" {
 }
 
 #ifdef OS_WINDOWS
-static TEST_URI = "E:\\CloudSync\\low-used\\videos\h264-1080p.mp4";
+static const char* TEST_URI = "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4";
 #else
-static TEST_URI = "h264-1080p.mp4";
+static const char* TEST_URI = "h264-1080p.mp4";
 #endif
 
 static void dump_media_tracks(const AVFormatContext *fmt_ctx) {
-    for (int i = 0; i < fmt_ctx->nb_streams; i++) {
+    for (UINT32 i = 0; i < fmt_ctx->nb_streams; i++) {
         const AVOption *opt = NULL;
         const AVStream *st = fmt_ctx->streams[i];
-        AVCodecContext *codec_ctx = st->codec;
+        AVCodecParameters *codec_par = st->codecpar;
+        AVCodecContext    *codec_ctx = NULL;
+        AVCodec           *codec_cur = NULL;
+
+        codec_cur = avcodec_find_decoder(codec_par->codec_id);
+        codec_ctx = avcodec_alloc_context3(codec_cur);
 
         while (opt = av_opt_next(codec_ctx, opt)) {
             uint8_t *str;
@@ -74,7 +79,7 @@ _final_end:
 
 RT_RET unit_test_ffmpeg_format(INT32 index, INT32 total) {
     AVFormatContext *fmt_ctx = NULL;
-    INT32 err = base_test_open_format(&fmt_ctx, "");
+    INT32 err = base_test_open_format(&fmt_ctx, TEST_URI);
     if ( err >= 0 ) {
         dump_media_tracks(fmt_ctx);
         avformat_close_input(&fmt_ctx);
