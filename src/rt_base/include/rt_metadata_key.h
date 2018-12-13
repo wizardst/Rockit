@@ -14,22 +14,27 @@
  * limitations under the License.
  *
  * author: Rimon.Xu@rock-chips.com
- *   date: 20181207
+ *   date: 20181213
  */
 
-#ifndef SRC_RT_BASE_INCLUDE_RT_BUFFER_TAG_H_
-#define SRC_RT_BASE_INCLUDE_RT_BUFFER_TAG_H_
+#ifndef SRC_RT_BASE_INCLUDE_RT_METADATA_KEY_H_
+#define SRC_RT_BASE_INCLUDE_RT_METADATA_KEY_H_
 
-#include "rt_header.h" // NOLINT
+enum {
+    /* common param */
+    kKeyWidth       = MKTAG('w', 'i', 't', 'h'),
+    kKeyHeight      = MKTAG('h', 'i', 'g', 'h'),
 
-#define TAG_MAX_LENGHT                          64
+    /* decode and encode */
+    kKeyCodingType  = MKTAG('c', 'd', 't', 'p'),
 
-/*
- * media plugin tag
- */
-#define TAG_MEDIA_PACKET                        "media.packet"
-#define TAG_MEDIA_FRAME                         "media.frame"
-#define TAG_MEDIA_FFMPEG_FRAME                  "media.ffmpeg.frame"
+    /* media common */
+    kKeyTimeStamps  = MKTAG('t', 's', 't', 'p'),
+    kKeyFrameWidth  = MKTAG('f', 'w', 'i', 't'),
+    kKeyFrameHeight = MKTAG('f', 'h', 'i', 't'),
+    kKeyEOS         = MKTAG('k', 'e', 'o', 's'),
+};
 
-#endif  // SRC_RT_BASE_INCLUDE_RT_BUFFER_TAG_H_
+
+#endif  // SRC_RT_BASE_INCLUDE_RT_METADATA_KEY_H_
 

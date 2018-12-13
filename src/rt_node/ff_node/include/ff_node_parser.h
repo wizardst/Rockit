@@ -18,21 +18,21 @@
  *   Task: use ffmpeg as demuxer and muxer
  */
 
-#ifndef SRC_RT_NODE_FF_NODE_FF_NODE_PARSER_H_
-#define SRC_RT_NODE_FF_NODE_FF_NODE_PARSER_H_
+#ifndef SRC_RT_NODE_FF_NODE_INCLUDE_FF_NODE_PARSER_H_
+#define SRC_RT_NODE_FF_NODE_INCLUDE_FF_NODE_PARSER_H_
 
 #include "rt_node.h" // NOLINT
+#include "rt_metadata.h" // NOLINT
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-INT8    node_ff_parser_init(void **ctx);
-INT8 node_ff_parser_release(void **ctx);
-INT8    node_ff_parser_pull(void *ctx, void *data, UINT32 *size);
-INT8    node_ff_parser_push(void *ctx, void *data, UINT32 *size);
-INT8 node_ff_parser_run_cmd(void* ctx, RT_NODE_CMD cmd,
-                            UINT32 data_int, void* data_void);
+RT_RET node_ff_parser_init(void **ctx);
+RT_RET node_ff_parser_release(void **ctx);
+RT_RET node_ff_parser_pull(void *ctx, void *data, UINT32 *size);
+RT_RET node_ff_parser_push(void *ctx, void *data, UINT32 *size);
+RT_RET node_ff_parser_run_cmd(void* ctx, RT_NODE_CMD cmd, RtMetaData *data);
 
 extern RT_Node ff_node_parser;
 
@@ -40,4 +40,4 @@ extern RT_Node ff_node_parser;
 }
 #endif
 
-#endif  // SRC_RT_NODE_FF_NODE_FF_NODE_PARSER_H_
+#endif  // SRC_RT_NODE_FF_NODE_INCLUDE_FF_NODE_PARSER_H_

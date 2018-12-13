@@ -54,12 +54,17 @@ RT_Deque* deque_create(UINT8 max_size) {
 void deque_destory(RT_Deque **list) {
     RT_ASSERT(RT_NULL != *list);
 
-    RT_DequeEntry* entry = (*list)->head;
-    RT_DequeEntry* next;
-    while (entry) {
-        next = entry->next;
-        rt_free(entry);
-        entry = next;
+    if ((*list)->entries) {
+        rt_free((*list)->entries);
+        (*list)->entries = NULL;
+    } else {
+        RT_DequeEntry* entry = (*list)->head;
+        RT_DequeEntry* next;
+        while (entry) {
+            next = entry->next;
+            rt_free(entry);
+            entry = next;
+        }
     }
     rt_memset(*list, 0, sizeof(RT_Deque));
 
@@ -106,7 +111,7 @@ RT_DequeEntry deque_pop(RT_Deque *list) {
     return entry;
 }
 
-INT8  deque_push(RT_Deque *list,
+RT_RET deque_push(RT_Deque *list,
                      const void *data,
                      RT_BOOL header /* =RT_FALSE */) {
     RT_ASSERT(RT_NULL != list);
@@ -140,7 +145,7 @@ INT8  deque_push(RT_Deque *list,
     return RT_OK;
 }
 
-INT8 deque_insert(RT_Deque *list, RT_DequeEntry* entry, const void *data) {
+RT_RET deque_insert(RT_Deque *list, RT_DequeEntry* entry, const void *data) {
     RT_ASSERT(RT_NULL != list);
 
     RT_DequeEntry *new_entry = deque_entry_malloc(list);
@@ -156,12 +161,12 @@ INT8 deque_insert(RT_Deque *list, RT_DequeEntry* entry, const void *data) {
     return RT_OK;
 }
 
-INT8  deque_push_tail(RT_Deque *list, const void *data) {
+RT_RET deque_push_tail(RT_Deque *list, const void *data) {
     RT_BOOL header =  RT_FALSE;
     return deque_push(list, data, header);
 }
 
-INT8  deque_push_head(RT_Deque *list, const void *data) {
+RT_RET deque_push_head(RT_Deque *list, const void *data) {
     RT_BOOL header =  RT_TRUE;
     return deque_push(list, data, header);
 }

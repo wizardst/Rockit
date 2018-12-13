@@ -19,6 +19,7 @@
  */
 
 #include "rt_header.h" // NOLINT
+#include "rt_metadata.h" // NOLINT
 
 #ifdef LOG_TAG
 #undef LOG_TAG
@@ -29,7 +30,7 @@
 #define DEBUG_NODE_MSG   1
 #define DEBUG_NODE_EVENT 1
 
-INT8 check_err(const RT_Node *node, INT8 err, const char* func_name) {
+RT_RET check_err(const RT_Node *node, RT_RET err, const char* func_name) {
     if (RT_OK != err) {
         RT_LOGE("RTNode(Name=%15.15s, ctx=%p):  errno=%02d, Fail to %s",
                 node->name, node->node_ctx, err, func_name);
@@ -39,39 +40,39 @@ INT8 check_err(const RT_Node *node, INT8 err, const char* func_name) {
 
 #define CHECK_ERR(err) check_err(this, err, __FUNCTION__)
 
-INT8 RT_Node::init() {
+RT_RET RT_Node::init() {
     node_ctx = RT_NULL;
-    INT8 err = RT_OK;
+    RT_RET err = RT_OK;
     err = impl_init(&node_ctx);
 
     return CHECK_ERR(err);
 }
 
-INT8 RT_Node::release() {
-    INT8 err = RT_OK;
+RT_RET RT_Node::release() {
+    RT_RET err = RT_OK;
     err = impl_release(&node_ctx);
     node_ctx = RT_NULL;
 
     return CHECK_ERR(err);
 }
 
-INT8 RT_Node::pull(void *data,  UINT32 *size) {
-    INT8 err = RT_OK;
+RT_RET RT_Node::pull(void *data,  UINT32 *size) {
+    RT_RET err = RT_OK;
     err  = impl_pull(node_ctx, data, size);
 
     return CHECK_ERR(err);
 }
 
-INT8 RT_Node::push(void *data, UINT32 *size) {
-    INT32 err = RT_OK;
+RT_RET RT_Node::push(void *data, UINT32 *size) {
+    RT_RET err = RT_OK;
     err = impl_push(node_ctx, data, size);
 
     return CHECK_ERR(err);
 }
 
-INT8 RT_Node::run_cmd(RT_NODE_CMD cmd, UINT32 data_int, void* data_void) {
-    INT32 err = RT_OK;
-    err = impl_run_cmd(node_ctx, cmd, data_int, data_void);
+RT_RET RT_Node::run_cmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
+    RT_RET err = RT_OK;
+    err = impl_run_cmd(node_ctx, cmd, metadata);
     #if DEBUG_NODE_CMD
     RT_LOGE("node: %-10s exec cmd:%-10s",
                   rt_node_type_name(this->type),
@@ -80,3 +81,8 @@ INT8 RT_Node::run_cmd(RT_NODE_CMD cmd, UINT32 data_int, void* data_void) {
 
     return CHECK_ERR(err);
 }
+
+RtMetaData *RT_Node::query_cap() {
+    return impl_query_cap();
+}
+

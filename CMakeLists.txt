@@ -17,6 +17,10 @@ if (HAS_PTHREAD)
 endif (HAS_PTHREAD)
 
 include_directories(include)
+
+include_directories(third-party/prebuilt/headers/ffmpeg-4.0/include)
+link_directories(third-party/prebuilt/arm32)
+
 add_subdirectory(src)
 
 message(STATUS "cmake version ${CMAKE_VERSION}")

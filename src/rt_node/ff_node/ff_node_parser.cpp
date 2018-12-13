@@ -24,7 +24,7 @@
 #define LOG_TAG "FFNodeParser"
 
 #include "rt_node.h" // NOLINT
-#include "ff_node_parser.h" // NOLINT
+#include "./include/ff_node_parser.h" // NOLINT
 #include "rt_mem.h" // NOLINT
 
 typedef struct _FF_PARSER_CONTEXT {
@@ -32,18 +32,18 @@ typedef struct _FF_PARSER_CONTEXT {
     UINT32 push_cnt;
 } FF_PARSER_CONTEXT;
 
-INT8 node_ff_parser_init(void **ctx) {
+RT_RET node_ff_parser_init(void **ctx) {
     *ctx = rt_malloc(FF_PARSER_CONTEXT);
     rt_memset(*ctx, 0, sizeof(FF_PARSER_CONTEXT));
     return RT_OK;
 }
 
-INT8 node_ff_parser_release(void **ctx) {
+RT_RET node_ff_parser_release(void **ctx) {
     rt_safe_free(*ctx);
     return RT_OK;
 }
 
-INT8 node_ff_parser_pull(void *ctx, void *data, UINT32 *size) {
+RT_RET node_ff_parser_pull(void *ctx, void *data, UINT32 *size) {
     FF_PARSER_CONTEXT* parser_ctx = reinterpret_cast<FF_PARSER_CONTEXT*>(ctx);
     RT_ASSERT(RT_NULL != parser_ctx);
     parser_ctx->pull_cnt++;
@@ -51,7 +51,7 @@ INT8 node_ff_parser_pull(void *ctx, void *data, UINT32 *size) {
     return RT_OK;
 }
 
-INT8 node_ff_parser_push(void *ctx, void *data, UINT32 *size) {
+RT_RET node_ff_parser_push(void *ctx, void *data, UINT32 *size) {
     FF_PARSER_CONTEXT* parser_ctx = reinterpret_cast<FF_PARSER_CONTEXT*>(ctx);
     RT_ASSERT(RT_NULL != parser_ctx);
     parser_ctx->push_cnt++;
@@ -59,8 +59,7 @@ INT8 node_ff_parser_push(void *ctx, void *data, UINT32 *size) {
     return RT_OK;
 }
 
-INT8 node_ff_parser_run_cmd(void* ctx, RT_NODE_CMD cmd,
-                            UINT32 data_int, void* data_void) {
+RT_RET node_ff_parser_run_cmd(void* ctx, RT_NODE_CMD cmd, RtMetaData *data) {
     FF_PARSER_CONTEXT* parser_ctx = reinterpret_cast<FF_PARSER_CONTEXT*>(ctx);
     RT_ASSERT(RT_NULL != parser_ctx);
     return RT_OK;
@@ -76,4 +75,5 @@ RT_Node ff_node_parser = {
     .impl_pull    = node_ff_parser_pull,
     .impl_push    = node_ff_parser_push,
     .impl_run_cmd = node_ff_parser_run_cmd,
+    .impl_query_cap = NULL,
 };

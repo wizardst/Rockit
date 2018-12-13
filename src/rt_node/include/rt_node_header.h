@@ -21,7 +21,7 @@
 #define SRC_RT_NODE_INCLUDE_RT_NODE_HEADER_H_
 
 /*header in src/rt_node/include*/
-#include "../ff_node/ff_node_parser.h" // NOLINT
+#include "../ff_node/include/ff_node_parser.h" // NOLINT
 #include "rt_node_parser.h" // NOLINT
 #include "rt_node_codec.h" // NOLINT
 #include "rt_node_filter.h" // NOLINT

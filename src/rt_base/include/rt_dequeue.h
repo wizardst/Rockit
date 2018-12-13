@@ -48,12 +48,12 @@ void           deque_destory(RT_Deque **list);
 RT_DequeEntry* deque_entry_malloc(RT_Deque *list);
 RT_DequeEntry  deque_pop(RT_Deque *list);
 void*          deque_get(RT_Deque *list, int index);
-INT8           deque_push(RT_Deque *list,
+RT_RET         deque_push(RT_Deque *list,
                               const void *data,
                               RT_BOOL header = RT_FALSE);
-INT8           deque_insert(RT_Deque *list, RT_DequeEntry* entry, const void *data);
-INT8           deque_push_tail(RT_Deque *list, const void *data);
-INT8           deque_push_head(RT_Deque *list, const void *data);
+RT_RET         deque_insert(RT_Deque *list, RT_DequeEntry* entry, const void *data);
+RT_RET         deque_push_tail(RT_Deque *list, const void *data);
+RT_RET         deque_push_head(RT_Deque *list, const void *data);
 
 #define deque_size(list) ((list)->size)
 #define deque_head(list) ((list)->head)

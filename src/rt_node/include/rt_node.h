@@ -40,16 +40,18 @@
 extern "C" {
 #endif
 
+struct RtMetaData;
 
 #define RT_NODE_CONTEXT void*
 
 typedef struct _RT_Node {
     // public api
-    INT8 init();
-    INT8 release();
-    INT8 pull(void *data, UINT32 *size);
-    INT8 push(void *data, UINT32 *size);
-    INT8 run_cmd(RT_NODE_CMD cmd, UINT32 data_int, void* data_void);
+    RT_RET init();
+    RT_RET release();
+    RT_RET pull(void *data, UINT32 *size);
+    RT_RET push(void *data, UINT32 *size);
+    RT_RET run_cmd(RT_NODE_CMD cmd, RtMetaData *metadata);
+    RtMetaData *query_cap();
 
     // private
     const RT_NODE_TYPE type;
@@ -58,14 +60,15 @@ typedef struct _RT_Node {
     void* node_ctx;
 
     // private api
-    INT8   (*impl_init   )(void** ctx);
-    INT8   (*impl_release)(void** ctx);
-    INT8   (*impl_pull   )(void* ctx, void *data, UINT32 *size);
-    INT8   (*impl_push   )(void* ctx, void *data, UINT32 *size);
-    INT8   (*impl_run_cmd)(void* ctx, RT_NODE_CMD cmd, UINT32 data_int, void* data_void);
+    RT_RET        (*impl_init   )(void** ctx);
+    RT_RET        (*impl_release)(void** ctx);
+    RT_RET        (*impl_pull   )(void* ctx, void *data, UINT32 *size);
+    RT_RET        (*impl_push   )(void* ctx, void *data, UINT32 *size);
+    RT_RET        (*impl_run_cmd)(void* ctx, RT_NODE_CMD cmd, RtMetaData *metadata);
+    RtMetaData *(*impl_query_cap)();
 } RT_Node;
 
-INT8 check_err(const RT_Node node, INT8 err, const char* func_name);
+RT_RET check_err(const RT_Node node, INT8 err, const char* func_name);
 
 #ifdef __cplusplus
 }

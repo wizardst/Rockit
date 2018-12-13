@@ -6,6 +6,7 @@ set(RT_NODE_TEST_SRC
     test_node_basic.cpp
     test_node_bus.cpp
     test_node_data_flow.cpp
+    test_ff_node_codec.cpp
 )
 
 add_executable(rt_node_test ${RT_NODE_TEST_SRC})

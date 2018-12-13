@@ -28,12 +28,21 @@ int main(int argc, char **argv) {
     CHECK_IS_NULL(test_ctx);
 
     /*
-     * testcases: unit tests for node&nodebus 
+     * testcases: unit tests for node & nodebus 
      *    author: martin.cheng@rock-chips.com
      */
     rt_tests_add(test_ctx, unit_test_node_basic, const_cast<char *>("UnitTest-NodeBasic"));
     rt_tests_add(test_ctx, unit_test_node_bus, const_cast<char *>("UnitTest-NodeBus"));
     rt_tests_add(test_ctx, unit_test_node_data_flow, const_cast<char *>("UnitTest-Dataflow"));
+
+    /*
+     * testcases: unit tests for plugins
+     *    author: rimon.xu@rock-chips.com
+     */
+    rt_tests_add(test_ctx, unit_test_ff_node_codec_video,
+                           const_cast<char *>("UnitTest-FFNodeCodecVideo"));
+    rt_tests_add(test_ctx, unit_test_ff_node_codec_audio,
+                           const_cast<char *>("UnitTest-FFNodeCodecAudio"));
 
     // ! run all testcases
     rt_tests_run(test_ctx, /*mem_dump=*/RT_TRUE);

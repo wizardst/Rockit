@@ -13,23 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: Rimon.Xu@rock-chips.com
- *   date: 20181207
+ * Author: martin.cheng@rock-chips.com
+ *   Date: 2018/12/18
+ *   Task: @TODO ffmpeg wrapper
  */
-
-#ifndef SRC_RT_BASE_INCLUDE_RT_BUFFER_TAG_H_
-#define SRC_RT_BASE_INCLUDE_RT_BUFFER_TAG_H_
-
-#include "rt_header.h" // NOLINT
-
-#define TAG_MAX_LENGHT                          64
-
-/*
- * media plugin tag
- */
-#define TAG_MEDIA_PACKET                        "media.packet"
-#define TAG_MEDIA_FRAME                         "media.frame"
-#define TAG_MEDIA_FFMPEG_FRAME                  "media.ffmpeg.frame"
-
-#endif  // SRC_RT_BASE_INCLUDE_RT_BUFFER_TAG_H_
-

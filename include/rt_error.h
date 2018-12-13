@@ -40,6 +40,12 @@ typedef enum _RT_RET {
     RT_ERR_FATAL_THREAD        = RT_ERR_BASE - 2,
     RT_ERR_NOMEM               = RT_ERR_BASE - 3,
     RT_ERR_OUTOF_RANGE         = RT_ERR_BASE - 4,
+
+    /* The error in list */
+    RT_ERR_LIST_BASE           = -128,
+    RT_ERR_LIST_EMPTY          = RT_ERR_LIST_BASE - 1,
+    RT_ERR_LIST_FULL           = RT_ERR_LIST_BASE - 2,
+    RT_ERR_LIST_OUTOF_RANGE    = RT_ERR_LIST_BASE - 3,
 } RT_RET;
 
 #endif  // INCLUDE_RT_ERROR_H_

@@ -31,16 +31,16 @@ void unit_test_node_operations(struct NodeBusContext* bus) {
         UINT32 *size = 0;
         demuxer->pull(data, size);
         demuxer->push(data, size);
-        demuxer->run_cmd(RT_NODE_CMD_INIT,    0, RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_PREPARE, 0, RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_START,   0, RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_STOP,    0, RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_CAPS_CHANGE,  0, RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_SEEK,         0, RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_RESET,        0, RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_REINIT,       0, RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_NAVIGATION,   0, RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_DRAIN,        0, RT_NULL);
+        demuxer->run_cmd(RT_NODE_CMD_INIT, RT_NULL);
+        demuxer->run_cmd(RT_NODE_CMD_PREPARE, RT_NULL);
+        demuxer->run_cmd(RT_NODE_CMD_START,   RT_NULL);
+        demuxer->run_cmd(RT_NODE_CMD_STOP,    RT_NULL);
+        demuxer->run_cmd(RT_NODE_CMD_CAPS_CHANGE,  RT_NULL);
+        demuxer->run_cmd(RT_NODE_CMD_SEEK,         RT_NULL);
+        demuxer->run_cmd(RT_NODE_CMD_RESET,        RT_NULL);
+        demuxer->run_cmd(RT_NODE_CMD_REINIT,       RT_NULL);
+        demuxer->run_cmd(RT_NODE_CMD_NAVIGATION,   RT_NULL);
+        demuxer->run_cmd(RT_NODE_CMD_DRAIN,        RT_NULL);
         demuxer->release();
     }
 }

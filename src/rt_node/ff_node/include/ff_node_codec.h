@@ -15,10 +15,15 @@
  *
  * Author: TOD - UNKOWN
  *   Date: 2018/11/03
- *   Task: use ffmpeg as demuxer
+ *   Task: use ffmpeg as encoder and decoder
  */
 
-#ifndef SRC_RT_NODE_FF_NODE_FF_NODE_DEMUXER_H_
-#define SRC_RT_NODE_FF_NODE_FF_NODE_DEMUXER_H_
+#ifndef SRC_RT_NODE_FF_NODE_INCLUDE_FF_NODE_CODEC_H_
+#define SRC_RT_NODE_FF_NODE_INCLUDE_FF_NODE_CODEC_H_
 
-#endif  // SRC_RT_NODE_FF_NODE_FF_NODE_DEMUXER_H_
+#include "rt_node.h" // NOLINT
+#include "rt_header.h" // NOLINT
+
+extern RT_Node ff_node_video_decoder;
+
+#endif  // SRC_RT_NODE_FF_NODE_INCLUDE_FF_NODE_CODEC_H_

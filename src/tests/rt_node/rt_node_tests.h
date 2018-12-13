@@ -26,5 +26,8 @@
 RT_RET unit_test_node_basic(INT32 index, INT32 total);
 RT_RET unit_test_node_bus(INT32 index, INT32 total);
 RT_RET unit_test_node_data_flow(INT32 index, INT32 total);
+RT_RET unit_test_ff_node_codec_video(INT32 index, INT32 total);
+RT_RET unit_test_ff_node_codec_audio(INT32 index, INT32 total);
+
 
 #endif  // SRC_TESTS_RT_NODE_RT_NODE_TESTS_H_
