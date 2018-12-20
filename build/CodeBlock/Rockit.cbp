@@ -15,11 +15,12 @@
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DOS_WINDOWS -DHAS_PTHREAD -D__MSVCRT__ -D_STAT_DEFINED -D__STDC_CONSTANT_MACROS" />
-					<Add directory="../../include" />
-					<Add directory="../../src/rt_base/include" />
-					<Add directory="../../src/rt_node/include" />
-					<Add directory="../../src/rt_task/include" />
-					<Add directory="../../third-party/prebuilt/headers/ffmpeg-4.0/include" />
+					<Add directory="${SRC_ROOT}/include" />
+					<Add directory="${SRC_ROOT}/src/rt_base/include" />
+					<Add directory="${SRC_ROOT}/src/rt_node/ff_node/include" />
+					<Add directory="${SRC_ROOT}/src/rt_node/include" />
+					<Add directory="${SRC_ROOT}/src/rt_task/include" />
+					<Add directory="${SRC_ROOT}/third-party/prebuilt/headers/ffmpeg-4.0/include" />
 				</Compiler>
 				<Linker>
 					<Add option="-lavformat -lavcodec -lavfilter -lavutil" />
@@ -32,6 +33,7 @@
 				</Linker>
 				<Environment>
 					<Variable name="BUILT_WIN32" value="..\..\third-party\prebuilt\win32" />
+					<Variable name="SRC_ROOT" value="..\.." />
 				</Environment>
 			</Target>
 			<Target title="Release">
@@ -76,6 +78,8 @@
 		<Unit filename="../../src/rt_base/include/rt_media_packet.h" />
 		<Unit filename="../../src/rt_base/include/rt_mem.h" />
 		<Unit filename="../../src/rt_base/include/rt_mem_service.h" />
+		<Unit filename="../../src/rt_base/include/rt_metadata.h" />
+		<Unit filename="../../src/rt_base/include/rt_metadata_key.h" />
 		<Unit filename="../../src/rt_base/include/rt_mutex.h" />
 		<Unit filename="../../src/rt_base/include/rt_thread.h" />
 		<Unit filename="../../src/rt_base/include/rt_time.h" />
@@ -104,14 +108,11 @@
 		<Unit filename="../../src/rt_base/windows/rt_os_thread.cpp" />
 		<Unit filename="../../src/rt_base/windows/rt_os_time.cpp" />
 		<Unit filename="../../src/rt_node/ff_node/ff_node_codec.cpp" />
+		<Unit filename="../../src/rt_node/ff_node/ff_node_demuxer.cpp" />
 		<Unit filename="../../src/rt_node/ff_node/ff_node_filter.cpp" />
-		<Unit filename="../../src/rt_node/ff_node/ff_node_parser.cpp" />
-		<Unit filename="../../src/rt_node/ff_node/ffm_node_video_decoder.cpp" />
 		<Unit filename="../../src/rt_node/ff_node/include/ff_node_codec.h" />
 		<Unit filename="../../src/rt_node/ff_node/include/ff_node_demuxer.h" />
 		<Unit filename="../../src/rt_node/ff_node/include/ff_node_filter.h" />
-		<Unit filename="../../src/rt_node/ff_node/include/ff_node_parser.h" />
-		<Unit filename="../../src/rt_node/ff_node/include/ffm_node_decode.h" />
 		<Unit filename="../../src/rt_node/include/rt_node.h" />
 		<Unit filename="../../src/rt_node/include/rt_node_bus.h" />
 		<Unit filename="../../src/rt_node/include/rt_node_codec.h" />
@@ -124,7 +125,6 @@
 		<Unit filename="../../src/rt_node/rt_node_codec.cpp" />
 		<Unit filename="../../src/rt_node/rt_node_define.cpp" />
 		<Unit filename="../../src/rt_node/rt_node_filter.cpp" />
-		<Unit filename="../../src/rt_node/rt_node_parser.cpp" />
 		<Unit filename="../../src/rt_task/include/rt_event.h" />
 		<Unit filename="../../src/rt_task/include/rt_event_bus.h" />
 		<Unit filename="../../src/rt_task/include/rt_task.h" />

@@ -21,7 +21,8 @@
 #include "rt_node_bus.h"    // NOLINT
 #include "rt_node_parser.h" // NOLINT
 #include "rt_node_header.h" // NOLINT
-#include "ff_node_codec.h"  // NOLINT
+#include "./ff_node/include/ff_node_codec.h"  // NOLINT
+#include "./ff_node/include/ff_node_demuxer.h"  // NOLINT
 
 struct NodeBusContext {
     RtArrayList *node_bus;
@@ -78,7 +79,7 @@ INT32 rt_node_bus_summary(struct NodeBusContext* bus, RT_BOOL full) {
 }
 
 INT32 rt_node_bus_register_all(struct NodeBusContext *bus) {
-    rt_node_bus_register(bus, &ff_node_parser);
+    rt_node_bus_register(bus, &ff_node_demuxer);
     rt_node_bus_register(bus, &ff_node_video_decoder);
     return RT_OK;
 }

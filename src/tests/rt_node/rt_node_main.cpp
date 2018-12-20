@@ -39,11 +39,12 @@ int main(int argc, char **argv) {
      * testcases: unit tests for plugins
      *    author: rimon.xu@rock-chips.com
      */
+#if 0
     rt_tests_add(test_ctx, unit_test_ff_node_codec_video,
                            const_cast<char *>("UnitTest-FFNodeCodecVideo"));
     rt_tests_add(test_ctx, unit_test_ff_node_codec_audio,
                            const_cast<char *>("UnitTest-FFNodeCodecAudio"));
-
+#endif
     // ! run all testcases
     rt_tests_run(test_ctx, /*mem_dump=*/RT_TRUE);
 

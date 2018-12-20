@@ -5,11 +5,12 @@ include_directories(ff_node/include)
 set(RT_NODE_SRC
     rt_node.cpp
     rt_node_bus.cpp
-    rt_node_parser.cpp
+    rt_node_codec.cpp
     rt_node_define.cpp
+    rt_node_filter.cpp
 
     ff_node/ff_node_codec.cpp
-    ff_node/ff_node_parser.cpp
+    ff_node/ff_node_demuxer.cpp
     ff_node/ffmpeg_wrapper.cpp
 )
 

@@ -20,7 +20,6 @@
 
 #include "./include/ff_node_codec.h"  // NOLINT
 #include "./include/ffmpeg_wrapper.h" // NOLINT
-#include "./include/ff_node_parser.h" // NOLINT
 
 #ifdef LOG_TAG
 #undef LOG_TAG
@@ -127,14 +126,9 @@ RT_RET FFNodeCodecCtx::initPacket(AVPacket *pkt, RtBuffer rt_buffer) {
     RT_LOGD("pkt->data: %p, size: %d pts: %lld", pkt->data, pkt->size, pkt->pts);
 
     return RT_OK;
-
-__FAILED:
-    return RT_ERR_UNKNOWN;
 }
 
 void FFNodeCodecCtx::decodeLooper() {
-    int len = 0, err = 0;
-    int gotPic = false;
     RtMediaPacket packet = NULL;
     RtBuffer pkt_buffer = NULL;
     AVFrame *frame = NULL;
@@ -310,9 +304,6 @@ RT_RET ff_node_codec_pull(void *ctx, RtMediaFrame frame, UINT32 *size) {
         rt_media_frame_set_status(frame, RT_MEDIA_FRAME_STATUS_READY);
     }
     return RT_OK;
-
-__FAILED:
-    return RT_ERR_UNKNOWN;
 }
 
 RT_RET ff_node_codec_push(void *ctx, RtMediaPacket packet, UINT32 *size) {

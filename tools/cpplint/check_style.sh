@@ -8,10 +8,17 @@ fi
 
 if [ -f cpplint.py ]
 then
-   ROCKIT_ROOT=../..
+    ROCKIT_ROOT=../..
 fi
 
-find ${ROCKIT_ROOT}/src -name *.cpp | xargs ${ROCKIT_ROOT}/tools/cpplint/cpplint.py --linelength=120 --root=${ROCKIT_ROOT}
-find ${ROCKIT_ROOT}/src -name *.h | xargs ${ROCKIT_ROOT}/tools/cpplint/cpplint.py --linelength=120 --root=${ROCKIT_ROOT}
+CHECK_DIR=${ROCKIT_ROOT}/src
+if [ -d ${ROCKIT_ROOT}/$1 ] && [ -n "$1" ]; then
+    CHECK_DIR=${ROCKIT_ROOT}/$1
+fi
+
+echo "run CPPLint in ${CHECK_DIR}"
+
+find ${CHECK_DIR} -name *.cpp | xargs ${ROCKIT_ROOT}/tools/cpplint/cpplint.py --linelength=120 --root=${ROCKIT_ROOT}
+find ${CHECK_DIR} -name *.h | xargs ${ROCKIT_ROOT}/tools/cpplint/cpplint.py --linelength=120 --root=${ROCKIT_ROOT}
 find ${ROCKIT_ROOT}/include -name *.h | xargs ${ROCKIT_ROOT}/tools/cpplint/cpplint.py --linelength=120 --root=${ROCKIT_ROOT}
 

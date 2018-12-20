@@ -45,6 +45,7 @@ static const rt_enum_name g_node_type_names[] = {
 static const rt_enum_name g_node_cmd_names[] = {
     { RT_NODE_CMD_BASE,        "BASE" },
     { RT_NODE_CMD_INIT,        "INIT" },
+    { RT_NODE_CMD_SET_DATASOURCE, "SET_DATASOURCE" },
     { RT_NODE_CMD_PREPARE,     "PREPARE" },
     { RT_NODE_CMD_START,       "START" },
     { RT_NODE_CMD_STOP,        "STOP" },

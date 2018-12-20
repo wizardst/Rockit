@@ -30,6 +30,8 @@ RT_RET unit_test_best_practice() {
     unit_test_node_bus(0, 0);
 
     rt_mem_record_dump();
+
+    unit_test_node_basic(0, 0);
     return RT_OK;
 }
 

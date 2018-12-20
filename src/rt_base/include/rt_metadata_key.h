@@ -33,6 +33,14 @@ enum {
     kKeyFrameWidth  = MKTAG('f', 'w', 'i', 't'),
     kKeyFrameHeight = MKTAG('f', 'h', 'i', 't'),
     kKeyEOS         = MKTAG('k', 'e', 'o', 's'),
+    kKeyUrl         = MKTAG('k', 'u', 'r', 'l'),
+    kKeyAVPacket    = MKTAG('a', 'v', 'p', 't'),   // AVPacket
+    kKeyAVPktPts    = MKTAG('p', 'p', 't', 's'),   // AVPacket dts
+    kKeyAVPktDts    = MKTAG('p', 'd', 't', 's'),   // AVPacket pts
+    kKeyAVPktSize   = MKTAG('p', 's', 'i', 'z'),   // AVPacket size
+    kKeyAVPktFlag   = MKTAG('p', 'f', 'l', 'g'),   // AVPacket flag
+    kKeyAVPktIndex  = MKTAG('p', 'i', 'd', 'x'),   // AVPacket index
+    kKeyAVPktData  =  MKTAG('p', 'd', 'a', 't'),   // AVPacket data
 };
 
 

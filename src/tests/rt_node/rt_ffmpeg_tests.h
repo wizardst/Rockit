@@ -25,7 +25,7 @@
 
 RT_RET unit_test_ffmpeg_format(INT32 index, INT32 total);
 RT_RET unit_test_ffmpeg_camera(INT32 index, INT32 total);
-RT_RET unit_test_ffmpeg_parser(INT32 index, INT32 total);
+RT_RET unit_test_ffmpeg_demuxer(INT32 index, INT32 total);
 RT_RET unit_test_ffmpeg_codec(INT32 index, INT32 total);
 
 #endif  // SRC_TESTS_RT_NODE_RT_FFMPEG_TESTS_H_

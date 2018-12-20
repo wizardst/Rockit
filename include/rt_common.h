@@ -43,4 +43,11 @@
 #define RT_ALIGN(x, a)         (((x) + (a) - 1) & ~((a) - 1))
 #define RT_VSWAP(a, b)         { a ^= b; b ^= a; a ^= b; }
 
+#ifndef RT_INT64_MIN
+#define RT_INT64_MIN       (-0x7fffffffffffffffLL-1)
+#endif
+
+#ifndef RT_INT64_MAX
+#define RT_INT64_MAX        INT64_C(9223372036854775807)
+#endif
 #endif  // INCLUDE_RT_COMMON_H_
