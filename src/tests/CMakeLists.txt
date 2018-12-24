@@ -1,10 +1,12 @@
 cmake_minimum_required( VERSION 2.8.8 )
 
 include_directories(rt_base)
+include_directories(rt_media)
 include_directories(rt_node)
 include_directories(rt_task)
 
 add_subdirectory(rt_base)
+add_subdirectory(rt_media)
 add_subdirectory(rt_node)
 add_subdirectory(rt_task)
 

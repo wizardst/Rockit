@@ -1,6 +1,7 @@
 cmake_minimum_required( VERSION 2.8.8 )
 
 set(RT_BASE_STATIC rt_base_static)
+set(RT_MEDIA_STATIC rt_media_static)
 set(RT_NODE_STATIC rt_node_static)
 set(RT_TASK_STATIC rt_task_static) 
 

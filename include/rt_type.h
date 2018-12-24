@@ -40,7 +40,9 @@ typedef uint16_t     UINT16;
 typedef uint32_t     UINT32;
 typedef uint64_t     UINT64;
 
-typedef void *       RT_PTR;
+typedef void*        RT_PTR;
+typedef void         RT_VOID;
+typedef float        RT_FLOAT;
 
 #define RtToBool(cond)  ((cond) != 0)
 #define RtToS8(x)     ((INT8)(x))
