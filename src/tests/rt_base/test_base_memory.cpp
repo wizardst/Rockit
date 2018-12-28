@@ -24,7 +24,7 @@
 
 #include "rt_header.h" // NOLINT
 #include "rt_base_tests.h" // NOLINT
-#include "rt_mem_service.h" // NOLINT
+#include "RTMemService.h" // NOLINT
 
 typedef struct _person {
     int   age;
@@ -69,7 +69,7 @@ RT_RET unit_test_memory(INT32 index, INT32 total_index) {
 RT_RET unit_test_mem_service(INT32 index, INT32 total_index) {
     RT_LOGE("Enter ...");
     UINT32 idx = 0;
-    rt_mem_service * mem_record = new rt_mem_service();
+    RTMemService * mem_record = new RTMemService();
     mem_record->reset();
 
     RT_LOGE("Case: memory leakage ...");
@@ -78,7 +78,7 @@ RT_RET unit_test_mem_service(INT32 index, INT32 total_index) {
         prince = rt_malloc(Person);
         prince->age  = idx;
         prince->name = const_cast<char*>("prince");
-        mem_record->add_node(__FUNCTION__, prince, sizeof(prince));
+        mem_record->addNode(__FUNCTION__, prince, sizeof(prince));
     }
     mem_record->dump();
 
@@ -87,8 +87,8 @@ RT_RET unit_test_mem_service(INT32 index, INT32 total_index) {
     UINT32  node_size;
     for (UINT32 i = 0; i < mem_record->nodes_max; i++, node++) {
         if ((RT_NULL != node->ptr) && (0 != node->size)) {
-            mem_record->find_node(__FUNCTION__, node->ptr, &node_size);
-            mem_record->remove_node(node->ptr, &node_size);
+            mem_record->findNode(__FUNCTION__, node->ptr, &node_size);
+            mem_record->removeNode(node->ptr, &node_size);
         } else {
             break;
         }

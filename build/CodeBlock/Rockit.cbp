@@ -5,7 +5,6 @@
 		<Option title="Rockit" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="src\rt_base\;" />
 		<Build>
 			<Target title="Debug">
 				<Option output="bin/Debug/Rockit" prefix_auto="1" extension_auto="1" />
@@ -21,14 +20,19 @@
 					<Add directory="${SRC_ROOT}/src/rt_node/include" />
 					<Add directory="${SRC_ROOT}/src/rt_task/include" />
 					<Add directory="${SRC_ROOT}/third-party/prebuilt/headers/ffmpeg-4.0/include" />
+					<Add directory="${SRC_ROOT}/third-party/prebuilt/headers/angle/include" />
+					<Add directory="${SRC_ROOT}/src/rt_media/include" />
+					<Add directory="${SRC_ROOT}/src/rt_media/GLRender" />
 				</Compiler>
 				<Linker>
-					<Add option="-lavformat -lavcodec -lavfilter -lavutil" />
-					<Add library="${BUILT_WIN32}/avcodec.lib" />
-					<Add library="${BUILT_WIN32}/avfilter.lib" />
-					<Add library="${BUILT_WIN32}/avformat.lib" />
-					<Add library="${BUILT_WIN32}/avutil.lib" />
-					<Add library="${BUILT_WIN32}/avdevice.lib" />
+					<Add option="-lgdi32" />
+					<Add library="${BUILT_WIN32}/ffmpeg/avcodec.lib" />
+					<Add library="${BUILT_WIN32}/ffmpeg/avfilter.lib" />
+					<Add library="${BUILT_WIN32}/ffmpeg/avformat.lib" />
+					<Add library="${BUILT_WIN32}/ffmpeg/avutil.lib" />
+					<Add library="${BUILT_WIN32}/ffmpeg/avdevice.lib" />
+					<Add library="${BUILT_WIN32}/angle/libEGL.lib" />
+					<Add library="${BUILT_WIN32}/angle/libGLESv2.lib" />
 					<Add directory="../../third-party/prebuilt/win32" />
 				</Linker>
 				<Environment>
@@ -65,6 +69,8 @@
 		<Unit filename="../../include/rt_header.h" />
 		<Unit filename="../../include/rt_task_header.h" />
 		<Unit filename="../../include/rt_type.h" />
+		<Unit filename="../../src/rt_base/RTMemService.cpp" />
+		<Unit filename="../../src/rt_base/include/RTMemService.h" />
 		<Unit filename="../../src/rt_base/include/rt_array_list.h" />
 		<Unit filename="../../src/rt_base/include/rt_buffer.h" />
 		<Unit filename="../../src/rt_base/include/rt_buffer_tag.h" />
@@ -77,10 +83,10 @@
 		<Unit filename="../../src/rt_base/include/rt_media_frame.h" />
 		<Unit filename="../../src/rt_base/include/rt_media_packet.h" />
 		<Unit filename="../../src/rt_base/include/rt_mem.h" />
-		<Unit filename="../../src/rt_base/include/rt_mem_service.h" />
 		<Unit filename="../../src/rt_base/include/rt_metadata.h" />
 		<Unit filename="../../src/rt_base/include/rt_metadata_key.h" />
 		<Unit filename="../../src/rt_base/include/rt_mutex.h" />
+		<Unit filename="../../src/rt_base/include/rt_string_utils.h" />
 		<Unit filename="../../src/rt_base/include/rt_thread.h" />
 		<Unit filename="../../src/rt_base/include/rt_time.h" />
 		<Unit filename="../../src/rt_base/linux/rt_os_cpu_info.cpp" />
@@ -96,7 +102,6 @@
 		<Unit filename="../../src/rt_base/rt_linked_list.cpp" />
 		<Unit filename="../../src/rt_base/rt_log.cpp" />
 		<Unit filename="../../src/rt_base/rt_mem.cpp" />
-		<Unit filename="../../src/rt_base/rt_mem_service.cpp" />
 		<Unit filename="../../src/rt_base/rt_metadata.cpp" />
 		<Unit filename="../../src/rt_base/rt_os_log.h" />
 		<Unit filename="../../src/rt_base/rt_os_mem.h" />
@@ -107,6 +112,39 @@
 		<Unit filename="../../src/rt_base/windows/rt_os_mutex.cpp" />
 		<Unit filename="../../src/rt_base/windows/rt_os_thread.cpp" />
 		<Unit filename="../../src/rt_base/windows/rt_os_time.cpp" />
+		<Unit filename="../../src/rt_media/GLRender/MathMat4.cpp" />
+		<Unit filename="../../src/rt_media/GLRender/MathMat4.h" />
+		<Unit filename="../../src/rt_media/GLRender/MathVec4.cpp" />
+		<Unit filename="../../src/rt_media/GLRender/MathVec4.h" />
+		<Unit filename="../../src/rt_media/GLRender/RTAction.cpp" />
+		<Unit filename="../../src/rt_media/GLRender/RTAction.h" />
+		<Unit filename="../../src/rt_media/GLRender/RTActionManager.cpp" />
+		<Unit filename="../../src/rt_media/GLRender/RTActionManager.h" />
+		<Unit filename="../../src/rt_media/GLRender/RTCamera.cpp" />
+		<Unit filename="../../src/rt_media/GLRender/RTCamera.h" />
+		<Unit filename="../../src/rt_media/GLRender/RTDirector.cpp" />
+		<Unit filename="../../src/rt_media/GLRender/RTDirector.h" />
+		<Unit filename="../../src/rt_media/GLRender/RTScene.cpp" />
+		<Unit filename="../../src/rt_media/GLRender/RTScene.h" />
+		<Unit filename="../../src/rt_media/GLRender/RTScheduler.cpp" />
+		<Unit filename="../../src/rt_media/GLRender/RTScheduler.h" />
+		<Unit filename="../../src/rt_media/GLRender/RTShaderUtil.cpp" />
+		<Unit filename="../../src/rt_media/GLRender/RTShaderUtil.h" />
+		<Unit filename="../../src/rt_media/GLRender/RTSprite.cpp" />
+		<Unit filename="../../src/rt_media/GLRender/RTSprite.h" />
+		<Unit filename="../../src/rt_media/GLRender/RTSpriteVideo.cpp" />
+		<Unit filename="../../src/rt_media/GLRender/RTSpriteVideo.h" />
+		<Unit filename="../../src/rt_media/RTGLApp.cpp" />
+		<Unit filename="../../src/rt_media/RTGLVideoScene.cpp" />
+		<Unit filename="../../src/rt_media/RTGLView.cpp" />
+		<Unit filename="../../src/rt_media/RTObject.cpp" />
+		<Unit filename="../../src/rt_media/include/RTConstant.h" />
+		<Unit filename="../../src/rt_media/include/RTGLApp.h" />
+		<Unit filename="../../src/rt_media/include/RTGLVideoScene.h" />
+		<Unit filename="../../src/rt_media/include/RTGLView.h" />
+		<Unit filename="../../src/rt_media/include/RTMediaMetaKeys.h" />
+		<Unit filename="../../src/rt_media/include/RTObject.h" />
+		<Unit filename="../../src/rt_media/include/RTString.h" />
 		<Unit filename="../../src/rt_node/ff_node/ff_node_codec.cpp" />
 		<Unit filename="../../src/rt_node/ff_node/ff_node_demuxer.cpp" />
 		<Unit filename="../../src/rt_node/ff_node/ff_node_filter.cpp" />
@@ -142,6 +180,8 @@
 		<Unit filename="../../src/tests/rt_base/test_base_memory.cpp" />
 		<Unit filename="../../src/tests/rt_base/test_base_meta_data.cpp" />
 		<Unit filename="../../src/tests/rt_base/test_base_mutex_thread.cpp" />
+		<Unit filename="../../src/tests/rt_media/rt_media_tests.h" />
+		<Unit filename="../../src/tests/rt_media/unit_test_display_gles.cpp" />
 		<Unit filename="../../src/tests/rt_node/rt_ffmpeg_tests.h" />
 		<Unit filename="../../src/tests/rt_node/rt_node_tests.h" />
 		<Unit filename="../../src/tests/rt_node/test_ffmpeg_camera.cpp" />

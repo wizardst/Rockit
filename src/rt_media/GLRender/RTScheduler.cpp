@@ -67,13 +67,15 @@ void RTTimer::update(RT_FLOAT dt) {
  * RenderSelector Implementation
  */
 RenderSelector::RenderSelector() {
+    RTObject::trace(getName(), this, sizeof(RenderSelector));
     mScheduler     = RT_NULL;
     mSchedulerFunc = RT_NULL;
     mTarget        = RT_NULL;
 }
 
 RenderSelector::~RenderSelector() {
-    // @TODO(martin)
+    RTObject::untrace(getName(), this);
+    // TODO(@martin)
 }
 
 void RenderSelector::setTarget(RTScheduler* scheduler, SchedulerFunc callback, void* target) {
@@ -94,22 +96,25 @@ void RenderSelector::cancel() {
     }
 }
 
-void RenderSelector::toString(char* buffer) {
-    rt_str_snprintf(buffer, MAX_NAME_LEN, "%s", "RTTimer/RenderSelector"); // NOLINT
-}
-
-void RenderSelector::summary(char* buffer) {
-    this->toString(buffer);
-}
-
 /*
  * RTScheduler Implementation
  */
 RTScheduler::RTScheduler() {
+    RTObject::trace(getName(), this, sizeof(RTScheduler));
+
     mSelectors = array_list_create();
 }
 
 RTScheduler::~RTScheduler() {
+    RTObject::untrace(getName(), this);
+
+    for (UINT32 idx = 0; idx < array_list_get_size(mSelectors); idx++) {
+        void* ptr = array_list_get_data(mSelectors, idx);
+        array_list_set(mSelectors, idx, RT_NULL);
+        RenderSelector* render = reinterpret_cast<RenderSelector*>(ptr);
+        rt_safe_delete(render);
+    }
+
     array_list_destroy(mSelectors);
     mSelectors = RT_NULL;
 }
@@ -155,10 +160,3 @@ void RTScheduler::unschedule(void *target) {
     }
 }
 
-void RTScheduler::toString(char* buffer) {
-    rt_str_snprintf(buffer, MAX_NAME_LEN, "%s", "RTTimer/RTScheduler");  // NOLINT
-}
-
-void RTScheduler::summary(char* buffer) {
-    this->toString(buffer);
-}

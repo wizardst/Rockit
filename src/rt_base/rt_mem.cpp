@@ -21,7 +21,7 @@
 #include "rt_mem.h" // NOLINT
 #include "rt_log.h" // NOLINT
 #include "rt_os_mem.h" // NOLINT
-#include "rt_mem_service.h" // NOLINT
+#include "RTMemService.h" // NOLINT
 #include <string.h>
 #include <stdio.h>
 
@@ -43,7 +43,7 @@
 #define MEM_HEAD_ROOM(debug)    (((debug) & MEM_EXT_ROOM) ? (MEM_ALIGN) : (0))
 
 static UINT8 debug = 0;
-static rt_mem_service mem_records;
+static RTMemService _gMemService;
 
 void *rt_mem_malloc(const char *caller, UINT32 size) {
     UINT32 size_align = MEM_ALIGNED(size);
@@ -54,7 +54,7 @@ void *rt_mem_malloc(const char *caller, UINT32 size) {
     rt_os_malloc(&ptr, MEM_ALIGN, size_real);
 
     // TODO(debug) : debug memory
-    mem_records.add_node(caller, ptr, size);
+    _gMemService.addNode(caller, ptr, size);
 
     return ptr;
 }
@@ -83,7 +83,7 @@ void *rt_mem_realloc(const char *caller, void *ptr, UINT32 size) {
     rt_os_realloc(ptr_real, &ret, MEM_ALIGN, size_align);
 
     // TODO(debug) : debug memory
-    // mem_service::dump(args)
+    // _gMemService->dump();
 
     return ret;
 }
@@ -100,7 +100,7 @@ void rt_mem_free(const char *caller, void *ptr) {
 
     // TODO(debug) : debug memory
     UINT32 size;
-    mem_records.remove_node(ptr, &size);
+    _gMemService.removeNode(ptr, &size);
 
     return;
 }
@@ -122,14 +122,14 @@ void *rt_memcpy(void *dst, const void *src, size_t n) {
 
 void rt_mem_record_dump() {
     // TODO(debug) : debug memory
-    mem_records.dump();
+    _gMemService.dump();
 
     return;
 }
 
 void rt_mem_record_reset() {
     // TODO(debug) : debug memory
-    mem_records.reset();
+    _gMemService.reset();
 
     return;
 }

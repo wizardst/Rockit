@@ -141,9 +141,9 @@ class RTCompound  : public RTActionTime {
     // virtual void step(RT_FLOAT dt);
     virtual void update(RT_FLOAT dt);
 
-    // override @RTObject methods
-    void toString(char* buffer);
-    void summary(char* buffer);
+    // override pure virtual methods of RTObject class
+    virtual void summary(INT32 fd) {}
+    virtual const char* getName() { return "RTActionTime/RTCompound"; }
 
  private:
     RTActionTime* mInnerAction;

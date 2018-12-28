@@ -17,8 +17,8 @@
  *   date: 2018/07/05
  */
 
-#ifndef SRC_RT_BASE_INCLUDE_RT_MEM_SERVICE_H_
-#define SRC_RT_BASE_INCLUDE_RT_MEM_SERVICE_H_
+#ifndef SRC_RT_BASE_INCLUDE_RTMEMSERVICE_H_
+#define SRC_RT_BASE_INCLUDE_RTMEMSERVICE_H_
 
 #include "rt_header.h" // NOLINT
 
@@ -28,15 +28,15 @@ typedef struct _mem_node {
     const char  *caller;
 } MemNode;
 
-class rt_mem_service {
+class RTMemService {
  public:
-    rt_mem_service();
-    ~rt_mem_service();
-    void add_node(const char *caller, void* ptr, UINT32 size);
-    void remove_node(void* ptr, UINT32 *size);
+    RTMemService();
+    ~RTMemService();
+    void addNode(const char *caller, void* ptr, UINT32 size);
+    void removeNode(void* ptr, UINT32 *size);
     void reset();
     void dump();
-    INT32 find_node(const char *caller, void* ptr, UINT32 *size);
+    INT32 findNode(const char *caller, void* ptr, UINT32 *size);
 
  public:
     MemNode *mem_nodes;
@@ -45,5 +45,5 @@ class rt_mem_service {
     UINT32  total_size;
 };
 
-#endif  // SRC_RT_BASE_INCLUDE_RT_MEM_SERVICE_H_
+#endif  // SRC_RT_BASE_INCLUDE_RTMEMSERVICE_H_
 

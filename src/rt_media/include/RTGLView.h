@@ -58,9 +58,10 @@ class RTGLView : public RTObject {
     void destroy();
     void swapBuffer();
 
-    // override @RTObject methods
-    void toString(char* buffer);
-    void summary(char* buffer);
+    // override pure virtual methods of RTObject class
+    virtual void summary(INT32 fd) {}
+    virtual const char* getName() { return "RTObject/RTGLView"; }
+
  private:
     EGLWindowCtx* mEglCtx;
 };

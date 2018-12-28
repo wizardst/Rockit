@@ -31,20 +31,15 @@ typedef struct _hashElement {
 } tHashElement;
 
 RTActionManager::RTActionManager() {
+    RTObject::trace(getName(), this, sizeof(RTActionManager));
+
     mActionTable = rt_hash_table_create(12, hash_ptr_func, hash_ptr_compare);
 }
 
 RTActionManager::~RTActionManager() {
+    RTObject::untrace(getName(), this);
     rt_hash_table_clear(this->mActionTable);
     rt_hash_table_destory(this->mActionTable);
-}
-
-void RTActionManager::toString(char* buffer) {
-    rt_str_snprintf(buffer, 64, "%s", "RTObject/RTActionManager");   // NOLINT
-}
-
-void RTActionManager::summary(char* buffer) {
-    toString(buffer);
 }
 
 void RTActionManager::addAction(RTAction *action, RTSprite *target, RT_BOOL paused) {

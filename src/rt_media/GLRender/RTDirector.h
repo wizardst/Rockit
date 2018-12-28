@@ -32,6 +32,7 @@ class RTScene;
 class RTDirector {
  public:
     static RTDirector* getInstance();
+    static void shutdown();
     void pause();
     void resume();
     void restart();
@@ -50,6 +51,7 @@ class RTDirector {
 
  private:
     RTDirector();
+    ~RTDirector();
     static RTDirector*  mInstance;
 
  protected:

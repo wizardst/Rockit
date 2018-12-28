@@ -13,22 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng@rock-chips.com
- *   date: 20181218
+ * Author: martin.cheng@rock-chips.com
+ *   Date: 2018/12/26
  */
 
-#include "RTObject.h"  // NOLINT
-#include "rt_log.h"    // NOLINT
+#ifndef SRC_RT_MEDIA_INCLUDE_RTCONSTANT_H_
+#define SRC_RT_MEDIA_INCLUDE_RTCONSTANT_H_
 
-void RTObject::setName(const char* name) {
-    rt_str_snprintf(mName, MAX_NAME_LEN, "%s", name);  // NOLINT
-}
+#define MAX_TRACK_STR_LEN    16
+#define TRACK_INDEX_UNKNOWN  -1
+#define MAX_URI_LEN          1028
 
-RTObject::RTObject() {
-    rt_str_snprintf(mName, MAX_NAME_LEN, "%s", "RTObject/Unknown");  // NOLINT
-    RT_LOGE(" RTObject() ptr=%p, name=%s", this, this->getName());
-}
-
-RTObject::~RTObject() {
-    RT_LOGE("~RTObject() ptr=%p, name=%s", this, this->getName());
-}
+#endif  // SRC_RT_MEDIA_INCLUDE_RTCONSTANT_H_

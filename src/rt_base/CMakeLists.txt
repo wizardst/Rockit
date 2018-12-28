@@ -21,11 +21,12 @@ set(RT_BASE_SRC
     rt_hash_table.cpp
     rt_linked_list.cpp
     rt_mem.cpp
-    rt_mem_service.cpp
+
     rt_log.cpp
     rt_string_utils.cpp
     rt_test.cpp
     rt_metadata.cpp
+    RTMemService.cpp
     ${RT_BASE_LINUX_SRC}
     ${RT_BUFFER_SRC}
 )

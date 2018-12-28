@@ -27,7 +27,8 @@ RTGLVideoScene::RTGLVideoScene() {
 }
 
 RTGLVideoScene::~RTGLVideoScene() {
-    {}
+    // TODO(@martin)
+    this->removeAllChildren();
 }
 
 void RTGLVideoScene::init() {

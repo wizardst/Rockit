@@ -130,6 +130,8 @@ void RTRepeatForever::step(RT_FLOAT dt) {
  *  2018-12-21
  */
 RTCompound::RTCompound() {
+    RTObject::trace(getName(), this, sizeof(RTCompound));
+
     mSrcOpacity = mDstOpacity = 255;
     mSrcScaleX  = mSrcScaleY  = mSrcScaleZ  = UNSET_VALUE;
     mDstScaleX  = mDstScaleY  = mDstScaleZ  = UNSET_VALUE;
@@ -140,7 +142,8 @@ RTCompound::RTCompound() {
 }
 
 RTCompound::~RTCompound() {
-    // @TODO(martin)
+    RTObject::untrace(getName(), this);
+    // TODO(@martin)
 }
 
 void RTCompound::scaleTo(RT_FLOAT sx, RT_FLOAT sy, RT_FLOAT sz) {
@@ -183,13 +186,4 @@ void RTCompound::update(float time) {
 
         mTarget->setPosition(pos_x, pos_y);
     }
-}
-
-// override @RTObject methods
-void RTCompound::toString(char* buffer) {
-    rt_str_snprintf(buffer, MAX_NAME_LEN, "%s", "RTActionTime/RTCompound");  // NOLINT
-}
-
-void RTCompound::summary(char* buffer) {
-    toString(buffer);
 }

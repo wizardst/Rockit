@@ -27,10 +27,10 @@
 #endif
 #define LOG_TAG "msg_looper"
 
-#ifdef LOG_FLAG
-#undef LOG_FLAG
+#ifdef DEBUG_FLAG
+#undef DEBUG_FLAG
 #endif
-#define LOG_FLAG 0x1
+#define DEBUG_FLAG 0x0
 
 RTMsgLooper::RTMsgLooper() {
     mEventQueue = deque_create();
@@ -39,7 +39,7 @@ RTMsgLooper::RTMsgLooper() {
     mLock       = new RtMutex();
     mExecCond   = new RtCondition();
     mExitFlag   = RT_FALSE;
-    RT_LOGX(LOG_FLAG, "+Constructor");
+    RT_LOGD_IF(DEBUG_FLAG, "+Constructor");
 }
 
 RTMsgLooper::~RTMsgLooper() {
@@ -50,7 +50,7 @@ RTMsgLooper::~RTMsgLooper() {
     rt_safe_delete(mThread);
     rt_safe_delete(mLock);
     rt_safe_delete(mExecCond);
-    RT_LOGX(LOG_FLAG, "~Destructor");
+    RT_LOGD_IF(DEBUG_FLAG, "~Destructor");
 }
 
 RT_RET RTMsgLooper::post(struct RTMessage* msg, INT64 delayUs /* = 0 */) {
@@ -90,7 +90,7 @@ RT_RET RTMsgLooper::post(struct RTMessage* msg, INT64 delayUs /* = 0 */) {
 #endif
     mExecCond->broadcast();
 
-    RT_LOGX(LOG_FLAG, "message(msg=%p; what=%d) posted to msg-queue", msg, msg->getWhat());
+    RT_LOGD_IF(DEBUG_FLAG, "message(msg=%p; what=%d) posted to msg-queue", msg, msg->getWhat());
 
     return RT_OK;
 }
@@ -105,7 +105,7 @@ RT_BOOL RTMsgLooper::msgLoop() {
         }
 
         if (0 == deque_size(mEventQueue)) {
-            RT_LOGX(LOG_FLAG, "[0]wait condition ...pid(%d)", mThread->get_tid());
+            RT_LOGD_IF(DEBUG_FLAG, "[0]wait condition ...pid(%d)", mThread->get_tid());
             mExecCond->wait(mLock);
         }
 
@@ -116,13 +116,13 @@ RT_BOOL RTMsgLooper::msgLoop() {
         if (whenUs > nowUs) {
             INT64 delayUs = whenUs - nowUs;
             mExecCond->timedwait(mLock, delayUs);
-            RT_LOGX(LOG_FLAG, "[0]timedwait condition ...pid(%d)", mThread->get_tid());
+            RT_LOGD_IF(DEBUG_FLAG, "[0]timedwait condition ...pid(%d)", mThread->get_tid());
         }
 
         msg = reinterpret_cast<struct RTMessage*>(deque_pop(mEventQueue).data);
 
         // Handler callback will handle this message
-        RT_LOGX(LOG_FLAG, "message(msg=%p; what=%d) delivering ...", msg, msg->getWhat());
+        RT_LOGD_IF(DEBUG_FLAG, "message(msg=%p; what=%d) delivering ...", msg, msg->getWhat());
         if (RT_NULL != msg) {
             msg->deliver();
             rt_safe_delete(msg);

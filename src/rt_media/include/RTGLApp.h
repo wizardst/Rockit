@@ -28,15 +28,15 @@ class RTGLView;
 class RTGLApp : public RTObject {
  public:
     RTGLApp();
-    ~RTGLApp();
+    virtual ~RTGLApp();
 
     void createWindow(const char* title, INT32 width, INT32 height);
     void runtime();
     void eventLoop();
 
-    // override @RTObject methods
-    void toString(char* buffer);
-    void summary(char* buffer);
+    // override pure virtual methods of RTObject class
+    virtual void summary(INT32 fd) {}
+    virtual const char* getName() { return "RTObject/RTGLApp"; }
 
  private:
     RTGLView* mGLView;

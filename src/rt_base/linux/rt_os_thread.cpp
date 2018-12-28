@@ -30,10 +30,10 @@
 #endif
 #define LOG_TAG "os_pthread"
 
-#ifdef LOG_FLAG
-#undef LOG_FLAG
+#ifdef DEBUG_FLAG
+#undef DEBUG_FLAG
 #endif
-#define LOG_FLAG 0x1
+#define DEBUG_FLAG 0x0
 
 #define MAX_THREAD_NAME_LEN 12
 
@@ -50,9 +50,9 @@ static void* thread_looping(void* arg) {
     RtThreadData* data = static_cast<RtThreadData*>(arg);
     // Call entry point only if thread was not canceled before starting.
     INT32 tid = (INT32)(data->mTid);
-    RT_LOGX(LOG_FLAG, "pthread(name:%-010s tid:%03d) Loop Start...", data->mName, tid);
+    RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:%03d) Loop Start...", data->mName, tid);
     data->mLoopProc(data->mPtrData);
-    RT_LOGX(LOG_FLAG, "pthread(name:%-010s tid:%03d) Loop DONE!", data->mName, tid);
+    RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:%03d) Loop DONE!", data->mName, tid);
     return NULL;
 }
 
@@ -96,9 +96,9 @@ void RtThread::join() {
             return;
         }
         INT32 tid = (INT32)(data->mTid);
-        RT_LOGX(LOG_FLAG, "pthread(name:%-010s tid:%03d) Joining...", data->mName, tid);
+        RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:%03d) Joining...", data->mName, tid);
         pthread_join(data->mTid, RT_NULL);
-        RT_LOGX(LOG_FLAG, "pthread(name:%-010s tid:%03d) Join DONE",  data->mName, tid);
+        RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:%03d) Join DONE",  data->mName, tid);
         data->mTid   = 0;
         data->mValid = RT_FALSE;
     }

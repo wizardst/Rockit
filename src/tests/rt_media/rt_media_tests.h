@@ -25,4 +25,4 @@
 
 RT_RET unit_test_display_gles(INT32 index, INT32 total_index);
 
-#endif // SRC_TESTS_RT_MEDIA_RT_MEDIA_TESTS_H_
+#endif  // SRC_TESTS_RT_MEDIA_RT_MEDIA_TESTS_H_

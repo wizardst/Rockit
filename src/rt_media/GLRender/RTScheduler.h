@@ -61,13 +61,16 @@ class RTTimer : public RTObject {
 class RenderSelector : public RTTimer {
  public:
     RenderSelector();
-    ~RenderSelector();
+    virtual ~RenderSelector();
     void setTarget(RTScheduler* scheduler, SchedulerFunc callback, void* target);
 
     virtual void trigger();
     virtual void cancel();
-    virtual void toString(char* buffer);
-    virtual void summary(char* buffer);
+
+    // override pure virtual methods of RTObject class
+    virtual void summary(INT32 fd) {}
+    virtual const char* getName() { return typeid(this).name(); }
+
  protected:
     SchedulerFunc mSchedulerFunc;
     void* mTarget;
@@ -76,7 +79,8 @@ class RenderSelector : public RTTimer {
 class RTScheduler : public RTObject {
  public:
     RTScheduler();
-    ~RTScheduler();
+    virtual ~RTScheduler();
+
  public:
     void update(RT_FLOAT dt);
     void schedule(SchedulerFunc callback, void *target, RT_FLOAT interval, RT_BOOL paused);
@@ -86,9 +90,10 @@ class RTScheduler : public RTObject {
     // void schedule(SEL_SCHEDULE selector, void *target, RT_FLOAT interval, RT_BOOL paused);
     void unschedule(void *target);
 
-    // override @RTObject methods
-    void toString(char* buffer);
-    void summary(char* buffer);
+    // override pure virtual methods of RTObject class
+    virtual void summary(INT32 fd) {}
+    virtual const char* getName() { return typeid(this).name(); }
+
  private:
     RtArrayList* mSelectors;
 };

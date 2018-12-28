@@ -35,6 +35,6 @@ set(ROCKIT_TEST_SRC
 )
 
 add_executable(rockit_test ${ROCKIT_TEST_SRC})
-target_link_libraries(rockit_test ${RT_BASE_STATIC} ${RT_NODE_STATIC} ${RT_TASK_STATIC})
+target_link_libraries(rockit_test ${RT_BASE_STATIC} ${RT_MEDIA_STATIC} ${RT_NODE_STATIC} ${RT_TASK_STATIC})
 
 message(STATUS "cmake version ${CMAKE_VERSION} [@@]config rockit_test")

@@ -43,6 +43,13 @@ RTDirector::RTDirector() {
     mAnimInterval    = 1.0f/30.0f;
 }
 
+RTDirector::~RTDirector() {
+    this->pause();
+    rt_safe_delete(mScheduler);
+    rt_safe_delete(mActionManager);
+    rt_safe_delete(mTaskScene);
+}
+
 void RTDirector::pause() {
     if (mPaused) {
         return;
@@ -102,6 +109,13 @@ void RTDirector::setAnimInterval(RT_FLOAT interval) {
 void RTDirector::mainLoop() {
     if (!mPaused) {
         drawScene();
+    }
+}
+
+void RTDirector::shutdown() {
+    if (RT_NULL != mInstance) {
+        delete mInstance;
+        mInstance = RT_NULL;
     }
 }
 

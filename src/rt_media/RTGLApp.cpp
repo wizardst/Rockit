@@ -21,8 +21,8 @@
 #include "include/RTGLApp.h"         // NOLINT
 #include "include/RTGLView.h"        // NOLINT
 #include "include/RTGLVideoScene.h"  // NOLINT
-#include "GLRender/RTDirector.h" // NOLINT
-#include "rt_type.h"                 // NOLINT
+#include "GLRender/RTDirector.h"     // NOLINT
+#include "rt_header.h"               // NOLINT
 #include "rt_string_utils.h"         // NOLINT
 #include <stdio.h>                   // NOLINT
 
@@ -33,12 +33,15 @@
 HWND native_window_create(const char* title, INT32 width, INT32 height);
 
 RTGLApp::RTGLApp() {
+    RTObject::trace(getName(), this, sizeof(RTGLApp));
     mGLView = new RTGLView();
     mWndPtr = 0;
 }
 
 RTGLApp::~RTGLApp() {
+    RTObject::untrace(getName(), this);
     mGLView->destroy();
+    RTDirector::shutdown();
     rt_safe_delete(mGLView);
 }
 
@@ -65,6 +68,7 @@ void RTGLApp::eventLoop() {
             switch (msg.message) {
                 case WM_QUIT:
                     done = 1;
+                    RT_LOGE("WM_QUIT");
                     break;
                 default:
                     TranslateMessage(&msg);
@@ -76,14 +80,6 @@ void RTGLApp::eventLoop() {
             runtime();
         }
     }
-}
-
-void RTGLApp::toString(char* buffer) {
-    rt_str_snprintf(buffer, MAX_NAME_LEN, "%s", "RTObject/RTGLApp");
-}
-
-void RTGLApp::summary(char* buffer) {
-    this->toString(buffer);
 }
 
 LRESULT WINAPI EventProc(HWND hWnd, UINT uMsg,
@@ -180,7 +176,8 @@ void unit_test_win32_gles_app() {
     RTGLApp* app = new RTGLApp();
     app->createWindow("Rockit", 800, 600);
     app->eventLoop();
-    rt_safe_delete(app);
+    RT_LOGE("app->eventLoop() DONE!");
+    delete app;
 }
 
 #else

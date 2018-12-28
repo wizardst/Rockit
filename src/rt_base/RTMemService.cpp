@@ -17,7 +17,7 @@
  *   date: 2018/07/05
  */
 
-#include "rt_mem_service.h" // NOLINT
+#include "RTMemService.h" // NOLINT
 #include "rt_os_mem.h" // NOLINT
 #include "rt_mem.h" // NOLINT
 #include "rt_log.h" // NOLINT
@@ -25,26 +25,26 @@
 #ifdef LOG_TAG
 #undef LOG_TAG
 #endif
-#define LOG_TAG "rt_mem_service"
+#define LOG_TAG "RTMemService"
 
 #define MEM_NODE_MAX            (1024)
 
-rt_mem_service::rt_mem_service() {
+RTMemService::RTMemService() {
     nodes_max = MEM_NODE_MAX;
     INT32 size = sizeof(MemNode)*nodes_max;
     rt_os_malloc(reinterpret_cast<void **>(&mem_nodes), MEM_ALIGN, size);
     RT_ASSERT(RT_NULL != mem_nodes);
 
     rt_memset(mem_nodes, 0, sizeof(MemNode)*nodes_max);
-    add_node(__FUNCTION__, mem_nodes, size);
+    addNode(__FUNCTION__, mem_nodes, size);
 
-    add_node(__FUNCTION__, this, sizeof(rt_mem_service));
+    addNode(__FUNCTION__, this, sizeof(RTMemService));
 }
 
-rt_mem_service::~rt_mem_service() {
+RTMemService::~RTMemService() {
 }
 
-void rt_mem_service::add_node(const char *caller, void* ptr, UINT32 size) {
+void RTMemService::addNode(const char *caller, void* ptr, UINT32 size) {
     RT_ASSERT(RT_NULL != mem_nodes);
 
     MemNode *node = mem_nodes;
@@ -60,7 +60,7 @@ void rt_mem_service::add_node(const char *caller, void* ptr, UINT32 size) {
     }
 }
 
-void rt_mem_service::remove_node(void* ptr, UINT32 *size) {
+void RTMemService::removeNode(void* ptr, UINT32 *size) {
     RT_ASSERT(RT_NULL != mem_nodes);
 
     MemNode *node = mem_nodes;
@@ -75,7 +75,7 @@ void rt_mem_service::remove_node(void* ptr, UINT32 *size) {
     }
 }
 
-void rt_mem_service::reset() {
+void RTMemService::reset() {
     RT_ASSERT(RT_NULL != mem_nodes);
 
     MemNode *node = mem_nodes;
@@ -88,7 +88,7 @@ void rt_mem_service::reset() {
     total_size = 0;
 }
 
-void rt_mem_service::dump() {
+void RTMemService::dump() {
     RT_ASSERT(RT_NULL != mem_nodes);
 
     RT_LOGE("======= Rockit Memory Summary =======");
@@ -103,7 +103,7 @@ void rt_mem_service::dump() {
     }
 }
 
-INT32 rt_mem_service::find_node(const char *caller, void* ptr, UINT32*size) {
+INT32 RTMemService::findNode(const char *caller, void* ptr, UINT32*size) {
     MemNode *node = mem_nodes;
 
     for (UINT32 i = 0; i < nodes_max; i++, node++) {

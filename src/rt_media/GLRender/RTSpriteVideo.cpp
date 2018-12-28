@@ -52,12 +52,15 @@ typedef struct _UserData {
 
 
 RTSpriteVideo::RTSpriteVideo() {
+    RTObject::trace(getName(), this, sizeof(RTSpriteVideo));
     this->mUserData = rt_malloc(UserData);
     this->initUserData();
     this->mCamera = new RTCamera();
 }
 
 RTSpriteVideo::~RTSpriteVideo() {
+    RTObject::untrace(getName(), this);
+
     UserData *userData = reinterpret_cast<UserData*>(mUserData);
 
     // Delete texture object
@@ -65,14 +68,8 @@ RTSpriteVideo::~RTSpriteVideo() {
 
     // Delete program object
     glDeleteProgram(userData->programObject);
-}
 
-void RTSpriteVideo::toString(char* buffer) {
-    rt_str_snprintf(buffer, 64, "%s", "RTObject/RTSpriteVideo");  // NOLINT
-}
-
-void RTSpriteVideo::summary(char* buffer) {
-    toString(buffer);
+    rt_safe_free(mUserData);
 }
 
 GLubyte* genCheckImage(int width, int height, int checkSize) {

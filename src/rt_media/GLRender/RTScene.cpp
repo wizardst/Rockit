@@ -25,11 +25,14 @@
  * RTScene Implementation
  */
 RTScene::RTScene() {
+    RTObject::trace(getName(), this, sizeof(RTScene));
+
     mChildren = RT_NULL;
 }
 
 RTScene::~RTScene() {
-    // @TODO(martin)
+    RTObject::untrace(getName(), this);
+    // TODO(@martin)
 }
 
 void RTScene::render() {
@@ -39,13 +42,6 @@ void RTScene::render() {
 }
 
 void RTScene::removeAllChildren() {
-    // @TODO(martin)
+    // TODO(@martin)
 }
 
-void RTScene::toString(char* buffer) {
-    rt_str_snprintf(buffer, MAX_NAME_LEN, "%s", "RTSprite/RTScene"); // NOLINT
-}
-
-void RTScene::summary(char* buffer) {
-    this->toString(buffer);
-}

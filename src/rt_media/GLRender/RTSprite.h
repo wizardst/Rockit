@@ -30,6 +30,7 @@ class RTCamera;
 class RTSprite : public RTObject {
  protected:
     RTSprite();
+    virtual ~RTSprite();
 
  public:
     // Sprite Life Cycle Operations

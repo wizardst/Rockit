@@ -34,10 +34,14 @@
 #include "GLRender/RTSprite.h"      // NOLINT
 
 RTGLView::RTGLView() {
+    RTObject::trace(getName(), this, sizeof(RTGLView));
+
     mEglCtx = rt_malloc(EGLWindowCtx);
 }
 
 RTGLView::~RTGLView() {
+    RTObject::untrace(getName(), this);
+
     rt_safe_free(mEglCtx);
 }
 
@@ -61,14 +65,6 @@ void RTGLView::swapBuffer() {
     if (RT_NULL != mEglCtx) {
         eglSwapBuffers(mEglCtx->mDisplay, mEglCtx->mSurface);
     }
-}
-
-void RTGLView::toString(char* buffer) {
-    rt_str_snprintf(buffer, MAX_NAME_LEN, "%s", "RTObject/RTGLView");  // NOLINT
-}
-
-void RTGLView::summary(char* buffer) {
-    toString(buffer);
 }
 
 // @private function

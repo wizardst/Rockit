@@ -28,17 +28,9 @@ class RTSpriteVideo : public RTSprite {
 
     ~RTSpriteVideo();
 
-    /** Returns a string representation of the object.
-      *
-      * @param buffer    buffer to save representation.
-      */
-    virtual void toString(char* buffer);
-
-    /** Returns a string summary of the object.
-      *
-      * @param buffer    buffer to save summary.
-      */
-    virtual void summary(char* buffer);
+    // override pure virtual methods of RTObject class
+    virtual void summary(INT32 fd) {}
+    virtual const char* getName() { return typeid(this).name(); }
 
     virtual void draw();
     virtual void update();

@@ -28,7 +28,8 @@
 #endif
 
 //! super macro.
-#define RT_LOGX(flag, format, ...) if (flag > 0) LOG_TRACE(format, ##__VA_ARGS__)
+#define RT_LOGD_IF(condition, format, ...) if (condition > 0) LOG_TRACE(format, ##__VA_ARGS__)
+#define RT_LOGE_IF(condition, format, ...) if (condition > 0) LOG_ERROR(format, ##__VA_ARGS__)
 
 //! super macro.
 #define RT_LOGT(format, ...) LOG_TRACE(format, ##__VA_ARGS__)

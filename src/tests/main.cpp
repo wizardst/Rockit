@@ -18,20 +18,23 @@
  */
 
 #include "rt_base/rt_base_tests.h" // NOLINT
+#include "rt_media/rt_media_tests.h" // NOLINT
 #include "rt_node/rt_node_tests.h" // NOLINT
 #include "rt_node/rt_ffmpeg_tests.h" // NOLINT
 #include "rt_task/rt_task_tests.h" // NOLINT
 #include "rt_check.h" // NOLINT
+#include "RTObject.h"   // NOLINT
 
 RT_RET unit_test_best_practice() {
     rt_mem_record_reset();
+    RTObject::resetTraces();
 
     /* your unit test */
     unit_test_node_bus(0, 0);
 
     rt_mem_record_dump();
+    RTObject::dumpTraces();
 
-    unit_test_node_basic(0, 0);
     return RT_OK;
 }
 

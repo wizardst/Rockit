@@ -39,6 +39,10 @@ RTSprite::RTSprite() {
     mCamera    = RT_NULL;
 }
 
+RTSprite::~RTSprite() {
+    removeAllChildren();
+}
+
 void RTSprite::addChild(RTSprite* child) {
     mChildren = child;
 }
@@ -71,6 +75,9 @@ void RTSprite::removeChild(RTSprite* child, RT_BOOL cleanup /*= true*/) {
 
 void RTSprite::removeAllChildren() {
     // @TODO(martin)
+    if (RT_NULL != mChildren) {
+        rt_safe_delete(mChildren);
+    }
 }
 
 void RTSprite::sortAllChildren() {
