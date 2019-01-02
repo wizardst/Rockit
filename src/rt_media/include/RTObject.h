@@ -26,13 +26,34 @@
 class RTMemService;
 class RTObject {
  public:
-    virtual void summary(INT32 fd) = 0;
     virtual const char* getName() = 0;
-    static void dumpTraces();                // Called when runtime env inits
-    static void resetTraces();               // Called when runtime env exits
+    virtual void    summary(INT32 fd) = 0;
+    virtual RT_BOOL equals(RTObject* ptr);
+
+    /** return hash-code of object.
+     *
+     * @return hash-code of object
+     *
+     * Best Practice: use jvmHashCode(typeid(this).name()) as hash code.
+     */
+    virtual UINT32  hashCode();
+
+ public:
+    static void    dumpTraces();                // Called when runtime env inits
+    static void    resetTraces();               // Called when runtime env exits
+
+    /** calculate hash-code of object name.
+     *
+     * @return hash-code of object name
+     *
+     * using hash function of the java virtual machine default.
+     */
+    static UINT32  jvmHashCode(const char* name);
+
  protected:
     void trace(const char* name, void* ptr, UINT32 size);  // Called in Constructor
     void untrace(const char* name, void* ptr);  // Called in Destructor
+
  private:
     static RTMemService* mObjTraces;
 };

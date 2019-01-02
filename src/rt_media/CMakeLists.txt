@@ -4,6 +4,7 @@ include_directories(GLRender)
 
 set(RT_MEDIA_SRC
     RTObject.cpp
+    RTObjectPool.cpp
     RTGLApp.cpp
     RTGLVideoScene.cpp
     RTGLView.cpp

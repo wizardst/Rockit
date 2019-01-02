@@ -86,7 +86,6 @@ LRESULT WINAPI EventProc(HWND hWnd, UINT uMsg,
                               WPARAM wParam, LPARAM lParam) {
     LRESULT err = -1;
     POINT   point;
-    RECT    rect;
     EGLWindowCtx *egl_ctx = RT_NULL;
     switch (uMsg) {
         case WM_CREATE:
@@ -110,8 +109,6 @@ LRESULT WINAPI EventProc(HWND hWnd, UINT uMsg,
 
 HWND native_window_create(const char* title, INT32 width, INT32 height) {
     WNDCLASS  wndclass  = {0};
-    DWORD     wStyle    =  0;
-    RECT      winRect   = {0, 0, 0, 0};
     HINSTANCE hInstance =  GetModuleHandle(NULL);
 
     wndclass.style         = CS_OWNDC;
@@ -125,22 +122,14 @@ HWND native_window_create(const char* title, INT32 width, INT32 height) {
         // return FALSE;
     }
 
-    wStyle = WS_VISIBLE | WS_POPUP | WS_BORDER | WS_SYSMENU | WS_CAPTION;
-
-    winRect.left   = 0;
-    winRect.top    = 0;
-    winRect.right  = width;
-    winRect.bottom = height;
-
     #if TO_DO_FLAG
+    DWORD wStyle = WS_VISIBLE | WS_POPUP | WS_BORDER | WS_SYSMENU | WS_CAPTION;
     egl_ctx->mWnd = CreateWindow(
                          "Rockit",
                          title,
                          wStyle,
-                         0,
-                         0,
-                         winRect.right  - winRect.left,
-                         winRect.bottom - winRect.top,
+                         0,     0,
+                         width, height,
                          NULL,
                          NULL,
                          hInstance,

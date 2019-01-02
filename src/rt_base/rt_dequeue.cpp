@@ -45,8 +45,8 @@ RT_Deque* deque_create(UINT8 max_size) {
     list->entries   = rt_malloc_array(RT_DequeEntry, max_size);
     RT_ASSERT(RT_NULL != list->entries);
     for (UINT32 idx = 0; idx < max_size; idx++) {
-        RT_DequeEntry entry = list->entries[idx];
-        rt_memset(&entry, RT_NULL, sizeof(RT_DequeEntry));
+        RT_DequeEntry* entry = &(list->entries[idx]);
+        rt_memset(entry, RT_NULL, sizeof(RT_DequeEntry));
     }
     return list;
 }
@@ -123,6 +123,7 @@ RT_RET deque_push(RT_Deque *list,
     entry->data = const_cast<void *> (data);
     entry->flag = ENTRY_FLAG_USE;
     entry->next = RT_NULL;
+
     if (deque_size(list) == 0) {
         // insert header, when list is RT_NULL
         entry->prev = RT_NULL;
@@ -131,17 +132,17 @@ RT_RET deque_push(RT_Deque *list,
     } else {
         if (RT_TRUE == header) {
             RT_DequeEntry* head = list->head;
-            head->prev         = entry;
             entry->next        = head;
             list->head         = entry;
         } else {
             RT_DequeEntry* tail = list->tail;
             tail->next         = entry;
-            entry->prev        = tail;
             list->tail         = entry;
         }
     }
+
     list->size++;
+
     return RT_OK;
 }
 

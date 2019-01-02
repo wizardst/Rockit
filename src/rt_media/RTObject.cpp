@@ -17,6 +17,7 @@
  *   Date: 2018/12/26
  */
 
+#include <string.h>
 #include "include/RTObject.h" // NOLINT
 #include "RTMemService.h" // NOLINT
 #include "rt_log.h" // NOLINT
@@ -32,6 +33,15 @@
 
 RTMemService* RTObject::mObjTraces = RT_NULL;
 
+RT_BOOL RTObject::equals(RTObject* ptr) {
+    UINT32 hash = RTObject::jvmHashCode(typeid(ptr).name());
+    return this->hashCode() == hash;
+}
+
+UINT32 RTObject::hashCode() {
+    return RTObject::jvmHashCode(typeid(this).name());
+}
+
 void RTObject::dumpTraces() {
     if (RT_NULL != mObjTraces) {
         mObjTraces->dump();
@@ -42,6 +52,23 @@ void RTObject::resetTraces() {
     if (RT_NULL != mObjTraces) {
         mObjTraces->reset();
     }
+}
+
+// By default, the hash function of the java virtual machine is used.
+UINT32 RTObject::jvmHashCode(const char* name) {
+    const char *str = name;
+    UINT32 hash = 0;
+
+    while (*str != '\0') {
+        hash = (hash * 31) + *str;
+        // hash = (hash << 5) - hash + *str;
+        str++;
+    }
+
+    // FORCE hash code is positive
+    hash = hash & 0x7FFFFFFF;
+
+    return hash;
 }
 
 void RTObject::trace(const char* name, void* ptr, UINT32 size) {

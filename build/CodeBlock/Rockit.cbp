@@ -138,12 +138,14 @@
 		<Unit filename="../../src/rt_media/RTGLVideoScene.cpp" />
 		<Unit filename="../../src/rt_media/RTGLView.cpp" />
 		<Unit filename="../../src/rt_media/RTObject.cpp" />
+		<Unit filename="../../src/rt_media/RTObjectPool.cpp" />
 		<Unit filename="../../src/rt_media/include/RTConstant.h" />
 		<Unit filename="../../src/rt_media/include/RTGLApp.h" />
 		<Unit filename="../../src/rt_media/include/RTGLVideoScene.h" />
 		<Unit filename="../../src/rt_media/include/RTGLView.h" />
 		<Unit filename="../../src/rt_media/include/RTMediaMetaKeys.h" />
 		<Unit filename="../../src/rt_media/include/RTObject.h" />
+		<Unit filename="../../src/rt_media/include/RTObjectPool.h" />
 		<Unit filename="../../src/rt_media/include/RTString.h" />
 		<Unit filename="../../src/rt_node/ff_node/ff_node_codec.cpp" />
 		<Unit filename="../../src/rt_node/ff_node/ff_node_demuxer.cpp" />
@@ -182,6 +184,7 @@
 		<Unit filename="../../src/tests/rt_base/test_base_mutex_thread.cpp" />
 		<Unit filename="../../src/tests/rt_media/rt_media_tests.h" />
 		<Unit filename="../../src/tests/rt_media/unit_test_display_gles.cpp" />
+		<Unit filename="../../src/tests/rt_media/unit_test_object_pool.cpp" />
 		<Unit filename="../../src/tests/rt_node/rt_ffmpeg_tests.h" />
 		<Unit filename="../../src/tests/rt_node/rt_node_tests.h" />
 		<Unit filename="../../src/tests/rt_node/test_ffmpeg_camera.cpp" />

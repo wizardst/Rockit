@@ -6,6 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set(RT_MEDIA_TEST_SRC
     rt_media_main.cpp
     unit_test_display_gles.cpp
+    unit_test_object_pool.cpp
 )
 
 add_executable(rt_media_test ${RT_MEDIA_TEST_SRC})
