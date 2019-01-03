@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rockchip Electronics Co. LTD
+ * Copyright 2019 Rockchip Electronics Co. LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng@rock-chips.com
- *   date: 2018/12/13
+ * Author: martin.cheng@rock-chips.com
+ *   Date: 2019/01/03
  */
 
-#ifndef SRC_TESTS_RT_MEDIA_RT_MEDIA_TESTS_H_
-#define SRC_TESTS_RT_MEDIA_RT_MEDIA_TESTS_H_
+#include <string.h>          // NOLINT
+#include "FFAdapterFilter.h" // NOLINT
+#include "rt_mem.h"          // NOLINT
+#include "rt_log.h"          // NOLINT
+#include "rt_common.h"       // NOLINT
 
-#include "rt_header.h" // NOLINT
-#include "rt_test_header.h" // NOLINT
-
-RT_RET unit_test_display_gles(INT32 index, INT32 total_index);
-RT_RET unit_test_object(INT32 index, INT32 total_index);
-RT_RET unit_test_object_pool(INT32 index, INT32 total_index);
-RT_RET unit_test_ffmpeg_adapter(INT32 index, INT32 total_index);
-
-#endif  // SRC_TESTS_RT_MEDIA_RT_MEDIA_TESTS_H_
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "FFAdapterFilter"
+#ifdef DEBUG_FLAG
+#undef DEBUG_FLAG
+#endif
+#define DEBUG_FLAG 0x1

@@ -1,6 +1,7 @@
 cmake_minimum_required( VERSION 2.8.8 )
 
 include_directories(GLRender)
+include_directories(FFMpeg)
 
 set(RT_MEDIA_SRC
     RTObject.cpp
@@ -8,6 +9,10 @@ set(RT_MEDIA_SRC
     RTGLApp.cpp
     RTGLVideoScene.cpp
     RTGLView.cpp
+    FFMpeg/FFAdapterCodec.cpp
+    FFMpeg/FFAdapterFilter.cpp
+    FFMpeg/FFAdapterFormat.cpp
+    FFMpeg/FFAdapterUtils.cpp
     GLRender/MathMat4.cpp
     GLRender/MathVec4.cpp
     GLRender/RTAction.cpp

@@ -1,19 +1,19 @@
-# 核心插件：ffmpeg 复用器
+# 核心插件：Resample
 
-- FFNodeMuxer 定位于基于ffmpeg的Demuxer媒体组件
-- FFNodeMuxer 继承插件基类RTNode，插件基类RTNode定义了一组插件接口；
-- FFNodeMuxer 继承媒体基类RTMuxer，媒体基类RTMuxer定义了一组解码器接口；
-- FFNodeMuxer 通过调用 ffmpeg-adapter的接口实现具体功能；
+- FFNodeFilter 定位于基于ffmpeg的Filter媒体组件
+- FFNodeFilter 继承插件基类RTNode，插件基类RTNode定义了一组插件接口；
+- FFNodeFilter 继承媒体基类RTFilter，媒体基类RTFilter定义了一组解码器接口；
+- FFNodeFilter 通过调用 ffmpeg-adapter的接口实现具体功能；
 
 ## RTCodec的接口
 
 ``` c++
-class RTMuxer {
+class RTFilter {
 
 };
 ```
 
-## ffmpeg-av-muxer的接口
+## ffmpeg-av-filter的接口
 
 ``` c++
 

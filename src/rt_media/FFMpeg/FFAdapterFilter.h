@@ -13,19 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng@rock-chips.com
- *   date: 2018/12/13
+ * Author: martin.cheng@rock-chips.com
+ *   Date: 2018/12/26
  */
 
-#ifndef SRC_TESTS_RT_MEDIA_RT_MEDIA_TESTS_H_
-#define SRC_TESTS_RT_MEDIA_RT_MEDIA_TESTS_H_
+#ifndef SRC_RT_MEDIA_FFMPEG_FFADAPTERFILTER_H_
+#define SRC_RT_MEDIA_FFMPEG_FFADAPTERFILTER_H_
 
-#include "rt_header.h" // NOLINT
-#include "rt_test_header.h" // NOLINT
+#include "FFAdapterUtils.h"  // NOLINT
 
-RT_RET unit_test_display_gles(INT32 index, INT32 total_index);
-RT_RET unit_test_object(INT32 index, INT32 total_index);
-RT_RET unit_test_object_pool(INT32 index, INT32 total_index);
-RT_RET unit_test_ffmpeg_adapter(INT32 index, INT32 total_index);
+struct FAFilterContext;
 
-#endif  // SRC_TESTS_RT_MEDIA_RT_MEDIA_TESTS_H_
+FAFilterContext* fa_filter_open(const char* filter_name);
+void fa_filter_close(FAFilterContext *fc);
+void fa_filter_flush(FAFilterContext *fc);
+void fa_filter_push(FAFilterContext *fc, char* buffer, UINT32 size);
+void fa_filter_pull(FAFilterContext *fc, char* buffer, UINT32* size);
+
+#endif  // SRC_RT_MEDIA_FFMPEG_FFADAPTERFILTER_H_
+

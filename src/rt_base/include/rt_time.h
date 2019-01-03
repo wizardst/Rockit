@@ -55,7 +55,7 @@ class RtAutoTimeoutLog {
     inline ~RtAutoTimeoutLog() {
         UINT64 duration = RtTime::getNowTimeMs() - mNow;
         if (duration >= mTimeOut) {
-            RT_LOGE("%s [perf:%lld ms]\n", mLabel ? mLabel : "", duration);
+            // RT_LOGE("%s [perf:%lld ms]\n", mLabel ? mLabel : "", duration);
         }
     }
  private:

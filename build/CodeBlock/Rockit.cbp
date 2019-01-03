@@ -23,6 +23,7 @@
 					<Add directory="${SRC_ROOT}/third-party/prebuilt/headers/angle/include" />
 					<Add directory="${SRC_ROOT}/src/rt_media/include" />
 					<Add directory="${SRC_ROOT}/src/rt_media/GLRender" />
+					<Add directory="${SRC_ROOT}/src/rt_media/FFMpeg" />
 				</Compiler>
 				<Linker>
 					<Add option="-lgdi32" />
@@ -112,6 +113,14 @@
 		<Unit filename="../../src/rt_base/windows/rt_os_mutex.cpp" />
 		<Unit filename="../../src/rt_base/windows/rt_os_thread.cpp" />
 		<Unit filename="../../src/rt_base/windows/rt_os_time.cpp" />
+		<Unit filename="../../src/rt_media/FFMpeg/FFAdapterCodec.cpp" />
+		<Unit filename="../../src/rt_media/FFMpeg/FFAdapterCodec.h" />
+		<Unit filename="../../src/rt_media/FFMpeg/FFAdapterFilter.cpp" />
+		<Unit filename="../../src/rt_media/FFMpeg/FFAdapterFilter.h" />
+		<Unit filename="../../src/rt_media/FFMpeg/FFAdapterFormat.cpp" />
+		<Unit filename="../../src/rt_media/FFMpeg/FFAdapterFormat.h" />
+		<Unit filename="../../src/rt_media/FFMpeg/FFAdapterUtils.cpp" />
+		<Unit filename="../../src/rt_media/FFMpeg/FFAdapterUtils.h" />
 		<Unit filename="../../src/rt_media/GLRender/MathMat4.cpp" />
 		<Unit filename="../../src/rt_media/GLRender/MathMat4.h" />
 		<Unit filename="../../src/rt_media/GLRender/MathVec4.cpp" />
@@ -184,6 +193,7 @@
 		<Unit filename="../../src/tests/rt_base/test_base_mutex_thread.cpp" />
 		<Unit filename="../../src/tests/rt_media/rt_media_tests.h" />
 		<Unit filename="../../src/tests/rt_media/unit_test_display_gles.cpp" />
+		<Unit filename="../../src/tests/rt_media/unit_test_ffmpeg_adapter.cpp" />
 		<Unit filename="../../src/tests/rt_media/unit_test_object_pool.cpp" />
 		<Unit filename="../../src/tests/rt_node/rt_ffmpeg_tests.h" />
 		<Unit filename="../../src/tests/rt_node/rt_node_tests.h" />

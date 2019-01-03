@@ -14,18 +14,24 @@
  * limitations under the License.
  *
  * author: martin.cheng@rock-chips.com
- *   date: 2018/12/13
+ *   date: 2019/01/03
  */
 
-#ifndef SRC_TESTS_RT_MEDIA_RT_MEDIA_TESTS_H_
-#define SRC_TESTS_RT_MEDIA_RT_MEDIA_TESTS_H_
+#include "rt_media_tests.h"  // NOLINT
 
-#include "rt_header.h" // NOLINT
-#include "rt_test_header.h" // NOLINT
+#include "FFAdapterFormat.h"
 
-RT_RET unit_test_display_gles(INT32 index, INT32 total_index);
-RT_RET unit_test_object(INT32 index, INT32 total_index);
-RT_RET unit_test_object_pool(INT32 index, INT32 total_index);
-RT_RET unit_test_ffmpeg_adapter(INT32 index, INT32 total_index);
+#ifdef OS_WINDOWS
+static const char* TEST_URI = "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4";
+#else
+static const char* TEST_URI = "h264-1080p.mp4";
+#endif
 
-#endif  // SRC_TESTS_RT_MEDIA_RT_MEDIA_TESTS_H_
+RT_RET unit_test_ffmpeg_adapter(INT32 index, INT32 total_index) {
+    RT_LOGD("ffmpeg version: %s", fa_utils_ffmpeg_version());
+    FAFormatContext* fafc = fa_format_open(TEST_URI);
+    for (UINT32 idx = 0; idx < fa_format_count_tracks(fafc); idx++) {
+        fa_format_track_query(fafc, idx, RT_NULL);
+    }
+    return RT_OK;
+}

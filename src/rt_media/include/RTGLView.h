@@ -52,7 +52,7 @@ typedef struct _EGLWindowCtx_ {
 class RTGLView : public RTObject {
  public:
     RTGLView();
-    ~RTGLView();
+    virtual ~RTGLView();
 
     void initialize(EGLNativeWindowType wndID, INT32 width, INT32 height);
     void destroy();
