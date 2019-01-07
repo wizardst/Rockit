@@ -17,10 +17,10 @@
  *   date: 2018/07/05
  */
 
-#ifndef SRC_RT_NODE_INCLUDE_RT_NODE_CODEC_H_
-#define SRC_RT_NODE_INCLUDE_RT_NODE_CODEC_H_
+#ifndef SRC_RT_NODE_INCLUDE_RTNODECODEC_H_
+#define SRC_RT_NODE_INCLUDE_RTNODECODEC_H_
 
-#include "rt_node.h" // NOLINT
+#include "RTNode.h" // NOLINT
 
 #ifdef  __cplusplus
 extern "C" {
@@ -64,10 +64,17 @@ typedef enum {
     RT_VIDEO_CodingMax = 0x7FFFFFFF
 }RtCodingType;
 
+class RTNodeCodec : public RTNode {
+ protected:
+    virtual RT_RET onStart() = 0;
+    virtual RT_RET onStop()  = 0;
+    virtual RT_RET onPause() = 0;
+    virtual RT_RET onFlush() = 0;
+};
 
 #ifdef  __cplusplus
 }
 #endif
 
-#endif  // SRC_RT_NODE_INCLUDE_RT_NODE_CODEC_H_
+#endif  // SRC_RT_NODE_INCLUDE_RTNODECODEC_H_
 

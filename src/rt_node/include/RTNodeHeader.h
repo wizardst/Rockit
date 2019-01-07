@@ -14,42 +14,17 @@
  * limitations under the License.
  *
  * author: martin.cheng@rock-chips.com
- *   date: 2018/07/05
+ *   date: 20180719
  */
 
-#ifdef LOG_TAG
-#undef LOG_TAG
-#endif
-#define LOG_TAG "NodeFilter"
+#ifndef SRC_RT_NODE_INCLUDE_RTNODEHEADER_H_
+#define SRC_RT_NODE_INCLUDE_RTNODEHEADER_H_
 
-#include "rt_node.h" // NOLINT
+/*header in src/rt_node/include*/
+#include "RTNode.h" // NOLINT
+#include "RTNodeDemuxer.h" // NOLINT
+#include "RTNodeMuxer.h" // NOLINT
+#include "RTNodeCodec.h"   // NOLINT
+#include "RTNodeFilter.h"  // NOLINT
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-INT8 node_filter_init(void *ctx) {
-    return RT_ERR_UNKNOWN;
-}
-
-INT8 node_filter_release(void *ctx) {
-    return RT_ERR_UNKNOWN;
-}
-
-INT8 node_filter_read(void *ctx, void *data, UINT32 *size) {
-    return RT_ERR_UNKNOWN;
-}
-
-
-INT8 node_filter_write(void *ctx, void *data, UINT32 *size) {
-    return RT_ERR_UNKNOWN;
-}
-
-
-INT8 node_filter_dump(void *ctx) {
-    return RT_ERR_UNKNOWN;
-}
-
-#ifdef  __cplusplus
-}
-#endif
+#endif  // SRC_RT_NODE_INCLUDE_RTNODEHEADER_H_

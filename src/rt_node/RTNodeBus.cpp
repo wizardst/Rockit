@@ -18,11 +18,11 @@
  *   Task: construct and manage pipeline of media node
  */
 
-#include "rt_node_bus.h"    // NOLINT
-#include "rt_node_parser.h" // NOLINT
-#include "rt_node_header.h" // NOLINT
-#include "./ff_node/include/ff_node_codec.h"  // NOLINT
-#include "./ff_node/include/ff_node_demuxer.h"  // NOLINT
+#include "RTNodeBus.h"    // NOLINT
+#include "RTNodeDemuxer.h" // NOLINT
+#include "RTNodeHeader.h" // NOLINT
+#include "FFNodeCodec.h"  // NOLINT
+#include "FFNodeDemuxer.h"  // NOLINT
 
 struct NodeBusContext {
     RtArrayList *node_bus;
@@ -69,32 +69,33 @@ INT32 rt_node_bus_summary(struct NodeBusContext* bus, RT_BOOL full) {
         UINT32 num_plugin = 0;
         struct rt_hash_node* root = rt_hash_table_get_bucket(bus->node_all, idx);
         for (node = root->next; node != root; node = node->next, num_plugin++) {
-            RT_Node* plugin = reinterpret_cast<RT_Node*>(node->data);
-            RT_LOGE("buckets[%02d:%02d]: type:%-10s, ptr:%p",
-                     idx, num_plugin, rt_node_type_name((RT_NODE_TYPE)plugin->type), node->data);
+            RTNode* plugin = reinterpret_cast<RTNode*>(node->data);
+            RT_LOGE("buckets[%02d:%02d]: name:%-10s, ptr:%p",
+                     idx, num_plugin, plugin->queryInfo()->mNodeName, node->data);
         }
     }
     RT_LOGE("done\r\n");
     return RT_OK;
 }
 
-INT32 rt_node_bus_register_all(struct NodeBusContext *bus) {
+INT32 rt_node_bus_register_all(struct NodeBusContext* bus) {
     rt_node_bus_register(bus, &ff_node_demuxer);
-    rt_node_bus_register(bus, &ff_node_video_decoder);
+    rt_node_bus_register(bus, &ff_node_decoder);
+    rt_node_bus_register(bus, &ff_node_encoder);
     return RT_OK;
 }
 
-INT32 rt_node_bus_register(struct NodeBusContext *bus, RT_Node *node) {
-    INT32 node_type = node->type;
-    rt_hash_table_insert(bus->node_all, reinterpret_cast<void*>(node_type), node);
+INT32 rt_node_bus_register(struct NodeBusContext* bus, RTNodeStub* node_info) {
+    INT32 node_type = node_info->mNodeType;
+    rt_hash_table_insert(bus->node_all, reinterpret_cast<void*>(node_type), node_info);
     return RT_OK;
 }
 
-RT_Node* rt_node_bus_find(struct NodeBusContext *bus, RT_NODE_TYPE node_type, UINT8 node_id) {
+RTNodeStub* rt_node_bus_find(struct NodeBusContext* bus, RT_NODE_TYPE node_type, UINT8 node_id) {
     void* data = rt_hash_table_find(bus->node_all,
                      reinterpret_cast<void *>(node_type));
     if (RT_NULL != data) {
-        return reinterpret_cast<RT_Node*>(data);
+        return reinterpret_cast<RTNodeStub*>(data);
     }
     return RT_NULL;
 }

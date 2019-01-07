@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rockchip Electronics Co. LTD
+ * Copyright 2019 Rockchip Electronics Co. LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Author: TOD - UNKOWN
- *   Date: 2018/11/03
- *   Task: use ffmpeg as filters
+ * Author: @TODO - UNKOWN
+ *   Date: 2019/01/07
+ *   Task: muxer class
  */
 
-#ifndef SRC_RT_NODE_FF_NODE_INCLUDE_FF_NODE_FILTER_H_
-#define SRC_RT_NODE_FF_NODE_INCLUDE_FF_NODE_FILTER_H_
-
-#endif  // SRC_RT_NODE_FF_NODE_INCLUDE_FF_NODE_FILTER_H_
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "RTNodeMuxer"

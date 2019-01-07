@@ -13,14 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Author: TOD - UNKOWN
- *   Date: 2018/11/03
- *   Task: use ffmpeg as filters
+ * author: martin.cheng@rock-chips.com
+ *   date: 2018/07/05
  */
 
 #ifdef LOG_TAG
 #undef LOG_TAG
 #endif
-#define LOG_TAG "FFNodeFilter"
+#define LOG_TAG "NodeFilter"
 
-#include "./include/ff_node_filter.h" // NOLINT
+#include "RTNode.h" // NOLINT
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+INT8 node_filter_init(void *ctx) {
+    return RT_ERR_UNKNOWN;
+}
+
+INT8 node_filter_release(void *ctx) {
+    return RT_ERR_UNKNOWN;
+}
+
+INT8 node_filter_read(void *ctx, void *data, UINT32 *size) {
+    return RT_ERR_UNKNOWN;
+}
+
+
+INT8 node_filter_write(void *ctx, void *data, UINT32 *size) {
+    return RT_ERR_UNKNOWN;
+}
+
+
+INT8 node_filter_dump(void *ctx) {
+    return RT_ERR_UNKNOWN;
+}
+
+#ifdef  __cplusplus
+}
+#endif

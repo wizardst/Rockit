@@ -32,13 +32,13 @@ class RtMetaData;
 // specified user agent is needed by some video server
 FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag = FLAG_DEMUXER);
 
-void   fa_format_track_query(FAFormatContext *fc, UINT32 track_id, RtMetaData *meta);
-UINT32 fa_format_count_tracks(FAFormatContext *fc);
-void   fa_format_close(FAFormatContext *fc);
-void   fa_format_seek_to(FAFormatContext *fc, INT32 track_id, UINT64 ts, UINT32 flags);
-void   fa_format_read_packet(FAFormatContext *fc, char* buffer, UINT32* size);
+void   fa_format_track_query(FAFormatContext* fc, UINT32 track_id, RtMetaData* meta);
+UINT32 fa_format_count_tracks(FAFormatContext* fc);
+void   fa_format_close(FAFormatContext* fc);
+void   fa_format_seek_to(FAFormatContext* fc, INT32 track_id, UINT64 ts, UINT32 flags);
+void   fa_format_read_packet(FAFormatContext* fc, char* buffer, UINT32* size);
 
 // specified user agent is needed by some video server
-void fa_format_set_user_agent(FAFormatContext *fc, const char* ua);
+void fa_format_set_user_agent(FAFormatContext* fc, const char* ua);
 
 #endif  // SRC_RT_MEDIA_FFMPEG_FFADAPTERFORMAT_H_

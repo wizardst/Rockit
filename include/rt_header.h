@@ -22,7 +22,6 @@
 
 #include "rt_error.h" // NOLINT
 #include "rt_type.h" // NOLINT
-#include "rt_node.h" // NOLINT
 #include "rt_debug.h" // NOLINT
 #include "rt_log.h" // NOLINT
 #include "rt_time.h" // NOLINT

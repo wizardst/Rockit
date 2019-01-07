@@ -26,6 +26,7 @@
 #undef LOG_TAG
 #endif
 #define LOG_TAG "RTObject"
+
 #ifdef DEBUG_FLAG
 #undef DEBUG_FLAG
 #endif

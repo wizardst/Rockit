@@ -13,17 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Author: TOD - UNKOWN
- *   Date: 2018/11/03
- *   Task: use ffmpeg as encoder and decoder
+ * author: martin.cheng@rock-chips.com
+ *   date: 2018/07/05
  */
 
-#ifndef SRC_RT_NODE_FF_NODE_INCLUDE_FF_NODE_CODEC_H_
-#define SRC_RT_NODE_FF_NODE_INCLUDE_FF_NODE_CODEC_H_
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "NodeDemuxer"
 
-#include "rt_node.h" // NOLINT
-#include "rt_header.h" // NOLINT
+#include "RTNode.h" // NOLINT
 
-extern RT_Node ff_node_video_decoder;
+INT8 node_codec_init(void *ctx) {
+    return RT_ERR_UNKNOWN;
+}
 
-#endif  // SRC_RT_NODE_FF_NODE_INCLUDE_FF_NODE_CODEC_H_
+INT8 node_codec_release(void *ctx) {
+    return RT_ERR_UNKNOWN;
+}
+
+INT8 node_codec_read(void *ctx, void *data, UINT32 *size) {
+    return RT_ERR_UNKNOWN;
+}
+
+INT8 node_codec_write(void *ctx, void *data, UINT32 *size) {
+    return RT_ERR_UNKNOWN;
+}
+
+INT8 node_codec_dump(void *ctx) {
+    return RT_ERR_UNKNOWN;
+}

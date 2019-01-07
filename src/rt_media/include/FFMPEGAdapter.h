@@ -14,6 +14,15 @@
  * limitations under the License.
  *
  * Author: martin.cheng@rock-chips.com
- *   Date: 2018/12/18
- *   Task: @TODO ffmpeg wrapper
+ *   Date: 2018/12/26
  */
+
+#ifndef SRC_RT_MEDIA_INCLUDE_FFMPEGADAPTER_H_
+#define SRC_RT_MEDIA_INCLUDE_FFMPEGADAPTER_H_
+
+#include "FFAdapterUtils.h"
+#include "FFAdapterFormat.h"
+#include "FFAdapterCodec.h"
+#include "FFAdapterFilter.h"
+
+#endif   // SRC_RT_MEDIA_INCLUDE_FFMPEGADAPTER_H_

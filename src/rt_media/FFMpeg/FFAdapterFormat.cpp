@@ -71,11 +71,11 @@ error_func:
     return RT_NULL;
 }
 
-void fa_format_track_query(FAFormatContext *fc, UINT32 track_id, RtMetaData *meta) {
-    AVFormatContext *avfc = fc->mAvfc;
+void fa_format_track_query(FAFormatContext* fc, UINT32 track_id, RtMetaData *meta) {
+    AVFormatContext* avfc = fc->mAvfc;
 
-    const AVOption *option = RT_NULL;
-    const AVStream *stream = RT_NULL;
+    const AVOption* option = RT_NULL;
+    const AVStream* stream = RT_NULL;
     if ((track_id >= 0) && (track_id < avfc->nb_streams)) {
         stream = avfc->streams[track_id];
     }
@@ -83,12 +83,12 @@ void fa_format_track_query(FAFormatContext *fc, UINT32 track_id, RtMetaData *met
         return;
     }
 
-    AVCodecParameters *codec_par = stream->codecpar;
-    AVCodec           *codec_cur = avcodec_find_decoder(codec_par->codec_id);
-    AVCodecContext    *codec_ctx = avcodec_alloc_context3(codec_cur);
+    AVCodecParameters* codec_par = stream->codecpar;
+    AVCodec*           codec_cur = avcodec_find_decoder(codec_par->codec_id);
+    AVCodecContext*    codec_ctx = avcodec_alloc_context3(codec_cur);
 
     while (option = av_opt_next(codec_ctx, option)) {
-        uint8_t *str;
+        uint8_t* str;
 
         if (option->type == AV_OPT_TYPE_CONST)
             continue;
@@ -103,15 +103,15 @@ void fa_format_track_query(FAFormatContext *fc, UINT32 track_id, RtMetaData *met
     }
 }
 
-UINT32 fa_format_count_tracks(FAFormatContext *fc) {
+UINT32 fa_format_count_tracks(FAFormatContext* fc) {
     if ((RT_NULL != fc) && (RT_NULL != fc->mAvfc)) {
-        AVFormatContext *avfc = fc->mAvfc;
+        AVFormatContext* avfc = fc->mAvfc;
         return avfc->nb_streams;
     }
     return 0;
 }
 
-void fa_format_close(FAFormatContext *fc) {
+void fa_format_close(FAFormatContext* fc) {
     switch (fc->mFcFlag) {
     case FLAG_DEMUXER:
         avformat_close_input(&(fc->mAvfc));
@@ -123,7 +123,7 @@ void fa_format_close(FAFormatContext *fc) {
     }
 }
 
-void fa_format_seek_to(FAFormatContext *fc, INT32 track_id, UINT64 ts, UINT32 flags) {
+void fa_format_seek_to(FAFormatContext* fc, INT32 track_id, UINT64 ts, UINT32 flags) {
     INT32 err = 0;
     err = avformat_seek_file(fc->mAvfc, track_id, RT_INT64_MIN, ts, RT_INT64_MAX, flags);
     fa_utils_check_error(err, "avformat_seek_file");

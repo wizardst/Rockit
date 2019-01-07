@@ -13,22 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Author: martin.cheng@rock-chips.com
- *   Date: 2019/01/03
+ * Author: @TODO - UNKOWN
+ *   Date: 2019/01/07
+ *   Task: demuxer class
  */
 
-#ifndef SRC_RT_MEDIA_FFMPEG_FFADAPTERCODEC_H_
-#define SRC_RT_MEDIA_FFMPEG_FFADAPTERCODEC_H_
-
-#include "FFAdapterUtils.h"  // NOLINT
-
-struct FACodecContext;
-
-FACodecContext* fa_codec_open(const char* codec_name);
-void fa_codec_close(FACodecContext* fc);
-void fa_codec_flush(FACodecContext* fc);
-void fa_codec_push(FACodecContext* fc, char* buffer, UINT32 size);
-void fa_codec_pull(FACodecContext* fc, char* buffer, UINT32* size);
-
-#endif  // SRC_RT_MEDIA_FFMPEG_FFADAPTERCODEC_H_
-
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "RTNodeDemuxer"

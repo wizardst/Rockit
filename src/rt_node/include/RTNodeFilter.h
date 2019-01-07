@@ -17,18 +17,26 @@
  *   date: 2018/07/05
  */
 
-#ifndef SRC_RT_NODE_INCLUDE_RT_NODE_PARSER_H_
-#define SRC_RT_NODE_INCLUDE_RT_NODE_PARSER_H_
+#ifndef SRC_RT_NODE_INCLUDE_RTNODEFILTER_H_
+#define SRC_RT_NODE_INCLUDE_RTNODEFILTER_H_
 
-#include "rt_node.h" // NOLINT
+#include "RTNode.h" // NOLINT
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
+class RTNodeFilter : public RTNode {
+ protected:
+    virtual RT_RET onStart() = 0;
+    virtual RT_RET onStop()  = 0;
+    virtual RT_RET onPause() = 0;
+    virtual RT_RET onFlush() = 0;
+};
+
 #ifdef  __cplusplus
 }
 #endif
 
-#endif  // SRC_RT_NODE_INCLUDE_RT_NODE_PARSER_H_
+#endif  // SRC_RT_NODE_INCLUDE_RTNODEFILTER_H_
 

@@ -46,7 +46,8 @@ class RTObjectPool : public RTObject {
     RTObjectPool(AllocListener listener, UINT32 maxNum);
     virtual ~RTObjectPool();
     RTObject* borrowObj();
-    void      returnObj(RTObject* obj);
+    RTObject* useObj();
+    RT_RET    returnObj(RTObject* obj);
     UINT32    getNumIdle();
     UINT32    getNumUsed();
 

@@ -17,31 +17,31 @@
  *   date: 2018/11/05
  */
 
-#include "rt_node.h" // NOLINT
-#include "rt_node_bus.h" // NOLINT
+#include "RTNode.h" // NOLINT
+#include "RTNodeBus.h" // NOLINT
 #include "rt_node_tests.h" // NOLINT
 
 void unit_test_node_operations(struct NodeBusContext* bus) {
     rt_node_bus_register_all(bus);
-    RT_Node* demuxer = rt_node_bus_find(bus, RT_NODE_TYPE_DEMUXER, 0);
-    if (0 && RT_NULL != demuxer) {
-        demuxer->init();
 
-        void *data   = RT_NULL;
-        UINT32 *size = 0;
-        demuxer->pull(data, size);
-        demuxer->push(data, size);
-        demuxer->run_cmd(RT_NODE_CMD_INIT, RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_PREPARE, RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_START,   RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_STOP,    RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_CAPS_CHANGE,  RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_SEEK,         RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_RESET,        RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_REINIT,       RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_NAVIGATION,   RT_NULL);
-        demuxer->run_cmd(RT_NODE_CMD_DRAIN,        RT_NULL);
+    RTNodeStub* stub = rt_node_bus_find(bus, RT_NODE_TYPE_DEMUXER, 0);
+    if (0 && RT_NULL != stub) {
+        RTNode* demuxer = stub->mCreateNode();
+        demuxer->init(RT_NULL);
+        demuxer->pullBuffer(RT_NULL);
+        demuxer->pushBuffer(RT_NULL);
+        demuxer->runCmd(RT_NODE_CMD_PREPARE, RT_NULL);
+        demuxer->runCmd(RT_NODE_CMD_START,   RT_NULL);
+        demuxer->runCmd(RT_NODE_CMD_STOP,    RT_NULL);
+        demuxer->runCmd(RT_NODE_CMD_CAPS_CHANGE,  RT_NULL);
+        demuxer->runCmd(RT_NODE_CMD_SEEK,         RT_NULL);
+        demuxer->runCmd(RT_NODE_CMD_RESET,        RT_NULL);
+        demuxer->runCmd(RT_NODE_CMD_REINIT,       RT_NULL);
+        demuxer->runCmd(RT_NODE_CMD_NAVIGATION,   RT_NULL);
+        demuxer->runCmd(RT_NODE_CMD_DRAIN,        RT_NULL);
         demuxer->release();
+        delete demuxer;
+        demuxer = RT_NULL;
     }
 }
 

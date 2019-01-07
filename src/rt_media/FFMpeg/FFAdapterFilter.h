@@ -25,10 +25,10 @@
 struct FAFilterContext;
 
 FAFilterContext* fa_filter_open(const char* filter_name);
-void fa_filter_close(FAFilterContext *fc);
-void fa_filter_flush(FAFilterContext *fc);
-void fa_filter_push(FAFilterContext *fc, char* buffer, UINT32 size);
-void fa_filter_pull(FAFilterContext *fc, char* buffer, UINT32* size);
+void fa_filter_close(FAFilterContext* fc);
+void fa_filter_flush(FAFilterContext* fc);
+void fa_filter_push(FAFilterContext* fc, char* buffer, UINT32 size);
+void fa_filter_pull(FAFilterContext* fc, char* buffer, UINT32* size);
 
 #endif  // SRC_RT_MEDIA_FFMPEG_FFADAPTERFILTER_H_
 

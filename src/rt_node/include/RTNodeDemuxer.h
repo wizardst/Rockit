@@ -14,15 +14,33 @@
  * limitations under the License.
  *
  * author: martin.cheng@rock-chips.com
- *   date: 20180719
+ *   date: 2018/07/05
  */
 
-#ifndef SRC_RT_NODE_INCLUDE_RT_NODE_HEADER_H_
-#define SRC_RT_NODE_INCLUDE_RT_NODE_HEADER_H_
+#ifndef SRC_RT_NODE_INCLUDE_RTNODEDEMUXER_H_
+#define SRC_RT_NODE_INCLUDE_RTNODEDEMUXER_H_
 
-/*header in src/rt_node/include*/
-#include "rt_node_parser.h" // NOLINT
-#include "rt_node_codec.h" // NOLINT
-#include "rt_node_filter.h" // NOLINT
+#include "RTNode.h"  // NOLINT
+#include "rt_type.h" // NOLINT
 
-#endif  // SRC_RT_NODE_INCLUDE_RT_NODE_HEADER_H_
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
+class RTNodeDemuxer : public RTNode {
+ public:
+    virtual INT32 countTracks() = 0;
+    virtual INT32 selectTrack(INT32 index) = 0;
+ protected:
+    virtual RT_RET onStart() = 0;
+    virtual RT_RET onStop()  = 0;
+    virtual RT_RET onPause() = 0;
+    virtual RT_RET onFlush() = 0;
+};
+
+#ifdef  __cplusplus
+}
+#endif
+
+#endif  // SRC_RT_NODE_INCLUDE_RTNODEDEMUXER_H_
+

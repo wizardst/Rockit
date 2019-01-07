@@ -69,13 +69,14 @@ RTObject* RTObjectPool::borrowObj() {
     return RT_NULL;
 }
 
-void RTObjectPool::returnObj(RTObject* obj) {
+RT_RET RTObjectPool::returnObj(RTObject* obj) {
     RtAutoMutex autolock(mLock);
     if (RT_NULL != obj) {
         RT_LOGD_IF(DEBUG_FLAG, "object = %p", obj);
         deque_push_tail(mIdleDeque, reinterpret_cast<void*>(obj));
         mObjNum--;
     }
+    return RT_OK;
 }
 
 UINT32 RTObjectPool::getNumIdle() {

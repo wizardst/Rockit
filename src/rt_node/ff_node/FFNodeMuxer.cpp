@@ -13,18 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Author: martin.cheng@rock-chips.com
- *   Date: 2018/12/18
- *   Task: @TODO ffmpeg wrapper
+ * Author: TOD - UNKOWN
+ *   Date: 2018/11/03
+ *   Task: use ffmpeg as muxer
  */
-#ifndef SRC_RT_NODE_FF_NODE_INCLUDE_FFMPEG_WRAPPER_H_
-#define SRC_RT_NODE_FF_NODE_INCLUDE_FFMPEG_WRAPPER_H_
 
-extern "C" {
-#include "libavformat/avformat.h" // NOLINT
-#include "libavformat/version.h" // NOLINT
-#include "libavdevice/avdevice.h"
-#include "libavutil/opt.h"
-}
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "FFNodeMuxer"
 
-#endif  // SRC_RT_NODE_FF_NODE_INCLUDE_FFMPEG_WRAPPER_H_
+#include "./include/FFNodeMuxer.h" // NOLINT

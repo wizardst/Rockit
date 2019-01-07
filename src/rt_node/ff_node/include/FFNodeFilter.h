@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng@rock-chips.com
- *   date: 2018/11/05
+ * Author: TOD - UNKOWN
+ *   Date: 2018/11/03
+ *   Task: use ffmpeg as filters
  */
 
-#include "RTNode.h" // NOLINT
-#include "rt_node_tests.h" // NOLINT
+#ifndef SRC_RT_NODE_FF_NODE_INCLUDE_FFNODEFILTER_H_
+#define SRC_RT_NODE_FF_NODE_INCLUDE_FFNODEFILTER_H_
 
-RT_RET unit_test_node_data_flow(INT32 index, INT32 total) {
-    return RT_OK;
-}
-
+#endif  // SRC_RT_NODE_FF_NODE_INCLUDE_FFNODEFILTER_H_
