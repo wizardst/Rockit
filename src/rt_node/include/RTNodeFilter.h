@@ -28,10 +28,7 @@ extern "C" {
 
 class RTNodeFilter : public RTNode {
  protected:
-    virtual RT_RET onStart() = 0;
-    virtual RT_RET onStop()  = 0;
-    virtual RT_RET onPause() = 0;
-    virtual RT_RET onFlush() = 0;
+     virtual RT_RET onFilter() = 0;
 };
 
 #ifdef  __cplusplus

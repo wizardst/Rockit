@@ -19,6 +19,7 @@
  */
 
 #include "RTNode.h" // NOLINT
+#include "RTNodeCodec.h" // NOLINT
 #include "rt_header.h" // NOLINT
 #include "rt_metadata.h" // NOLINT
 
@@ -31,7 +32,7 @@
 
 RT_RET check_err(RTNode* node, RT_RET err, const char* func_name) {
     if (RT_OK != err) {
-        RTNodeStub* stub = node->queryInfo();
+        RTNodeStub* stub = node->queryStub();
         RT_LOGE("RTNode(%15.15s):  errno=%d, Fail to %s",
                 stub->mNodeName, err, func_name);
     }
@@ -50,13 +51,8 @@ RT_RET RTNodeAdapter::release(RTNode* node) {
     return CHECK_ERR(node, err);
 }
 
-RT_RET RTNodeAdapter::pullBuffer(RTNode* node, RTMediaBuffer* data) {
+RT_RET RTNodeAdapter::pullBuffer(RTNode* node, RTMediaBuffer** data) {
     RT_RET err = node->pullBuffer(data);
-    return CHECK_ERR(node, err);
-}
-
-RT_RET RTNodeAdapter::dequePoolBuffer(RTNode* node, RTMediaBuffer** data) {
-    RT_RET err = node->dequePoolBuffer(data);
     return CHECK_ERR(node, err);
 }
 
@@ -65,18 +61,38 @@ RT_RET RTNodeAdapter::pushBuffer(RTNode* node, RTMediaBuffer* data) {
     return CHECK_ERR(node, err);
 }
 
+RT_RET RTNodeAdapter::dequeCodecBuffer(RTNode* node, RTMediaBuffer** data, RTPortType port) {
+    RT_RET err = RT_ERR_BAD;
+    RTNodeStub* stub = node->queryStub();
+    if ((RT_NODE_TYPE_DECODER == stub->mNodeType)&&(RT_NODE_TYPE_ENCODER == stub->mNodeType)) {
+        RTNodeCodec* codec = reinterpret_cast<RTNodeCodec*>(node);
+        err = codec->dequeBuffer(data, port);
+    }
+    return err;
+}
+
+RT_RET RTNodeAdapter::queueCodecBuffer(RTNode* node, RTMediaBuffer*  data, RTPortType port) {
+    RT_RET err = RT_ERR_BAD;
+    RTNodeStub* stub = node->queryStub();
+    if ((RT_NODE_TYPE_DECODER == stub->mNodeType)&&(RT_NODE_TYPE_ENCODER == stub->mNodeType)) {
+        RTNodeCodec* codec = reinterpret_cast<RTNodeCodec*>(node);
+        err = codec->queueBuffer(data, port);
+    }
+    return err;
+}
+
 RT_RET RTNodeAdapter::runCmd(RTNode* node, RT_NODE_CMD cmd, RtMetaData* metadata) {
     RT_RET err = node->runCmd(cmd, metadata);
-    RTNodeStub* info = node->queryInfo();
+    RTNodeStub* info = node->queryStub();
     RT_LOGD_IF(DEBUG_NODE_CMD, "RTNode(%15.15s):  exec %-10s",
                   info->mNodeName, rt_node_cmd_name(cmd));
     return CHECK_ERR(node, err);
 }
 
-RtMetaData* RTNodeAdapter::queryCap(RTNode* node) {
-    return node->queryCap();
+RtMetaData* RTNodeAdapter::queryFormat(RTNode* node, RTPortType port) {
+    return node->queryFormat(port);
 }
 
-RTNodeStub* RTNodeAdapter::queryInfo(RTNode* node) {
-    return node->queryInfo();
+RTNodeStub* RTNodeAdapter::queryStub(RTNode* node) {
+    return node->queryStub();
 }

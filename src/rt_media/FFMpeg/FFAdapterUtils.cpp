@@ -20,6 +20,62 @@
 #include <stdarg.h>   // NOLINT
 #include "FFAdapterUtils.h"  // NOLINT
 #include "rt_log.h"  // NOLINT
+#include "rt_common.h" // NOLINT
+
+typedef struct {
+    RtCodingType     coding;
+    AVCodecID        ffmpeg_codec_id;
+} FACodingTypeInfo;
+
+static FACodingTypeInfo kFdCodecMappingList[] = {
+    { RT_VIDEO_CodingMPEG2,         AV_CODEC_ID_MPEG2VIDEO },
+    { RT_VIDEO_CodingH263,          AV_CODEC_ID_H263 },
+    { RT_VIDEO_CodingMPEG4,         AV_CODEC_ID_MPEG4 },
+    { RT_VIDEO_CodingWMV,           AV_CODEC_ID_WMV3 },
+    { RT_VIDEO_CodingAVC,           AV_CODEC_ID_H264 },
+    { RT_VIDEO_CodingMJPEG,         AV_CODEC_ID_MJPEG },
+    { RT_VIDEO_CodingVP8,           AV_CODEC_ID_VP8 },
+    { RT_VIDEO_CodingVP9,           AV_CODEC_ID_VP9 },
+    { RT_VIDEO_CodingHEVC,          AV_CODEC_ID_HEVC },
+    { RT_VIDEO_CodingVC1,           AV_CODEC_ID_VC1 },
+    { RT_VIDEO_CodingAVS,           AV_CODEC_ID_AVS },
+};
+
+RtCodingType fa_utils_find_codectype_from_codecid(UINT32 codec_id) {
+    UINT32 i = 0;
+    RT_BOOL found = RT_FALSE;
+    for (i = 0; i < RT_ARRAY_ELEMS(kFdCodecMappingList); i++) {
+        if (codec_id == kFdCodecMappingList[i].ffmpeg_codec_id) {
+            found = RT_TRUE;
+            break;
+        }
+    }
+
+    if (found) {
+        return kFdCodecMappingList[i].coding;
+    } else {
+        RT_LOGE("unknown codec id: %d", codec_id);
+        return RT_VIDEO_CodingUnused;
+    }
+}
+
+AVCodecID fa_utils_find_codecid_from_codectype(RtCodingType coding) {
+    UINT32 i = 0;
+    RT_BOOL found = RT_FALSE;
+    for (i = 0; i < RT_ARRAY_ELEMS(kFdCodecMappingList); i++) {
+        if (coding == kFdCodecMappingList[i].coding) {
+            found = RT_TRUE;
+            break;
+        }
+    }
+
+    if (found) {
+        return kFdCodecMappingList[i].ffmpeg_codec_id;
+    } else {
+        RT_LOGE("unknown codec type: %d", coding);
+        return AV_CODEC_ID_NONE;
+    }
+}
 
 INT32 fa_utils_error_string(INT32 errnum, char *errbuf, UINT32 errbuf_size) {
     return av_strerror(errnum, errbuf, errbuf_size);

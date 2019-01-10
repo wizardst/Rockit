@@ -36,17 +36,17 @@
 #include "rt_mem.h" // NOLINT
 #include "rt_array_list.h" // NOLINT
 #include "rt_thread.h" // NOLINT
-#include "rt_metadata_key.h" // NOLINT
+#include "RTMediaMetaKeys.h" // NOLINT
 #include "rt_buffer.h" // NOLINT
 #include "rt_metadata.h" // NOLINT
 #include "rt_common.h" // NOLINT
-#include "rt_media_packet.h" // NOLINT
 
 typedef struct _FFNodeDemuxerCtx {
     AVFormatContext    *mFormatCtx;
     RtArrayList        *mListPacket;
     RtThread           *mThread;
     RtMutex            *mLockPacket;
+    RTMsgLooper        *mEventLooper;
 
     UINT32              mEosFlag;
     UINT32              mCountPull;
@@ -136,16 +136,16 @@ RT_RET FFNodeDemuxer::release() {
     return RT_OK;
 }
 
-RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer* rtPacket) {
+RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** rtPacket) {
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
     RT_ASSERT(RT_NULL != ctx);
     RT_ASSERT(RT_NULL != rtPacket);
 
-    RtMetaData* metaData = rtPacket->getMetaData();
+    RtMetaData* metaData = (*rtPacket)->getMetaData();
     AVPacket*   avPacket = reinterpret_cast<AVPacket*>(array_list_get_data(ctx->mListPacket, 0));
     if (RT_NULL == avPacket) {
         RT_LOGD("packet NULL");
-        rtPacket->setData(RT_NULL, 0);
+        (*rtPacket)->setData(RT_NULL, 0);
         if (ctx->mEosFlag) {
             return RT_OK;
         }
@@ -154,10 +154,10 @@ RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer* rtPacket) {
         RtMutex::RtAutolock autoLock(ctx->mLockPacket);
         RT_LOGD("--RTPacket(%p/%d)", avPacket, avPacket->size);
         array_list_remove_at(ctx->mListPacket, 0);
-        rtPacket->setData(avPacket->data, avPacket->size);
+        (*rtPacket)->setData(avPacket->data, avPacket->size);
         if (RT_NULL != metaData) {
             metaData->setPointer(kKeyAVPacket, avPacket);
-            metaData->setInt64(kKeyAVPktPts, avPacket->pts);
+            metaData->setInt64(kKeyTimeStamps, avPacket->pts);
             metaData->setInt64(kKeyAVPktDts, avPacket->dts);
             metaData->setInt32(kKeyAVPktSize, avPacket->size);
             metaData->setInt32(kKeyAVPktFlag, avPacket->flags);
@@ -170,7 +170,7 @@ RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer* rtPacket) {
 }
 
 RT_RET FFNodeDemuxer::pushBuffer(RTMediaBuffer* data) {
-    return RT_OK;
+    return RT_ERR_UNIMPLIMENTED;
 }
 
 RT_RET FFNodeDemuxer::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
@@ -194,11 +194,16 @@ RT_RET FFNodeDemuxer::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
     return RT_OK;
 }
 
-RtMetaData* FFNodeDemuxer::queryCap() {
+RT_RET FFNodeDemuxer::setEventLooper(RTMsgLooper* eventLooper) {
+    FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
+    ctx->mEventLooper = eventLooper;
+}
+
+RtMetaData* FFNodeDemuxer::queryFormat(RTPortType port) {
     return RT_NULL;
 }
 
-RTNodeStub* FFNodeDemuxer::queryInfo() {
+RTNodeStub* FFNodeDemuxer::queryStub() {
     return &ff_node_demuxer;
 }
 
@@ -206,8 +211,12 @@ INT32 FFNodeDemuxer::countTracks() {
     return 0;
 }
 
-INT32 FFNodeDemuxer::selectTrack(INT32 index) {
+INT32 FFNodeDemuxer::selectTrack(INT32 index, RTTrackType tType) {
     return 0;
+}
+
+RtMetaData* FFNodeDemuxer::queryTrack(UINT32 index) {
+    return RT_NULL;
 }
 
 RT_RET FFNodeDemuxer::onStart() {
@@ -234,6 +243,10 @@ RT_RET FFNodeDemuxer::onStop() {
 }
 
 RT_RET FFNodeDemuxer::onPause() {
+    return RT_OK;
+}
+
+RT_RET FFNodeDemuxer::onReset() {
     return RT_OK;
 }
 

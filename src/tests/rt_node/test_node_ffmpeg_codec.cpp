@@ -23,10 +23,10 @@
 #include "RTNodeCodec.h" // NOLINT
 #include "RTNodeBus.h" // NOLINT
 #include "rt_node_tests.h" // NOLINT
-#include "rt_media_frame.h" // NOLINT
-#include "rt_media_packet.h" // NOLINT
+#include "RTMediaBuffer.h" // NOLINT
 #include "rt_metadata.h" // NOLINT
-#include "rt_metadata_key.h" // NOLINT
+#include "RTMediaMetaKeys.h" // NOLINT
+#include "RTVideoUtils.h"   // NOLINT
 
 extern "C" {
 #include "libavformat/avformat.h" // NOLINT
@@ -35,72 +35,36 @@ extern "C" {
 #include "libavutil/opt.h" // NOLINT
 }
 
-#define MAX_BUFFER_SIZE (1024 * 1024)
-#define BULK_SIZE 32768
+#ifdef OS_WINDOWS
+#define TEST_URI "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4"
+#else
+#define TEST_URI "airplay.mp4"
+#endif
 
-class VideoBuffer {
- public:
-    VideoBuffer() {
-    }
+#define DEFAULT_WIDTH           608
+#define DEFAULT_HEIGHT          1080
 
-    void SetBuffer(unsigned char* buffer) {
-        mBuffer = buffer;
-        mTotalLength = 0;
-    }
+#define DEC_TEST_OUTPUT_FILE    "dec_output.bin"
+#define ENC_TEST_OUTPUT_FILE    "enc_output.bin"
 
-    void AppendBuffer(unsigned char* buffer, int len) {
-        memcpy(mBuffer + mTotalLength, buffer, len);
-        mTotalLength += len;
-    }
-
-    void DisposeOneFrame(int len) {
-        memmove(mBuffer, mBuffer + len, mTotalLength - len);
-        mTotalLength -= len;
-    }
-
-    int SearchStartCode() {
-        int count = 0;
-        for (int i = 4; i < mTotalLength; i++) {
-            switch (count) {
-            case 0:
-            case 1:
-            case 2:
-                if (mBuffer[i] == 0) {
-                    count++;
-                } else {
-                    count = 0;
-                }
-                break;
-            case 3:
-                if (mBuffer[i] == 1) {
-                    return i - 3;
-                } else {
-                    count = 0;
-                }
-                break;
-            default:
-                break;
-            }
-        }
-
-        return 0;
-    }
-
-    unsigned char* GetBuffer() {
-        return mBuffer;
-    }
-
- private:
-    unsigned char* mBuffer;
-    int mTotalLength;
-};
-
-RT_RET node_init_meta(RtMetaData *meta) {
+RT_RET init_decoder_meta(RtMetaData *meta) {
     CHECK_IS_NULL(meta);
 
-    meta->setInt32(kKeyWidth, 352);
-    meta->setInt32(kKeyHeight, 288);
+    meta->setInt32(kKeyWidth, DEFAULT_WIDTH);
+    meta->setInt32(kKeyHeight, DEFAULT_HEIGHT);
     meta->setInt32(kKeyCodingType, RT_VIDEO_CodingAVC);
+
+__FAILED:
+    return RT_ERR_UNKNOWN;
+}
+
+RT_RET init_encoder_meta(RtMetaData *meta) {
+    CHECK_IS_NULL(meta);
+
+    meta->setInt32(kKeyWidth, DEFAULT_WIDTH);
+    meta->setInt32(kKeyHeight, DEFAULT_HEIGHT);
+    meta->setInt32(kKeyCodingType, RT_VIDEO_CodingMPEG4);
+    meta->setInt32(kKeyBitrate, 5000000);
 
 __FAILED:
     return RT_ERR_UNKNOWN;
@@ -109,58 +73,196 @@ __FAILED:
 RTNode* initRTNode(struct NodeBusContext* bus, RT_NODE_TYPE node_type) {
     RTNodeStub* stub     = rt_node_bus_find(bus, node_type, 0);
     RTNode*     node     = stub->mCreateNode();
-    RtMetaData *nodeMeta = new RtMetaData();
-    node_init_meta(nodeMeta);
-    RTNodeAdapter::init(node, nodeMeta);
-    // nodeMeta->clear();
-    delete nodeMeta;
-    nodeMeta = RT_NULL;
     return node;
 }
 
 RT_RET unit_test_ff_node_decoder_proc(struct NodeBusContext* bus) {
+    FILE *write_fd = fopen(DEC_TEST_OUTPUT_FILE, "wb");
+    if (!write_fd) {
+        RT_LOGE("dec_output.bin open failed!!");
+    }
     RTNode* demuxer = initRTNode(bus, RT_NODE_TYPE_DEMUXER);
     RTNode* decoder = initRTNode(bus, RT_NODE_TYPE_DECODER);
     if ((RT_NULL != demuxer)&&(RT_NULL != decoder)) {
+        RtMetaData *demux_meta = RT_NULL;
+        RtMetaData *decoder_meta = RT_NULL;
+        demux_meta = new RtMetaData();
+        decoder_meta = new RtMetaData();
+
+        init_decoder_meta(decoder_meta);
+        demux_meta->setCString(kKeyUrl, TEST_URI);
+
+        RTNodeAdapter::init(demuxer, demux_meta);
+        RTNodeAdapter::init(decoder, decoder_meta);
+
         RTNodeAdapter::runCmd(demuxer, RT_NODE_CMD_START, NULL);
         RTNodeAdapter::runCmd(decoder, RT_NODE_CMD_START, NULL);
 
+        RTMediaBuffer *frame = RT_NULL;
         RTMediaBuffer* esPacket;
         do {
             // deqeue buffer from object pool
-            RTNodeAdapter::dequePoolBuffer(decoder, &esPacket);
+            RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
             if (RT_NULL != esPacket) {
                 // save es-packet to buffer
-                RTNodeAdapter::pullBuffer(demuxer, esPacket);
+                RTNodeAdapter::pullBuffer(demuxer, &esPacket);
 
-                // push es-packet to decoder
-                RTNodeAdapter::pushBuffer(decoder, esPacket);
+                UINT8 *data = reinterpret_cast<UINT8 *>(esPacket->getData());
+                UINT32 size = esPacket->getSize();
+                RT_LOGD("data: %p size: %d", data, size);
+                if (!data) {
+                    RT_LOGD("eos!!!!! break");
+                    break;
+                }
 
-                // pull av-frame from decoder
-                RTNodeAdapter::pullBuffer(decoder, NULL);
-
-                // dump AVFrame
-                RtTime::sleepMs(50);
+                // TODO(nal2annaB): must convert by demux!!!! this is test codec.
+                while (size > 0) {
+                    UINT32 nal_length = (data[0] << 24) + (data[1] << 16) + (data[2] << 8) + data[3];
+                    data[0] = 0;
+                    data[1] = 0;
+                    data[2] = 0;
+                    data[3] = 1;
+                    data += nal_length + 4;
+                    size -= nal_length + 4;
+                }
             }
+            // push es-packet to decoder
+            RTNodeAdapter::pushBuffer(decoder, esPacket);
+
+            // pull av-frame from decoder
+            RTNodeAdapter::pullBuffer(decoder, &frame);
+
+            if (frame) {
+                RT_LOGD("dec complete frame data: %p length: %d", frame->getData(), frame->getLength());
+                fwrite(frame->getData(), frame->getLength(), 1, write_fd);
+                fflush(write_fd);
+                RTNodeAdapter::queueCodecBuffer(decoder, frame, RT_PORT_OUTPUT);
+                frame = NULL;
+            }
+
+            // dump AVFrame
+            RtTime::sleepMs(50);
         } while (true);
+
+        if (demux_meta) {
+            delete demux_meta;
+            demux_meta = NULL;
+        }
+
+        if (decoder_meta) {
+            delete decoder_meta;
+            decoder_meta;
+        }
 
         RTNodeAdapter::runCmd(decoder, RT_NODE_CMD_STOP, NULL);
         RTNodeAdapter::runCmd(demuxer, RT_NODE_CMD_STOP, NULL);
         decoder->release();
         demuxer->release();
+        if (write_fd) {
+            fclose(write_fd);
+        }
     }
     return RT_OK;
 }
 
+RT_RET unit_test_ff_node_encoder_proc(struct NodeBusContext* bus) {
+    FILE *write_fd = fopen(ENC_TEST_OUTPUT_FILE, "wb");
+    if (!write_fd) {
+        RT_LOGE("%s open failed!!", ENC_TEST_OUTPUT_FILE);
+        return RT_ERR_UNKNOWN;
+    }
+
+    FILE *read_fd = fopen(DEC_TEST_OUTPUT_FILE, "rb");
+    if (!read_fd) {
+        RT_LOGE("%s open failed!!", DEC_TEST_OUTPUT_FILE);
+        return RT_ERR_UNKNOWN;
+    }
+
+    RTNode* encoder = initRTNode(bus, RT_NODE_TYPE_ENCODER);
+    if (RT_NULL != encoder) {
+        RtMetaData *encoder_meta = RT_NULL;
+        encoder_meta = new RtMetaData();
+
+        init_encoder_meta(encoder_meta);
+
+        RTNodeAdapter::init(encoder, encoder_meta);
+        RTNodeAdapter::runCmd(encoder, RT_NODE_CMD_START, NULL);
+
+        RTMediaBuffer *pkt = RT_NULL;
+        RTMediaBuffer *frame = RT_NULL;
+        RT_RET err = RT_OK;
+        do {
+            // deqeue buffer from object pool
+            if (!frame) {
+                err = RTNodeAdapter::dequeCodecBuffer(encoder, &frame, RT_PORT_INPUT);
+            }
+            if (err == RT_OK && frame) {
+                if (fread(frame->getData(),
+                          DEFAULT_HEIGHT * DEFAULT_WIDTH * 3 / 2,
+                          1,
+                          read_fd) < 1) {
+                    RT_LOGD("read eof, break");
+                    break;
+                }
+                fflush(read_fd);
+
+                if (RTNodeAdapter::pushBuffer(encoder, frame) == RT_OK) {
+                    frame = NULL;
+                }
+                err = RTNodeAdapter::pullBuffer(encoder, &pkt);
+                if (err == RT_OK && pkt) {
+                    RT_LOGD("encode complete pkt data: %p length: %d",
+                                 pkt->getData(), pkt->getLength());
+                    fwrite(pkt->getData(), pkt->getLength(), 1, write_fd);
+                    fflush(write_fd);
+                    RTNodeAdapter::queueCodecBuffer(encoder, pkt, RT_PORT_OUTPUT);
+                    pkt = NULL;
+                }
+            }
+
+            // dump AVFrame
+            RtTime::sleepMs(50);
+        } while (true);
+
+        if (encoder_meta) {
+            delete encoder_meta;
+            encoder_meta;
+        }
+
+        RTNodeAdapter::runCmd(encoder, RT_NODE_CMD_STOP, NULL);
+        encoder->release();
+        if (write_fd) {
+            fclose(write_fd);
+        }
+        if (read_fd) {
+            fclose(write_fd);
+        }
+    }
+    return RT_OK;
+}
+
+
 RT_RET unit_test_ff_node_decoder(INT32 index, INT32 total) {
-    RT_RET ret = RT_OK;
+    RT_RET err = RT_OK;
 
     struct NodeBusContext* bus = rt_node_bus_create();
     rt_node_bus_register_all(bus);
 
-    ret = unit_test_ff_node_decoder_proc(bus);
+    err = unit_test_ff_node_decoder_proc(bus);
     rt_node_bus_destory(bus);
 
-    return ret;
+    return err;
+}
+
+RT_RET unit_test_ff_node_encoder(INT32 index, INT32 total) {
+    RT_RET err = RT_OK;
+
+    struct NodeBusContext* bus = rt_node_bus_create();
+    rt_node_bus_register_all(bus);
+
+    err = unit_test_ff_node_encoder_proc(bus);
+    rt_node_bus_destory(bus);
+
+    return err;
 }
 

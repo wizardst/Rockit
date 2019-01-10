@@ -21,7 +21,8 @@
 #include "RTNodeBus.h"    // NOLINT
 #include "RTNodeDemuxer.h" // NOLINT
 #include "RTNodeHeader.h" // NOLINT
-#include "FFNodeCodec.h"  // NOLINT
+#include "FFNodeDecoder.h"  // NOLINT
+#include "FFNodeEncoder.h"  // NOLINT
 #include "FFNodeDemuxer.h"  // NOLINT
 
 struct NodeBusContext {
@@ -70,8 +71,9 @@ INT32 rt_node_bus_summary(struct NodeBusContext* bus, RT_BOOL full) {
         struct rt_hash_node* root = rt_hash_table_get_bucket(bus->node_all, idx);
         for (node = root->next; node != root; node = node->next, num_plugin++) {
             RTNode* plugin = reinterpret_cast<RTNode*>(node->data);
+            /*
             RT_LOGE("buckets[%02d:%02d]: name:%-10s, ptr:%p",
-                     idx, num_plugin, plugin->queryInfo()->mNodeName, node->data);
+                     idx, num_plugin, plugin->queryInfo()->mNodeName, node->data);*/
         }
     }
     RT_LOGE("done\r\n");
@@ -80,8 +82,8 @@ INT32 rt_node_bus_summary(struct NodeBusContext* bus, RT_BOOL full) {
 
 INT32 rt_node_bus_register_all(struct NodeBusContext* bus) {
     rt_node_bus_register(bus, &ff_node_demuxer);
-    rt_node_bus_register(bus, &ff_node_decoder);
-    rt_node_bus_register(bus, &ff_node_encoder);
+    rt_node_bus_register(bus, &ff_node_video_decoder);
+    rt_node_bus_register(bus, &ff_node_video_encoder);
     return RT_OK;
 }
 

@@ -5,10 +5,10 @@
 - FFNodeCodec 继承媒体基类RTCodec，媒体基类RTCodec定义了一组解码器接口；
 - FFNodeCodec 通过调用 ffmpeg-adapter的接口实现具体功能；
 
-## RTCodec的接口
+## FFNodeCodec的接口
 
 ``` c++
-class RTCodec {
+class FFNodeCodec {
 
 };
 ```

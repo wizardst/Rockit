@@ -34,7 +34,7 @@
 #define DEBUG_FLAG 0x1
 
 struct FAFormatContext {
-    AVFormatContext *mAvfc;
+    AVFormatContext  *mAvfc;
     FC_FLAG          mFcFlag;
 };
 

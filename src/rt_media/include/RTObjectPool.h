@@ -58,8 +58,8 @@ class RTObjectPool : public RTObject {
     virtual void dump();
 
  private:
-    UINT32    mMaxNum;
-    UINT32    mObjNum;
+    INT32    mMaxNum;
+    INT32    mObjNum;
     RT_Deque* mUsedDeque;
     RT_Deque* mIdleDeque;
     AllocListener mAllocObj;

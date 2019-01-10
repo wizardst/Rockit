@@ -103,3 +103,12 @@ void RTMediaBuffer::reset() {
     mMetaData->clear();
     setRange(0, mSize);
 }
+
+void RTMediaBuffer::setStatus(RtMediaBufferStatus status) {
+    mStatus = status;
+}
+
+RtMediaBufferStatus RTMediaBuffer::getStatus() {
+    return mStatus;
+}
+

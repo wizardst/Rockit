@@ -22,10 +22,27 @@
 
 #include "FFAdapterUtils.h"  // NOLINT
 
-struct FACodecContext;
+struct FACodecContext {
+    AVCodecContext  *mAvCodecCtx;
+};
 
-FACodecContext* fa_codec_open(const char* codec_name);
-void fa_codec_close(FACodecContext* fc);
+class RtMetaData;
+class RTMediaBuffer;
+
+FACodecContext* fa_video_decode_create(RtMetaData *meta);
+void fa_video_decode_destroy(FACodecContext** fc);
+
+FACodecContext* fa_video_encode_create(RtMetaData *meta);
+void fa_video_encode_destroy(FACodecContext** fc);
+
+
+RT_RET fa_decode_send_packet(FACodecContext* fc, RTMediaBuffer *buffer);
+RT_RET fa_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer);
+
+RT_RET fa_encode_send_frame(FACodecContext* fc, RTMediaBuffer *buffer);
+RT_RET fa_encode_get_packet(FACodecContext* fc, RTMediaBuffer *buffer);
+
+
 void fa_codec_flush(FACodecContext* fc);
 void fa_codec_push(FACodecContext* fc, char* buffer, UINT32 size);
 void fa_codec_pull(FACodecContext* fc, char* buffer, UINT32* size);

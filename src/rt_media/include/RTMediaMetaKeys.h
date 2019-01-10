@@ -41,7 +41,12 @@ enum {
     kKeyAVPktSize   = MKTAG('p', 's', 'i', 'z'),   // AVPacket size
     kKeyAVPktFlag   = MKTAG('p', 'f', 'l', 'g'),   // AVPacket flag
     kKeyAVPktIndex  = MKTAG('p', 'i', 'd', 'x'),   // AVPacket index
-    kKeyAVPktData   =  MKTAG('p', 'd', 'a', 't'),  // AVPacket data
+    kKeyAVPktData   = MKTAG('p', 'd', 'a', 't'),  // AVPacket data
+    kKeyExtraData   = MKTAG('e', 'x', 'd', 'a'),  // void *
+    kKeyExtraDataSize = MKTAG('e', 'x', 'd', 's'),  // INT32
+    kKeyBitrate     = MKTAG('b', 't', 'r', 't'),  // INT32
+    kKeyFramerate   = MKTAG('f', 'n', 'r', 't'),  // INT32
+    kKeyPixFormat   = MKTAG('p', 'f', 'r', 'm'),  // INT32
 
     // media track
     kKeyTrackType      = MKTAG('t', 't', 'p', 'e'),  // INT32
@@ -70,6 +75,10 @@ enum {
 
     // subtitle track features
     kKeyTSubtitleEncoding   = MKTAG('s', 'e', 'n', 'g'),  // INT32
+
+    // encode features
+    kKeyGopSize             = MKTAG('g', 'p', 's', 'z'),  // INT32
+    kKeyMaxBFrames          = MKTAG('m', 'b', 'f', 'm'),  // INT32
 };
 
 #endif  // SRC_RT_MEDIA_INCLUDE_RTMEDIAMETAKEYS_H_

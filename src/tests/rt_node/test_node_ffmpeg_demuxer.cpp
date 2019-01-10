@@ -25,9 +25,7 @@
 
 #include "rt_node_tests.h"   // NOLINT
 #include "rt_metadata.h"     // NOLINT
-#include "rt_metadata_key.h" // NOLINT
-#include "rt_media_frame.h"  // NOLINT
-#include "rt_media_packet.h"  // NOLINT
+#include "RTMediaMetaKeys.h" // NOLINT
 
 #ifdef OS_WINDOWS
 #define TEST_URI "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4"
@@ -57,7 +55,7 @@ RT_RET unit_test_ff_node_demuxer(INT32 index, INT32 total) {
     rtPacket = new RTMediaBuffer(RT_NULL, 0);
     while (++count < 100) {
         rtPacket->reset();
-        RTNodeAdapter::pullBuffer(demuxer, rtPacket);
+        RTNodeAdapter::pullBuffer(demuxer, &rtPacket);
         if (rtPacket->getSize() > 0) {
             metaData = rtPacket->getMetaData();
             metaData->findPointer(kKeyAVPacket, reinterpret_cast<void **>(&avPacket));

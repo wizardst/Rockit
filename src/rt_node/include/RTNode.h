@@ -35,6 +35,7 @@
 
 #include "rt_header.h" // NOLINT
 #include "rt_node_define.h" // NOLINT
+#include "rt_msg_looper.h"  // NOLINT
 #include "RTMediaBuffer.h"
 
 #ifdef __cplusplus
@@ -45,6 +46,12 @@ struct RtMetaData;
 
 #define RT_NODE_CONTEXT void*
 
+typedef enum {
+    RT_PORT_INPUT,
+    RT_PORT_OUTPUT,
+    RT_PORT_MAX,
+}RTPortType;
+
 struct RTNodeStub;
 class RTNode {
  public:
@@ -52,13 +59,28 @@ class RTNode {
     // core api for media plugins
     virtual RT_RET init(RtMetaData *metadata) = 0;
     virtual RT_RET release() = 0;
-    virtual RT_RET pullBuffer(RTMediaBuffer* data) = 0;
 
-    virtual RT_RET dequePoolBuffer(RTMediaBuffer** data) = 0;
-    virtual RT_RET pushBuffer(RTMediaBuffer* data) = 0;
+    // pull buffer from last node, then push to next node
+    virtual RT_RET pullBuffer(RTMediaBuffer** data) = 0;
+    virtual RT_RET pushBuffer(RTMediaBuffer*  data) = 0;
+
+    // use the command to distribute control flow
     virtual RT_RET runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) = 0;
-    virtual RtMetaData* queryCap() = 0;
-    virtual RTNodeStub* queryInfo() = 0;
+
+    // notify event for node-bus
+    virtual RT_RET setEventLooper(RTMsgLooper* eventLooper) = 0;
+
+    // node capability and stub description
+    virtual RtMetaData* queryFormat(RTPortType port) = 0;
+    virtual RTNodeStub* queryStub()   = 0;
+
+ protected:
+    virtual RT_RET onStart() = 0;
+    virtual RT_RET onPause() = 0;
+    virtual RT_RET onStop()  = 0;
+    virtual RT_RET onReset() = 0;
+    virtual RT_RET onFlush() = 0;
+
  protected:
     void*   mNodeContext;
 };
@@ -67,12 +89,19 @@ class RTNodeAdapter {
  public:
     static RT_RET init(RTNode* node, RtMetaData* metadata);
     static RT_RET release(RTNode* node);
-    static RT_RET pullBuffer(RTNode* node, RTMediaBuffer* data);
-    static RT_RET dequePoolBuffer(RTNode* node, RTMediaBuffer** data);
+
+    static RT_RET pullBuffer(RTNode* node, RTMediaBuffer** data);
     static RT_RET pushBuffer(RTNode* node, RTMediaBuffer* data);
+
+    // borrow and return buffer for pool buffer
+    static  RT_RET dequeCodecBuffer(RTNode* node, RTMediaBuffer** data, RTPortType port);
+    static  RT_RET queueCodecBuffer(RTNode* node, RTMediaBuffer*  data, RTPortType port);
+
     static RT_RET runCmd(RTNode* node, RT_NODE_CMD cmd, RtMetaData* metadata);
-    static RtMetaData* queryCap(RTNode* node);
-    static RTNodeStub* queryInfo(RTNode* node);
+    static RT_RET setEventLooper(RTNode* node, RTMsgLooper* eventLooper);
+
+    static RtMetaData* queryFormat(RTNode* node, RTPortType port);
+    static RTNodeStub* queryStub(RTNode* node);
 };
 
 typedef RTNode* (*CreateNode)();

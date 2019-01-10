@@ -27,15 +27,19 @@
 extern "C" {
 #endif
 
+typedef enum {
+    RT_TRACK_VIDEO,
+    RT_TRACK_AUDIO,
+    RT_TRACK_SUBTITLE,
+    RT_TRACK_META,
+    RT_TRACK_MAX,
+}RTTrackType;
+
 class RTNodeDemuxer : public RTNode {
  public:
-    virtual INT32 countTracks() = 0;
-    virtual INT32 selectTrack(INT32 index) = 0;
- protected:
-    virtual RT_RET onStart() = 0;
-    virtual RT_RET onStop()  = 0;
-    virtual RT_RET onPause() = 0;
-    virtual RT_RET onFlush() = 0;
+    virtual INT32       countTracks() = 0;
+    virtual INT32       selectTrack(INT32 index, RTTrackType tType) = 0;
+    virtual RtMetaData* queryTrack(UINT32 index) = 0;
 };
 
 #ifdef  __cplusplus

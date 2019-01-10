@@ -24,6 +24,14 @@
 #include "RTObject.h"   // NOLINT
 #include "rt_metadata.h"  // NOLINT
 
+enum RtMediaBufferStatus {
+    RT_MEDIA_BUFFER_STATUS_UNKONN = 0,
+    RT_MEDIA_BUFFER_STATUS_UNUSED,
+    RT_MEDIA_BUFFER_STATUS_READY,
+    RT_MEDIA_BUFFER_STATUS_USING,
+    RT_MEDIA_BUFFER_STATUS_BOTTON,
+};
+
 class RTMediaBuffer : public RTObject {
  public:
     // The underlying data remains the responsibility of the caller!
@@ -44,6 +52,8 @@ class RTMediaBuffer : public RTObject {
     UINT32 getLength() const;
     void   setData(void* data, UINT32 size);
     void   setRange(UINT32 offset, UINT32 length);
+    void   setStatus(RtMediaBufferStatus status);
+    RtMediaBufferStatus getStatus();
     RtMetaData* getMetaData();
 
     // Clears meta data and resets the range to the full extent.
@@ -55,6 +65,7 @@ class RTMediaBuffer : public RTObject {
     RT_BOOL mOwnsData;
 
     RtMetaData* mMetaData;
+    RtMediaBufferStatus mStatus;
 };
 
 #endif  // SRC_RT_MEDIA_INCLUDE_RTMEDIABUFFER_H_

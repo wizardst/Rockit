@@ -11,7 +11,8 @@ set(RT_NODE_SRC
     RTNodeMuxer.cpp
     rt_node_define.cpp
 
-    ff_node/FFNodeCodec.cpp
+    ff_node/FFNodeDecoder.cpp
+    ff_node/FFNodeEncoder.cpp
     ff_node/FFNodeDemuxer.cpp
     ff_node/FFNodeFilter.cpp
     ff_node/FFNodeMuxer.cpp

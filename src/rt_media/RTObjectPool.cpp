@@ -61,7 +61,7 @@ RTObject* RTObjectPool::borrowObj() {
            // use alloc listener to create new object
            result = (RT_NULL != mAllocObj)? mAllocObj(): RT_NULL;
        }
-       RT_LOGD_IF(DEBUG_FLAG, "object = %p", result);
+       RT_LOGD_IF(DEBUG_FLAG, "object = %p mObjNum: %d", result, mObjNum);
        return result;
     }
 
@@ -72,9 +72,9 @@ RTObject* RTObjectPool::borrowObj() {
 RT_RET RTObjectPool::returnObj(RTObject* obj) {
     RtAutoMutex autolock(mLock);
     if (RT_NULL != obj) {
-        RT_LOGD_IF(DEBUG_FLAG, "object = %p", obj);
         deque_push_tail(mIdleDeque, reinterpret_cast<void*>(obj));
         mObjNum--;
+        RT_LOGD_IF(DEBUG_FLAG, "object = %p mObjNum %d", obj, mObjNum);
     }
     return RT_OK;
 }
