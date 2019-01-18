@@ -48,19 +48,19 @@ FACodecContext* fa_video_decode_create(RtMetaData *meta) {
 
     // necessary parameters
     RtCodingType type;
-    CHECK_EQ(meta->findInt32(kKeyCodingType, reinterpret_cast<INT32 *>(&type)), RT_TRUE);
+    CHECK_EQ(meta->findInt32(kKeyCodecID, reinterpret_cast<INT32 *>(&type)), RT_TRUE);
 
     INT32 width, height;
-    CHECK_EQ(meta->findInt32(kKeyWidth, &width), RT_TRUE);
-    CHECK_EQ(meta->findInt32(kKeyHeight, &height), RT_TRUE);
+    CHECK_EQ(meta->findInt32(kKeyVCodecWidth,  &width), RT_TRUE);
+    CHECK_EQ(meta->findInt32(kKeyVCodecHeight, &height), RT_TRUE);
 
     // non necessary parameters
     RT_PTR extradata;
     INT32 extradata_size;
-    if (!meta->findPointer(kKeyExtraData, &extradata)) {
+    if (!meta->findPointer(kKeyVCodecExtraData, &extradata)) {
         extradata = NULL;
     }
-    if (!meta->findInt32(kKeyExtraDataSize, &extradata_size)) {
+    if (!meta->findInt32(kKeyVCodecExtraSize, &extradata_size)) {
         extradata_size = 0;
     }
 
@@ -110,30 +110,30 @@ FACodecContext* fa_video_encode_create(RtMetaData *meta) {
 
     // necessary parameters
     RtCodingType type;
-    CHECK_EQ(meta->findInt32(kKeyCodingType, reinterpret_cast<INT32 *>(&type)), RT_TRUE);
+    CHECK_EQ(meta->findInt32(kKeyCodecID, reinterpret_cast<INT32 *>(&type)), RT_TRUE);
 
     INT32 width, height;
-    CHECK_EQ(meta->findInt32(kKeyWidth, &width), RT_TRUE);
-    CHECK_EQ(meta->findInt32(kKeyHeight, &height), RT_TRUE);
+    CHECK_EQ(meta->findInt32(kKeyVCodecWidth,  &width), RT_TRUE);
+    CHECK_EQ(meta->findInt32(kKeyVCodecHeight, &height), RT_TRUE);
 
     // non necessary parameters
     INT32 bitrate;
-    if (!meta->findInt32(kKeyBitrate, &bitrate)) {
+    if (!meta->findInt32(kKeyCodecBitrate, &bitrate)) {
         bitrate = 2000000;
     }
 
     INT32 framerate;
-    if (!meta->findInt32(kKeyFramerate, &framerate)) {
+    if (!meta->findInt32(kKeyVCodecFrameRate, &framerate)) {
         framerate = 30;
     }
 
     INT32 gop_size;
-    if (!meta->findInt32(kKeyGopSize, &gop_size)) {
+    if (!meta->findInt32(kKeyVCodecGopSize, &gop_size)) {
         gop_size = 10;
     }
 
     INT32 max_b_frames;
-    if (!meta->findInt32(kKeyMaxBFrames, &max_b_frames)) {
+    if (!meta->findInt32(kKeyVCodecMaxBFrames, &max_b_frames)) {
         max_b_frames = 1;
     }
 
@@ -219,8 +219,8 @@ static RT_RET fa_init_av_packet(AVPacket *pkt, RTMediaBuffer *buffer) {
     if (buffer) {
         pkt->data = reinterpret_cast<UINT8 *>(buffer->getData());
         pkt->size = buffer->getSize();
-        meta->findInt64(kKeyTimeStamps, &pkt->pts);
-        meta->findInt64(kKeyTimeStamps, &pkt->dts);
+        meta->findInt64(kKeyPacketPts, &pkt->pts);
+        meta->findInt64(kKeyPacketDts, &pkt->dts);
     } else {
         // empty packet. like eos.
         pkt->data = NULL;
@@ -235,7 +235,7 @@ static RT_RET fa_init_av_packet(AVPacket *pkt, RTMediaBuffer *buffer) {
 }
 
 static RT_RET fa_init_av_frame(FACodecContext* fc, AVFrame **frame, RTMediaBuffer *buffer) {
-    RtMetaData *meta = buffer->getMetaData();
+    // RtMetaData *meta = buffer->getMetaData();
     UINT8 *data = reinterpret_cast<UINT8 *>(buffer->getData());
     AVFrame *tmp_frame = RT_NULL;
     tmp_frame = av_frame_alloc();
@@ -282,7 +282,7 @@ RT_RET fa_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
     int      i;
     UINT8 *data[4];
     int      linesize[4];
-    INT64  pts = AV_NOPTS_VALUE;
+    // INT64  pts = AV_NOPTS_VALUE;
     UINT8 *dst = NULL;
     RtMetaData *meta = NULL;
 
@@ -323,12 +323,7 @@ RT_RET fa_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
     }
 
     buffer->setRange(0, frame->width * frame->height * 3 / 2);
-    if (frame->pts == AV_NOPTS_VALUE) {
-        pts = 0;
-    } else {
-        pts = frame->pts;
-    }
-    meta->setInt64(kKeyTimeStamps,  pts);
+    meta->setInt64(kKeyFramePts,    frame->pts);
     meta->setInt32(kKeyFrameWidth,  frame->width);
     meta->setInt32(kKeyFrameHeight, frame->height);
     av_frame_unref(frame);
@@ -355,11 +350,6 @@ RT_RET fa_encode_send_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
 }
 
 RT_RET fa_encode_get_packet(FACodecContext* fc, RTMediaBuffer *buffer) {
-    int      i;
-    UINT8 *data[4];
-    int      linesize[4];
-    INT64  pts = AV_NOPTS_VALUE;
-    UINT8 *dst = NULL;
     RtMetaData *meta = NULL;
     int ret = 0;
 
@@ -377,7 +367,8 @@ RT_RET fa_encode_get_packet(FACodecContext* fc, RTMediaBuffer *buffer) {
         return RT_ERR_TIMEOUT;
     }
 
-    meta->setInt64(kKeyTimeStamps, pkt->pts);
+    meta->setInt64(kKeyPacketPts, pkt->pts);
+    meta->setInt64(kKeyPacketDts, pkt->dts);
     buffer->setRange(0, pkt->size);
 
     rt_memcpy(buffer->getData(), pkt->data, pkt->size);

@@ -27,12 +27,6 @@
 extern "C" {
 #endif
 
-RT_RET    node_ff_demuxer_init(void **ctx);
-RT_RET    node_ff_demuxer_release(void **ctx);
-RT_RET    node_ff_demuxer_pull(void *ctx, void* packet, UINT32 *size);
-RT_RET    node_ff_demuxer_push(void *ctx, void* packet, UINT32 *size);
-RT_RET    node_ff_demuxer_run_cmd(void* ctx, RT_NODE_CMD cmd, RtMetaData *metadata);
-
 class FFNodeDemuxer : public RTNodeDemuxer {
  public:
     FFNodeDemuxer();
@@ -54,7 +48,7 @@ class FFNodeDemuxer : public RTNodeDemuxer {
 
  public:
     // override RTNodeDemuxer methods
-    virtual INT32 countTracks();
+    virtual INT32 countTracks(RTTrackType tType);
     virtual INT32 selectTrack(INT32 index, RTTrackType tType);
     virtual RtMetaData* queryTrack(UINT32 index);
 

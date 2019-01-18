@@ -22,63 +22,64 @@
 #define SRC_RT_MEDIA_INCLUDE_RTMEDIAMETAKEYS_H_
 
 enum {
-    /* common param */
-    kKeyWidth       = MKTAG('w', 'i', 't', 'h'),
-    kKeyHeight      = MKTAG('h', 'i', 'g', 'h'),
+    /* media format features */
+    kKeyFormatDuration   = MKTAG('f', 'd', 'u', 'r'),  // UINT64
+    kKeyFormatEOS        = MKTAG('f', 'e', 'o', 's'),
+    kKeyFormatUri        = MKTAG('f', 'u', 'r', 'i'),
 
-    /* decode and encode */
-    kKeyCodingType  = MKTAG('c', 'd', 't', 'p'),
+    /* common track features*/
+    kKeyCodecType        = MKTAG('c', 't', 'y', 'p'),
+    kKeyCodecID          = MKTAG('c', 'c', 'i', 'd'),
+    kKeyCodecProfile     = MKTAG('c', 'p', 'r', 'o'),
+    kKeyCodecLevel       = MKTAG('c', 'l', 'e', 'v'),
+    kKeyCodecFormat      = MKTAG('c', 'f', 'o', 'r'),
+    kKeyCodecBitrate     = MKTAG('c', 'b', 'i', 't'),
 
-    /* media common */
-    kKeyTimeStamps  = MKTAG('t', 's', 't', 'p'),
-    kKeyFrameWidth  = MKTAG('f', 'w', 'i', 't'),
-    kKeyFrameHeight = MKTAG('f', 'h', 'i', 't'),
-    kKeyEOS         = MKTAG('k', 'e', 'o', 's'),
-    kKeyUrl         = MKTAG('k', 'u', 'r', 'l'),
-    kKeyAVPacket    = MKTAG('a', 'v', 'p', 't'),   // AVPacket
-    kKeyAVPktPts    = MKTAG('p', 'p', 't', 's'),   // AVPacket dts
-    kKeyAVPktDts    = MKTAG('p', 'd', 't', 's'),   // AVPacket pts
-    kKeyAVPktSize   = MKTAG('p', 's', 'i', 'z'),   // AVPacket size
-    kKeyAVPktFlag   = MKTAG('p', 'f', 'l', 'g'),   // AVPacket flag
-    kKeyAVPktIndex  = MKTAG('p', 'i', 'd', 'x'),   // AVPacket index
-    kKeyAVPktData   = MKTAG('p', 'd', 'a', 't'),  // AVPacket data
-    kKeyExtraData   = MKTAG('e', 'x', 'd', 'a'),  // void *
-    kKeyExtraDataSize = MKTAG('e', 'x', 'd', 's'),  // INT32
-    kKeyBitrate     = MKTAG('b', 't', 'r', 't'),  // INT32
-    kKeyFramerate   = MKTAG('f', 'n', 'r', 't'),  // INT32
-    kKeyPixFormat   = MKTAG('p', 'f', 'r', 'm'),  // INT32
+    /* video track features*/
+    kKeyVCodecWidth          = MKTAG('v', 'w', 'i', 'd'),
+    kKeyVCodecHeight         = MKTAG('v', 'h', 'e', 'i'),
+    kKeyVCodecVideoDelay     = MKTAG('v', 'v', 'd', 'e'),  // INT32
+    kKeyVCodecFrameRate      = MKTAG('v', 'f', 'r', 'a'),  // INT32 23.976 x 1000
+    kKeyVCodecExtraData      = MKTAG('v', 'd', 'a', 't'),  // void *
+    kKeyVCodecExtraSize      = MKTAG('v', 's', 'i', 'z'),  // INT32
+    kKeyVCodecFieldOrder     = MKTAG('v', 'f', 'i', 'e'),  // INT32
+    kKeyVCodecColorRange     = MKTAG('v', 'c', 'r', 'a'),  // INT32
+    kKeyVCodecColorPrimary   = MKTAG('v', 'c', 'p', 'r'),  // INT32
+    kKeyVCodecColorTransfer  = MKTAG('v', 'c', 't', 'r'),  // INT32
+    kKeyVCodecColorSpace     = MKTAG('v', 'c', 's', 'p'),  // INT32
+    kKeyVCodecChromaLocation = MKTAG('v', 'c', 'l', 'o'),  // INT32
 
-    // media track
-    kKeyTrackType      = MKTAG('t', 't', 'p', 'e'),  // INT32
-    kKeyTrackSubType   = MKTAG('t', 's', 't', 'y'),  // INT32
-    kKeyTrackCodecID   = MKTAG('t', 'c', 'i', 'd'),  // INT32
-    kKeyTrackDuration  = MKTAG('t', 'd', 't', 'n'),  // UINT64
-    kKeyTrackLanguage  = MKTAG('t', 'l', 'a', 'n'),  // char*
+    /* video extra features*/
+    kKeyVCodecGopSize        = MKTAG('g', 'p', 's', 'z'),  // INT32 encoder feature
+    kKeyVCodecMaxBFrames     = MKTAG('m', 'b', 'f', 'm'),  // INT32 encoder feature
 
-    // video track features
-    kKeyTVideoFrameWidth    = MKTAG('v', 'f', 'w', 'h'),  // INT32
-    kKeyTVideoFrameHeight   = MKTAG('v', 'f', 'h', 't'),  // INT32
-    kKeyTVideoDisplayWidth  = MKTAG('v', 'd', 'w', 'h'),  // INT32
-    kKeyTVideoDisplayHeight = MKTAG('v', 'd', 'h', 't'),  // INT32
-    kKeyTVideoAlign         = MKTAG('v', 'a', 'l', 'n'),  // INT32
-    kKeyTVideoBitrate       = MKTAG('v', 'b', 'i', 'e'),  // INT32
-    kKeyTVideoFrameRate     = MKTAG('v', 'f', 'r', 'a'),  // INT32 23.976 x 1000
-    kKeyTVideoColorSpace    = MKTAG('v', 'c', 's', 'e'),  // INT32
-    kKeyTVideoBitDepth      = MKTAG('v', 'b', 'e', 'h'),  // INT32
-    kKeyTVideoScanType      = MKTAG('v', 's', 't', 'e'),  // INT32
+    /* audio track features*/
+    kKeyACodecChanneLayout     = MKTAG('a', 'c', 'l', 'a'),
+    kKeyACodecChannels         = MKTAG('a', 'c', 'h', 'a'),
+    kKeyACodecSampleRate       = MKTAG('a', 's', 'r', 'a'),
+    kKeyACodecBlockAlign       = MKTAG('a', 'c', 'l', 'a'),
+    kKeyACodecFrameSize        = MKTAG('a', 'c', 'h', 'a'),
+    kKeyACodecInitialPadding   = MKTAG('a', 's', 'r', 'a'),
+    kKeyACodecTrailinglPadding = MKTAG('a', 's', 'r', 'a'),
 
-    // audio track features
-    kKeyTAudioBitrate       = MKTAG('a', 'c', 's', 'e'),  // INT32
-    kKeyTAudioSample        = MKTAG('a', 'b', 'e', 'h'),  // INT32
-    kKeyTAudioChannelNB     = MKTAG('a', 'c', 'n', 'b'),  // INT32
-    kKeyTAudioBitDepth      = MKTAG('a', 'c', 'n', 'b'),  // INT32
+    /* subtitle track features */
+    kKeySCodecLanguage      = MKTAG('s', 'l', 'a', 'n'),  // char*
+    kKeySCodecEncoding      = MKTAG('s', 'e', 'n', 'g'),  // INT32
 
-    // subtitle track features
-    kKeyTSubtitleEncoding   = MKTAG('s', 'e', 'n', 'g'),  // INT32
+    /* RTFrame */
+    kKeyFrameWidth       = MKTAG('f', 'w', 'i', 't'),
+    kKeyFrameHeight      = MKTAG('f', 'h', 'i', 't'),
+    kKeyFramePts         = MKTAG('f', 'p', 't', 's'),
 
-    // encode features
-    kKeyGopSize             = MKTAG('g', 'p', 's', 'z'),  // INT32
-    kKeyMaxBFrames          = MKTAG('m', 'b', 'f', 'm'),  // INT32
+    /* RTPacket */
+    kKeyPacketPtr        = MKTAG('a', 'v', 'p', 't'),   // AVPacket
+    kKeyPacketPts        = MKTAG('p', 'p', 't', 's'),   // INT64 AVPacket dts
+    kKeyPacketDts        = MKTAG('p', 'd', 't', 's'),   // INT64 AVPacket pts
+    kKeyPacketPos        = MKTAG('p', 'p', 'o', 's'),   // INT64 AVPacket pos
+    kKeyPacketSize       = MKTAG('p', 's', 'i', 'z'),   // INT32 AVPacket size
+    kKeyPacketFlag       = MKTAG('p', 'f', 'l', 'g'),   // INT32 AVPacket flag
+    kKeyPacketIndex      = MKTAG('p', 'i', 'd', 'x'),   // INT32 AVPacket index
+    kKeyPacketData       = MKTAG('p', 'd', 'a', 't'),   // AVPacket data
 };
 
 #endif  // SRC_RT_MEDIA_INCLUDE_RTMEDIAMETAKEYS_H_

@@ -18,16 +18,16 @@
  */
 
  /*
-  *    node         node_codec      ff_node_codec
-  *      |  init <ctx>  |                |
-  *      |              |    init <ctx>  |
-  *      |              |                | init <ctx>
-  *      |  send <pkt>  |                |
-  *      |              |   send <pkt>   |
-  *      | recv <frame> |                |
-  *      |              |  recv <frame>  |
-  *      |   release    |                |
-  *      |              |    release     |
+  * node_demuxer    node_codec        node_render
+  *      |               |                 |
+  *  init <meta>    init <meta>        init <meta>
+  *      |               |                 |
+  *  pullBuffer          |                 |
+  *      |           pushBuffer            |
+  *      |           pullBuffer            |
+  *      |               |             pushBuffer
+  *   release          release           release
+  *      |               |                 |
   */
 
 #ifndef SRC_RT_NODE_INCLUDE_RTNODE_H_

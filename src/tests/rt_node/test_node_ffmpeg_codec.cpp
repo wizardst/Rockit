@@ -50,9 +50,9 @@ extern "C" {
 RT_RET init_decoder_meta(RtMetaData *meta) {
     CHECK_IS_NULL(meta);
 
-    meta->setInt32(kKeyWidth, DEFAULT_WIDTH);
-    meta->setInt32(kKeyHeight, DEFAULT_HEIGHT);
-    meta->setInt32(kKeyCodingType, RT_VIDEO_CodingAVC);
+    meta->setInt32(kKeyVCodecWidth,  DEFAULT_WIDTH);
+    meta->setInt32(kKeyVCodecHeight, DEFAULT_HEIGHT);
+    meta->setInt32(kKeyCodecID,      RT_VIDEO_CodingAVC);
 
 __FAILED:
     return RT_ERR_UNKNOWN;
@@ -61,10 +61,10 @@ __FAILED:
 RT_RET init_encoder_meta(RtMetaData *meta) {
     CHECK_IS_NULL(meta);
 
-    meta->setInt32(kKeyWidth, DEFAULT_WIDTH);
-    meta->setInt32(kKeyHeight, DEFAULT_HEIGHT);
-    meta->setInt32(kKeyCodingType, RT_VIDEO_CodingMPEG4);
-    meta->setInt32(kKeyBitrate, 5000000);
+    meta->setInt32(kKeyVCodecWidth,  DEFAULT_WIDTH);
+    meta->setInt32(kKeyVCodecHeight, DEFAULT_HEIGHT);
+    meta->setInt32(kKeyCodecID,      RT_VIDEO_CodingMPEG4);
+    meta->setInt32(kKeyCodecBitrate, 5000000);
 
 __FAILED:
     return RT_ERR_UNKNOWN;
@@ -84,15 +84,15 @@ RT_RET unit_test_ff_node_decoder_proc(struct NodeBusContext* bus) {
     RTNode* demuxer = initRTNode(bus, RT_NODE_TYPE_DEMUXER);
     RTNode* decoder = initRTNode(bus, RT_NODE_TYPE_DECODER);
     if ((RT_NULL != demuxer)&&(RT_NULL != decoder)) {
-        RtMetaData *demux_meta = RT_NULL;
+        RtMetaData *demuxer_meta = RT_NULL;
         RtMetaData *decoder_meta = RT_NULL;
-        demux_meta = new RtMetaData();
+        demuxer_meta = new RtMetaData();
         decoder_meta = new RtMetaData();
 
         init_decoder_meta(decoder_meta);
-        demux_meta->setCString(kKeyUrl, TEST_URI);
+        demuxer_meta->setCString(kKeyFormatUri, TEST_URI);
 
-        RTNodeAdapter::init(demuxer, demux_meta);
+        RTNodeAdapter::init(demuxer, demuxer_meta);
         RTNodeAdapter::init(decoder, decoder_meta);
 
         RTNodeAdapter::runCmd(demuxer, RT_NODE_CMD_START, NULL);
@@ -144,14 +144,14 @@ RT_RET unit_test_ff_node_decoder_proc(struct NodeBusContext* bus) {
             RtTime::sleepMs(50);
         } while (true);
 
-        if (demux_meta) {
-            delete demux_meta;
-            demux_meta = NULL;
+        if (demuxer_meta) {
+            delete demuxer_meta;
+            demuxer_meta = RT_NULL;
         }
 
         if (decoder_meta) {
             delete decoder_meta;
-            decoder_meta;
+            decoder_meta = RT_NULL;
         }
 
         RTNodeAdapter::runCmd(decoder, RT_NODE_CMD_STOP, NULL);

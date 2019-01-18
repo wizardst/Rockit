@@ -197,12 +197,12 @@ RT_RET FFNodeDecoder::queueBuffer(RTMediaBuffer *buffer, RTPortType type) {
 
 RT_RET FFNodeDecoder::pullBuffer(RTMediaBuffer** data) {
     mCountPull++;
-    dequeBuffer(data, RT_PORT_OUTPUT);
+    return dequeBuffer(data, RT_PORT_OUTPUT);
 }
 
 RT_RET FFNodeDecoder::pushBuffer(RTMediaBuffer*  data) {
     mCountPush++;
-    queueBuffer(data, RT_PORT_INPUT);
+    return queueBuffer(data, RT_PORT_INPUT);
 }
 
 RT_RET FFNodeDecoder::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
@@ -234,6 +234,7 @@ RT_RET FFNodeDecoder::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
 
 RT_RET FFNodeDecoder::setEventLooper(RTMsgLooper* eventLooper) {
     mEventLooper = eventLooper;
+    return RT_OK;
 }
 
 RtMetaData* FFNodeDecoder::queryFormat(RTPortType port) {
@@ -304,9 +305,11 @@ RT_RET FFNodeDecoder::onStop() {
 }
 
 RT_RET FFNodeDecoder::onReset() {
+    return RT_ERR_UNIMPLIMENTED;
 }
 
 RT_RET FFNodeDecoder::onFlush() {
+    return RT_ERR_UNIMPLIMENTED;
 }
 
 static RTNode* createFFDecoder() {

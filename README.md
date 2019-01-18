@@ -25,13 +25,16 @@
 
 | Process | Plugin Name | Authors | Quality Rank\(0-5\) |  
 | :---: | :--- | :---: | :---: |  
-| 50% | Plugin Manager | Martin | ☆ |  
-| TODO | Meta Plugin | Unkown | 0 |
-| TODO | Demux Plugin  | Unkown  | 0 |  
-| TODO | Muxer Plugin | Unkown | 0 |  
-| TODO | Soft Plugin  | Unkown  | 0 |  
-| TODO | Hard Plugin  | Unkown  | 0 |
+| 80% | Node API | @martin & @rimon.xu | ☆☆☆ |  
+| 90% | Meta Extractor | @martin | ☆☆☆ |
+| 80% | Demux Plugin  | @hery.xu & @martin  | ☆☆☆ |  
+| 10% | Muxer Plugin | @hery.xu | ☆ |  
+| 80% | Soft Codec  | @rimon.xu  | ☆☆☆ |  
+| TODO | Hard Codec  | @rimon.xu  | 0 |
+| 30% | Audio Sink  | @shika.zhou  | ☆☆☆ |  
+| 30% | Video Sink  | @martin  | ☆☆☆ |
 | TODO | Filter Plugin  | Unkown  | 0 |
+| 30% | NodeBus  | @princejay.dai & @martin  | ☆☆☆ |
 | TODO | IPTV Player  | Unkown  | 0 |
 | TODO | Android Player  | Unkown  | 0 |
 

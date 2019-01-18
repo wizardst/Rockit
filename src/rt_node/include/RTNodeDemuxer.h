@@ -22,24 +22,19 @@
 
 #include "RTNode.h"  // NOLINT
 #include "rt_type.h" // NOLINT
+#include "RTCodecData.h" // NOLINT
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
-    RT_TRACK_VIDEO,
-    RT_TRACK_AUDIO,
-    RT_TRACK_SUBTITLE,
-    RT_TRACK_META,
-    RT_TRACK_MAX,
-}RTTrackType;
-
 class RTNodeDemuxer : public RTNode {
  public:
-    virtual INT32       countTracks() = 0;
+    virtual INT32       countTracks(RTTrackType tType) = 0;
     virtual INT32       selectTrack(INT32 index, RTTrackType tType) = 0;
     virtual RtMetaData* queryTrack(UINT32 index) = 0;
+    virtual INT32       queryDrmFlag()  { return 0; }
+    virtual INT32       querySeekFlag() { return 0; }
 };
 
 #ifdef  __cplusplus

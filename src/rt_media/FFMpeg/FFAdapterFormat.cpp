@@ -19,6 +19,8 @@
 
 #include "FFAdapterFormat.h" // NOLINT
 #include "FFAdapterUtils.h"  // NOLINT
+#include "RTMediaMetaKeys.h" // NOLINT
+#include "RTCodecDef.h"      // NOLINT
 #include "rt_metadata.h"     // NOLINT
 #include "rt_mem.h"          // NOLINT
 #include "rt_log.h"          // NOLINT
@@ -71,46 +73,6 @@ error_func:
     return RT_NULL;
 }
 
-void fa_format_track_query(FAFormatContext* fc, UINT32 track_id, RtMetaData *meta) {
-    AVFormatContext* avfc = fc->mAvfc;
-
-    const AVOption* option = RT_NULL;
-    const AVStream* stream = RT_NULL;
-    if ((track_id >= 0) && (track_id < avfc->nb_streams)) {
-        stream = avfc->streams[track_id];
-    }
-    if ((RT_NULL == stream)/*||(RT_NULL == meta)*/) {
-        return;
-    }
-
-    AVCodecParameters* codec_par = stream->codecpar;
-    AVCodec*           codec_cur = avcodec_find_decoder(codec_par->codec_id);
-    AVCodecContext*    codec_ctx = avcodec_alloc_context3(codec_cur);
-
-    while (option = av_opt_next(codec_ctx, option)) {
-        uint8_t* str;
-
-        if (option->type == AV_OPT_TYPE_CONST)
-            continue;
-
-        if (!strcmp(option->name, "frame_number"))
-            continue;
-
-        if (av_opt_get(codec_ctx, option->name, 0, &str) >= 0) {
-            RT_LOGE_IF(DEBUG_FLAG, "option: %s=%s", option->name, str);
-            av_free(str);
-        }
-    }
-}
-
-UINT32 fa_format_count_tracks(FAFormatContext* fc) {
-    if ((RT_NULL != fc) && (RT_NULL != fc->mAvfc)) {
-        AVFormatContext* avfc = fc->mAvfc;
-        return avfc->nb_streams;
-    }
-    return 0;
-}
-
 void fa_format_close(FAFormatContext* fc) {
     switch (fc->mFcFlag) {
     case FLAG_DEMUXER:
@@ -121,10 +83,136 @@ void fa_format_close(FAFormatContext* fc) {
     default:
         break;
     }
+    rt_safe_free(fc);
 }
 
 void fa_format_seek_to(FAFormatContext* fc, INT32 track_id, UINT64 ts, UINT32 flags) {
     INT32 err = 0;
     err = avformat_seek_file(fc->mAvfc, track_id, RT_INT64_MIN, ts, RT_INT64_MAX, flags);
     fa_utils_check_error(err, "avformat_seek_file");
+}
+
+INT32 fa_format_read_packet(FAFormatContext* fc, void** ff_pkt) {
+    INT32 err = 0;
+    AVPacket *avPacket = av_packet_alloc();
+    av_init_packet(avPacket);
+    err = av_read_frame(fc->mAvfc, avPacket);
+    *ff_pkt = avPacket;
+    return err;
+}
+
+INT32 fa_format_packet_free(void* raw_pkt) {
+    AVPacket* ff_pkt = reinterpret_cast<AVPacket*>(raw_pkt);
+    if (RT_NULL != ff_pkt) {
+        av_packet_unref(ff_pkt);
+    }
+}
+
+INT32 fa_format_parse_packet(void* ff_pkt, RTPacket* rt_pkt) {
+    rt_memset(rt_pkt, 0, sizeof(RTPacket));
+    AVPacket* raw_pkt = reinterpret_cast<AVPacket*>(ff_pkt);
+    if (RT_NULL != ff_pkt) {
+        rt_pkt->mPts      = raw_pkt->pts;
+        rt_pkt->mDts      = raw_pkt->dts;
+        rt_pkt->mPos      = raw_pkt->pos;
+        rt_pkt->mData     = raw_pkt->data;
+        rt_pkt->mSize     = raw_pkt->size;
+        rt_pkt->mFlags    = raw_pkt->flags;
+        rt_pkt->mRawPkt   = ff_pkt;
+        rt_pkt->mFuncFree   = fa_format_packet_free;
+        rt_pkt->mTrackIndex = raw_pkt->stream_index;
+    }
+}
+
+void fa_format_build_track_meta(const AVStream* stream, RTTrackParms* track) {
+    UINT32 frame_rate = 0;
+    if (stream->avg_frame_rate.den > 0) {
+        frame_rate = stream->avg_frame_rate.num/stream->avg_frame_rate.den;
+    }
+    AVCodecParameters* cpar = stream->codecpar;
+    track->mCodecType       = (RTTrackType)cpar->codec_type;
+    track->mCodecID         = (RTCodecID)cpar->codec_id;
+    track->mCodecFormat     =  cpar->format;
+    track->mCodecProfile    =  cpar->profile;
+    track->mCodecLevel      =  cpar->level;
+
+    track->mBitrate         =  cpar->bit_rate;
+    track->mExtraData       =  cpar->extradata;
+    track->mExtraDataSize   =  cpar->extradata_size;
+
+    /* video track features */
+    track->mVideoWidth      =  cpar->width;
+    track->mVideoHeight     =  cpar->height;
+    track->mVideoDelay      =  cpar->video_delay;
+    track->mVideoFrameRate  =  frame_rate;
+    track->mFieldOrder      =  (RTFieldOrder)cpar->field_order;
+    track->mColorRange      =  (RTColorRange)cpar->color_range;
+    track->mColorPrimaries  =  (RTColorPrimaries)cpar->color_primaries;
+    track->mColorTrc        =  (RTColorTransfer)cpar->color_trc;
+    track->mColorSpace      =  (RTColorSpace)cpar->color_space;
+    track->mChromaLocation  =  (RTChromaLocation)cpar->chroma_location;
+
+    /* audio track features*/
+    track->mAudioChannelLayout      = cpar->channel_layout;
+    track->mAudioChannels           = cpar->channels;
+    track->mAudioSampleRate         = cpar->sample_rate;
+    track->mAudioBlockAlign         = cpar->block_align;
+    track->mAudioFrameSize          = cpar->frame_size;
+    track->mAudioInitialPadding     = cpar->initial_padding;
+    track->mAudioTrailingPadding    = cpar->trailing_padding;
+    track->mAudiobitsPerCodedSample = cpar->bits_per_coded_sample;
+    track->mAudiobitsPerRawSample   = cpar->bits_per_raw_sample;
+}
+
+void fa_format_query_track(FAFormatContext* fc, UINT32 idx, \
+                              RTTrackType tType, RTTrackParms* track) {
+    UINT32 count = 0;
+    const AVStream* stream = RT_NULL;
+    if ((RT_NULL != fc) && (RT_NULL != fc->mAvfc)) {
+        AVFormatContext* avfc = fc->mAvfc;
+        for (UINT32 ii = 0; ii < avfc->nb_streams; ii++) {
+            if (avfc->streams[ii]->codecpar->codec_type == tType) {
+                count++;
+                if ((count-1) == idx) {
+                    stream = avfc->streams[ii];
+                    if ((RT_NULL != stream) && (RT_NULL != track)) {
+                        fa_format_build_track_meta(stream, track);
+                    }
+                }
+            }
+        }
+    }
+}
+
+UINT32 fa_format_select_track(FAFormatContext* fc, UINT32 idx, RTTrackType tType) {
+    UINT32 count = 0;
+    if ((RT_NULL != fc) && (RT_NULL != fc->mAvfc)) {
+        AVFormatContext* avfc = fc->mAvfc;
+        for (UINT32 idx = 0; idx < avfc->nb_streams; idx++) {
+            if (avfc->streams[idx]->codecpar->codec_type == tType) {
+                if (count == idx) {
+                    return idx;
+                } else {
+                    count++;
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+UINT32 fa_format_count_tracks(FAFormatContext* fc, RTTrackType tType) {
+    UINT32 count = 0;
+    if ((RT_NULL != fc) && (RT_NULL != fc->mAvfc)) {
+        AVFormatContext* avfc = fc->mAvfc;
+        if (RTTRACK_TYPE_UNKNOWN == tType) {
+            return avfc->nb_streams;
+        }
+        for (UINT32 idx = 0; idx < avfc->nb_streams; idx++) {
+            if (avfc->streams[idx]->codecpar->codec_type == tType) {
+                count++;
+            }
+        }
+    }
+    return count;
 }

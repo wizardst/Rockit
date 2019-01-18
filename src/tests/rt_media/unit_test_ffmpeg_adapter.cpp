@@ -30,8 +30,15 @@ static const char* TEST_URI = "h264-1080p.mp4";
 RT_RET unit_test_ffmpeg_adapter(INT32 index, INT32 total_index) {
     RT_LOGD("ffmpeg version: %s", fa_utils_ffmpeg_version());
     FAFormatContext* fafc = fa_format_open(TEST_URI);
-    for (UINT32 idx = 0; idx < fa_format_count_tracks(fafc); idx++) {
-        fa_format_track_query(fafc, idx, RT_NULL);
+
+    RTTrackParms trackPar;
+    for (UINT32 idx = 0; idx < fa_format_count_tracks(fafc, RTTRACK_TYPE_UNKNOWN); idx++) {
+        fa_format_query_track(fafc, idx, RTTRACK_TYPE_UNKNOWN, &trackPar);
+        rt_utils_dump_track_par(&trackPar);
     }
+    RT_LOGD("found: %d v_tracks; %d a_tracks; %d s_tracks; ", \
+             fa_format_count_tracks(fafc, RTTRACK_TYPE_VIDEO), \
+             fa_format_count_tracks(fafc, RTTRACK_TYPE_AUDIO), \
+             fa_format_count_tracks(fafc, RTTRACK_TYPE_SUBTITLE));
     return RT_OK;
 }
