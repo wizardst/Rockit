@@ -22,6 +22,8 @@ include_directories(include)
 include_directories(third-party/prebuilt/headers/ffmpeg-4.0/include)
 link_directories(third-party/prebuilt/arm32)
 
+include_directories(third-party/drm)
+
 add_subdirectory(src)
 
 message(STATUS "cmake version ${CMAKE_VERSION}")

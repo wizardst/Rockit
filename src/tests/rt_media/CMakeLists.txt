@@ -8,6 +8,7 @@ set(RT_MEDIA_TEST_SRC
     unit_test_display_gles.cpp
     unit_test_object_pool.cpp
     unit_test_ffmpeg_adapter.cpp
+    unit_test_allocator.cpp
 )
 
 add_executable(rt_media_test ${RT_MEDIA_TEST_SRC})

@@ -88,6 +88,7 @@
 		<Unit filename="../../src/rt_base/include/rt_string_utils.h" />
 		<Unit filename="../../src/rt_base/include/rt_thread.h" />
 		<Unit filename="../../src/rt_base/include/rt_time.h" />
+		<Unit filename="../../src/rt_base/linux/rt_drm.cpp" />
 		<Unit filename="../../src/rt_base/linux/rt_os_cpu_info.cpp" />
 		<Unit filename="../../src/rt_base/linux/rt_os_mutex.cpp" />
 		<Unit filename="../../src/rt_base/linux/rt_os_thread.cpp" />
@@ -138,6 +139,12 @@
 		<Unit filename="../../src/rt_media/GLRender/RTSprite.h" />
 		<Unit filename="../../src/rt_media/GLRender/RTSpriteVideo.cpp" />
 		<Unit filename="../../src/rt_media/GLRender/RTSpriteVideo.h" />
+		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorBase.cpp" />
+		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorDrm.cpp" />
+		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorGralloc.cpp" />
+		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorIon.cpp" />
+		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorStore.cpp" />
+		<Unit filename="../../src/rt_media/RTBuffer.cpp" />
 		<Unit filename="../../src/rt_media/RTCodecData.cpp" />
 		<Unit filename="../../src/rt_media/RTGLApp.cpp" />
 		<Unit filename="../../src/rt_media/RTGLVideoScene.cpp" />
@@ -146,6 +153,12 @@
 		<Unit filename="../../src/rt_media/RTObject.cpp" />
 		<Unit filename="../../src/rt_media/RTObjectPool.cpp" />
 		<Unit filename="../../src/rt_media/include/FFMPEGAdapter.h" />
+		<Unit filename="../../src/rt_media/include/RTAllocatorBase.h" />
+		<Unit filename="../../src/rt_media/include/RTAllocatorDrm.h" />
+		<Unit filename="../../src/rt_media/include/RTAllocatorGralloc.h" />
+		<Unit filename="../../src/rt_media/include/RTAllocatorIon.h" />
+		<Unit filename="../../src/rt_media/include/RTAllocatorStore.h" />
+		<Unit filename="../../src/rt_media/include/RTBuffer.h" />
 		<Unit filename="../../src/rt_media/include/RTCodecData.h" />
 		<Unit filename="../../src/rt_media/include/RTCodecDef.h" />
 		<Unit filename="../../src/rt_media/include/RTConstant.h" />
@@ -209,6 +222,7 @@
 		<Unit filename="../../src/tests/rt_base/test_base_meta_data.cpp" />
 		<Unit filename="../../src/tests/rt_base/test_base_mutex_thread.cpp" />
 		<Unit filename="../../src/tests/rt_media/rt_media_tests.h" />
+		<Unit filename="../../src/tests/rt_media/unit_test_allocator.cpp" />
 		<Unit filename="../../src/tests/rt_media/unit_test_display_gles.cpp" />
 		<Unit filename="../../src/tests/rt_media/unit_test_ffmpeg_adapter.cpp" />
 		<Unit filename="../../src/tests/rt_media/unit_test_object_pool.cpp" />

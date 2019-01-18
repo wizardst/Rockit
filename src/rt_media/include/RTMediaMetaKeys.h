@@ -80,6 +80,12 @@ enum {
     kKeyPacketFlag       = MKTAG('p', 'f', 'l', 'g'),   // INT32 AVPacket flag
     kKeyPacketIndex      = MKTAG('p', 'i', 'd', 'x'),   // INT32 AVPacket index
     kKeyPacketData       = MKTAG('p', 'd', 'a', 't'),   // AVPacket data
+
+    // memory features
+    kKeyMemAlign            = MKTAG('m', 'e', 'a', 'l'),  // INT32
+    kKeyMemFlags            = MKTAG('m', 'e', 'f', 'l'),  // INT32
+    kKeyMemHeapMask         = MKTAG('m', 'h', 'm', 's'),  // INT32
+    kKeyMemUsage            = MKTAG('m', 'e', 'u', 's'),  // INT32
 };
 
 #endif  // SRC_RT_MEDIA_INCLUDE_RTMEDIAMETAKEYS_H_

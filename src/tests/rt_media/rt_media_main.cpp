@@ -36,6 +36,10 @@ int main(int argc, char **argv) {
                  unit_test_display_gles,
                  const_cast<char *>("UnitTest-Display-GLES"));
 
+    rt_tests_add(test_ctx,
+                 unit_test_allocator,
+                 const_cast<char *>("UnitTest-Allocator"));
+
     // ! run all testcases
     rt_tests_run(test_ctx, /*mem_dump=*/RT_TRUE);
 
