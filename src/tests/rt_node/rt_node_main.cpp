@@ -38,10 +38,11 @@ int main(int argc, char **argv) {
      * testcases: unit tests for plugins
      *    author: rimon.xu@rock-chips.com
      */
-    rt_tests_add(test_ctx, unit_test_ff_node_decoder,
-                           const_cast<char *>("UnitTest-FFNodeCodecDecoder"));
-    rt_tests_add(test_ctx, unit_test_ff_node_encoder,
-                           const_cast<char *>("UnitTest-FFNodeCodecEncoder"));
+    rt_tests_add(test_ctx, unit_test_node_decoder,
+                           const_cast<char *>("UnitTest-NodeCodecDecoder"));
+    rt_tests_add(test_ctx, unit_test_node_encoder,
+                           const_cast<char *>("UnitTest-NodeCodecEncoder"));
+
     // ! run all testcases
     rt_tests_run(test_ctx, /*mem_dump=*/RT_TRUE);
 

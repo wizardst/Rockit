@@ -25,6 +25,7 @@
 					<Add directory="${SRC_ROOT}/src/rt_media/include" />
 					<Add directory="${SRC_ROOT}/src/rt_media/GLRender" />
 					<Add directory="${SRC_ROOT}/src/rt_media/FFMpeg" />
+					<Add directory="${SRC_ROOT}/src/rt_node/hw_codec/include" />
 				</Compiler>
 				<Linker>
 					<Add option="-lgdi32" />
@@ -188,6 +189,7 @@
 		<Unit filename="../../src/rt_node/ff_node/include/FFNodeEncoder.h" />
 		<Unit filename="../../src/rt_node/ff_node/include/FFNodeFilter.h" />
 		<Unit filename="../../src/rt_node/ff_node/include/FFNodeMuxer.h" />
+		<Unit filename="../../src/rt_node/hw_codec/include/HWNodeMpiDecoder.h" />
 		<Unit filename="../../src/rt_node/include/RTNode.h" />
 		<Unit filename="../../src/rt_node/include/RTNodeBus.h" />
 		<Unit filename="../../src/rt_node/include/RTNodeBusContext.h" />
@@ -231,8 +233,8 @@
 		<Unit filename="../../src/tests/rt_node/test_ffmpeg_camera.cpp" />
 		<Unit filename="../../src/tests/rt_node/test_ffmpeg_format.cpp" />
 		<Unit filename="../../src/tests/rt_node/test_node_bus.cpp" />
+		<Unit filename="../../src/tests/rt_node/test_node_codec.cpp" />
 		<Unit filename="../../src/tests/rt_node/test_node_data_flow.cpp" />
-		<Unit filename="../../src/tests/rt_node/test_node_ffmpeg_codec.cpp" />
 		<Unit filename="../../src/tests/rt_node/test_node_ffmpeg_demuxer.cpp" />
 		<Unit filename="../../src/tests/rt_task/rt_task_tests.h" />
 		<Unit filename="../../src/tests/rt_task/test_msg_queue.cpp" />

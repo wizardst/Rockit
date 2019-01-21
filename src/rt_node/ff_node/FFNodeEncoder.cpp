@@ -50,11 +50,11 @@ void* ff_encode_loop(void* ptr_node) {
     return RT_NULL;
 }
 
-RTObject *allocEncInputBuffer() {
+RTObject *allocEncInputBuffer(void *) {
     return new RTMediaBuffer(1920 * 1088 * 3 / 2);
 }
 
-RTObject *allocEncOutputBuffer() {
+RTObject *allocEncOutputBuffer(void *) {
     return new RTMediaBuffer(1920 * 1088 * 3 / 2);
 }
 

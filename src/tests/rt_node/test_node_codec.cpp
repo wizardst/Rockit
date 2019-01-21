@@ -28,17 +28,10 @@
 #include "RTMediaMetaKeys.h" // NOLINT
 #include "RTVideoUtils.h"   // NOLINT
 
-extern "C" {
-#include "libavformat/avformat.h" // NOLINT
-#include "libavformat/version.h" // NOLINT
-#include "libavdevice/avdevice.h" // NOLINT
-#include "libavutil/opt.h" // NOLINT
-}
-
 #ifdef OS_WINDOWS
 #define TEST_URI "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4"
 #else
-#define TEST_URI "airplay.mp4"
+#define TEST_URI "iphone6p.mp4"
 #endif
 
 #define DEFAULT_WIDTH           608
@@ -76,7 +69,7 @@ RTNode* initRTNode(struct NodeBusContext* bus, RT_NODE_TYPE node_type) {
     return node;
 }
 
-RT_RET unit_test_ff_node_decoder_proc(struct NodeBusContext* bus) {
+RT_RET unit_test_node_decoder_proc(struct NodeBusContext* bus) {
     FILE *write_fd = fopen(DEC_TEST_OUTPUT_FILE, "wb");
     if (!write_fd) {
         RT_LOGE("dec_output.bin open failed!!");
@@ -105,7 +98,9 @@ RT_RET unit_test_ff_node_decoder_proc(struct NodeBusContext* bus) {
             RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
             if (RT_NULL != esPacket) {
                 // save es-packet to buffer
-                RTNodeAdapter::pullBuffer(demuxer, &esPacket);
+                while (RTNodeAdapter::pullBuffer(demuxer, &esPacket) != RT_OK) {
+                    RtTime::sleepMs(10);
+                }
 
                 UINT8 *data = reinterpret_cast<UINT8 *>(esPacket->getData());
                 UINT32 size = esPacket->getSize();
@@ -133,9 +128,11 @@ RT_RET unit_test_ff_node_decoder_proc(struct NodeBusContext* bus) {
             RTNodeAdapter::pullBuffer(decoder, &frame);
 
             if (frame) {
-                RT_LOGD("dec complete frame data: %p length: %d", frame->getData(), frame->getLength());
-                fwrite(frame->getData(), frame->getLength(), 1, write_fd);
-                fflush(write_fd);
+                if (frame->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
+                    RT_LOGD("dec complete frame data: %p length: %d", frame->getData(), frame->getLength());
+                    fwrite(frame->getData(), frame->getLength(), 1, write_fd);
+                    fflush(write_fd);
+                }
                 RTNodeAdapter::queueCodecBuffer(decoder, frame, RT_PORT_OUTPUT);
                 frame = NULL;
             }
@@ -165,7 +162,7 @@ RT_RET unit_test_ff_node_decoder_proc(struct NodeBusContext* bus) {
     return RT_OK;
 }
 
-RT_RET unit_test_ff_node_encoder_proc(struct NodeBusContext* bus) {
+RT_RET unit_test_node_encoder_proc(struct NodeBusContext* bus) {
     FILE *write_fd = fopen(ENC_TEST_OUTPUT_FILE, "wb");
     if (!write_fd) {
         RT_LOGE("%s open failed!!", ENC_TEST_OUTPUT_FILE);
@@ -242,25 +239,25 @@ RT_RET unit_test_ff_node_encoder_proc(struct NodeBusContext* bus) {
 }
 
 
-RT_RET unit_test_ff_node_decoder(INT32 index, INT32 total) {
+RT_RET unit_test_node_decoder(INT32 index, INT32 total) {
     RT_RET err = RT_OK;
 
     struct NodeBusContext* bus = rt_node_bus_create();
     rt_node_bus_register_all(bus);
 
-    err = unit_test_ff_node_decoder_proc(bus);
+    err = unit_test_node_decoder_proc(bus);
     rt_node_bus_destory(bus);
 
     return err;
 }
 
-RT_RET unit_test_ff_node_encoder(INT32 index, INT32 total) {
+RT_RET unit_test_node_encoder(INT32 index, INT32 total) {
     RT_RET err = RT_OK;
 
     struct NodeBusContext* bus = rt_node_bus_create();
     rt_node_bus_register_all(bus);
 
-    err = unit_test_ff_node_encoder_proc(bus);
+    err = unit_test_node_encoder_proc(bus);
     rt_node_bus_destory(bus);
 
     return err;

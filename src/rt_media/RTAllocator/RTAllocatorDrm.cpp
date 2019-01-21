@@ -28,7 +28,7 @@
 
 #include "RTAllocatorDrm.h"         // NOLINT
 #include "rt_drm.h"                 // NOLINT
-#include "RTBuffer.h"               // NOLINT
+#include "RTMediaBuffer.h"          // NOLINT
 #include "rt_metadata.h"            // NOLINT
 #include "RTMediaMetaKeys.h"        // NOLINT
 
@@ -54,10 +54,10 @@ RTAllocatorDrm::~RTAllocatorDrm() {
     deinit();
 }
 
-RT_RET RTAllocatorDrm::newBuffer(UINT32 capacity, RTBuffer **buffer) {
+RT_RET RTAllocatorDrm::newBuffer(UINT32 capacity, RTMediaBuffer **buffer) {
     RT_RET ret = RT_OK;
 
-    RTBuffer *buffer_impl = NULL;
+    RTMediaBuffer *buffer_impl = NULL;
 
     INT32 err = 0;
     UINT32 handle = 0;
@@ -77,7 +77,7 @@ RT_RET RTAllocatorDrm::newBuffer(UINT32 capacity, RTBuffer **buffer) {
         return ret;
     }
 
-    buffer_impl = new RTBuffer(data, capacity, handle, fd);
+    buffer_impl = new RTMediaBuffer(data, capacity, handle, fd);
     if (!buffer_impl) {
         RT_LOGE("new buffer failed");
         ret = RT_ERR_UNKNOWN;
@@ -93,7 +93,7 @@ RT_RET RTAllocatorDrm::newBuffer(
         UINT32 width,
         UINT32 height,
         UINT32 format,
-        RTBuffer **buffer) {
+        RTMediaBuffer **buffer) {
     // TODO(graphic buffer alloc):
     (void)width;
     (void)height;
@@ -102,7 +102,7 @@ RT_RET RTAllocatorDrm::newBuffer(
     return RT_OK;
 }
 
-RT_RET RTAllocatorDrm::freeBuffer(RTBuffer **buffer) {
+RT_RET RTAllocatorDrm::freeBuffer(RTMediaBuffer **buffer) {
     INT32 handle = (*buffer)->getHandle();
     void *data = (*buffer)->getData();
     INT32 size = (*buffer)->getSize();

@@ -24,6 +24,7 @@
 #include "FFNodeDecoder.h"  // NOLINT
 #include "FFNodeEncoder.h"  // NOLINT
 #include "FFNodeDemuxer.h"  // NOLINT
+#include "HWNodeMpiDecoder.h" // NOLINT
 
 struct NodeBusContext {
     RtArrayList *node_bus;
@@ -81,6 +82,9 @@ INT32 rt_node_bus_summary(struct NodeBusContext* bus, RT_BOOL full) {
 }
 
 INT32 rt_node_bus_register_all(struct NodeBusContext* bus) {
+    #ifdef RK_HW_CODEC
+    rt_node_bus_register(bus, &hw_node_mpi_decoder);
+    #endif
     rt_node_bus_register(bus, &ff_node_demuxer);
     rt_node_bus_register(bus, &ff_node_video_decoder);
     rt_node_bus_register(bus, &ff_node_video_encoder);

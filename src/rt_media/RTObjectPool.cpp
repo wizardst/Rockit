@@ -30,12 +30,13 @@
 #endif
 #define DEBUG_FLAG 0x1
 
-RTObjectPool::RTObjectPool(AllocListener listener, UINT32 maxNum) {
+RTObjectPool::RTObjectPool(AllocListener listener, UINT32 maxNum, void *listener_ctx) {
     RTObject::trace(this->getName(), this, sizeof(RTObjectPool));
 
     mMaxNum    = (maxNum < 16)? 16 : maxNum;
     mObjNum    = 0;
     mAllocObj  = listener;
+    mListenerCtx = listener_ctx;
     mIdleDeque = deque_create(mMaxNum);
     mLock      = new RtMutex();
 }
@@ -59,7 +60,7 @@ RTObject* RTObjectPool::borrowObj() {
            result = reinterpret_cast<RTObject*>(entry.data);
        } else {
            // use alloc listener to create new object
-           result = (RT_NULL != mAllocObj)? mAllocObj(): RT_NULL;
+           result = (RT_NULL != mAllocObj)? mAllocObj(mListenerCtx): RT_NULL;
        }
        RT_LOGD_IF(DEBUG_FLAG, "object = %p mObjNum: %d", result, mObjNum);
        return result;

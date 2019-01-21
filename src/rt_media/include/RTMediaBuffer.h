@@ -29,6 +29,7 @@ enum RtMediaBufferStatus {
     RT_MEDIA_BUFFER_STATUS_UNUSED,
     RT_MEDIA_BUFFER_STATUS_READY,
     RT_MEDIA_BUFFER_STATUS_USING,
+    RT_MEDIA_BUFFER_STATUS_INFO_CHANGE,
     RT_MEDIA_BUFFER_STATUS_BOTTON,
 };
 
@@ -36,6 +37,7 @@ class RTMediaBuffer : public RTObject {
  public:
     // The underlying data remains the responsibility of the caller!
     explicit RTMediaBuffer(void* data, UINT32 size);
+    explicit RTMediaBuffer(void* data, UINT32 size, INT32 handle, INT32 fd);
     explicit RTMediaBuffer(UINT32 size);
     explicit RTMediaBuffer(const RTMediaBuffer* data);
     virtual ~RTMediaBuffer();
@@ -50,6 +52,8 @@ class RTMediaBuffer : public RTObject {
     UINT32 getSize() const;
     UINT32 getOffset() const;
     UINT32 getLength() const;
+    INT32  getFd() const;
+    INT32  getHandle() const;
     void   setData(void* data, UINT32 size);
     void   setRange(UINT32 offset, UINT32 length);
     void   setStatus(RtMediaBufferStatus status);
@@ -62,6 +66,8 @@ class RTMediaBuffer : public RTObject {
  private:
     void*   mData;
     UINT32  mSize, mRangeOffset, mRangeLength;
+    INT32 mHandle;
+    INT32 mFd;
     RT_BOOL mOwnsData;
 
     RtMetaData* mMetaData;

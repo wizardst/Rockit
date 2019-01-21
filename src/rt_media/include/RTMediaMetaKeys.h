@@ -70,6 +70,7 @@ enum {
     kKeyFrameWidth       = MKTAG('f', 'w', 'i', 't'),
     kKeyFrameHeight      = MKTAG('f', 'h', 'i', 't'),
     kKeyFramePts         = MKTAG('f', 'p', 't', 's'),
+    kKeyFrameEOS         = MKTAG('p', 'e', 'o', 's'),   // INT32 EOS
 
     /* RTPacket */
     kKeyPacketPtr        = MKTAG('a', 'v', 'p', 't'),   // AVPacket
@@ -80,6 +81,7 @@ enum {
     kKeyPacketFlag       = MKTAG('p', 'f', 'l', 'g'),   // INT32 AVPacket flag
     kKeyPacketIndex      = MKTAG('p', 'i', 'd', 'x'),   // INT32 AVPacket index
     kKeyPacketData       = MKTAG('p', 'd', 'a', 't'),   // AVPacket data
+    kKeyPacketEOS        = MKTAG('p', 'e', 'o', 's'),   // INT32 EOS
 
     // memory features
     kKeyMemAlign            = MKTAG('m', 'e', 'a', 'l'),  // INT32

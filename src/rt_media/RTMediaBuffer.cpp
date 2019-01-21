@@ -27,6 +27,15 @@ RTMediaBuffer::RTMediaBuffer(void* data, UINT32 size) {
     setData(data, size);
 }
 
+RTMediaBuffer::RTMediaBuffer(void* data, UINT32 size, INT32 handle, INT32 fd) {
+    RTObject::trace(this->getName(), this, sizeof(RTMediaBuffer));
+
+    mMetaData = RT_NULL;
+    mHandle = handle;
+    mFd = fd;
+    setData(data, size);
+}
+
 RTMediaBuffer::RTMediaBuffer(UINT32 size) {
     RTObject::trace(this->getName(), this, sizeof(RTMediaBuffer));
 
@@ -62,7 +71,8 @@ void RTMediaBuffer::summary(INT32 fd) {
 }
 
 void RTMediaBuffer::setData(void* data, UINT32 size) {
-    mData = data; mSize = size;
+    mData = data;
+    mSize = size;
     setRange(0, size);
     mOwnsData = RT_FALSE;
     if (RT_NULL != mMetaData) {
@@ -93,6 +103,13 @@ UINT32 RTMediaBuffer::getOffset() const {
 
 UINT32 RTMediaBuffer::getLength() const {
     return mRangeLength;
+}
+
+INT32  RTMediaBuffer::getFd() const {
+    return mFd;
+}
+INT32  RTMediaBuffer::getHandle() const {
+    return mHandle;
 }
 
 RtMetaData* RTMediaBuffer::getMetaData() {

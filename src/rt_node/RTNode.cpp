@@ -64,7 +64,7 @@ RT_RET RTNodeAdapter::pushBuffer(RTNode* node, RTMediaBuffer* data) {
 RT_RET RTNodeAdapter::dequeCodecBuffer(RTNode* node, RTMediaBuffer** data, RTPortType port) {
     RT_RET err = RT_ERR_BAD;
     RTNodeStub* stub = node->queryStub();
-    if ((RT_NODE_TYPE_DECODER == stub->mNodeType)&&(RT_NODE_TYPE_ENCODER == stub->mNodeType)) {
+    if ((RT_NODE_TYPE_DECODER == stub->mNodeType) || (RT_NODE_TYPE_ENCODER == stub->mNodeType)) {
         RTNodeCodec* codec = reinterpret_cast<RTNodeCodec*>(node);
         err = codec->dequeBuffer(data, port);
     }
@@ -74,7 +74,7 @@ RT_RET RTNodeAdapter::dequeCodecBuffer(RTNode* node, RTMediaBuffer** data, RTPor
 RT_RET RTNodeAdapter::queueCodecBuffer(RTNode* node, RTMediaBuffer*  data, RTPortType port) {
     RT_RET err = RT_ERR_BAD;
     RTNodeStub* stub = node->queryStub();
-    if ((RT_NODE_TYPE_DECODER == stub->mNodeType)&&(RT_NODE_TYPE_ENCODER == stub->mNodeType)) {
+    if ((RT_NODE_TYPE_DECODER == stub->mNodeType) || (RT_NODE_TYPE_ENCODER == stub->mNodeType)) {
         RTNodeCodec* codec = reinterpret_cast<RTNodeCodec*>(node);
         err = codec->queueBuffer(data, port);
     }

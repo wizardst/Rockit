@@ -11,7 +11,6 @@ set(RT_MEDIA_SRC
     RTMediaBuffer.cpp
     RTObject.cpp
     RTObjectPool.cpp
-    RTBuffer.cpp
     FFMpeg/FFAdapterCodec.cpp
     FFMpeg/FFAdapterFilter.cpp
     FFMpeg/FFAdapterFormat.cpp
@@ -30,6 +29,8 @@ set(RT_MEDIA_SRC
     RTAllocator/RTAllocatorBase.cpp
     RTAllocator/RTAllocatorDrm.cpp
     RTAllocator/RTAllocatorStore.cpp
+    mpi/MpiAdapterCodec.cpp
+    mpi/MpiAdapterUtils.cpp
 )
 
 add_library(${RT_MEDIA_STATIC} STATIC ${RT_MEDIA_SRC})

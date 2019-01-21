@@ -5,7 +5,7 @@ set(RT_NODE_TEST_SRC
     rt_node_main.cpp
     test_node_bus.cpp
     test_node_data_flow.cpp
-    test_node_ffmpeg_codec.cpp
+    test_node_codec.cpp
     test_node_ffmpeg_demuxer.cpp
 )
 

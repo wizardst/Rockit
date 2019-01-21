@@ -24,7 +24,7 @@
 #include "rt_header.h"  // NOLINT
 #include "RTObject.h"  // NOLINT
 
-class RTBuffer;
+class RTMediaBuffer;
 
 class RTAllocator : public RTObject {
  public:
@@ -39,13 +39,13 @@ class RTAllocator : public RTObject {
     virtual const char* getName() { return "RTAllocatorBase"; }
     virtual void summary(INT32 fd) {}
 
-    virtual RT_RET newBuffer(UINT32 capacity, RTBuffer **buffer) = 0;
+    virtual RT_RET newBuffer(UINT32 capacity, RTMediaBuffer **buffer) = 0;
     virtual RT_RET newBuffer(UINT32 width,
                              UINT32 height,
                              UINT32 format,
-                             RTBuffer **buffer) = 0;
+                             RTMediaBuffer **buffer) = 0;
 
-    virtual RT_RET freeBuffer(RTBuffer **buffer) = 0;
+    virtual RT_RET freeBuffer(RTMediaBuffer **buffer) = 0;
 };
 
 #endif  // SRC_RT_MEDIA_INCLUDE_RTALLOCATORBASE_H_

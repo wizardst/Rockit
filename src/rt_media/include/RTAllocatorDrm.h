@@ -33,13 +33,13 @@ class RTAllocatorDrm : public RTAllocator {
     virtual void summary(INT32 fd) {}
 
     static RT_BOOL checkAvail();
-    virtual RT_RET newBuffer(UINT32 capacity, RTBuffer **buffer);
+    virtual RT_RET newBuffer(UINT32 capacity, RTMediaBuffer **buffer);
     virtual RT_RET newBuffer(UINT32 width,
                              UINT32 height,
                              UINT32 format,
-                             RTBuffer **buffer);
+                             RTMediaBuffer **buffer);
 
-    virtual RT_RET freeBuffer(RTBuffer **buffer);
+    virtual RT_RET freeBuffer(RTMediaBuffer **buffer);
 
     RT_RET init(RtMetaData *meta);
     RT_RET deinit();

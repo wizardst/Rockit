@@ -37,13 +37,12 @@
 #include "rt_type.h"    // NOLINT
 #include "rt_dequeue.h" // NOLINT
 
-
-typedef RTObject* (*AllocListener)();
+typedef RTObject* (*AllocListener)(void *);
 
 class RtMutex;
 class RTObjectPool : public RTObject {
  public:
-    RTObjectPool(AllocListener listener, UINT32 maxNum);
+    RTObjectPool(AllocListener listener, UINT32 maxNum, void *listener_ctx = RT_NULL);
     virtual ~RTObjectPool();
     RTObject* borrowObj();
     RTObject* useObj();
@@ -63,6 +62,7 @@ class RTObjectPool : public RTObject {
     RT_Deque* mUsedDeque;
     RT_Deque* mIdleDeque;
     AllocListener mAllocObj;
+    void* mListenerCtx;
     RtMutex*  mLock;
 };
 

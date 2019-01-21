@@ -50,11 +50,11 @@ void* ff_codec_loop(void* ptr_node) {
     return RT_NULL;
 }
 
-RTObject *allocInputBuffer() {
+RTObject *allocInputBuffer(void *) {
     return new RTMediaBuffer(NULL, 0);
 }
 
-RTObject *allocOutputBuffer() {
+RTObject *allocOutputBuffer(void *) {
     return new RTMediaBuffer(1920 * 1088 * 3 / 2);
 }
 

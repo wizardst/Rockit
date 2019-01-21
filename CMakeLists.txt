@@ -11,6 +11,7 @@ endif (OS_WINDOWS)
 
 if (OS_LINUX)
     add_definitions(-DOS_LINUX)
+    add_definitions(-DRK_HW_CODEC)
 endif (OS_LINUX)
 
 if (HAS_PTHREAD)
@@ -23,6 +24,9 @@ include_directories(third-party/prebuilt/headers/ffmpeg-4.0/include)
 link_directories(third-party/prebuilt/arm32)
 
 include_directories(third-party/drm)
+
+# linked mpp
+include_directories(third-party/prebuilt/headers/mpp)
 
 add_subdirectory(src)
 

@@ -16,11 +16,12 @@ set(RT_NODE_SRC
     ff_node/FFNodeDemuxer.cpp
     ff_node/FFNodeFilter.cpp
     ff_node/FFNodeMuxer.cpp
+    hw_codec/HWNodeMpiDecoder.cpp
 )
 
 
 add_library(${RT_NODE_STATIC} STATIC ${RT_NODE_SRC})
 set_target_properties(${RT_NODE_STATIC} PROPERTIES FOLDER "rt_node")
-target_link_libraries(${RT_NODE_STATIC} ${RT_BASE_STATIC} ${RT_MEDIA_STATIC} -lffmpeg_4_0)
+target_link_libraries(${RT_NODE_STATIC} ${RT_BASE_STATIC} ${RT_MEDIA_STATIC} -lffmpeg_4_0 -lmpp)
 
 message(STATUS "cmake version ${CMAKE_VERSION} [@@]config library: rt_node")

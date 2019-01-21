@@ -21,7 +21,7 @@
 #include "rt_media_tests.h"         // NOLINT
 #include "RTAllocatorStore.h"       // NOLINT
 #include "RTAllocatorBase.h"        // NOLINT
-#include "RTBuffer.h"               // NOLINT
+#include "RTMediaBuffer.h"          // NOLINT
 #include "rt_metadata.h"            // NOLINT
 #include "rt_header.h"              // NOLINT
 
@@ -34,7 +34,7 @@ RT_RET unit_test_allocator(INT32 index, INT32 total_index) {
     RT_RET ret = RT_OK;
     RTAllocator *allocator = NULL;
     RTAllocatorStore *allocator_store = new RTAllocatorStore();
-    RTBuffer *buffer[16];
+    RTMediaBuffer *buffer[16];
     UINT8 *data[16];
     RtMetaData *config = new RtMetaData();
 

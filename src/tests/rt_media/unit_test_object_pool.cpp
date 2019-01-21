@@ -55,7 +55,7 @@ RT_RET unit_test_object(INT32 index, INT32 total_index) {
     return RT_OK;
 }
 
-RTObject* ObjectAllocator() {
+RTObject* ObjectAllocator(void *) {
     return new UnitTestObject();
 }
 
