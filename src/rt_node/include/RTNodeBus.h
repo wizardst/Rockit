@@ -38,4 +38,14 @@ INT32  rt_node_bus_register_all(struct NodeBusContext* bus);
 INT32      rt_node_bus_register(struct NodeBusContext* bus, RTNodeStub* node_info);
 RTNodeStub*    rt_node_bus_find(struct NodeBusContext* bus, RT_NODE_TYPE node_type, UINT8 node_id);
 
+
+/******add by princejay.dai for temp test *******/
+RT_RET unit_test_rt_plugin_manage_test(RT_NODE_TYPE rt_node_type);
+INT32 rt_plugin_autobuild(struct NodeBusContext* bus);
+RT_RET rt_plugin_init(struct NodeBusContext* bus, RtMetaData *nodeMeta);
+RT_RET rt_plugin_push(struct NodeBusContext* bus, RT_NODE_TYPE node_type, RTMediaBuffer* media_buf);
+RT_RET rt_plugin_pull(struct NodeBusContext* bus, RT_NODE_TYPE node_type, RTMediaBuffer* media_buf);
+INT32 rt_plugin_run_cmd(struct NodeBusContext* bus, RT_NODE_CMD  node_cmd);
+INT32 rt_plugin_release(struct NodeBusContext* bus, RT_NODE_TYPE node_type);
+
 #endif  // SRC_RT_NODE_INCLUDE_RTNODEBUS_H_

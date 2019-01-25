@@ -242,6 +242,7 @@
 		<Unit filename="../../src/tests/rt_node/test_node_codec.cpp" />
 		<Unit filename="../../src/tests/rt_node/test_node_data_flow.cpp" />
 		<Unit filename="../../src/tests/rt_node/test_node_ffmpeg_demuxer.cpp" />
+		<Unit filename="../../src/tests/rt_node/test_node_render.cpp" />
 		<Unit filename="../../src/tests/rt_task/rt_task_tests.h" />
 		<Unit filename="../../src/tests/rt_task/test_msg_queue.cpp" />
 		<Unit filename="../../src/tests/rt_task/test_task_taskpool.cpp" />

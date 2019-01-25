@@ -17,8 +17,8 @@
  *   date: 20190122
  */
 
-#include "RTSinkDisplayNative.h"  // NOLINT
 #include "RTMediaData.h"          // NOLINT
+#include "RTSinkDisplayNative.h"  // NOLINT
 
 RTSinkDisplayNative::RTSinkDisplayNative() {
     // @TODO
