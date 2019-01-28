@@ -21,10 +21,12 @@
 #ifndef SRC_RT_MEDIA_INCLUDE_RTGLAPP_H_
 #define SRC_RT_MEDIA_INCLUDE_RTGLAPP_H_
 
-#include "rt_header.h"  // NOLINT
-#include "RTObject.h"   // NOLINT
+#include "rt_header.h"   // NOLINT
+#include "RTObject.h"    // NOLINT
+#include "../GLRender/RTScheduler.h" // NOLINT
 
 class RTGLView;
+class RTGLVideoScene;
 class RTGLApp : public RTObject {
  public:
     RTGLApp();
@@ -33,14 +35,17 @@ class RTGLApp : public RTObject {
     void createWindow(const char* title, INT32 width, INT32 height);
     void runtime();
     void eventLoop();
+    void setVideoScheduler(SchedulerFunc callback, void* target);
+    void updateFrame(UCHAR* frame, INT32 width, INT32 height);
 
     // override pure virtual methods of RTObject class
     virtual void summary(INT32 fd) {}
     virtual const char* getName() { return "RTObject/RTGLApp"; }
 
  private:
-    RTGLView* mGLView;
-    void*     mWndPtr;
+    RTGLView*        mGLView;
+    RTGLVideoScene*  mScene;
+    void*            mWndPtr;
 };
 
 void unit_test_win32_gles_app();

@@ -50,15 +50,14 @@ void RTGLApp::createWindow(const char* title, INT32 width, INT32 height) {
     mWndPtr  = wnd;
     mGLView->initialize(wnd, width, height);
     RTDirector::getInstance()->setAnimInterval(1.0/60.0f);
-    RTGLVideoScene* scene = new RTGLVideoScene();
-    RTDirector::getInstance()->startScene(scene);
+    mScene = new RTGLVideoScene();
+    RTDirector::getInstance()->startScene(mScene);
 }
 
 void RTGLApp::runtime() {
     RTDirector::getInstance()->mainLoop();
     mGLView->swapBuffer();
 }
-
 
 void RTGLApp::eventLoop() {
     MSG msg = { 0 };
@@ -79,6 +78,20 @@ void RTGLApp::eventLoop() {
             // SendMessage( (HWND)mWndPtr, WM_PAINT, 0, 0 );
             runtime();
         }
+    }
+}
+
+void RTGLApp::setVideoScheduler(SchedulerFunc callback, void* target) {
+    if (RT_NULL != callback) {
+        RT_FLOAT interval      =  RTDirector::getInstance()->getAnimInterval();
+        RTScheduler* scheduler = RTDirector::getInstance()->getScheduler();
+        scheduler->schedulePerFrame(callback, target, interval, 0);
+    }
+}
+
+void RTGLApp::updateFrame(UCHAR* frame, INT32 width, INT32 height) {
+    if (RT_NULL != mScene) {
+        mScene->updateFrame(frame, width, height);
     }
 }
 

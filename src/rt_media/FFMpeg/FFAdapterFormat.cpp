@@ -20,7 +20,7 @@
 #include "FFAdapterFormat.h" // NOLINT
 #include "FFAdapterUtils.h"  // NOLINT
 #include "RTMediaMetaKeys.h" // NOLINT
-#include "RTCodecDef.h"      // NOLINT
+#include "RTMediaDef.h"      // NOLINT
 #include "rt_metadata.h"     // NOLINT
 #include "rt_mem.h"          // NOLINT
 #include "rt_log.h"          // NOLINT
@@ -118,7 +118,7 @@ INT32 fa_format_parse_packet(void* ff_pkt, RTPacket* rt_pkt) {
         rt_pkt->mData     = raw_pkt->data;
         rt_pkt->mSize     = raw_pkt->size;
         rt_pkt->mFlags    = raw_pkt->flags;
-        rt_pkt->mRawPkt   = ff_pkt;
+        rt_pkt->mRawPtr   = ff_pkt;
         rt_pkt->mFuncFree   = fa_format_packet_free;
         rt_pkt->mTrackIndex = raw_pkt->stream_index;
     }

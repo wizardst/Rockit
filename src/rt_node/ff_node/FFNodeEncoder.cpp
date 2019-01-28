@@ -150,9 +150,6 @@ RT_RET FFNodeEncoder::release() {
     mProcThread = RT_NULL;
 
     return RT_OK;
-
-__FAILED:
-    return RT_ERR_UNKNOWN;
 }
 
 RT_RET FFNodeEncoder::dequeBuffer(RTMediaBuffer **buffer, RTPortType type) {

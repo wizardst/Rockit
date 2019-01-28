@@ -31,7 +31,7 @@
 RTCamera::RTCamera() {
     mPerspective = new MathMat4();
     mPerspective->identity();
-    mModelView = new MathMat4();
+    mModelView   = new MathMat4();
     mModelView->identity();
 }
 

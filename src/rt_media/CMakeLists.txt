@@ -4,11 +4,11 @@ include_directories(GLRender)
 include_directories(FFMpeg)
 
 set(RT_MEDIA_SRC
-    RTCodecData.cpp
     RTGLApp.cpp
     RTGLVideoScene.cpp
     RTGLView.cpp
     RTMediaBuffer.cpp
+    RTMediaData.cpp
     RTObject.cpp
     RTObjectPool.cpp
     FFMpeg/FFAdapterCodec.cpp

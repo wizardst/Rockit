@@ -46,10 +46,13 @@ typedef struct _UserData {
     // Texture handle
     GLuint textureId;
 
+    GLint  width;
+    GLint  height;
+
     GLfloat angle;
     GLfloat vpMatrix[4][4];
+    GLubyte* pixels;
 } UserData;
-
 
 RTSpriteVideo::RTSpriteVideo() {
     RTObject::trace(getName(), this, sizeof(RTSpriteVideo));
@@ -72,39 +75,43 @@ RTSpriteVideo::~RTSpriteVideo() {
     rt_safe_free(mUserData);
 }
 
-GLubyte* genCheckImage(int width, int height, int checkSize) {
-    int x, y;
-    GLubyte *pixels = reinterpret_cast<GLubyte *>(rt_malloc_size(GLubyte, width*height*checkSize));
+void rebindImage2D(UserData* userData) {
+    GLubyte* pixels = userData->pixels;
 
-    if (pixels == NULL)
-        return NULL;
+    // Bind the texture object
+    if ((RT_NULL != pixels) && (userData->textureId > 0)) {
+        RT_LOGE("Image(%p) %dx%d", pixels, userData->width, userData->height);
 
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
-            GLubyte rColor = 0;
-            GLubyte bColor = 0;
+        glBindTexture(GL_TEXTURE_2D, userData->textureId);
 
-            if ((x / checkSize) % 2 == 0) {
-                rColor = 255 * ((y / checkSize) % 2);
-                bColor = 255 * (1 - ((y / checkSize) % 2));
-            } else {
-                bColor = 255 * ((y / checkSize) % 2);
-                rColor = 255 * (1 - ((y / checkSize) % 2));
-            }
-
-            pixels[(y * height + x) * 3] = rColor;
-            pixels[(y * height + x) * 3 + 1] = 255;
-            pixels[(y * height + x) * 3 + 2] = bColor;
-        }
+        // Load the texture
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, userData->width, userData->height, 0, \
+                                       GL_RGB, GL_UNSIGNED_BYTE, pixels);
+        // Set the filtering mode
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     }
+}
 
-    return pixels;
+GLuint createTexture2D(UserData* userData) {
+    // Texture object handle
+    GLuint textureId;
+
+    // Use tightly packed data
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    // Generate a texture object
+    glGenTextures(1, &textureId);
+    userData->textureId = textureId;
+
+    return textureId;
 }
 
 void RTSpriteVideo::draw() {
     update();
+    glEnable(GL_DEPTH_TEST);
     UserData *userData = reinterpret_cast<UserData*>(mUserData);
-    GLfloat vVertices[] = { -0.5f,  0.5f, 0.0f,  // Position 0
+    GLfloat vVertices[] = { -0.5f, 0.5f, 0.0f,  // Position 0
                             0.0f,  0.0f,        // TexCoord 0
                            -0.5f, -0.5f, 0.0f,  // Position 1
                             0.0f,  1.0f,        // TexCoord 1
@@ -155,39 +162,21 @@ void RTSpriteVideo::update() {
     if (userData->angle > 360.0f) {
         userData->angle = 0.0f;
     }
+
+    rebindImage2D(userData);
     if (RT_NULL != mCamera) {
-        mCamera->setPerspective(60.0f, 800/600, -1.0f, 20.0f);
+        // mCamera->setPerspective(90.0f, 800/600, 0.5f, 55.0f);
+        // mCamera->setModelScale(0.01f, 0.01f, 1.0f);
         mCamera->setModelRotate(0.0f, 0.0f, 1.0f, userData->angle);
         mCamera->getShaderMatric(userData->vpMatrix);
     }
 }
 
-GLuint CreateSimpleTexture2D() {
-    // Texture object handle
-    GLuint textureId;
-
-    // 2x2 Image, 3 bytes per pixel (R, G, B)
-    GLubyte *pixels = genCheckImage(128, 128, 64);
-
-    // Use tightly packed data
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    // Generate a texture object
-    glGenTextures(1, &textureId);
-
-    // Bind the texture object
-    glBindTexture(GL_TEXTURE_2D, textureId);
-
-    // Load the texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-
-    // Set the filtering mode
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    RT_LOGD("glTexImage2D(id=%d)", textureId);
-
-    return textureId;
+void RTSpriteVideo::updateFrame(UCHAR* frame, INT32 width, INT32 height) {
+    UserData *userData = reinterpret_cast<UserData*>(mUserData);
+    userData->pixels   = frame;
+    userData->width    = width;
+    userData->height   = height;
 }
 
 void RTSpriteVideo::initUserData() {
@@ -224,7 +213,7 @@ void RTSpriteVideo::initUserData() {
     userData->mvpLoc     = glGetUniformLocation(userData->programObject, "u_mvpMatrix");
 
     // Load the texture
-    userData->textureId = CreateSimpleTexture2D();
+    createTexture2D(userData);
     userData->angle     = 0.0f;
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);

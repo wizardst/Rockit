@@ -152,30 +152,31 @@ RT_RET FFNodeDemuxer::release() {
     return RT_OK;
 }
 
-RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** rtPacket) {
+/* read/pull RTPacket from NodeDemuxer */
+RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** media_buf) {
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
     RT_ASSERT(RT_NULL != ctx);
-    RT_ASSERT(RT_NULL != rtPacket);
+    RT_ASSERT(RT_NULL != media_buf);
 
-    RtMetaData* metaData = (*rtPacket)->getMetaData();
     void*       raw_pkt  = array_list_get_data(ctx->mListPacket, 0);
     RTPacket    rt_pkt   = {0};
 
     if (RT_NULL == raw_pkt) {
         RT_LOGD("packet NULL");
-        (*rtPacket)->setData(RT_NULL, 0);
+        (*media_buf)->setData(RT_NULL, 0);
         if (ctx->mEosFlag) {
             return RT_OK;
         }
         return RT_ERR_UNKNOWN;
     } else {
         RtMutex::RtAutolock autoLock(ctx->mLockPacket);
-        fa_format_parse_packet(raw_pkt, &rt_pkt);
-        RT_LOGD(" --> RTPacket(ptr=%p, size=%d)", rt_pkt.mRawPkt, rt_pkt.mSize);
-        array_list_remove_at(ctx->mListPacket, 0);
-        (*rtPacket)->setData(rt_pkt.mData, rt_pkt.mSize);
-        if (RT_NULL != metaData) {
-            rt_utils_pkt_to_meta(&rt_pkt, metaData);
+        if (RT_NULL != *media_buf) {
+            fa_format_parse_packet(raw_pkt, &rt_pkt);
+            RT_LOGD(" --> RTPacket(ptr=%p, size=%d)", rt_pkt.mRawPtr, rt_pkt.mSize);
+            array_list_remove_at(ctx->mListPacket, 0);
+
+            (*media_buf)->setData(rt_pkt.mData, rt_pkt.mSize);
+            rt_mediabuf_from_packet(*media_buf, &rt_pkt);
         }
         return RT_OK;
     }
@@ -210,10 +211,24 @@ RT_RET FFNodeDemuxer::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
 RT_RET FFNodeDemuxer::setEventLooper(RTMsgLooper* eventLooper) {
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
     ctx->mEventLooper = eventLooper;
+    return RT_OK;
 }
 
 RtMetaData* FFNodeDemuxer::queryFormat(RTPortType port) {
-    return RT_NULL;
+    FFNodeDemuxerCtx* ctx  = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
+    RtMetaData*       meta = RT_NULL;
+
+    switch (port) {
+    case RT_PORT_INPUT:
+        meta = ctx->mMetaInput;
+        break;
+    case RT_PORT_OUTPUT:
+        meta = ctx->mMetaOutput;
+        break;
+    default:
+        break;
+    }
+    return meta;
 }
 
 RTNodeStub* FFNodeDemuxer::queryStub() {
@@ -222,7 +237,7 @@ RTNodeStub* FFNodeDemuxer::queryStub() {
 
 INT32 FFNodeDemuxer::countTracks(RTTrackType tType) {
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
-    fa_format_count_tracks(ctx->mFormatCtx, tType);
+    return fa_format_count_tracks(ctx->mFormatCtx, tType);
 }
 
 INT32 FFNodeDemuxer::selectTrack(INT32 index, RTTrackType tType) {
@@ -241,6 +256,7 @@ INT32 FFNodeDemuxer::selectTrack(INT32 index, RTTrackType tType) {
     default:
         break;
     }
+    return index;
 }
 
 RtMetaData* FFNodeDemuxer::queryTrack(UINT32 index) {

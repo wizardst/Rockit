@@ -18,8 +18,8 @@
  *    ref: ffmpeg/libavcodec/avcodec.h
  */
 
-#ifndef SRC_RT_MEDIA_INCLUDE_RTCODECDEF_H_
-#define SRC_RT_MEDIA_INCLUDE_RTCODECDEF_H_
+#ifndef SRC_RT_MEDIA_INCLUDE_RTMEDIADEF_H_
+#define SRC_RT_MEDIA_INCLUDE_RTMEDIADEF_H_
 
 #include "RTPixelDef.h"   // NOLINT
 #include "rt_type.h"      // NOLINT
@@ -114,4 +114,4 @@ struct RTTrackParms {
     INT32  mAudiobitsPerRawSample;
 };
 
-#endif  // SRC_RT_MEDIA_INCLUDE_RTCODECDEF_H_
+#endif  // SRC_RT_MEDIA_INCLUDE_RTMEDIADEF_H_

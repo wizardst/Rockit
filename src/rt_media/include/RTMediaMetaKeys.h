@@ -67,10 +67,14 @@ enum {
     kKeySCodecEncoding      = MKTAG('s', 'e', 'n', 'g'),  // INT32
 
     /* RTFrame */
-    kKeyFrameWidth       = MKTAG('f', 'w', 'i', 't'),
-    kKeyFrameHeight      = MKTAG('f', 'h', 'i', 't'),
-    kKeyFramePts         = MKTAG('f', 'p', 't', 's'),
+    kKeyFrameType        = MKTAG('f', 't', 'y', 'e'),   // INT32
+    kKeyFieldOrder       = MKTAG('f', 'f', 'o', 'r'),   // INT32
+    kKeyFrameW           = MKTAG('f', 'w', 'i', 'd'),   // INT32
+    kKeyFrameH           = MKTAG('f', 'h', 'e', 'i'),   // INT32
+    kKeyFramePts         = MKTAG('f', 'p', 't', 's'),   // INT64 AVPacket pts
     kKeyFrameEOS         = MKTAG('p', 'e', 'o', 's'),   // INT32 EOS
+    kKeyDisplayW         = MKTAG('d', 'w', 'i', 'd'),   // INT32
+    kKeyDisplayH         = MKTAG('d', 'h', 'e', 'i'),   // INT32
 
     /* RTPacket */
     kKeyPacketPtr        = MKTAG('a', 'v', 'p', 't'),   // AVPacket

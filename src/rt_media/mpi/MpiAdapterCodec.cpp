@@ -301,11 +301,11 @@ RT_RET ma_decode_get_frame(MACodecContext *ctx, RTMediaBuffer **frame) {
         }
 
         meta->clear();
-        meta->setInt32(kKeyVCodecWidth, mpp_frame_get_hor_stride(mpp_frame));
+        meta->setInt32(kKeyVCodecWidth,  mpp_frame_get_hor_stride(mpp_frame));
         meta->setInt32(kKeyVCodecHeight, mpp_frame_get_ver_stride(mpp_frame));
-        meta->setInt32(kKeyFrameWidth, mpp_frame_get_width(mpp_frame));
-        meta->setInt32(kKeyFrameHeight, mpp_frame_get_height(mpp_frame));
-        meta->setInt64(kKeyFramePts, mpp_frame_get_pts(mpp_frame));
+        meta->setInt32(kKeyFrameW,       mpp_frame_get_width(mpp_frame));
+        meta->setInt32(kKeyFrameH,       mpp_frame_get_height(mpp_frame));
+        meta->setInt64(kKeyFramePts,     mpp_frame_get_pts(mpp_frame));
         (*frame)->setRange(0, mpp_frame_get_hor_stride(mpp_frame) * mpp_frame_get_ver_stride(mpp_frame) * 3 / 2);
 
         RT_LOGD("get frame frame width: %d, frame height: %d, width: %d, height: %d timestamps: %lld us",

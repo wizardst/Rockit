@@ -56,8 +56,7 @@ RT_RET unit_test_ff_node_demuxer(INT32 index, INT32 total) {
         rt_buf->reset();
         RTNodeAdapter::pullBuffer(demuxer, &rt_buf);
         if (rt_buf->getSize() > 0) {
-            pkt_meta = rt_buf->getMetaData();
-            rt_utils_meta_to_pkt(pkt_meta, &rt_pkt);
+            rt_mediabuf_goto_packet(rt_buf, &rt_pkt);
             rt_utils_packet_free(&rt_pkt);
             // RtTime::sleepUs(21000);
         }

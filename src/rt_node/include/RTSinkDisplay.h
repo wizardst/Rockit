@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rockchip Electronics Co. LTD
+ * Copyright 2019 Rockchip Electronics Co. LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,29 @@
  * limitations under the License.
  *
  * author: martin.cheng@rock-chips.com
- *   date: 20181212
- * module: render engine for OpenGL-ES2.0
+ *   date: 2019/01/22
  */
 
-#ifndef SRC_RT_MEDIA_INCLUDE_RTGLVIDEOSCENE_H_
-#define SRC_RT_MEDIA_INCLUDE_RTGLVIDEOSCENE_H_
+#ifndef SRC_RT_NODE_INCLUDE_RTSINKDISPLAY_H_
+#define SRC_RT_NODE_INCLUDE_RTSINKDISPLAY_H_
 
-#include "RTScene.h" // NOLINT
+#include "RTNode.h" // NOLINT
 
-class RTGLVideoScene : public RTScene {
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
+class RTSinkDisplay : public RTNode {
+ protected:
+    RTSinkDisplay() {}
+    ~RTSinkDisplay() {}
+
  public:
-    RTGLVideoScene();
-    ~RTGLVideoScene();
-    virtual void init();
- public:
-    void updateFrame(UCHAR* frame, INT32 width, INT32 height);
+    virtual RT_RET onFireFrame() = 0;
 };
 
-#endif  // SRC_RT_MEDIA_INCLUDE_RTGLVIDEOSCENE_H_
+#ifdef  __cplusplus
+}
+#endif
+
+#endif  // SRC_RT_NODE_INCLUDE_RTSINKDISPLAY_H_

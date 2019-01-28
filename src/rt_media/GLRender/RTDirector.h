@@ -40,6 +40,7 @@ class RTDirector {
     void startScene(RTScene *scene);
     void drawScene();
     void setAnimInterval(RT_FLOAT interval);
+    RT_FLOAT getAnimInterval() { return mAnimInterval;}
     void mainLoop();
 
     /** calculates delta time since last time it was called */

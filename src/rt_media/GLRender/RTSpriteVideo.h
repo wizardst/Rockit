@@ -35,6 +35,8 @@ class RTSpriteVideo : public RTSprite {
     virtual void draw();
     virtual void update();
 
+    void updateFrame(UCHAR* frame, INT32 width, INT32 height);
+
  private:
     virtual void initUserData();
 };

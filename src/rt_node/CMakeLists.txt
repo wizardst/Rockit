@@ -1,6 +1,7 @@
 cmake_minimum_required( VERSION 2.8.8 )
 
 include_directories(ff_node/include)
+include_directories(ff_node/rt_sink)
 
 set(RT_NODE_SRC
     RTNode.cpp
@@ -10,7 +11,8 @@ set(RT_NODE_SRC
     RTNodeFilter.cpp
     RTNodeMuxer.cpp
     rt_node_define.cpp
-
+    rt_sink/RTSinkDisplayGLES.cpp
+    rt_sink/RTSinkDisplayNative.cpp
     ff_node/FFNodeDecoder.cpp
     ff_node/FFNodeEncoder.cpp
     ff_node/FFNodeDemuxer.cpp
@@ -21,6 +23,7 @@ set(RT_NODE_SRC
 
 
 add_library(${RT_NODE_STATIC} STATIC ${RT_NODE_SRC})
+add_definitions(-std=c++11)
 set_target_properties(${RT_NODE_STATIC} PROPERTIES FOLDER "rt_node")
 target_link_libraries(${RT_NODE_STATIC} ${RT_BASE_STATIC} ${RT_MEDIA_STATIC} -lffmpeg_4_0 -lmpp)
 

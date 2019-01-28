@@ -30,12 +30,13 @@ typedef void (*rt_log_callback)(const char*, const char*, va_list);
 extern "C" {
 #endif
 
-static UINT32 rk_log_flag = 0;
+static UINT32   rt_log_flag = 0;
+static RtMutex* rt_log_lock = RT_NULL;
 
 #define MAX_LINE_LEN 256
 
 void rt_set_log_flag(UINT32 flag) {
-    rk_log_flag = flag;
+    rt_log_flag = flag;
 }
 
 static void rt_log_full(rt_log_callback log_cb, const char *tag,
@@ -48,6 +49,10 @@ static void rt_log_full(rt_log_callback log_cb, const char *tag,
 
 void rt_log(const char *tag, const char *fmt, const char *fname,
                              const UINT16 row, ...) {
+    if (RT_NULL == rt_log_lock) {
+        rt_log_lock = new RtMutex();
+    }
+    RtAutoMutex autolock(rt_log_lock);
     va_list args;
     va_start(args, row);
     rt_log_full(rt_os_log, tag, fmt, fname, row, args);
@@ -56,6 +61,10 @@ void rt_log(const char *tag, const char *fmt, const char *fname,
 
 void rt_err(const char *tag, const char *fmt, const char *fname,
                             const UINT16 row, ...) {
+    if (RT_NULL == rt_log_lock) {
+        rt_log_lock = new RtMutex();
+    }
+    RtAutoMutex autolock(rt_log_lock);
     va_list args;
     va_start(args, row);
     rt_log_full(rt_os_err, tag, fmt, fname, row, args);

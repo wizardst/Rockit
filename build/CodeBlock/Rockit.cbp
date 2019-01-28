@@ -26,6 +26,7 @@
 					<Add directory="${SRC_ROOT}/src/rt_media/GLRender" />
 					<Add directory="${SRC_ROOT}/src/rt_media/FFMpeg" />
 					<Add directory="${SRC_ROOT}/src/rt_node/hw_codec/include" />
+					<Add directory="${SRC_ROOT}/src/rt_node/rt_sink" />
 				</Compiler>
 				<Linker>
 					<Add option="-lgdi32" />
@@ -146,11 +147,11 @@
 		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorIon.cpp" />
 		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorStore.cpp" />
 		<Unit filename="../../src/rt_media/RTBuffer.cpp" />
-		<Unit filename="../../src/rt_media/RTCodecData.cpp" />
 		<Unit filename="../../src/rt_media/RTGLApp.cpp" />
 		<Unit filename="../../src/rt_media/RTGLVideoScene.cpp" />
 		<Unit filename="../../src/rt_media/RTGLView.cpp" />
 		<Unit filename="../../src/rt_media/RTMediaBuffer.cpp" />
+		<Unit filename="../../src/rt_media/RTMediaData.cpp" />
 		<Unit filename="../../src/rt_media/RTObject.cpp" />
 		<Unit filename="../../src/rt_media/RTObjectPool.cpp" />
 		<Unit filename="../../src/rt_media/include/FFMPEGAdapter.h" />
@@ -160,13 +161,13 @@
 		<Unit filename="../../src/rt_media/include/RTAllocatorIon.h" />
 		<Unit filename="../../src/rt_media/include/RTAllocatorStore.h" />
 		<Unit filename="../../src/rt_media/include/RTBuffer.h" />
-		<Unit filename="../../src/rt_media/include/RTCodecData.h" />
-		<Unit filename="../../src/rt_media/include/RTCodecDef.h" />
 		<Unit filename="../../src/rt_media/include/RTConstant.h" />
 		<Unit filename="../../src/rt_media/include/RTGLApp.h" />
 		<Unit filename="../../src/rt_media/include/RTGLVideoScene.h" />
 		<Unit filename="../../src/rt_media/include/RTGLView.h" />
 		<Unit filename="../../src/rt_media/include/RTMediaBuffer.h" />
+		<Unit filename="../../src/rt_media/include/RTMediaData.h" />
+		<Unit filename="../../src/rt_media/include/RTMediaDef.h" />
 		<Unit filename="../../src/rt_media/include/RTMediaMetaKeys.h" />
 		<Unit filename="../../src/rt_media/include/RTObject.h" />
 		<Unit filename="../../src/rt_media/include/RTObjectPool.h" />
@@ -198,8 +199,13 @@
 		<Unit filename="../../src/rt_node/include/RTNodeFilter.h" />
 		<Unit filename="../../src/rt_node/include/RTNodeHeader.h" />
 		<Unit filename="../../src/rt_node/include/RTNodeMuxer.h" />
+		<Unit filename="../../src/rt_node/include/RTSinkDisplay.h" />
 		<Unit filename="../../src/rt_node/include/rt_node_define.h" />
 		<Unit filename="../../src/rt_node/rt_node_define.cpp" />
+		<Unit filename="../../src/rt_node/rt_sink/RTSinkDisplayGLES.cpp" />
+		<Unit filename="../../src/rt_node/rt_sink/RTSinkDisplayGLES.h" />
+		<Unit filename="../../src/rt_node/rt_sink/RTSinkDisplayNative.cpp" />
+		<Unit filename="../../src/rt_node/rt_sink/RTSinkDisplayNative.h" />
 		<Unit filename="../../src/rt_task/include/rt_event.h" />
 		<Unit filename="../../src/rt_task/include/rt_event_bus.h" />
 		<Unit filename="../../src/rt_task/include/rt_message.h" />

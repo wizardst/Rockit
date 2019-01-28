@@ -118,7 +118,7 @@ RT_RET deque_push(RT_Deque *list,
 
     RT_DequeEntry *entry = deque_entry_malloc(list);
     if (RT_NULL == entry)
-       return RT_ERR_BAD;
+       return RT_ERR_LIST_FULL;
 
     entry->data = const_cast<void *> (data);
     entry->flag = ENTRY_FLAG_USE;

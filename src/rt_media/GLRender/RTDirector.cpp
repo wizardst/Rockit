@@ -85,19 +85,20 @@ void RTDirector::startScene(RTScene *scene) {
 
 void RTDirector::drawScene() {
     calculateDeltaTime();
+    RT_ASSERT(RT_NULL != mScheduler);
+    RT_ASSERT(RT_NULL != mTaskScene);
+
     if (!mPaused) {
         mScheduler->update(mDeltaTime);
         #if TO_DO_FLAG
             mEventDispatcher->dispatchEvent(_eventAfterUpdate);
         #endif
-    }
-    if (RT_NULL != mTaskScene) {
         mTaskScene->render();
         #if TO_DO_FLAG
-        mEventDispatcher->dispatchEvent(_eventAfterVisit);
+            mEventDispatcher->dispatchEvent(_eventAfterVisit);
         #endif
+        mFrameNum++;
     }
-    mFrameNum++;
 
     // swap buffers
 }

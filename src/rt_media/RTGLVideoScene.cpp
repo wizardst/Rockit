@@ -28,14 +28,14 @@ RTGLVideoScene::RTGLVideoScene() {
 
 RTGLVideoScene::~RTGLVideoScene() {
     // TODO(@martin)
-    this->removeAllChildren();
+    rt_safe_free(mChildren);
 }
 
 void RTGLVideoScene::init() {
-    RTSprite* sprite = new RTSpriteVideo();
-    #if TO_DO_FLAG
-    RTCompound* action = new RTCompound();
-    sprite->runAction(action);
-    #endif
-    this->addChild(sprite);
+    mChildren = new RTSpriteVideo();
+}
+
+void RTGLVideoScene::updateFrame(UCHAR* frame, INT32 width, INT32 height) {
+    RTSpriteVideo* sprite_video = reinterpret_cast<RTSpriteVideo*>(mChildren);
+    sprite_video->updateFrame(frame, width, height);
 }

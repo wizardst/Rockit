@@ -21,7 +21,7 @@
 #define SRC_RT_MEDIA_FFMPEG_FFADAPTERFORMAT_H_
 
 #include "FFAdapterUtils.h"  // NOLINT
-#include "RTCodecData.h"
+#include "RTMediaData.h"
 
 typedef enum _FC_FLAG {
     FLAG_DEMUXER,

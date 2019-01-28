@@ -22,7 +22,7 @@
 
 #include "RTNode.h"  // NOLINT
 #include "rt_type.h" // NOLINT
-#include "RTCodecData.h" // NOLINT
+#include "RTMediaData.h" // NOLINT
 
 #ifdef  __cplusplus
 extern "C" {

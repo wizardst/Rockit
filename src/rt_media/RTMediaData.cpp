@@ -18,7 +18,7 @@
  *    ref: ffmpeg/libavcodec/avcodec.h
  */
 
-#include "RTCodecData.h"
+#include "RTMediaData.h"
 #include "RTMediaMetaKeys.h"
 #include "FFAdapterUtils.h"
 
@@ -35,18 +35,19 @@
 RT_RET rt_utils_packet_free(RTPacket* rt_pkt) {
     RT_RET err = RT_ERR_NULL_PTR;
     if ((RT_NULL != rt_pkt) && (RT_NULL != rt_pkt->mFuncFree)) {
-        if (RT_NULL != rt_pkt->mRawPkt) {
-            rt_pkt->mFuncFree(rt_pkt->mRawPkt);
+        if (RT_NULL != rt_pkt->mRawPtr) {
+            rt_pkt->mFuncFree(rt_pkt->mRawPtr);
             err = RT_OK;
         }
     }
     return err;
 }
 
-RT_RET rt_utils_pkt_to_meta(RTPacket* rt_pkt, RtMetaData* meta) {
+RT_RET rt_mediabuf_from_packet(RTMediaBuffer* media_buf, RTPacket* rt_pkt) {
     RT_RET err = RT_ERR_NULL_PTR;
-    if ((RT_NULL != rt_pkt) && (RT_NULL != meta)) {
-        meta->setPointer(kKeyPacketPtr,  rt_pkt->mRawPkt);
+    if ((RT_NULL != rt_pkt) && (RT_NULL != media_buf)) {
+        RtMetaData* meta  = media_buf->getMetaData();
+        meta->setPointer(kKeyPacketPtr,  rt_pkt->mRawPtr);
         meta->setInt64(kKeyPacketPts,    rt_pkt->mPts);
         meta->setInt64(kKeyPacketDts,    rt_pkt->mDts);
         meta->setInt64(kKeyPacketPos,    rt_pkt->mPos);
@@ -58,10 +59,11 @@ RT_RET rt_utils_pkt_to_meta(RTPacket* rt_pkt, RtMetaData* meta) {
     return err;
 }
 
-RT_RET rt_utils_meta_to_pkt(RtMetaData* meta, RTPacket* rt_pkt) {
+RT_RET rt_mediabuf_goto_packet(RTMediaBuffer* media_buf, RTPacket* rt_pkt) {
     RT_RET err = RT_ERR_NULL_PTR;
-    if ((RT_NULL != rt_pkt) && (RT_NULL != meta)) {
-        meta->findPointer(kKeyPacketPtr,  &(rt_pkt->mRawPkt));
+    if ((RT_NULL != rt_pkt) && (RT_NULL != media_buf)) {
+        RtMetaData* meta  = media_buf->getMetaData();
+        meta->findPointer(kKeyPacketPtr,  &(rt_pkt->mRawPtr));
         meta->findInt64(kKeyPacketPts,    &(rt_pkt->mPts));
         meta->findInt64(kKeyPacketDts,    &(rt_pkt->mDts));
         meta->findInt64(kKeyPacketPos,    &(rt_pkt->mPos));
@@ -69,6 +71,49 @@ RT_RET rt_utils_meta_to_pkt(RtMetaData* meta, RTPacket* rt_pkt) {
         meta->findInt32(kKeyPacketFlag,   &(rt_pkt->mFlags));
         meta->findInt32(kKeyPacketIndex,  &(rt_pkt->mTrackIndex));
         meta->findPointer(kKeyPacketData, reinterpret_cast<void**>(&(rt_pkt->mData)));
+    }
+    return err;
+}
+
+RT_RET rt_utils_frame_free(RTFrame* rt_frame) {
+    RT_RET err = RT_ERR_NULL_PTR;
+    if ((RT_NULL != rt_frame) && (RT_NULL != rt_frame->mFuncFree)) {
+        if (RT_NULL != rt_frame->mRawPtr) {
+            rt_frame->mFuncFree(rt_frame->mRawPtr);
+            err = RT_OK;
+        }
+    }
+    return err;
+}
+
+RT_RET rt_mediabuf_from_frame(RTMediaBuffer* media_buf, RTFrame* rt_frame) {
+    RT_RET err = RT_ERR_NULL_PTR;
+    if ((RT_NULL != rt_frame) && (RT_NULL != media_buf)) {
+        RtMetaData* meta  = media_buf->getMetaData();
+        media_buf->setData(rt_frame->mData, rt_frame->mSize);
+        meta->setInt32(kKeyFrameW,      rt_frame->mFrameW);
+        meta->setInt32(kKeyFrameH,     rt_frame->mFrameH);
+        meta->setInt64(kKeyFramePts,        rt_frame->mPts);
+        meta->setInt32(kKeyDisplayW,    rt_frame->mDisplayW);
+        meta->setInt32(kKeyDisplayH,   rt_frame->mDisplayH);
+        meta->setInt32(kKeyFrameType,       rt_frame->mFrameType);
+        meta->setInt32(kKeyFieldOrder,      rt_frame->mFieldOrder);
+    }
+    return err;
+}
+
+RT_RET rt_mediabuf_goto_frame(RTMediaBuffer* media_buf, RTFrame* rt_frame) {
+    RT_RET err = RT_ERR_NULL_PTR;
+    if ((RT_NULL != rt_frame) && (RT_NULL != media_buf)) {
+        RtMetaData* meta  = media_buf->getMetaData();
+        rt_memset(rt_frame, 0, sizeof(RTFrame));
+        rt_frame->mData = media_buf->getData();
+        rt_frame->mSize = media_buf->getSize();
+        meta->findInt32(kKeyFrameW,     &(rt_frame->mFrameW));
+        meta->findInt32(kKeyFrameH,    &(rt_frame->mFrameH));
+        meta->findInt64(kKeyFramePts,       &(rt_frame->mPts));
+        meta->findInt32(kKeyDisplayW,   &(rt_frame->mDisplayW));
+        meta->findInt32(kKeyDisplayH,  &(rt_frame->mDisplayH));
     }
     return err;
 }
@@ -166,7 +211,7 @@ RT_RET rt_utils_meta_to_track_par(RtMetaData* meta, RTTrackParms* tpar) {
     return RT_OK;
 }
 
-RT_RET rt_utils_dump_track_par(RTTrackParms* tpar, RT_BOOL full) {
+RT_RET rt_utils_dump_track(RTTrackParms* tpar, RT_BOOL full) {
     RT_LOGD("%12s: %04s; %12s: %04d; %12s: %05dk", \
             "CodecID", fa_utils_codec_name(tpar->mCodecID), \
             "Profile", tpar->mCodecProfile, \
@@ -189,4 +234,5 @@ RT_RET rt_utils_dump_track_par(RTTrackParms* tpar, RT_BOOL full) {
     default:
         break;
     }
+    return RT_OK;
 }

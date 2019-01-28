@@ -323,9 +323,9 @@ RT_RET fa_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
     }
 
     buffer->setRange(0, frame->width * frame->height * 3 / 2);
-    meta->setInt64(kKeyFramePts,    frame->pts);
-    meta->setInt32(kKeyFrameWidth,  frame->width);
-    meta->setInt32(kKeyFrameHeight, frame->height);
+    meta->setInt64(kKeyFramePts, frame->pts);
+    meta->setInt32(kKeyFrameW,   frame->width);
+    meta->setInt32(kKeyFrameH,   frame->height);
     av_frame_unref(frame);
 
     buffer->setStatus(RT_MEDIA_BUFFER_STATUS_READY);

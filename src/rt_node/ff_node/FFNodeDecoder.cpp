@@ -58,7 +58,6 @@ RTObject *allocOutputBuffer(void *) {
     return new RTMediaBuffer(1920 * 1088 * 3 / 2);
 }
 
-
 FFNodeDecoder::FFNodeDecoder() {
     const char* name = "FFDecoder";
     mProcThread = new RtThread(ff_codec_loop, reinterpret_cast<void*>(this));
