@@ -108,6 +108,7 @@ RT_BOOL RtMetaData::remove(UINT32 key) {
 
     item = reinterpret_cast<typed_data *>(data);
     item->clear();
+    rt_free(item);
     return rt_hash_table_remove(mHashTable, reinterpret_cast<void*>(key), RT_TRUE);
 }
 

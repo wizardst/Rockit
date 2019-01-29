@@ -23,6 +23,7 @@ set(RT_NODE_SRC
     rt_sink/RTSinkDisplayNative.cpp
     ${FF_NODE_SRC}
     hw_codec/HWNodeMpiDecoder.cpp
+    hw_codec/HWNodeMpiEncoder.cpp
 )
 
 

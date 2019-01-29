@@ -14,11 +14,11 @@
  * limitations under the License.
  *
  * Author: rimon.xu@rock-chips.com
- *   Date: 2019/01/18
- *   Task: hardware mpi decoder
+ *   Date: 2019/01/28
+ *   Task: hardware mpi encoder
  */
 
-#include "HWNodeMpiDecoder.h"       // NOLINT
+#include "HWNodeMpiEncoder.h"       // NOLINT
 #include "RTAllocatorBase.h"        // NOLINT
 #include "RTAllocatorStore.h"       // NOLINT
 #include "MpiAdapterCodec.h"        // NOLINT
@@ -26,18 +26,15 @@
 #define MAX_INPUT_BUFFER_COUNT      30
 #define MAX_OUTPUT_BUFFER_COUNT     30
 
-void* hw_decode_loop(void* ptr_node) {
-    HWNodeMpiDecoder* node = reinterpret_cast<HWNodeMpiDecoder*>(ptr_node);
+void* hw_encode_loop(void* ptr_node) {
+    HWNodeMpiEncoder* node = reinterpret_cast<HWNodeMpiEncoder*>(ptr_node);
     node->runTask();
     return RT_NULL;
 }
 
-RTObject *allocInputBuffer(void *) {
-    return new RTMediaBuffer(NULL, 0);
-}
-
-RTObject *allocOutputBuffer(void *ctx) {
-    HWNodeMpiDecoder *hw_ctx = reinterpret_cast<HWNodeMpiDecoder*>(ctx);
+RTObject *hwAllocInputBuffer(void *ctx) {
+    RT_LOGD("in");
+    HWNodeMpiEncoder *hw_ctx = reinterpret_cast<HWNodeMpiEncoder*>(ctx);
     RTAllocator *allocator = hw_ctx->getLinearAllocator();
     RTMediaBuffer *buffer = RT_NULL;
     if (allocator) {
@@ -47,19 +44,31 @@ RTObject *allocOutputBuffer(void *ctx) {
     return buffer;
 }
 
-HWNodeMpiDecoder::HWNodeMpiDecoder() {
-    const char* name = "HWMpiDecoder";
-    mProcThread = new RtThread(hw_decode_loop, reinterpret_cast<void*>(this));
+RTObject *hwAllocOutputBuffer(void *ctx) {
+    RT_LOGD("in");
+    HWNodeMpiEncoder *hw_ctx = reinterpret_cast<HWNodeMpiEncoder*>(ctx);
+    RTAllocator *allocator = hw_ctx->getLinearAllocator();
+    RTMediaBuffer *buffer = RT_NULL;
+    if (allocator) {
+        allocator->newBuffer(1920 * 1088 * 3 / 2, &buffer);
+    }
+
+    return buffer;
+}
+
+HWNodeMpiEncoder::HWNodeMpiEncoder() {
+    const char* name = "HWMpiEncoder";
+    mProcThread = new RtThread(hw_encode_loop, reinterpret_cast<void*>(this));
     mProcThread->setName(name);
 
     mAllocatorStore = new RTAllocatorStore();
 }
 
-HWNodeMpiDecoder::~HWNodeMpiDecoder() {
+HWNodeMpiEncoder::~HWNodeMpiEncoder() {
     release();
 }
 
-RT_RET HWNodeMpiDecoder::runTask() {
+RT_RET HWNodeMpiEncoder::runTask() {
     RTMediaBuffer *input = NULL;
     RTMediaBuffer *output = NULL;
     while (mRunning) {
@@ -68,13 +77,17 @@ RT_RET HWNodeMpiDecoder::runTask() {
             input = reinterpret_cast<RTMediaBuffer *>(mUsedInputPort->borrowObj());
         }
 
-        if (!input) {
+        if (!output) {
+            output = reinterpret_cast<RTMediaBuffer *>(mUnusedOutputPort->borrowObj());
+        }
+
+        if (!input || !output) {
             RtTime::sleepMs(5);
             continue;
         }
 
         RT_LOGD("input and output ready, go to decode!");
-        err = ma_decode_send_packet(mMpiAdapterCtx, input);
+        err = ma_encode_send_frame(mMpiAdapterCtx, input);
         if (err) {
             if (err == RT_ERR_TIMEOUT) {
                 input = NULL;
@@ -83,12 +96,11 @@ RT_RET HWNodeMpiDecoder::runTask() {
             mUnusedInputPort->returnObj(input);
             input = NULL;
         }
-        err = ma_decode_get_frame(mMpiAdapterCtx, &output);
+        err = ma_encode_get_packet(mMpiAdapterCtx, output);
         if (err) {
         } else {
-            if (output->getStatus() == RT_MEDIA_BUFFER_STATUS_READY
-                    || output->getStatus() == RT_MEDIA_BUFFER_STATUS_INFO_CHANGE) {
-                mAvailOutputPort->returnObj(output);
+            if (output->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
+                mUsedOutputPort->returnObj(output);
                 output = NULL;
             }
         }
@@ -96,7 +108,7 @@ RT_RET HWNodeMpiDecoder::runTask() {
     return RT_OK;
 }
 
-RT_RET HWNodeMpiDecoder::init(RtMetaData *metadata) {
+RT_RET HWNodeMpiEncoder::init(RtMetaData *metadata) {
     RT_RET ret = RT_OK;
     // init memory allocator
     mAllocatorStore = new RTAllocatorStore();
@@ -106,14 +118,21 @@ RT_RET HWNodeMpiDecoder::init(RtMetaData *metadata) {
         return ret;
     }
 
-    mUnusedInputPort = new RTObjectPool(allocInputBuffer, MAX_INPUT_BUFFER_COUNT, this);
+    mUnusedInputPort = new RTObjectPool(hwAllocInputBuffer, MAX_INPUT_BUFFER_COUNT, this);
     mUsedInputPort = new RTObjectPool(RT_NULL, MAX_INPUT_BUFFER_COUNT);
-    mAvailOutputPort = new RTObjectPool(allocOutputBuffer, MAX_OUTPUT_BUFFER_COUNT, this);
+    mUnusedOutputPort = new RTObjectPool(hwAllocOutputBuffer, MAX_OUTPUT_BUFFER_COUNT, this);
+    mUsedOutputPort = new RTObjectPool(RT_NULL, MAX_OUTPUT_BUFFER_COUNT);
 
-    mMpiAdapterCtx = ma_decode_create(metadata);
+    mMpiAdapterCtx = ma_encode_create(metadata);
     if (mMpiAdapterCtx == RT_NULL) {
         RT_LOGE("mpi adapter context create failed!");
         return RT_ERR_UNKNOWN;
+    }
+
+    ret = ma_encode_prepare(mMpiAdapterCtx, metadata);
+    if (ret) {
+        RT_LOGE("mpi encode prepare failed!");
+        return ret;
     }
 
     allocateBuffersOnPort(RT_PORT_INPUT);
@@ -122,15 +141,15 @@ RT_RET HWNodeMpiDecoder::init(RtMetaData *metadata) {
     return ret;
 }
 
-RTAllocator *HWNodeMpiDecoder::getLinearAllocator() {
+RTAllocator *HWNodeMpiEncoder::getLinearAllocator() {
     return mLinearAllocator;
 }
-RTAllocator *HWNodeMpiDecoder::getGraphicAllocator() {
+RTAllocator *HWNodeMpiEncoder::getGraphicAllocator() {
     return mGraphicAllocator;
 }
 
-RT_RET HWNodeMpiDecoder::release() {
-    ma_decode_destroy(&mMpiAdapterCtx);
+RT_RET HWNodeMpiEncoder::release() {
+    ma_encode_destroy(&mMpiAdapterCtx);
 
     if (mUnusedInputPort) {
         delete mUnusedInputPort;
@@ -140,10 +159,13 @@ RT_RET HWNodeMpiDecoder::release() {
         delete mUsedInputPort;
         mUsedInputPort = NULL;
     }
-
-    if (mAvailOutputPort) {
-        delete mAvailOutputPort;
-        mAvailOutputPort = NULL;
+    if (mUnusedOutputPort) {
+        delete mUnusedOutputPort;
+        mUnusedOutputPort = NULL;
+    }
+    if (mUsedOutputPort) {
+        delete mUsedOutputPort;
+        mUsedOutputPort = NULL;
     }
 
     // thread release
@@ -155,17 +177,17 @@ __FAILED:
     return RT_ERR_UNKNOWN;
 }
 
-RT_RET HWNodeMpiDecoder::pullBuffer(RTMediaBuffer **data) {
+RT_RET HWNodeMpiEncoder::pullBuffer(RTMediaBuffer **data) {
     mCountPull++;
     dequeBuffer(data, RT_PORT_OUTPUT);
 }
 
-RT_RET HWNodeMpiDecoder::pushBuffer(RTMediaBuffer* data) {
+RT_RET HWNodeMpiEncoder::pushBuffer(RTMediaBuffer* data) {
     mCountPush++;
     queueBuffer(data, RT_PORT_INPUT);
 }
 
-RT_RET HWNodeMpiDecoder::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
+RT_RET HWNodeMpiEncoder::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
     RT_RET err = RT_OK;
     switch (cmd) {
     case RT_NODE_CMD_INIT:
@@ -192,42 +214,42 @@ RT_RET HWNodeMpiDecoder::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
     return err;
 }
 
-RT_RET HWNodeMpiDecoder::setEventLooper(RTMsgLooper* eventLooper) {
+RT_RET HWNodeMpiEncoder::setEventLooper(RTMsgLooper* eventLooper) {
     mEventLooper = eventLooper;
 }
 
-RtMetaData* HWNodeMpiDecoder::queryFormat(RTPortType port) {
+RtMetaData* HWNodeMpiEncoder::queryFormat(RTPortType port) {
     return RT_NULL;
 }
 
-RTNodeStub* HWNodeMpiDecoder::queryStub() {
-    return &hw_node_mpi_decoder;
+RTNodeStub* HWNodeMpiEncoder::queryStub() {
+    return &hw_node_mpi_encoder;
 }
 
-RT_RET HWNodeMpiDecoder::onStart() {
+RT_RET HWNodeMpiEncoder::onStart() {
     RT_RET          err = RT_OK;
     mRunning = RT_TRUE;
     mProcThread->start();
     return err;
 }
 
-RT_RET HWNodeMpiDecoder::onPause() {
+RT_RET HWNodeMpiEncoder::onPause() {
 }
 
-RT_RET HWNodeMpiDecoder::onStop() {
+RT_RET HWNodeMpiEncoder::onStop() {
     RT_RET          err = RT_OK;
     mRunning = RT_FALSE;
     mProcThread->join();
     return err;
 }
 
-RT_RET HWNodeMpiDecoder::onReset() {
+RT_RET HWNodeMpiEncoder::onReset() {
 }
 
-RT_RET HWNodeMpiDecoder::onFlush() {
+RT_RET HWNodeMpiEncoder::onFlush() {
 }
 
-RT_RET HWNodeMpiDecoder::allocateBuffersOnPort(RTPortType port) {
+RT_RET HWNodeMpiEncoder::allocateBuffersOnPort(RTPortType port) {
     UINT32 i = 0;
     switch (port) {
         case RT_PORT_INPUT: {
@@ -243,10 +265,10 @@ RT_RET HWNodeMpiDecoder::allocateBuffersOnPort(RTPortType port) {
         case RT_PORT_OUTPUT: {
             RTMediaBuffer *buffer[MAX_OUTPUT_BUFFER_COUNT];
             for (i = 0; i < MAX_OUTPUT_BUFFER_COUNT; i++) {
-                buffer[i] = reinterpret_cast<RTMediaBuffer *>(mAvailOutputPort->borrowObj());
+                buffer[i] = reinterpret_cast<RTMediaBuffer *>(mUnusedOutputPort->borrowObj());
             }
             for (i = 0; i < MAX_OUTPUT_BUFFER_COUNT; i++) {
-                ma_commit_buffer_to_group(mMpiAdapterCtx->codec_ctx, buffer[i]);
+                mUnusedOutputPort->returnObj(buffer[i]);
             }
         }
             break;
@@ -258,13 +280,13 @@ RT_RET HWNodeMpiDecoder::allocateBuffersOnPort(RTPortType port) {
     return RT_OK;
 }
 
-RT_RET HWNodeMpiDecoder::dequeBuffer(RTMediaBuffer** data, RTPortType port) {
+RT_RET HWNodeMpiEncoder::dequeBuffer(RTMediaBuffer** data, RTPortType port) {
     switch (port) {
         case RT_PORT_INPUT:
             *data = reinterpret_cast<RTMediaBuffer *>(mUnusedInputPort->borrowObj());
             break;
         case RT_PORT_OUTPUT:
-            *data = reinterpret_cast<RTMediaBuffer *>(mAvailOutputPort->borrowObj());
+            *data = reinterpret_cast<RTMediaBuffer *>(mUsedOutputPort->borrowObj());
             break;
         default:
             RT_LOGE("unknown port! port: %d", port);
@@ -277,15 +299,14 @@ RT_RET HWNodeMpiDecoder::dequeBuffer(RTMediaBuffer** data, RTPortType port) {
     return RT_OK;
 }
 
-RT_RET HWNodeMpiDecoder::queueBuffer(RTMediaBuffer* data, RTPortType port) {
+RT_RET HWNodeMpiEncoder::queueBuffer(RTMediaBuffer* data, RTPortType port) {
     RT_RET ret = RT_OK;
     switch (port) {
         case RT_PORT_INPUT:
             ret = mUsedInputPort->returnObj(data);
             break;
         case RT_PORT_OUTPUT:
-            // TODO(fill buffer to mpp frame group)
-            ret = ma_fill_buffer_to_group(mMpiAdapterCtx->codec_ctx, data);
+            ret = mUnusedOutputPort->returnObj(data);
             break;
         default:
             RT_LOGE("unknown port! port: %d", port);
@@ -298,15 +319,15 @@ RT_RET HWNodeMpiDecoder::queueBuffer(RTMediaBuffer* data, RTPortType port) {
     return RT_OK;
 }
 
-static RTNode* createMpiDecoder() {
-    return new HWNodeMpiDecoder();
+static RTNode* createMpiEncoder() {
+    return new HWNodeMpiEncoder();
 }
 
-struct RTNodeStub hw_node_mpi_decoder {
-    .mCreateNode     = createMpiDecoder,
-    .mNodeType       = RT_NODE_TYPE_DECODER,
+struct RTNodeStub hw_node_mpi_encoder {
+    .mCreateNode     = createMpiEncoder,
+    .mNodeType       = RT_NODE_TYPE_ENCODER,
     .mUsePool        = RT_TRUE,
-    .mNodeName       = "hw_node_mpi_decoder",
+    .mNodeName       = "hw_node_mpi_encoder",
     .mNodeVersion    = "v1.0",
 };
 

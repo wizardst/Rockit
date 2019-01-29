@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Rockchip Electronics Co. LTD
+ * Copyright 2018 Rockchip Electronics Co. LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,17 @@
  * limitations under the License.
  *
  * Author: rimon.xu@rock-chips.com
- *   Date: 2019/01/18
- *   Task: hardware mpi decoder
+ *   Date: 2019/01/28
+ *   Task: hardware mpi encoder
  */
 
-#ifndef SRC_RT_NODE_HW_CODEC_INCLUDE_HWNODEMPIDECODER_H_
-#define SRC_RT_NODE_HW_CODEC_INCLUDE_HWNODEMPIDECODER_H_
-
-#ifdef RK_HW_CODEC
-
-#include "rt_header.h"       // NOLINT
-#include "rt_thread.h"       // NOLINT
-#include "MpiAdapterCodec.h" // NOLINT
+#ifndef SRC_RT_NODE_HW_CODEC_INCLUDE_HWNODEMPIENCODER_H_
+#define SRC_RT_NODE_HW_CODEC_INCLUDE_HWNODEMPIENCODER_H_
 
 #include "RTNodeCodec.h"     // NOLINT
+#include "rt_header.h"       // NOLINT
+#include "MpiAdapterCodec.h" // NOLINT
+#include "rt_thread.h"       // NOLINT
 #include "RTMediaBuffer.h"   // NOLINT
 #include "RTObject.h"        // NOLINT
 #include "RTObjectPool.h"    // NOLINT
@@ -35,10 +32,10 @@
 class RTAllocator;
 class RTAllocatorStore;
 
-class HWNodeMpiDecoder : public RTNodeCodec {
+class HWNodeMpiEncoder : public RTNodeCodec {
  public:
-    HWNodeMpiDecoder();
-    virtual ~HWNodeMpiDecoder();
+    HWNodeMpiEncoder();
+    virtual ~HWNodeMpiEncoder();
     RT_RET runTask();
 
  public:
@@ -75,11 +72,12 @@ class HWNodeMpiDecoder : public RTNodeCodec {
     RTAllocator *getGraphicAllocator();
 
  private:
-    MADecodeContext     *mMpiAdapterCtx;
+    MAEncodeContext     *mMpiAdapterCtx;
     RtThread            *mProcThread;
     RTObjectPool        *mUnusedInputPort;
     RTObjectPool        *mUsedInputPort;
-    RTObjectPool        *mAvailOutputPort;
+    RTObjectPool        *mUnusedOutputPort;
+    RTObjectPool        *mUsedOutputPort;
     RTMsgLooper         *mEventLooper;
 
     RT_BOOL              mRunning;
@@ -92,9 +90,7 @@ class HWNodeMpiDecoder : public RTNodeCodec {
     RTAllocator         *mGraphicAllocator;
 };
 
-extern struct RTNodeStub hw_node_mpi_decoder;
+extern struct RTNodeStub hw_node_mpi_encoder;
 
-#endif
-
-#endif  // SRC_RT_NODE_HW_CODEC_INCLUDE_HWNODEMPIDECODER_H_
+#endif  // SRC_RT_NODE_HW_CODEC_INCLUDE_HWNODEMPIENCODER_H_
 

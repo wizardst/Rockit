@@ -26,7 +26,12 @@
 #include "FFNodeDecoder.h"    // NOLINT
 #include "FFNodeEncoder.h"    // NOLINT
 #include "FFNodeDemuxer.h"    // NOLINT
+
+#ifdef OS_LINUX
 #include "HWNodeMpiDecoder.h" // NOLINT
+#include "HWNodeMpiEncoder.h" // NOLINT
+#endif
+
 #ifdef OS_WINDOWS
 #include "RTSinkDisplayGLES.h" // NOLINT
 #endif
@@ -163,6 +168,7 @@ RT_RET RTNodeBus::registerCoreStubs() {
     RT_ASSERT(RT_NULL != mBusCtx);
     #ifdef RK_HW_CODEC
     registerStub(&hw_node_mpi_decoder);
+    registerStub(&hw_node_mpi_encoder);
     #endif
     registerStub(&ff_node_demuxer);
     registerStub(&ff_node_decoder);

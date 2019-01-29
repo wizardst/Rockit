@@ -17,16 +17,15 @@
 					<Add option="-DOS_WINDOWS -DHAS_PTHREAD -D__MSVCRT__ -D_STAT_DEFINED -D__STDC_CONSTANT_MACROS" />
 					<Add directory="${SRC_ROOT}/include" />
 					<Add directory="${SRC_ROOT}/src/rt_base/include" />
-					<Add directory="${SRC_ROOT}/src/rt_node/ff_node/include" />
-					<Add directory="${SRC_ROOT}/src/rt_node/include" />
 					<Add directory="${SRC_ROOT}/src/rt_task/include" />
-					<Add directory="${SRC_ROOT}/third-party/prebuilt/headers/ffmpeg-4.0/include" />
-					<Add directory="${SRC_ROOT}/third-party/prebuilt/headers/angle/include" />
 					<Add directory="${SRC_ROOT}/src/rt_media/include" />
 					<Add directory="${SRC_ROOT}/src/rt_media/GLRender" />
 					<Add directory="${SRC_ROOT}/src/rt_media/FFMpeg" />
-					<Add directory="${SRC_ROOT}/src/rt_node/hw_codec/include" />
-					<Add directory="${SRC_ROOT}/src/rt_node/rt_sink" />
+					<Add directory="${SRC_ROOT}/src/rt_node/rt_sink/include" />
+					<Add directory="${SRC_ROOT}/src/rt_node/ff_node/include" />
+					<Add directory="${SRC_ROOT}/src/rt_node/include" />
+					<Add directory="${SRC_ROOT}/third-party/prebuilt/headers/ffmpeg-4.0/include" />
+					<Add directory="${SRC_ROOT}/third-party/prebuilt/headers/angle/include" />
 				</Compiler>
 				<Linker>
 					<Add option="-lgdi32" />
@@ -35,6 +34,7 @@
 					<Add library="${BUILT_WIN32}/ffmpeg/avformat.lib" />
 					<Add library="${BUILT_WIN32}/ffmpeg/avutil.lib" />
 					<Add library="${BUILT_WIN32}/ffmpeg/avdevice.lib" />
+					<Add library="${BUILT_WIN32}/ffmpeg/swresample.lib" />
 					<Add library="${BUILT_WIN32}/angle/libEGL.lib" />
 					<Add library="${BUILT_WIN32}/angle/libGLESv2.lib" />
 					<Add directory="../../third-party/prebuilt/win32" />

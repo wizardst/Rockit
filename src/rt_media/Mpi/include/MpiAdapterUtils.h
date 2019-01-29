@@ -25,8 +25,14 @@
 #include "rt_common.h"        // NOLINT
 #include "RTMediaDef.h"       // NOLINT
 
-RTCodecID     fa_utils_find_codectype_from_mpp(MppCodingType mpp_coding_type);
-MppCodingType fa_utils_find_mpp_codectype_from_rt(RTCodecID rt_coding_type);
+UINT32 ma_mpp_to_rt_codec_id(const UINT32 type);
+UINT32 ma_rt_to_mpp_codec_id(const UINT32 type);
+
+UINT32 ma_mpp_to_rt_color_format(const UINT32 type);
+UINT32 ma_rt_to_mpp_color_format(const UINT32 type);
+
+UINT32 ma_mpp_to_rt_rc_mode(const UINT32 type);
+UINT32 ma_rt_to_mpp_rc_mode(const UINT32 type);
 
 #endif  // SRC_RT_MEDIA_MPI_INCLUDE_MPIADAPTERUTILS_H_
 

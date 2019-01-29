@@ -53,6 +53,8 @@ enum {
     /* video extra features*/
     kKeyVCodecGopSize        = MKTAG('g', 'p', 's', 'z'),  // INT32 encoder feature
     kKeyVCodecMaxBFrames     = MKTAG('m', 'b', 'f', 'm'),  // INT32 encoder feature
+    kKeyVCodecRCMode         = MKTAG('v', 'r', 'c', 'm'),  // INT32 encoder feature
+    kKeyVCodecQP             = MKTAG('v', 'c', 'q', 'p'),  // INT32 encoder feature
 
     /* audio track features*/
     kKeyACodecChanneLayout      = MKTAG('a', 'c', 'l', 'a'),

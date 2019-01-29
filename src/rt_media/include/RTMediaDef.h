@@ -154,6 +154,51 @@ enum RTSampleFormat {
     RT_SAMPLE_FMT_MAX          ///< Number of sample formats. DO NOT USE if linking dynamically
 };
 
+#define RT_VIDEO_FMT_MASK                   0x000f0000
+#define RT_VIDEO_FMT_YUV                    0x00000000
+#define RT_VIDEO_FMT_RGB                    0x00010000
+
+typedef enum {
+    RT_FMT_YUV420SP        = RT_VIDEO_FMT_YUV,         /* YYYY... UV...            */
+    RT_FMT_YUV420SP_10BIT,
+    RT_FMT_YUV422SP,                                   /* YYYY... UVUV...          */
+    RT_FMT_YUV422SP_10BIT,                             ///< Not part of ABI
+    RT_FMT_YUV420P,                                    /* YYYY... UUUU... VVVV     */
+    RT_FMT_YUV420SP_VU,                                /* YYYY... VUVUVU...        */
+    RT_FMT_YUV422P,                                    /* YYYY... UUUU... VVVV     */
+    RT_FMT_YUV422SP_VU,                                /* YYYY... VUVUVU...        */
+    RT_FMT_YUV422_YUYV,                                /* YUYVYUYV...              */
+    RT_FMT_YUV422_UYVY,                                /* UYVYUYVY...              */
+    RT_FMT_YUV400SP,                                   /* YYYY...                  */
+    RT_FMT_YUV440SP,                                   /* YYYY... UVUV...          */
+    RT_FMT_YUV411SP,                                   /* YYYY... UV...            */
+    RT_FMT_YUV444SP,                                   /* YYYY... UVUVUVUV...      */
+    RT_FMT_YUV_BUTT,
+    RT_FMT_RGB565          = RT_VIDEO_FMT_RGB,         /* 16-bit RGB               */
+    RT_FMT_BGR565,                                     /* 16-bit RGB               */
+    RT_FMT_RGB555,                                     /* 15-bit RGB               */
+    RT_FMT_BGR555,                                     /* 15-bit RGB               */
+    RT_FMT_RGB444,                                     /* 12-bit RGB               */
+    RT_FMT_BGR444,                                     /* 12-bit RGB               */
+    RT_FMT_RGB888,                                     /* 24-bit RGB               */
+    RT_FMT_BGR888,                                     /* 24-bit RGB               */
+    RT_FMT_RGB101010,                                  /* 30-bit RGB               */
+    RT_FMT_BGR101010,                                  /* 30-bit RGB               */
+    RT_FMT_ARGB8888,                                   /* 32-bit RGB               */
+    RT_FMT_ABGR8888,                                   /* 32-bit RGB               */
+    RT_FMT_RGB_BUTT,
+    RT_FMT_BUTT            = RT_FMT_RGB_BUTT,
+} RtVideoFormat;
+
+typedef enum {
+    RT_RC_MODE_DISABLE = 0,
+    RT_RC_MODE_VBR,
+    RT_RC_MODE_CBR,
+    RT_RC_MODE_CQP,
+    RT_RC_MODE_BUTT,
+} RtVideoRCMode;
+
+
 struct RTTrackParms {
     RTTrackType mCodecType;
     RTCodecID   mCodecID;

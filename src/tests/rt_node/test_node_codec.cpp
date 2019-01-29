@@ -34,11 +34,11 @@
 #ifdef OS_WINDOWS
 #define TEST_URI "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4"
 #else
-#define TEST_URI "iphone6p.mp4"
+#define TEST_URI "airplay.mp4"
 #endif
 
 #define DEFAULT_WIDTH           608
-#define DEFAULT_HEIGHT          1080
+#define DEFAULT_HEIGHT          1088
 
 #define DEC_TEST_OUTPUT_FILE    "dec_output.bin"
 #define ENC_TEST_OUTPUT_FILE    "enc_output.bin"
@@ -63,10 +63,12 @@ UINT8* allocVideoBuf2(INT32 width, INT32 height) {
 RT_RET init_encoder_meta(RtMetaData *meta) {
     CHECK_IS_NULL(meta);
 
-    meta->setInt32(kKeyVCodecWidth,  DEFAULT_WIDTH);
-    meta->setInt32(kKeyVCodecHeight, DEFAULT_HEIGHT);
-    meta->setInt32(kKeyCodecID,      RT_VIDEO_ID_MPEG4);
-    meta->setInt32(kKeyCodecBitrate, 5000000);
+    meta->setInt32(kKeyVCodecWidth,     DEFAULT_WIDTH);
+    meta->setInt32(kKeyVCodecHeight,    DEFAULT_HEIGHT);
+    meta->setInt32(kKeyFrameW,          DEFAULT_WIDTH);
+    meta->setInt32(kKeyFrameH,          DEFAULT_HEIGHT);
+    meta->setInt32(kKeyCodecID,         RT_VIDEO_ID_AVC);
+    meta->setInt32(kKeyCodecBitrate,    2000000);
 
 __FAILED:
     return RT_ERR_UNKNOWN;
@@ -175,7 +177,7 @@ RT_RET unit_test_node_decoder_proc() {
             }
 
             // dump AVFrame
-            RtTime::sleepMs(50);
+            RtTime::sleepMs(10);
         } while (true);
 
         if (demuxer_meta) {
@@ -258,7 +260,7 @@ RT_RET unit_test_node_encoder_proc() {
             }
 
             // dump AVFrame
-            RtTime::sleepMs(50);
+            RtTime::sleepMs(5);
         } while (true);
 
         rt_safe_delete(encoder_meta);
