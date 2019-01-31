@@ -20,32 +20,52 @@
 #ifndef SRC_RT_NODE_INCLUDE_RTNODEBUS_H_
 #define SRC_RT_NODE_INCLUDE_RTNODEBUS_H_
 
-#include "RTNode.h" // NOLINT
-#include "rt_header.h" // NOLINT
+#include "RTNode.h"        // NOLINT
+#include "rt_header.h"     // NOLINT
 #include "rt_hash_table.h" // NOLINT
 #include "rt_array_list.h" // NOLINT
 
 struct NodeBusContext;
 
-// ! life cycles of node_bus
-struct NodeBusContext* rt_node_bus_create();
-INT32     rt_node_bus_destory(struct NodeBusContext* bus);
-INT32       rt_node_bus_build(struct NodeBusContext* bus);
-INT32     rt_node_bus_summary(struct NodeBusContext* bus, RT_BOOL full);
+typedef struct _NodeBusSetting {
+    char   mUri[1024];
+    char   mUserAgent[256];
+    char   mVersion[32];
+} NodeBusSetting;
 
-// ! node operations of node_bus
-INT32  rt_node_bus_register_all(struct NodeBusContext* bus);
-INT32      rt_node_bus_register(struct NodeBusContext* bus, RTNodeStub* node_info);
-RTNodeStub*    rt_node_bus_find(struct NodeBusContext* bus, RT_NODE_TYPE node_type, UINT8 node_id);
+typedef enum _BUS_LINE_TYPE {
+    BUS_LINE_SOURCE,
+    BUS_LINE_VIDEO,
+    BUS_LINE_AUDIO,
+    BUS_LINE_SUBTITLE,
+    BUS_LINE_MAX,
+} BUS_LINE_TYPE;
 
+RTNodeStub* findStub(RT_NODE_TYPE nType);
 
-/******add by princejay.dai for temp test *******/
-RT_RET unit_test_rt_plugin_manage_test(RT_NODE_TYPE rt_node_type);
-INT32 rt_plugin_autobuild(struct NodeBusContext* bus);
-RT_RET rt_plugin_init(struct NodeBusContext* bus, RtMetaData *nodeMeta);
-RT_RET rt_plugin_push(struct NodeBusContext* bus, RT_NODE_TYPE node_type, RTMediaBuffer* media_buf);
-RT_RET rt_plugin_pull(struct NodeBusContext* bus, RT_NODE_TYPE node_type, RTMediaBuffer* media_buf);
-INT32 rt_plugin_run_cmd(struct NodeBusContext* bus, RT_NODE_CMD  node_cmd);
-INT32 rt_plugin_release(struct NodeBusContext* bus, RT_NODE_TYPE node_type);
+class RTNodeBus {
+ public:
+    RTNodeBus();
+    ~RTNodeBus();
+    RT_RET      autoBuild(NodeBusSetting *setting);
+    RT_RET      release();
 
+    RT_RET      summary(INT32 fd, RT_BOOL full = RT_FALSE);
+    RT_RET      registerStub(RTNodeStub *nStub);
+    RT_RET      registerNode(RTNode     *pNode);
+
+    RTNodeStub* findStub(RT_NODE_TYPE nType, BUS_LINE_TYPE lType);
+    RTNode*     findNode(RT_NODE_TYPE nType, BUS_LINE_TYPE lType);
+    RT_RET      coreLoopDriver();
+
+ private:
+    RT_RET      registerCoreStubs();
+    RT_RET      nodeChainAppend(RTNode *pNode, BUS_LINE_TYPE lType);
+    RT_RET      nodeChainDriver(RTNode *pNode, BUS_LINE_TYPE lType);
+    RT_RET      nodeChainDumper(BUS_LINE_TYPE lType);
+    RT_RET      excuteCommand(RT_NODE_CMD cmd);
+
+ private:
+    struct NodeBusContext* mBusCtx;
+};
 #endif  // SRC_RT_NODE_INCLUDE_RTNODEBUS_H_

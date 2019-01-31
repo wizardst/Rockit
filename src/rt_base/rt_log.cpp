@@ -43,7 +43,7 @@ static void rt_log_full(rt_log_callback log_cb, const char *tag,
                         const char *fmt, const char *fname,
                         const UINT16 row, va_list args) {
     char line[MAX_LINE_LEN];
-    snprintf(line, sizeof(line), "{%22s:%03d} %s\r\n", fname, row, fmt);
+    snprintf(line, sizeof(line), "{%-18.18s:%03d} %s\r\n", fname, row, fmt);
     log_cb(tag, line, args);
 }
 

@@ -35,13 +35,18 @@ class RtMetaData;
 FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag = FLAG_DEMUXER);
 void   fa_format_close(FAFormatContext* fc);
 void   fa_format_seek_to(FAFormatContext* fc, INT32 track_id, UINT64 ts, UINT32 flags);
-INT32  fa_format_read_packet(FAFormatContext* fc, void** ff_pkt);
-INT32  fa_format_parse_packet(void*  ff_pkt, RTPacket* rt_pkt);
+INT32  fa_format_packet_read(FAFormatContext* fc, void** raw_pkt);
+INT32  fa_format_packet_parse(void* raw_pkt, RTPacket* rt_pkt);
+INT32  fa_format_packet_type(void*  raw_pkt);
+INT32  fa_format_packet_free(void*  raw_pkt);
+
 
 // some operations for media tracks
-void   fa_format_query_track(FAFormatContext* fc, UINT32 idx, RTTrackType tType, RTTrackParms* track);
-UINT32 fa_format_select_track(FAFormatContext* fc, UINT32 idx, RTTrackType tType);
-UINT32 fa_format_count_tracks(FAFormatContext* fc, RTTrackType tType);
+INT32 fa_format_query_track(FAFormatContext* fc, UINT32 idx, RTTrackType tType, RTTrackParms* track);
+INT32 fa_format_query_used_track(FAFormatContext* fc, RTTrackType tType);
+INT32 fa_format_select_track(FAFormatContext* fc, UINT32 idx, RTTrackType tType);
+INT32 fa_format_find_best_track(FAFormatContext* fc, RTTrackType tType);
+INT32 fa_format_count_tracks(FAFormatContext* fc, RTTrackType tType);
 
 // specified user agent is needed by some video server
 void fa_format_set_user_agent(FAFormatContext* fc, const char* ua);

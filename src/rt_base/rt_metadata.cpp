@@ -76,6 +76,7 @@ RtMetaData::RtMetaData() {
 }
 
 RtMetaData::~RtMetaData() {
+    clear();
     rt_hash_table_destory(mHashTable);
 }
 

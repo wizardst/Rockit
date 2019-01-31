@@ -64,17 +64,23 @@ FFNodeDecoder::FFNodeDecoder() {
     mProcThread->setName(name);
 
     mUnusedInputPort  = RT_NULL;
-    mUsedInputPort = RT_NULL;
+    mUsedInputPort    = RT_NULL;
     mUnusedOutputPort = RT_NULL;
-    mUsedOutputPort = RT_NULL;
-    mUnusedInputPort = new RTObjectPool(allocInputBuffer, MAX_INPUT_BUFFER_COUNT);
-    mUsedInputPort = new RTObjectPool(NULL, MAX_INPUT_BUFFER_COUNT);
+    mUsedOutputPort   = RT_NULL;
+    mUnusedInputPort  = new RTObjectPool(allocInputBuffer, MAX_INPUT_BUFFER_COUNT);
+    mUsedInputPort    = new RTObjectPool(NULL, MAX_INPUT_BUFFER_COUNT);
     mUnusedOutputPort = new RTObjectPool(allocOutputBuffer, MAX_OUTPUT_BUFFER_COUNT);
-    mUsedOutputPort = new RTObjectPool(RT_NULL, MAX_OUTPUT_BUFFER_COUNT);
+    mUsedOutputPort   = new RTObjectPool(RT_NULL, MAX_OUTPUT_BUFFER_COUNT);
+
+    mTrackParms       = rt_malloc(RTTrackParms);
+
+    mMetaInput  = RT_NULL;
+    mMetaOutput = new RtMetaData;
 }
 
 FFNodeDecoder::~FFNodeDecoder() {
     release();
+    rt_safe_free(mTrackParms);
     mNodeContext = RT_NULL;
 }
 
@@ -84,6 +90,12 @@ RT_RET FFNodeDecoder::init(RtMetaData *metadata) {
         RT_LOGE("fa_video_decode_open failed");
         return RT_ERR_UNKNOWN;
     }
+
+    mMetaInput = metadata;
+    rt_medatdata_goto_trackpar(metadata, mTrackParms);
+    mMetaOutput->clear();
+    mMetaOutput->setInt32(kKeyFrameW,   mTrackParms->mVideoWidth);
+    mMetaOutput->setInt32(kKeyFrameH,   mTrackParms->mVideoHeight);
 
     allocateBuffersOnPort(RT_PORT_INPUT);
     allocateBuffersOnPort(RT_PORT_OUTPUT);
@@ -125,33 +137,17 @@ RT_RET FFNodeDecoder::allocateBuffersOnPort(RTPortType port) {
 RT_RET FFNodeDecoder::release() {
     fa_video_decode_destroy(&mFFCodec);
 
-    if (mUnusedInputPort) {
-        delete mUnusedInputPort;
-        mUnusedInputPort = NULL;
-    }
-    if (mUsedInputPort) {
-        delete mUsedInputPort;
-        mUsedInputPort = NULL;
-    }
+    rt_safe_delete(mUnusedInputPort);
+    rt_safe_delete(mUsedInputPort);
+    rt_safe_delete(mMetaInput);
 
-    if (mUnusedOutputPort) {
-        delete mUnusedOutputPort;
-        mUnusedOutputPort = NULL;
-    }
-
-    if (mUsedOutputPort) {
-        delete mUsedOutputPort;
-        mUsedOutputPort = NULL;
-    }
+    rt_safe_delete(mUnusedOutputPort);
+    rt_safe_delete(mUsedOutputPort);
 
     // thread release
-    delete(mProcThread);
-    mProcThread = RT_NULL;
+    rt_safe_delete(mProcThread);
 
     return RT_OK;
-
-__FAILED:
-    return RT_ERR_UNKNOWN;
 }
 
 RT_RET FFNodeDecoder::dequeBuffer(RTMediaBuffer **buffer, RTPortType type) {
@@ -237,7 +233,18 @@ RT_RET FFNodeDecoder::setEventLooper(RTMsgLooper* eventLooper) {
 }
 
 RtMetaData* FFNodeDecoder::queryFormat(RTPortType port) {
-    return RT_NULL;
+    RtMetaData *nMeta = RT_NULL;
+    switch (port) {
+    case RT_PORT_INPUT:
+        nMeta = mMetaInput;
+        break;
+    case RT_PORT_OUTPUT:
+        nMeta = mMetaOutput;
+        break;
+    default:
+        break;
+    }
+    return nMeta;
 }
 
 RTNodeStub* FFNodeDecoder::queryStub() {

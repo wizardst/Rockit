@@ -17,12 +17,8 @@
  *   date: 2018/12/11
  */
 
-#include "rt_ffmpeg_tests.h" // NOLINT
-extern "C" {
-    #include "libavformat/avformat.h" // NOLINT
-    #include "libavformat/version.h" // NOLINT
-    #include "libavutil/opt.h" // NOLINT
-}
+#include "rt_ffmpeg_tests.h"  // NOLINT
+#include "FFAdapterFormat.h"  // NOLINT
 
 #ifdef OS_WINDOWS
 static const char* TEST_URI = "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4";
@@ -30,59 +26,41 @@ static const char* TEST_URI = "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4";
 static const char* TEST_URI = "h264-1080p.mp4";
 #endif
 
-static void dump_media_tracks(const AVFormatContext *fmt_ctx) {
-    for (UINT32 i = 0; i < fmt_ctx->nb_streams; i++) {
-        const AVOption *opt = NULL;
-        const AVStream *st = fmt_ctx->streams[i];
-        AVCodecParameters *codec_par = st->codecpar;
-        AVCodecContext    *codec_ctx = NULL;
-        AVCodec           *codec_cur = NULL;
-
-        codec_cur = avcodec_find_decoder(codec_par->codec_id);
-        codec_ctx = avcodec_alloc_context3(codec_cur);
-
-        while (opt = av_opt_next(codec_ctx, opt)) {
-            uint8_t *str;
-
-            if (opt->type == AV_OPT_TYPE_CONST)
-                continue;
-
-            if (!strcmp(opt->name, "frame_number"))
-                continue;
-
-            if (av_opt_get(codec_ctx, opt->name, 0, &str) >= 0) {
-                printf("    %s=%s\n", opt->name, str);
-                av_free(str);
-            }
-        }
-    }
+void updateBestTrack(FAFormatContext* fa_ctx, RTTrackType tType) {
+    INT32 bestIndex = fa_format_find_best_track(fa_ctx, tType);
+    fa_format_select_track(fa_ctx, bestIndex, tType);
 }
 
-INT32 base_test_open_format(AVFormatContext **fmt_ctx, const char *filename) {
-    int err = 0;
+void dumpBestTrack(FAFormatContext* fa_ctx, RTTrackType tType) {
+    INT32 usedIndex = 0;
+    RTTrackParms tParms;
+    RtMetaData*  tMeta;
 
-    err = avformat_open_input(fmt_ctx, filename, NULL, NULL);
-    if (err < 0) {
-        RT_LOGE("Fail to avformat_open_input(uri=%s)", filename);
-        goto _final_end;
+    rt_memset(&tParms, 0, sizeof(RTTrackParms));
+    if (usedIndex == fa_format_query_track(fa_ctx, usedIndex, tType, &tParms)) {
+        rt_utils_dump_track(&tParms);
+
+        tMeta = new RtMetaData();
+        rt_medatdata_from_trackpar(tMeta, &tParms);
+        rt_utils_dump_track(tMeta);
+
+        rt_safe_delete(tMeta);
     }
-
-    // err = find_video_stream_info(*fmt_ctx, 0);
-    if (err < 0) {
-        RT_LOGE("Fail to find_video_stream_info(uri=%s)", filename);
-        goto _final_end;
-    }
-
-_final_end:
-    return err;
 }
 
 RT_RET unit_test_ffmpeg_format(INT32 index, INT32 total) {
-    AVFormatContext *fmt_ctx = NULL;
-    INT32 err = base_test_open_format(&fmt_ctx, TEST_URI);
-    if ( err >= 0 ) {
-        dump_media_tracks(fmt_ctx);
-        avformat_close_input(&fmt_ctx);
-    }
+    FAFormatContext* fa_ctx = fa_format_open(TEST_URI, FLAG_DEMUXER);
+    // find best track
+    updateBestTrack(fa_ctx, RTTRACK_TYPE_VIDEO);
+    updateBestTrack(fa_ctx, RTTRACK_TYPE_AUDIO);
+    updateBestTrack(fa_ctx, RTTRACK_TYPE_SUBTITLE);
+
+    // dump track info
+    dumpBestTrack(fa_ctx, RTTRACK_TYPE_VIDEO);
+    dumpBestTrack(fa_ctx, RTTRACK_TYPE_AUDIO);
+    dumpBestTrack(fa_ctx, RTTRACK_TYPE_SUBTITLE);
+
+    fa_format_close(fa_ctx);
+
     return RT_OK;
 }

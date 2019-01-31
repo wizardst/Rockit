@@ -21,12 +21,12 @@
 #define SRC_RT_MEDIA_MPI_MPIADAPTERUTILS_H_
 
 #include "rt_header.h"        // NOLINT
-#include "RTVideoUtils.h"     // NOLINT
 #include "rk_mpi.h"           // NOLINT
 #include "rt_common.h"        // NOLINT
+#include "RTMediaDef.h"       // NOLINT
 
-RtCodingType fa_utils_find_codectype_from_mpp(MppCodingType mpp_coding_type);
-MppCodingType fa_utils_find_mpp_codectype_from_rt(RtCodingType rt_coding_type);
+RTCodecID     fa_utils_find_codectype_from_mpp(MppCodingType mpp_coding_type);
+MppCodingType fa_utils_find_mpp_codectype_from_rt(RTCodecID rt_coding_type);
 
 #endif  // SRC_RT_MEDIA_MPI_MPIADAPTERUTILS_H_
 

@@ -49,6 +49,7 @@ class RTMediaBuffer : public RTObject {
  public:
     void   release();
     void*  getData() const;
+    void*  getDataEx() { return mData; }
     UINT32 getSize() const;
     UINT32 getOffset() const;
     UINT32 getLength() const;

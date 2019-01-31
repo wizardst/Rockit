@@ -74,6 +74,7 @@ RT_RET RTSinkDisplayNative::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
     default:
         break;
     }
+    return err;
 }
 
 RT_RET RTSinkDisplayNative::setEventLooper(RTMsgLooper* eventLooper) {
@@ -115,7 +116,7 @@ static RTNode* createSinkDisplay() {
 
 struct RTNodeStub rt_sink_display_native {
     .mCreateNode     = createSinkDisplay,
-    .mNodeType       = RT_NODE_TYPE_RENDER,
+    .mNodeType       = RT_NODE_TYPE_SINK,
     .mUsePool        = RT_FALSE,
     .mNodeName       = "rt_sink_display_native",
     .mNodeVersion    = "v1.0",

@@ -21,7 +21,6 @@
 #define SRC_RT_MEDIA_FFMPEG_FFADAPTERUTILS_H_
 
 #include "rt_header.h"        // NOLINT
-#include "RTVideoUtils.h"     // NOLINT
 
 extern "C" {
     #include "libavformat/avformat.h" // NOLINT
@@ -36,8 +35,11 @@ void        fa_utils_set_log_callback();
 const char* fa_utils_codec_name(UINT32 codec_id);
 const char* fa_utils_ffmpeg_version();
 
-RtCodingType fa_utils_find_codectype_from_codecid(UINT32 codec_id);
-AVCodecID    fa_utils_find_codecid_from_codectype(RtCodingType coding);
+UINT32      fa_utils_to_rt_codec_id(UINT32 codec_id);  // trans AVCodecID to RTCodecID
+UINT32      fa_utils_to_av_codec_id(UINT32 codec_id);  // trans RTCodecID to AVCodecID
+
+UINT32      fa_utils_yuv420_to_rgb(void* src, unsigned char* dest, \
+                                   int width, int height);
 
 
 #endif  // SRC_RT_MEDIA_FFMPEG_FFADAPTERUTILS_H_

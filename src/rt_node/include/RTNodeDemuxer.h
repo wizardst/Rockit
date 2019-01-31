@@ -32,7 +32,8 @@ class RTNodeDemuxer : public RTNode {
  public:
     virtual INT32       countTracks(RTTrackType tType) = 0;
     virtual INT32       selectTrack(INT32 index, RTTrackType tType) = 0;
-    virtual RtMetaData* queryTrack(UINT32 index) = 0;
+    virtual RtMetaData* queryTrackMeta(UINT32 index, RTTrackType tType) = 0;
+    virtual INT32       queryTrackUsed(RTTrackType tType) = 0;
     virtual INT32       queryDrmFlag()  { return 0; }
     virtual INT32       querySeekFlag() { return 0; }
 };

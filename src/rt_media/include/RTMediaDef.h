@@ -25,10 +25,48 @@
 #include "rt_type.h"      // NOLINT
 #include "rt_metadata.h"  // NOLINT
 
-enum RTCodecID {
-    RT_VIDEO_Codec_VP6,
-    RT_VIDEO_Codec_MAX,
-};
+/**
+* @ingroup rt_node
+* @brief Enumeration used to define the possible video compression codings.
+*        sync with the omx_video.h
+*
+* @note  This essentially refers to file extensions. If the coding is
+*        being used to specify the ENCODE type, then additional work
+*        must be done to configure the exact flavor of the compression
+*        to be used.  For decode cases where the user application can
+*        not differentiate between MPEG-4 and H.264 bit streams, it is
+*        up to the codec to handle this.
+*/
+
+typedef enum {
+     RT_VIDEO_ID_Unused,             /**< Value when coding is N/A */
+     RT_VIDEO_ID_AutoDetect,         /**< Autodetection of coding type */
+     RT_VIDEO_ID_MPEG2,              /**< AKA: H.262 */
+     RT_VIDEO_ID_H263,               /**< H.263 */
+     RT_VIDEO_ID_MPEG4,              /**< MPEG-4 */
+     RT_VIDEO_ID_WMV,                /**< Windows Media Video (WMV1,WMV2,WMV3)*/
+     RT_VIDEO_ID_RV,                 /**< all versions of Real Video */
+     RT_VIDEO_ID_AVC,                /**< H.264/AVC */
+     RT_VIDEO_ID_MJPEG,              /**< Motion JPEG */
+     RT_VIDEO_ID_VP8,                /**< VP8 */
+     RT_VIDEO_ID_VP9,                /**< VP9 */
+     RT_VIDEO_ID_HEVC,               /**< ITU H.265/HEVC */
+     RT_VIDEO_ID_DolbyVision,        /**< Dolby Vision */
+     RT_VIDEO_ID_ImageHEIC,          /**< HEIF image encoded with HEVC */
+     RT_VIDEO_ID_VC1 = 0x01000000,   /**< Windows Media Video (WMV1,WMV2,WMV3)*/
+     RT_VIDEO_ID_FLV1,               /**< Sorenson H.263 */
+     RT_VIDEO_ID_DIVX3,              /**< DIVX3 */
+     RT_VIDEO_ID_VP6,
+     RT_VIDEO_ID_AVSPLUS,            /**< AVS+ */
+     RT_VIDEO_ID_AVS,                /**< AVS profile=0x20 */
+
+     /* *< Reserved region for introducing Khronos Standard Extensions */
+     RT_VIDEO_ID_KhronosExtensions = 0x6F000000,
+
+     /* *< Reserved region for introducing Vendor Extensions */
+     RT_VIDEO_ID_VendorStartUnused = 0x7F000000,
+     RT_VIDEO_ID_Max = 0x7FFFFFFF
+} RTCodecID;
 
 enum RTFieldOrder {
     RT_FIELD_UNKNOWN,
@@ -50,7 +88,7 @@ enum RTImageType {
     RT_IMAGE_TYPE_BI,        ///< BI type
 };
 
-enum RTTrackType {
+typedef enum _RTTrackType {
     RTTRACK_TYPE_UNKNOWN = -1,  // < Usually treated as AVMEDIA_TYPE_DATA
     RTTRACK_TYPE_VIDEO,
     RTTRACK_TYPE_AUDIO,
@@ -58,7 +96,7 @@ enum RTTrackType {
     RTTRACK_TYPE_SUBTITLE,
     RTTRACK_TYPE_ATTACHMENT,    // < Opaque data information usually sparse
     RTTRACK_TYPE_MAX
-};
+} RTTrackType;
 
 enum RTSampleFormat {
     RT_SAMPLE_FMT_NONE = -1,
@@ -80,8 +118,8 @@ enum RTSampleFormat {
 };
 
 struct RTTrackParms {
-    enum RTTrackType mCodecType;
-    enum RTCodecID   mCodecID;
+    RTTrackType mCodecType;
+    RTCodecID   mCodecID;
     INT32  mCodecFormat;  // video: the pixel format; audio: the sample format
     INT32  mCodecProfile;
     INT32  mCodecLevel;

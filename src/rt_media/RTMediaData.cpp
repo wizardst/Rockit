@@ -109,17 +109,17 @@ RT_RET rt_mediabuf_goto_frame(RTMediaBuffer* media_buf, RTFrame* rt_frame) {
         rt_memset(rt_frame, 0, sizeof(RTFrame));
         rt_frame->mData = media_buf->getData();
         rt_frame->mSize = media_buf->getSize();
-        meta->findInt32(kKeyFrameW,     &(rt_frame->mFrameW));
+        meta->findInt32(kKeyFrameW,    &(rt_frame->mFrameW));
         meta->findInt32(kKeyFrameH,    &(rt_frame->mFrameH));
-        meta->findInt64(kKeyFramePts,       &(rt_frame->mPts));
-        meta->findInt32(kKeyDisplayW,   &(rt_frame->mDisplayW));
+        meta->findInt64(kKeyFramePts,  &(rt_frame->mPts));
+        meta->findInt32(kKeyDisplayW,  &(rt_frame->mDisplayW));
         meta->findInt32(kKeyDisplayH,  &(rt_frame->mDisplayH));
     }
     return err;
 }
 
-RT_RET rt_utils_track_par_to_meta(RTTrackParms* tpar, RtMetaData* meta) {
-    if ((RT_NULL != tpar) && (RT_NULL != meta)) {
+RT_RET rt_medatdata_from_trackpar(RtMetaData* meta, RTTrackParms* tpar) {
+    if ((RT_NULL == tpar) || (RT_NULL == meta)) {
         return RT_ERR_NULL_PTR;
     }
     meta->setInt32(kKeyCodecType,    tpar->mCodecType);
@@ -165,8 +165,8 @@ RT_RET rt_utils_track_par_to_meta(RTTrackParms* tpar, RtMetaData* meta) {
     return RT_OK;
 }
 
-RT_RET rt_utils_meta_to_track_par(RtMetaData* meta, RTTrackParms* tpar) {
-    if ((RT_NULL != tpar) && (RT_NULL !=  meta)) {
+RT_RET rt_medatdata_goto_trackpar(RtMetaData* meta, RTTrackParms* tpar) {
+    if ((RT_NULL == tpar) || (RT_NULL ==  meta)) {
         return RT_ERR_NULL_PTR;
     }
     meta->findInt32(kKeyCodecType,    reinterpret_cast<INT32*>(&(tpar->mCodecType)));
@@ -211,9 +211,13 @@ RT_RET rt_utils_meta_to_track_par(RtMetaData* meta, RTTrackParms* tpar) {
     return RT_OK;
 }
 
-RT_RET rt_utils_dump_track(RTTrackParms* tpar, RT_BOOL full) {
+RT_RET rt_utils_dump_track(RTTrackParms* tpar, RT_BOOL full/*=false*/) {
+    INT32 avCodeID = tpar->mCodecID;
+    if (tpar->mCodecType == RTTRACK_TYPE_VIDEO) {
+        avCodeID = fa_utils_to_av_codec_id(tpar->mCodecID);
+    }
     RT_LOGD("%12s: %04s; %12s: %04d; %12s: %05dk", \
-            "CodecID", fa_utils_codec_name(tpar->mCodecID), \
+            "CodecID", fa_utils_codec_name(avCodeID), \
             "Profile", tpar->mCodecProfile, \
             "Bitrate", tpar->mBitrate/1024);
     switch (tpar->mCodecType) {
@@ -234,5 +238,12 @@ RT_RET rt_utils_dump_track(RTTrackParms* tpar, RT_BOOL full) {
     default:
         break;
     }
+    return RT_OK;
+}
+
+RT_RET rt_utils_dump_track(RtMetaData* meta, RT_BOOL full/*=false*/) {
+    RTTrackParms track_par;
+    rt_medatdata_goto_trackpar(meta, &track_par);
+    rt_utils_dump_track(&track_par, full);
     return RT_OK;
 }

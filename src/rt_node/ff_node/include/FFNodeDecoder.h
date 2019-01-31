@@ -21,12 +21,11 @@
 #ifndef SRC_RT_NODE_FF_NODE_INCLUDE_FFNODEDECODER_H_
 #define SRC_RT_NODE_FF_NODE_INCLUDE_FFNODEDECODER_H_
 
-#include "RTNodeCodec.h" // NOLINT
-#include "rt_header.h" // NOLINT
+#include "rt_header.h"      // NOLINT
+#include "rt_thread.h"      // NOLINT
+#include "RTNodeCodec.h"    // NOLINT
 #include "FFAdapterCodec.h" // NOLINT
-#include "rt_thread.h" // NOLINT
-#include "RTMediaBuffer.h" // NOLINT
-#include "RTObject.h"   // NOLINT
+#include "RTObject.h"       // NOLINT
 #include "RTObjectPool.h"   // NOLINT
 
 class FFNodeDecoder : public RTNodeCodec {
@@ -72,6 +71,9 @@ class FFNodeDecoder : public RTNodeCodec {
     RTObjectPool        *mUnusedOutputPort;
     RTObjectPool        *mUsedOutputPort;
     RTMsgLooper         *mEventLooper;
+    RtMetaData          *mMetaInput;
+    RtMetaData          *mMetaOutput;
+    RTTrackParms        *mTrackParms;
 
     RT_BOOL              mRunning;
     UINT32               mCountPull;

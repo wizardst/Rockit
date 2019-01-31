@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rockchip Electronics Co. LTD
+ * Copyright 2019 Rockchip Electronics Co. LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,14 @@
 
 #ifdef RK_HW_CODEC
 
-#include "RTNodeCodec.h" // NOLINT
-#include "rt_header.h" // NOLINT
+#include "rt_header.h"       // NOLINT
+#include "rt_thread.h"       // NOLINT
 #include "MpiAdapterCodec.h" // NOLINT
-#include "rt_thread.h" // NOLINT
-#include "RTMediaBuffer.h" // NOLINT
-#include "RTObject.h"   // NOLINT
-#include "RTObjectPool.h"   // NOLINT
+
+#include "RTNodeCodec.h"     // NOLINT
+#include "RTMediaBuffer.h"   // NOLINT
+#include "RTObject.h"        // NOLINT
+#include "RTObjectPool.h"    // NOLINT
 
 class RTAllocator;
 class RTAllocatorStore;

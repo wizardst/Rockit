@@ -35,6 +35,7 @@
 
 RT_RET unit_test_ff_node_demuxer(INT32 index, INT32 total) {
     UINT32         count     = 0;
+    RT_RET         rt_err    = RT_OK;
     RTPacket       rt_pkt    = {0};
     RTMediaBuffer* rt_buf    = RT_NULL;
     RtMetaData*    node_meta = RT_NULL;
@@ -52,13 +53,18 @@ RT_RET unit_test_ff_node_demuxer(INT32 index, INT32 total) {
     RTNodeAdapter::runCmd(demuxer, RT_NODE_CMD_START, node_meta);
 
     rt_buf = new RTMediaBuffer(RT_NULL, 0);
-    while (++count < 100) {
+    while (count < 100) {
         rt_buf->reset();
-        RTNodeAdapter::pullBuffer(demuxer, &rt_buf);
-        if (rt_buf->getSize() > 0) {
+        rt_err = demuxer->pullBuffer(&rt_buf);
+        // RTNodeAdapter::pullBuffer(demuxer, &rt_buf);
+        if (rt_err == RT_OK) {
             rt_mediabuf_goto_packet(rt_buf, &rt_pkt);
+            RT_LOGD(" --> RTPacket(ptr=0x%p, size=%d) MediaBuffer=0x%p", \
+                      rt_pkt.mRawPtr, rt_pkt.mSize, rt_buf);
             rt_utils_packet_free(&rt_pkt);
-            // RtTime::sleepUs(21000);
+            rt_buf->getMetaData()->clear();
+            count++;
+            RtTime::sleepUs(10);
         }
     }
     RTNodeAdapter::runCmd(demuxer, RT_NODE_CMD_STOP, reinterpret_cast<RtMetaData *>(NULL));

@@ -47,7 +47,7 @@ cmake ../../../                                                             \
 # Code Style Check using cpplint
 echo "Code Style Check using cpplint ..."
 ROCKIT_ROOT=../../..
-if [ -f ${ROCKIT_ROOT}/tools/cpplint/cpplint.py ]
+if [ -f ${ROCKIT_ROOT}/tools-x/cpplint/cpplint.py ]
 then
     find ${ROCKIT_ROOT}/src -name *.cpp | xargs ${ROCKIT_ROOT}/tools/cpplint/cpplint.py --linelength=120 --root=${ROCKIT_ROOT}
     find ${ROCKIT_ROOT}/src -name *.h | xargs ${ROCKIT_ROOT}/tools/cpplint/cpplint.py --linelength=120 --root=${ROCKIT_ROOT}

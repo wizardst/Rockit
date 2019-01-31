@@ -173,7 +173,6 @@
 		<Unit filename="../../src/rt_media/include/RTObjectPool.h" />
 		<Unit filename="../../src/rt_media/include/RTPixelDef.h" />
 		<Unit filename="../../src/rt_media/include/RTString.h" />
-		<Unit filename="../../src/rt_media/include/RTVideoUtils.h" />
 		<Unit filename="../../src/rt_node/RTNode.cpp" />
 		<Unit filename="../../src/rt_node/RTNodeBus.cpp" />
 		<Unit filename="../../src/rt_node/RTNodeCodec.cpp" />

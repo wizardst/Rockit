@@ -50,7 +50,8 @@ class FFNodeDemuxer : public RTNodeDemuxer {
     // override RTNodeDemuxer methods
     virtual INT32 countTracks(RTTrackType tType);
     virtual INT32 selectTrack(INT32 index, RTTrackType tType);
-    virtual RtMetaData* queryTrack(UINT32 index);
+    virtual RtMetaData* queryTrackMeta(UINT32 index, RTTrackType tType);
+    virtual INT32       queryTrackUsed(RTTrackType tType);
 
  protected:
     // override RTNode protected methods

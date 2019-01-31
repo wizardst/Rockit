@@ -29,25 +29,25 @@
 #define DEBUG_FLAG 0x1
 
 typedef struct {
-    RtCodingType        rt_coding_type;
-    MppCodingType       mpp_coding_type;
+    RTCodecID         rt_coding_type;
+    MppCodingType     mpp_coding_type;
 } MACodingTypeInfo;
 
 static MACodingTypeInfo kMACodecMappingList[] = {
-    { RT_VIDEO_CodingMPEG2,         MPP_VIDEO_CodingMPEG2 },
-    { RT_VIDEO_CodingH263,          MPP_VIDEO_CodingH263 },
-    { RT_VIDEO_CodingMPEG4,         MPP_VIDEO_CodingMPEG4 },
-    { RT_VIDEO_CodingWMV,           MPP_VIDEO_CodingWMV },
-    { RT_VIDEO_CodingAVC,           MPP_VIDEO_CodingAVC },
-    { RT_VIDEO_CodingMJPEG,         MPP_VIDEO_CodingMJPEG },
-    { RT_VIDEO_CodingVP8,           MPP_VIDEO_CodingVP8 },
-    { RT_VIDEO_CodingVP9,           MPP_VIDEO_CodingVP9 },
-    { RT_VIDEO_CodingHEVC,          MPP_VIDEO_CodingHEVC },
-    { RT_VIDEO_CodingVC1,           MPP_VIDEO_CodingVC1 },
-    { RT_VIDEO_CodingAVS,           MPP_VIDEO_CodingAVS },
+    { RT_VIDEO_ID_MPEG2,         MPP_VIDEO_CodingMPEG2 },
+    { RT_VIDEO_ID_H263,          MPP_VIDEO_CodingH263 },
+    { RT_VIDEO_ID_MPEG4,         MPP_VIDEO_CodingMPEG4 },
+    { RT_VIDEO_ID_WMV,           MPP_VIDEO_CodingWMV },
+    { RT_VIDEO_ID_AVC,           MPP_VIDEO_CodingAVC },
+    { RT_VIDEO_ID_MJPEG,         MPP_VIDEO_CodingMJPEG },
+    { RT_VIDEO_ID_VP8,           MPP_VIDEO_CodingVP8 },
+    { RT_VIDEO_ID_VP9,           MPP_VIDEO_CodingVP9 },
+    { RT_VIDEO_ID_HEVC,          MPP_VIDEO_CodingHEVC },
+    { RT_VIDEO_ID_VC1,           MPP_VIDEO_CodingVC1 },
+    { RT_VIDEO_ID_AVS,           MPP_VIDEO_CodingAVS },
 };
 
-RtCodingType fa_utils_find_codectype_from_mpp(MppCodingType mpp_coding_type) {
+RTCodecID fa_utils_find_codectype_from_mpp(MppCodingType mpp_coding_type) {
     UINT32 i = 0;
     RT_BOOL found = RT_FALSE;
     for (i = 0; i < RT_ARRAY_ELEMS(kMACodecMappingList); i++) {
@@ -61,11 +61,11 @@ RtCodingType fa_utils_find_codectype_from_mpp(MppCodingType mpp_coding_type) {
         return kMACodecMappingList[i].rt_coding_type;
     } else {
         RT_LOGE("unknown codec id: %d", mpp_coding_type);
-        return RT_VIDEO_CodingUnused;
+        return RT_VIDEO_ID_Unused;
     }
 }
 
-MppCodingType fa_utils_find_mpp_codectype_from_rt(RtCodingType rt_coding_type) {
+MppCodingType fa_utils_find_mpp_codectype_from_rt(RTCodecID rt_coding_type) {
     UINT32 i = 0;
     RT_BOOL found = RT_FALSE;
     for (i = 0; i < RT_ARRAY_ELEMS(kMACodecMappingList); i++) {

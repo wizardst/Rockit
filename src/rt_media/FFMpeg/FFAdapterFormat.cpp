@@ -46,7 +46,7 @@ FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag /*FLAG_DEMUXER*/) 
     fafc->mAvfc           = RT_NULL;
     fafc->mFcFlag         = flag;
 
-    RT_LOGE_IF(DEBUG_FLAG, " uri=%s", uri);
+    RT_LOGE_IF(DEBUG_FLAG, "uri = %s", uri);
 
     switch (flag) {
     case FLAG_DEMUXER:
@@ -92,12 +92,12 @@ void fa_format_seek_to(FAFormatContext* fc, INT32 track_id, UINT64 ts, UINT32 fl
     fa_utils_check_error(err, "avformat_seek_file");
 }
 
-INT32 fa_format_read_packet(FAFormatContext* fc, void** ff_pkt) {
+INT32 fa_format_packet_read(FAFormatContext* fc, void** raw_pkt) {
     INT32 err = 0;
     AVPacket *avPacket = av_packet_alloc();
     av_init_packet(avPacket);
     err = av_read_frame(fc->mAvfc, avPacket);
-    *ff_pkt = avPacket;
+    *raw_pkt = avPacket;
     return err;
 }
 
@@ -105,23 +105,35 @@ INT32 fa_format_packet_free(void* raw_pkt) {
     AVPacket* ff_pkt = reinterpret_cast<AVPacket*>(raw_pkt);
     if (RT_NULL != ff_pkt) {
         av_packet_unref(ff_pkt);
+        return 0;
     }
+    return -1;
 }
 
-INT32 fa_format_parse_packet(void* ff_pkt, RTPacket* rt_pkt) {
-    rt_memset(rt_pkt, 0, sizeof(RTPacket));
-    AVPacket* raw_pkt = reinterpret_cast<AVPacket*>(ff_pkt);
+INT32  fa_format_packet_type(void* raw_pkt) {
+    AVPacket* ff_pkt = reinterpret_cast<AVPacket*>(raw_pkt);
     if (RT_NULL != ff_pkt) {
-        rt_pkt->mPts      = raw_pkt->pts;
-        rt_pkt->mDts      = raw_pkt->dts;
-        rt_pkt->mPos      = raw_pkt->pos;
-        rt_pkt->mData     = raw_pkt->data;
-        rt_pkt->mSize     = raw_pkt->size;
-        rt_pkt->mFlags    = raw_pkt->flags;
-        rt_pkt->mRawPtr   = ff_pkt;
-        rt_pkt->mFuncFree   = fa_format_packet_free;
-        rt_pkt->mTrackIndex = raw_pkt->stream_index;
+        return ff_pkt->stream_index;
     }
+    return -1;
+}
+
+INT32 fa_format_packet_parse(void* raw_pkt, RTPacket* rt_pkt) {
+    rt_memset(rt_pkt, 0, sizeof(RTPacket));
+    AVPacket* ff_pkt = reinterpret_cast<AVPacket*>(raw_pkt);
+    if (RT_NULL != ff_pkt) {
+        rt_pkt->mPts      = ff_pkt->pts;
+        rt_pkt->mDts      = ff_pkt->dts;
+        rt_pkt->mPos      = ff_pkt->pos;
+        rt_pkt->mData     = ff_pkt->data;
+        rt_pkt->mSize     = ff_pkt->size;
+        rt_pkt->mFlags    = ff_pkt->flags;
+        rt_pkt->mRawPtr   = raw_pkt;
+        rt_pkt->mFuncFree   = fa_format_packet_free;
+        rt_pkt->mTrackIndex = ff_pkt->stream_index;
+        return 0;
+    }
+    return -1;
 }
 
 void fa_format_build_track_meta(const AVStream* stream, RTTrackParms* track) {
@@ -131,7 +143,9 @@ void fa_format_build_track_meta(const AVStream* stream, RTTrackParms* track) {
     }
     AVCodecParameters* cpar = stream->codecpar;
     track->mCodecType       = (RTTrackType)cpar->codec_type;
-    track->mCodecID         = (RTCodecID)cpar->codec_id;
+    if (RTTRACK_TYPE_VIDEO == track->mCodecType) {
+        track->mCodecID     = (RTCodecID)fa_utils_to_rt_codec_id(cpar->codec_id);
+    }
     track->mCodecFormat     =  cpar->format;
     track->mCodecProfile    =  cpar->profile;
     track->mCodecLevel      =  cpar->level;
@@ -164,32 +178,35 @@ void fa_format_build_track_meta(const AVStream* stream, RTTrackParms* track) {
     track->mAudiobitsPerRawSample   = cpar->bits_per_raw_sample;
 }
 
-void fa_format_query_track(FAFormatContext* fc, UINT32 idx, \
+INT32 fa_format_query_track(FAFormatContext* fc, UINT32 idx, \
                               RTTrackType tType, RTTrackParms* track) {
     UINT32 count = 0;
+
     const AVStream* stream = RT_NULL;
     if ((RT_NULL != fc) && (RT_NULL != fc->mAvfc)) {
         AVFormatContext* avfc = fc->mAvfc;
         for (UINT32 ii = 0; ii < avfc->nb_streams; ii++) {
-            if (avfc->streams[ii]->codecpar->codec_type == tType) {
+            if (avfc->streams[ii]->codecpar->codec_type == (AVMediaType)tType) {
                 count++;
                 if ((count-1) == idx) {
                     stream = avfc->streams[ii];
                     if ((RT_NULL != stream) && (RT_NULL != track)) {
                         fa_format_build_track_meta(stream, track);
+                        return idx;
                     }
                 }
             }
         }
     }
+    return -1;
 }
 
-UINT32 fa_format_select_track(FAFormatContext* fc, UINT32 idx, RTTrackType tType) {
+INT32 fa_format_select_track(FAFormatContext* fc, UINT32 idx, RTTrackType tType) {
     UINT32 count = 0;
     if ((RT_NULL != fc) && (RT_NULL != fc->mAvfc)) {
         AVFormatContext* avfc = fc->mAvfc;
         for (UINT32 idx = 0; idx < avfc->nb_streams; idx++) {
-            if (avfc->streams[idx]->codecpar->codec_type == tType) {
+            if (avfc->streams[idx]->codecpar->codec_type == (AVMediaType)tType) {
                 if (count == idx) {
                     return idx;
                 } else {
@@ -201,15 +218,37 @@ UINT32 fa_format_select_track(FAFormatContext* fc, UINT32 idx, RTTrackType tType
     return -1;
 }
 
-UINT32 fa_format_count_tracks(FAFormatContext* fc, RTTrackType tType) {
-    UINT32 count = 0;
+INT32 fa_format_find_best_track(FAFormatContext* fc, RTTrackType tType) {
+    INT32 bestIdx = -1;
+    enum AVMediaType avType;
+    if ((RT_NULL != fc) && (RT_NULL != fc->mAvfc)) {
+        switch (tType) {
+        case RTTRACK_TYPE_VIDEO:
+            avType = AVMEDIA_TYPE_VIDEO;
+            break;
+        case RTTRACK_TYPE_AUDIO:
+            avType = AVMEDIA_TYPE_AUDIO;
+            break;
+        case RTTRACK_TYPE_SUBTITLE:
+            avType = AVMEDIA_TYPE_SUBTITLE;
+            break;
+        default:
+            avType = AVMEDIA_TYPE_UNKNOWN;
+        }
+        bestIdx = av_find_best_stream(fc->mAvfc, avType, 1, -1, NULL, 0);
+    }
+    return bestIdx;
+}
+
+INT32 fa_format_count_tracks(FAFormatContext* fc, RTTrackType tType) {
+    INT32 count = 0;
     if ((RT_NULL != fc) && (RT_NULL != fc->mAvfc)) {
         AVFormatContext* avfc = fc->mAvfc;
         if (RTTRACK_TYPE_UNKNOWN == tType) {
             return avfc->nb_streams;
         }
         for (UINT32 idx = 0; idx < avfc->nb_streams; idx++) {
-            if (avfc->streams[idx]->codecpar->codec_type == tType) {
+            if (avfc->streams[idx]->codecpar->codec_type == (AVMediaType)tType) {
                 count++;
             }
         }

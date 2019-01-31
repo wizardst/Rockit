@@ -49,9 +49,10 @@ typedef struct _UserData {
     GLint  width;
     GLint  height;
 
-    GLfloat angle;
-    GLfloat vpMatrix[4][4];
-    GLubyte* pixels;
+    GLfloat   angle;
+    GLint     stepStrategy;
+    GLfloat   vpMatrix[4][4];
+    GLubyte*  pixels;
 } UserData;
 
 RTSpriteVideo::RTSpriteVideo() {
@@ -111,13 +112,17 @@ void RTSpriteVideo::draw() {
     update();
     glEnable(GL_DEPTH_TEST);
     UserData *userData = reinterpret_cast<UserData*>(mUserData);
-    GLfloat vVertices[] = { -0.5f, 0.5f, 0.0f,  // Position 0
+    float pos_w = 0.5f;
+    if (userData->height > 0) {
+        pos_w = (userData->width / userData->height)/2.0f;
+    }
+    GLfloat vVertices[] = { -pos_w, 0.5f, 0.0f,  // Position 0
                             0.0f,  0.0f,        // TexCoord 0
-                           -0.5f, -0.5f, 0.0f,  // Position 1
+                           -pos_w, -0.5f, 0.0f,  // Position 1
                             0.0f,  1.0f,        // TexCoord 1
-                            0.5f, -0.5f, 0.0f,  // Position 2
+                            pos_w, -0.5f, 0.0f,  // Position 2
                             1.0f,  1.0f,        // TexCoord 2
-                            0.5f,  0.5f, 0.0f,  // Position 3
+                            pos_w,  0.5f, 0.0f,  // Position 3
                             1.0f,  0.0f         // TexCoord 3
                          };
     GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
@@ -158,9 +163,17 @@ void RTSpriteVideo::draw() {
 
 void RTSpriteVideo::update() {
     UserData *userData = reinterpret_cast<UserData*>(mUserData);
-    userData->angle += 0.1f;
-    if (userData->angle > 360.0f) {
-        userData->angle = 0.0f;
+    // userData->angle += 0.1f;
+    if (userData->stepStrategy) {
+        userData->angle += 0.8f;
+        if (userData->angle > 30.0f) {
+            userData->stepStrategy = 0;
+        }
+    } else {
+        userData->angle -= 0.8f;
+        if (userData->angle < -30.0f) {
+            userData->stepStrategy = 1;
+        }
     }
 
     rebindImage2D(userData);
@@ -214,7 +227,8 @@ void RTSpriteVideo::initUserData() {
 
     // Load the texture
     createTexture2D(userData);
-    userData->angle     = 0.0f;
+    userData->angle        = 0.0f;
+    userData->stepStrategy = 1;
 
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 }

@@ -26,6 +26,7 @@ enum {
     kKeyFormatDuration   = MKTAG('f', 'd', 'u', 'r'),  // UINT64
     kKeyFormatEOS        = MKTAG('f', 'e', 'o', 's'),
     kKeyFormatUri        = MKTAG('f', 'u', 'r', 'i'),
+    kKeyUserAgent        = MKTAG('u', 's', 'a', 't'),
 
     /* common track features*/
     kKeyCodecType        = MKTAG('c', 't', 'y', 'p'),

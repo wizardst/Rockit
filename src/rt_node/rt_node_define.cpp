@@ -31,15 +31,15 @@ typedef struct rt_enum_name_t {
 } rt_enum_name;
 
 static const rt_enum_name g_node_type_names[] = {
-    { RT_NODE_TYPE_BASE,      "Base" },
+    { RT_NODE_TYPE_BASE,      "NodeBase" },
     { RT_NODE_TYPE_EXTRACTOR, "Extractor" },
-    { RT_NODE_TYPE_DEMUXER,   "Demuxer" },
-    { RT_NODE_TYPE_MUXER,     "Muxer" },
-    { RT_NODE_TYPE_DECODER,   "Decoder" },
-    { RT_NODE_TYPE_ENCODER,   "Encoder" },
-    { RT_NODE_TYPE_FILTER,    "Filter" },
-    { RT_NODE_TYPE_RENDER,    "Render" },
-    { RT_NODE_TYPE_DEVICE,    "Device" },
+    { RT_NODE_TYPE_DEMUXER,   "NodeDemuxer" },
+    { RT_NODE_TYPE_MUXER,     "NodeMuxer" },
+    { RT_NODE_TYPE_DECODER,   "NodeDecoder" },
+    { RT_NODE_TYPE_ENCODER,   "NodeEncoder" },
+    { RT_NODE_TYPE_FILTER,    "NodeFilter" },
+    { RT_NODE_TYPE_SINK,      "NodeSINK" },
+    { RT_NODE_TYPE_DEVICE,    "NodeDevice" },
 };
 
 static const rt_enum_name g_node_cmd_names[] = {

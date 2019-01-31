@@ -17,62 +17,65 @@
  *   Date: 2019/01/03
  */
 
-#include <stdarg.h>   // NOLINT
+#include <stdarg.h>          // NOLINT
 #include "FFAdapterUtils.h"  // NOLINT
-#include "rt_log.h"  // NOLINT
-#include "rt_common.h" // NOLINT
+#include "RTMediaDef.h"      // NOLINT
+#include "rt_log.h"          // NOLINT
+#include "rt_common.h"       // NOLINT
 
 typedef struct {
-    RtCodingType     coding;
-    AVCodecID        ffmpeg_codec_id;
+    RTCodecID  rt_codec_id;
+    enum AVCodecID  av_codec_id;
 } FACodingTypeInfo;
 
 static FACodingTypeInfo kFdCodecMappingList[] = {
-    { RT_VIDEO_CodingMPEG2,         AV_CODEC_ID_MPEG2VIDEO },
-    { RT_VIDEO_CodingH263,          AV_CODEC_ID_H263 },
-    { RT_VIDEO_CodingMPEG4,         AV_CODEC_ID_MPEG4 },
-    { RT_VIDEO_CodingWMV,           AV_CODEC_ID_WMV3 },
-    { RT_VIDEO_CodingAVC,           AV_CODEC_ID_H264 },
-    { RT_VIDEO_CodingMJPEG,         AV_CODEC_ID_MJPEG },
-    { RT_VIDEO_CodingVP8,           AV_CODEC_ID_VP8 },
-    { RT_VIDEO_CodingVP9,           AV_CODEC_ID_VP9 },
-    { RT_VIDEO_CodingHEVC,          AV_CODEC_ID_HEVC },
-    { RT_VIDEO_CodingVC1,           AV_CODEC_ID_VC1 },
-    { RT_VIDEO_CodingAVS,           AV_CODEC_ID_AVS },
+    { RT_VIDEO_ID_MPEG2,         AV_CODEC_ID_MPEG2VIDEO },
+    { RT_VIDEO_ID_H263,          AV_CODEC_ID_H263 },
+    { RT_VIDEO_ID_MPEG4,         AV_CODEC_ID_MPEG4 },
+    { RT_VIDEO_ID_WMV,           AV_CODEC_ID_WMV3 },
+    { RT_VIDEO_ID_AVC,           AV_CODEC_ID_H264 },
+    { RT_VIDEO_ID_MJPEG,         AV_CODEC_ID_MJPEG },
+    { RT_VIDEO_ID_VP8,           AV_CODEC_ID_VP8 },
+    { RT_VIDEO_ID_VP9,           AV_CODEC_ID_VP9 },
+    { RT_VIDEO_ID_HEVC,          AV_CODEC_ID_HEVC },
+    { RT_VIDEO_ID_VC1,           AV_CODEC_ID_VC1 },
+    { RT_VIDEO_ID_AVS,           AV_CODEC_ID_AVS },
 };
 
-RtCodingType fa_utils_find_codectype_from_codecid(UINT32 codec_id) {
+// trans AVCodecID to RTCodecID
+UINT32 fa_utils_to_rt_codec_id(UINT32 av_codec_id) {
     UINT32 i = 0;
     RT_BOOL found = RT_FALSE;
     for (i = 0; i < RT_ARRAY_ELEMS(kFdCodecMappingList); i++) {
-        if (codec_id == kFdCodecMappingList[i].ffmpeg_codec_id) {
+        if (av_codec_id == kFdCodecMappingList[i].av_codec_id) {
             found = RT_TRUE;
             break;
         }
     }
 
     if (found) {
-        return kFdCodecMappingList[i].coding;
+        return kFdCodecMappingList[i].rt_codec_id;
     } else {
-        RT_LOGE("unknown codec id: %d", codec_id);
-        return RT_VIDEO_CodingUnused;
+        RT_LOGE("Unknown AVCodecID(%02d,%s)", av_codec_id, fa_utils_codec_name(av_codec_id));
+        return RT_VIDEO_ID_Unused;
     }
 }
 
-AVCodecID fa_utils_find_codecid_from_codectype(RtCodingType coding) {
+// trans RTCodecID to AVCodecID
+UINT32 fa_utils_to_av_codec_id(UINT32 rt_codec_id) {
     UINT32 i = 0;
     RT_BOOL found = RT_FALSE;
     for (i = 0; i < RT_ARRAY_ELEMS(kFdCodecMappingList); i++) {
-        if (coding == kFdCodecMappingList[i].coding) {
+        if (rt_codec_id == kFdCodecMappingList[i].rt_codec_id) {
             found = RT_TRUE;
             break;
         }
     }
 
     if (found) {
-        return kFdCodecMappingList[i].ffmpeg_codec_id;
+        return kFdCodecMappingList[i].av_codec_id;
     } else {
-        RT_LOGE("unknown codec type: %d", coding);
+        RT_LOGE("Unknown RTCodecID(%02d,%s)", rt_codec_id);
         return AV_CODEC_ID_NONE;
     }
 }
@@ -108,4 +111,42 @@ const char* fa_utils_codec_name(UINT32 codec_id) {
 
 const char* fa_utils_ffmpeg_version() {
     return av_version_info();
+}
+
+#define YUV2R(y, u, v) ({ \
+    int r = (y) + ((((v) - 128) * 1436) >> 10); r > 255 ? 255 : r < 0 ? 0 : r; })
+#define YUV2G(y, u, v) ({ \
+    int g = (y) - ((((u) - 128) * 352 + ((v) - 128) * 731) >> 10); g > 255 ? 255 : g < 0 ? 0 : g; })
+#define YUV2B(y, u, v) ({ \
+    int b = (y) + ((((u) - 128) * 1814) >> 10); b > 255 ? 255 : b < 0 ? 0 : b; })
+UINT32 fa_utils_yuv420_to_rgb(void* src, unsigned char* dest, \
+                                   int width, int height) {
+    int ix, iy;
+    const unsigned char *ysrc = (unsigned char*)src;
+    const unsigned char *usrc, *vsrc;
+
+    usrc = (unsigned char*)(src + width * height);
+    vsrc = (unsigned char*)(usrc + (width * height) / 4);
+
+    for (iy = 0; iy < height; iy++) {
+        for (ix = 0; ix < width; ix += 2) {
+            *dest++ = YUV2R(*ysrc, *usrc, *vsrc);
+            *dest++ = YUV2G(*ysrc, *usrc, *vsrc);
+            *dest++ = YUV2B(*ysrc, *usrc, *vsrc);
+            ysrc++;
+
+            *dest++ = YUV2R(*ysrc, *usrc, *vsrc);
+            *dest++ = YUV2G(*ysrc, *usrc, *vsrc);
+            *dest++ = YUV2B(*ysrc, *usrc, *vsrc);
+            ysrc++;
+            usrc++;
+            vsrc++;
+        }
+        /* Rewind u and v for next line */
+        if (!(iy & 0x1)) {
+            usrc -= width / 2;
+            vsrc -= width / 2;
+        }
+    }
+    return 0;
 }

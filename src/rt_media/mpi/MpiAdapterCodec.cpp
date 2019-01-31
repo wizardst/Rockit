@@ -48,7 +48,7 @@ MACodecContext* ma_decode_create(RtMetaData *meta) {
     MppBufferGroup frm_grp = RT_NULL;
     RtArrayList *rt_list = RT_NULL;
     MppCodingType mpp_coding_type;
-    RtCodingType type;
+    RTCodecID     type;
 
     CHECK_IS_NULL(meta);
 
@@ -91,6 +91,7 @@ MACodecContext* ma_decode_create(RtMetaData *meta) {
     ctx->frm_grp = frm_grp;
     ctx->frm_list = rt_list;
     return ctx;
+
 __FAILED:
     if (rt_list) {
         array_list_destroy(rt_list);

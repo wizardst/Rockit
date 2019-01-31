@@ -20,12 +20,13 @@
 #include <string.h>          // NOLINT
 #include "FFAdapterCodec.h"  // NOLINT
 #include "FFAdapterUtils.h"  // NOLINT
+#include "RTMediaMetaKeys.h" // NOLINT
+#include "RTMediaDef.h"      // NOLINT
+#include "RTMediaBuffer.h"   // NOLINT
+#include "rt_metadata.h"     // NOLINT
 #include "rt_mem.h"          // NOLINT
 #include "rt_log.h"          // NOLINT
 #include "rt_common.h"       // NOLINT
-#include "RTMediaMetaKeys.h" // NOLINT
-#include "rt_metadata.h"     // NOLINT
-#include "RTMediaBuffer.h"   // NOLINT
 
 #ifdef LOG_TAG
 #undef LOG_TAG
@@ -47,8 +48,8 @@ FACodecContext* fa_video_decode_create(RtMetaData *meta) {
     codec_ctx = ctx->mAvCodecCtx;
 
     // necessary parameters
-    RtCodingType type;
-    CHECK_EQ(meta->findInt32(kKeyCodecID, reinterpret_cast<INT32 *>(&type)), RT_TRUE);
+    RTCodecID codecID;
+    CHECK_EQ(meta->findInt32(kKeyCodecID, reinterpret_cast<INT32 *>(&codecID)), RT_TRUE);
 
     INT32 width, height;
     CHECK_EQ(meta->findInt32(kKeyVCodecWidth,  &width), RT_TRUE);
@@ -63,29 +64,32 @@ FACodecContext* fa_video_decode_create(RtMetaData *meta) {
     if (!meta->findInt32(kKeyVCodecExtraSize, &extradata_size)) {
         extradata_size = 0;
     }
+    RT_LOGE("Codec Extra(ptr=0x%p, size=%d)", extradata, extradata_size);
+    RT_LOGE("Codec Extra(ptr=0x%p, size=%d)", extradata, extradata_size);
 
     // codec context parameters configure
     codec_ctx->codec_type = AVMEDIA_TYPE_VIDEO;
-    codec_ctx->codec_id = fa_utils_find_codecid_from_codectype(type);
+    codec_ctx->codec_id   = (AVCodecID)fa_utils_to_av_codec_id(codecID);
     codec_ctx->extradata_size = extradata_size;
     codec_ctx->extradata = reinterpret_cast<UINT8 *>(extradata);
-    codec_ctx->width = width;
+    codec_ctx->width  = width;
     codec_ctx->height = height;
 
     // find decoder again as codec_id may have changed
     codec_ctx->codec = avcodec_find_decoder(codec_ctx->codec_id);
     if (NULL == codec_ctx->codec) {
-        RT_LOGE("ffmpeg decoder codec find failed, id: 0x%x", codec_ctx->codec_id);
+        RT_LOGE("Fail to find decoder(%s)", avcodec_get_name(codec_ctx->codec_id));
         goto __FAILED;
     }
 
-    RT_LOGD("begin to open ffmpeg decoder(%s) now", avcodec_get_name(codec_ctx->codec_id));
+    RT_LOGD("Try to create decoder(%s)", avcodec_get_name(codec_ctx->codec_id));
     err = avcodec_open2(codec_ctx, codec_ctx->codec, NULL);
     if (err < 0) {
-        RT_LOGE("ffmpeg video decoder failed to initialize. (%d)", (err));
+        RT_LOGE("Fail to create decoder(%s) err=%d", \
+                 avcodec_get_name(codec_ctx->codec_id), err);
         goto __FAILED;
     }
-    RT_LOGD("open ffmpeg video decoder(%s) success", avcodec_get_name(codec_ctx->codec_id));
+    RT_LOGD("Success to open ffmpeg decoder(%s)!", avcodec_get_name(codec_ctx->codec_id));
 
     return ctx;
 
@@ -104,13 +108,14 @@ __FAILED:
 FACodecContext* fa_video_encode_create(RtMetaData *meta) {
     INT32 err = 0;
     AVCodecContext *codec_ctx = RT_NULL;
-    const AVCodec *codec = RT_NULL;
-    FACodecContext *ctx = rt_malloc(FACodecContext);
-    ctx->mAvCodecCtx = RT_NULL;
+    const AVCodec  *codec     = RT_NULL;
+    FACodecContext *ctx       = rt_malloc(FACodecContext);
+    ctx->mAvCodecCtx          = RT_NULL;
 
     // necessary parameters
-    RtCodingType type;
-    CHECK_EQ(meta->findInt32(kKeyCodecID, reinterpret_cast<INT32 *>(&type)), RT_TRUE);
+    RTCodecID codecID   = RT_VIDEO_ID_Unused;
+    INT32     avCodecID = 0;
+    CHECK_EQ(meta->findInt32(kKeyCodecID, reinterpret_cast<INT32 *>(&codecID)), RT_TRUE);
 
     INT32 width, height;
     CHECK_EQ(meta->findInt32(kKeyVCodecWidth,  &width), RT_TRUE);
@@ -138,9 +143,10 @@ FACodecContext* fa_video_encode_create(RtMetaData *meta) {
     }
 
     // find encoder again as codec_id may have changed
-    codec = avcodec_find_encoder(fa_utils_find_codecid_from_codectype(type));
+    avCodecID = fa_utils_to_av_codec_id(codecID);
+    codec = avcodec_find_encoder((AVCodecID)avCodecID);
     if (NULL == codec) {
-        RT_LOGE("ffmpeg encoder codec find failed, id: 0x%x", fa_utils_find_codecid_from_codectype(type));
+        RT_LOGE("Fail to create encoder(%s)", fa_utils_codec_name(avCodecID));
         goto __FAILED;
     }
 

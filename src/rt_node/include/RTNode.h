@@ -33,10 +33,12 @@
 #ifndef SRC_RT_NODE_INCLUDE_RTNODE_H_
 #define SRC_RT_NODE_INCLUDE_RTNODE_H_
 
-#include "rt_header.h" // NOLINT
+#include "rt_header.h"      // NOLINT
 #include "rt_node_define.h" // NOLINT
 #include "rt_msg_looper.h"  // NOLINT
-#include "RTMediaBuffer.h"
+#include "RTMediaBuffer.h"  // NOLINT
+#include "RTMediaData.h"    // NOLINT
+#include "RTMediaDef.h"     // NOLINT
 
 #ifdef __cplusplus
 extern "C" {
@@ -82,26 +84,29 @@ class RTNode {
     virtual RT_RET onFlush() = 0;
 
  protected:
-    void*   mNodeContext;
+    void    *mNodeContext;
+
+ public:
+    RTNode  *mNext;
 };
 
 class RTNodeAdapter {
  public:
-    static RT_RET init(RTNode* node, RtMetaData* metadata);
-    static RT_RET release(RTNode* node);
+    static RT_RET init(RTNode* pNode, RtMetaData* metadata);
+    static RT_RET release(RTNode* pNode);
 
-    static RT_RET pullBuffer(RTNode* node, RTMediaBuffer** data);
-    static RT_RET pushBuffer(RTNode* node, RTMediaBuffer* data);
+    static RT_RET pullBuffer(RTNode* pNode, RTMediaBuffer** data);
+    static RT_RET pushBuffer(RTNode* pNode, RTMediaBuffer* data);
 
     // borrow and return buffer for pool buffer
-    static  RT_RET dequeCodecBuffer(RTNode* node, RTMediaBuffer** data, RTPortType port);
-    static  RT_RET queueCodecBuffer(RTNode* node, RTMediaBuffer*  data, RTPortType port);
+    static  RT_RET dequeCodecBuffer(RTNode* pNode, RTMediaBuffer** data, RTPortType port);
+    static  RT_RET queueCodecBuffer(RTNode* pNode, RTMediaBuffer*  data, RTPortType port);
 
-    static RT_RET runCmd(RTNode* node, RT_NODE_CMD cmd, RtMetaData* metadata);
-    static RT_RET setEventLooper(RTNode* node, RTMsgLooper* eventLooper);
+    static RT_RET runCmd(RTNode* pNode, RT_NODE_CMD cmd, RtMetaData* metadata);
+    static RT_RET setEventLooper(RTNode* pNode, RTMsgLooper* eventLooper);
 
-    static RtMetaData* queryFormat(RTNode* node, RTPortType port);
-    static RTNodeStub* queryStub(RTNode* node);
+    static RtMetaData* queryFormat(RTNode* pNode, RTPortType port);
+    static RTNodeStub* queryStub(RTNode* pNode);
 };
 
 typedef RTNode* (*CreateNode)();

@@ -242,7 +242,7 @@ static RTNode* createSinkDisplay() {
 
 struct RTNodeStub rt_sink_display_gles {
     .mCreateNode     = createSinkDisplay,
-    .mNodeType       = RT_NODE_TYPE_RENDER,
+    .mNodeType       = RT_NODE_TYPE_SINK,
     .mUsePool        = RT_FALSE,
     .mNodeName       = "rt_sink_display_gles",
     .mNodeVersion    = "v1.0",
