@@ -59,7 +59,7 @@ RTObject *allocOutputBuffer(void *) {
 }
 
 FFNodeDecoder::FFNodeDecoder() {
-    const char* name = "FFDecoder";
+    const char* name = "FFmpegDecoder";
     mProcThread = new RtThread(ff_codec_loop, reinterpret_cast<void*>(this));
     mProcThread->setName(name);
 
@@ -85,7 +85,7 @@ FFNodeDecoder::~FFNodeDecoder() {
 }
 
 RT_RET FFNodeDecoder::init(RtMetaData *metadata) {
-    mFFCodec = fa_video_decode_create(metadata);
+    mFFCodec = fa_decode_create(metadata);
     if (!mFFCodec) {
         RT_LOGE("fa_video_decode_open failed");
         return RT_ERR_UNKNOWN;
@@ -248,7 +248,7 @@ RtMetaData* FFNodeDecoder::queryFormat(RTPortType port) {
 }
 
 RTNodeStub* FFNodeDecoder::queryStub() {
-    return &ff_node_video_decoder;
+    return &ff_node_decoder;
 }
 
 RT_RET FFNodeDecoder::runTask() {
@@ -322,11 +322,11 @@ static RTNode* createFFDecoder() {
     return new FFNodeDecoder();
 }
 
-struct RTNodeStub ff_node_video_decoder {
+struct RTNodeStub ff_node_decoder {
     .mCreateNode     = createFFDecoder,
     .mNodeType       = RT_NODE_TYPE_DECODER,
     .mUsePool        = RT_TRUE,
-    .mNodeName       = "ff_node_video_decoder",
+    .mNodeName       = "ff_node_decoder",
     .mNodeVersion    = "v1.0",
 };
 

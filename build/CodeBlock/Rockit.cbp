@@ -202,9 +202,9 @@
 		<Unit filename="../../src/rt_node/include/rt_node_define.h" />
 		<Unit filename="../../src/rt_node/rt_node_define.cpp" />
 		<Unit filename="../../src/rt_node/rt_sink/RTSinkDisplayGLES.cpp" />
-		<Unit filename="../../src/rt_node/rt_sink/RTSinkDisplayGLES.h" />
 		<Unit filename="../../src/rt_node/rt_sink/RTSinkDisplayNative.cpp" />
-		<Unit filename="../../src/rt_node/rt_sink/RTSinkDisplayNative.h" />
+		<Unit filename="../../src/rt_node/rt_sink/include/RTSinkDisplayGLES.h" />
+		<Unit filename="../../src/rt_node/rt_sink/include/RTSinkDisplayNative.h" />
 		<Unit filename="../../src/rt_task/include/rt_event.h" />
 		<Unit filename="../../src/rt_task/include/rt_event_bus.h" />
 		<Unit filename="../../src/rt_task/include/rt_message.h" />

@@ -7,6 +7,7 @@ set(RT_NODE_TEST_SRC
     test_node_data_flow.cpp
     test_node_codec.cpp
     test_node_ffmpeg_demuxer.cpp
+    test_node_audio_codec.cpp
 )
 
 add_executable(rt_node_test ${RT_NODE_TEST_SRC})

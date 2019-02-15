@@ -188,16 +188,16 @@ RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** media_buf) {
             array_list_remove_at(ctx->mListPacket, 0);
 
             // @TODO design proper filter method
-            if (rt_pkt.mTrackIndex == 0x1) {
+          //  if (rt_pkt.mTrackIndex == 0x1) {
                 RT_LOGD("RTPacket(ptr=0x%p, size=%d) MediaBuffer=0x%p", \
                           rt_pkt.mRawPtr, rt_pkt.mSize, *media_buf);
                 (*media_buf)->setData(rt_pkt.mData, rt_pkt.mSize);
                 rt_mediabuf_from_packet(*media_buf, &rt_pkt);
-            } else {
+         //   } else {
                 // @TODO Filter Video Only.
-                fa_format_packet_free(raw_pkt);
-                return RT_ERR_BAD;
-            }
+         //       fa_format_packet_free(raw_pkt);
+          //      return RT_ERR_BAD;
+        //    }
         }
         return RT_OK;
     }
@@ -381,6 +381,7 @@ RT_RET FFNodeDemuxer::runTask() {
         do {
             RtMutex::RtAutolock autoLock(ctx->mLockPacket);
             array_list_add(ctx->mListPacket, raw_pkt);
+            RT_LOGD("read packet");
         } while (0);
         RtTime::sleepUs(2000);
     }

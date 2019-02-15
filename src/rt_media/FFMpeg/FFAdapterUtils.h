@@ -23,10 +23,11 @@
 #include "rt_header.h"        // NOLINT
 
 extern "C" {
-    #include "libavformat/avformat.h" // NOLINT
-    #include "libavformat/version.h"  // NOLINT
-    #include "libavutil/avutil.h"     // NOLINT
-    #include "libavutil/opt.h"     // NOLINT
+    #include "libavformat/avformat.h"     // NOLINT
+    #include "libavformat/version.h"      // NOLINT
+    #include "libavutil/avutil.h"         // NOLINT
+    #include "libavutil/opt.h"            // NOLINT
+    #include "libswresample/swresample.h" // NOLINT
 }
 
 INT32       fa_utils_error_string(INT32 errnum, char *errbuf, UINT32 errbuf_size);
@@ -40,7 +41,6 @@ UINT32      fa_utils_to_av_codec_id(UINT32 codec_id);  // trans RTCodecID to AVC
 
 UINT32      fa_utils_yuv420_to_rgb(void* src, unsigned char* dest, \
                                    int width, int height);
-
 
 #endif  // SRC_RT_MEDIA_FFMPEG_FFADAPTERUTILS_H_
 

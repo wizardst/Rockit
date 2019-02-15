@@ -41,8 +41,7 @@ FACodecContext* fa_video_decode_create(RtMetaData *meta) {
     INT32 err = 0;
     AVCodecContext *codec_ctx = NULL;
     FACodecContext *ctx = rt_malloc(FACodecContext);
-    ctx->mAvCodecCtx = RT_NULL;
-
+    ctx->mTrackType = RTTRACK_TYPE_VIDEO;
     ctx->mAvCodecCtx = avcodec_alloc_context3(NULL);
     CHECK_IS_NULL(ctx->mAvCodecCtx);
     codec_ctx = ctx->mAvCodecCtx;
@@ -58,10 +57,10 @@ FACodecContext* fa_video_decode_create(RtMetaData *meta) {
     // non necessary parameters
     RT_PTR extradata;
     INT32 extradata_size;
-    if (!meta->findPointer(kKeyVCodecExtraData, &extradata)) {
+    if (!meta->findPointer(kKeyCodecExtraData, &extradata)) {
         extradata = NULL;
     }
-    if (!meta->findInt32(kKeyVCodecExtraSize, &extradata_size)) {
+    if (!meta->findInt32(kKeyCodecExtraSize, &extradata_size)) {
         extradata_size = 0;
     }
     RT_LOGE("Codec Extra(ptr=0x%p, size=%d)", extradata, extradata_size);
@@ -90,6 +89,53 @@ FACodecContext* fa_video_decode_create(RtMetaData *meta) {
         goto __FAILED;
     }
     RT_LOGD("Success to open ffmpeg decoder(%s)!", avcodec_get_name(codec_ctx->codec_id));
+
+    return ctx;
+
+__FAILED:
+    if (ctx && ctx->mAvCodecCtx) {
+        avcodec_free_context(&ctx->mAvCodecCtx);
+        ctx->mAvCodecCtx = NULL;
+    }
+    if (ctx) {
+        rt_free(ctx);
+        ctx = NULL;
+    }
+    return NULL;
+}
+
+FACodecContext* fa_audio_decode_create(RtMetaData *meta) {
+    INT32 err = 0;
+    AVCodecContext *codec_ctx = NULL;
+    FACodecContext *ctx = rt_malloc(FACodecContext);
+    ctx->mTrackType = RTTRACK_TYPE_AUDIO;
+    ctx->mAvCodecCtx = avcodec_alloc_context3(NULL);
+    CHECK_IS_NULL(ctx->mAvCodecCtx);
+    codec_ctx = ctx->mAvCodecCtx;
+
+    err = fa_init_audio_params_from_metadata(ctx, meta);
+    if (err < 0) {
+        RT_LOGE("failed to init audio params from metadata");
+        goto __FAILED;
+    }
+
+    // find decoder again as codec_id may have changed
+    codec_ctx->codec = avcodec_find_decoder(codec_ctx->codec_id);
+    if (NULL == codec_ctx->codec) {
+        RT_LOGE("Fail to find decoder(%s)", avcodec_get_name(codec_ctx->codec_id));
+        goto __FAILED;
+    }
+
+    RT_LOGD("Try to create decoder(%s)", avcodec_get_name(codec_ctx->codec_id));
+    err = avcodec_open2(codec_ctx, codec_ctx->codec, NULL);
+    if (err < 0) {
+        RT_LOGE("Fail to create decoder(%s) err=%d", \
+                 avcodec_get_name(codec_ctx->codec_id), err);
+        goto __FAILED;
+    }
+    RT_LOGD("Success to open ffmpeg decoder(%s)!", avcodec_get_name(codec_ctx->codec_id));
+
+    ctx->mAudioSrc.fmt = AV_SAMPLE_FMT_S16;
 
     return ctx;
 
@@ -194,6 +240,31 @@ __FAILED:
     return NULL;
 }
 
+FACodecContext *fa_decode_create(RtMetaData *meta) {
+    RTTrackType type;
+    FACodecContext *ctx = RT_NULL;
+    CHECK_IS_NULL(meta);
+
+    if (!meta->findInt32(kKeyCodecType, reinterpret_cast<INT32*>(&type))) {
+        type = RTTRACK_TYPE_VIDEO;
+    }
+    switch (type) {
+    case RTTRACK_TYPE_VIDEO:
+        ctx = fa_video_decode_create(meta);
+        break;
+    case RTTRACK_TYPE_AUDIO:
+        ctx = fa_audio_decode_create(meta);
+        break;
+    default:
+        RT_LOGE("not support track type: %d\n", type);
+        break;
+    }
+
+    return ctx;
+__FAILED:
+    return RT_NULL;
+}
+
 void fa_video_decode_destroy(FACodecContext **fc) {
     if (*fc && (*fc)->mAvCodecCtx) {
         avcodec_free_context(&((*fc)->mAvCodecCtx));
@@ -284,7 +355,7 @@ RT_RET fa_decode_send_packet(FACodecContext* fc, RTMediaBuffer *buffer) {
     return RT_OK;
 }
 
-RT_RET fa_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
+RT_RET fa_video_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
     int      i;
     UINT8 *data[4];
     int      linesize[4];
@@ -338,6 +409,112 @@ RT_RET fa_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
     return RT_OK;
 }
 
+RT_RET fa_audio_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
+    UINT8 *dst = NULL;
+    RtMetaData *meta = NULL;
+    INT32 data_size = 0;
+    INT32 ret = 0;
+    AVFrame *frame = av_frame_alloc();
+    if (frame) {
+        ret = avcodec_receive_frame(fc->mAvCodecCtx, frame);
+        if (ret == AVERROR(EAGAIN)) {
+            av_frame_unref(frame);
+            return RT_ERR_TIMEOUT;
+        }
+    }
+
+    if (ret >= 0) {
+        INT64 dec_channel_layout;
+
+        meta = buffer->getMetaData();
+        dst = reinterpret_cast<UINT8 *>(buffer->getData());
+
+        data_size = av_samples_get_buffer_size(NULL, frame->channels,
+                frame->nb_samples, (enum AVSampleFormat)frame->format, 1);
+
+        RT_LOGD("sample data size:%d, channels: %d, nb_samples:%d, timstamps: %lld ret: %d, frame->format: %d"
+                "channel_layout: %lld, sample_rate:%d",
+                data_size, frame->channels, frame->nb_samples, frame->pts, ret, frame->format,
+                frame->channel_layout, frame->sample_rate);
+
+        /* TODO(): dst audio params should can be set */
+        {
+            dec_channel_layout =
+                (frame->channel_layout && frame->channels == av_get_channel_layout_nb_channels(frame->channel_layout)) ?
+                frame->channel_layout : av_get_default_channel_layout(frame->channels);
+
+            if (frame->format != fc->mAudioSrc.fmt) {
+                swr_free(&fc->mSwrCtx);
+                fc->mSwrCtx = swr_alloc_set_opts(NULL,
+                                                 dec_channel_layout, AV_SAMPLE_FMT_S16, 44100,
+                                                 dec_channel_layout, (AVSampleFormat)frame->format, frame->sample_rate,
+                                                 0, NULL);
+                if (!fc->mSwrCtx || swr_init(fc->mSwrCtx) < 0) {
+                    RT_LOGE(
+                           "Cannot create sample rate converter for conversion of "
+                           "%d Hz %s %d channels to %d Hz %s %d channels!\n",
+                            frame->sample_rate, av_get_sample_fmt_name(AVSampleFormat(frame->format)), frame->channels,
+                            44100, av_get_sample_fmt_name(AV_SAMPLE_FMT_S16), 2);
+                    swr_free(&fc->mSwrCtx);
+                    return RT_ERR_UNKNOWN;
+                }
+                fc->mAudioSrc.fmt = (AVSampleFormat)frame->format;
+            }
+
+            if (fc->mSwrCtx) {
+                const UINT8 **in = (const UINT8 **)frame->extended_data;
+                UINT8 **out = &dst;
+                int out_count = (INT64)192000 / fc->mAvCodecCtx->channels / av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
+                int len2;
+                len2 = swr_convert(fc->mSwrCtx, out, out_count, in, frame->nb_samples);
+                if (len2 < 0) {
+                    RT_LOGE("swr_convert() failed\n");
+                    return RT_ERR_UNKNOWN;
+                }
+                if (len2 == out_count) {
+                    RT_LOGD("audio buffer is probably too small\n");
+                    if (swr_init(fc->mSwrCtx) < 0)
+                        swr_free(&fc->mSwrCtx);
+                }
+                data_size = len2 * frame->channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
+            } else {
+                rt_memcpy(dst, frame->data[0], data_size);
+            }
+        }
+
+        buffer->setRange(0, data_size);
+        meta->setInt64(kKeyFramePts, frame->pts);
+
+        buffer->setStatus(RT_MEDIA_BUFFER_STATUS_READY);
+        return RT_OK;
+    }
+    av_frame_unref(frame);
+    return RT_ERR_TIMEOUT;
+}
+
+
+RT_RET fa_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
+    RT_RET ret = RT_OK;
+    CHECK_IS_NULL(fc);
+    CHECK_IS_NULL(buffer);
+
+    switch (fc->mTrackType) {
+    case RTTRACK_TYPE_VIDEO:
+        ret = fa_video_decode_get_frame(fc, buffer);
+        break;
+    case RTTRACK_TYPE_AUDIO:
+        ret = fa_audio_decode_get_frame(fc, buffer);
+        break;
+    default:
+        RT_LOGE("not support track type: %d\n", fc->mTrackType);
+        break;
+    }
+
+    return ret;
+__FAILED:
+    return RT_ERR_UNKNOWN;
+}
+
 RT_RET fa_encode_send_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
     if (!fc && buffer) {
         RT_LOGE("fc or pkt is NULL: fc: %p pkt: %p", fc, buffer);
@@ -387,4 +564,60 @@ void fa_codec_close(FACodecContext *fc);
 void fa_codec_flush(FACodecContext *fc);
 void fa_codec_push(FACodecContext *fc, char* buffer, UINT32 size);
 void fa_codec_pull(FACodecContext *fc, char* buffer, UINT32* size);
+
+INT32 fa_init_audio_params_from_metadata(FACodecContext *ctx, RtMetaData *meta) {
+    AVCodecContext  *codec_ctx = RT_NULL;
+    CHECK_IS_NULL(ctx);
+    CHECK_IS_NULL(meta);
+
+    codec_ctx = ctx->mAvCodecCtx;
+
+    // necessary parameters
+    RTCodecID codecID;
+    CHECK_EQ(meta->findInt32(kKeyCodecID, reinterpret_cast<INT32 *>(&codecID)), RT_TRUE);
+
+    // non necessary parameters
+    RT_PTR extradata;
+    INT32 extradata_size;
+    if (!meta->findPointer(kKeyCodecExtraData, &extradata)) {
+        extradata = NULL;
+    }
+    if (!meta->findInt32(kKeyCodecExtraSize, &extradata_size)) {
+        extradata_size = 0;
+    }
+    INT32 channels;
+    if (!meta->findInt32(kKeyACodecChannels, &channels)) {
+        channels = 2;
+    }
+    INT32 sample_rate;
+    if (!meta->findInt32(kKeyACodecSampleRate, &sample_rate)) {
+        sample_rate = 44100;
+    }
+    INT32 bit_rate;
+    if (!meta->findInt32(kKeyCodecBitrate, &bit_rate)) {
+        bit_rate = 0;
+    }
+    INT32 bit_per_coded_sample;
+    if (!meta->findInt32(kKeyACodecBitPerCodedSample, &bit_per_coded_sample)) {
+        bit_per_coded_sample = 0;
+    }
+
+    RT_LOGE("Codec Extra(ptr=0x%p, size=%d)", extradata, extradata_size);
+
+    // codec context parameters configure
+    codec_ctx->codec_type = AVMEDIA_TYPE_AUDIO;
+    codec_ctx->codec_id   = (AVCodecID)fa_utils_to_av_codec_id(codecID);
+    codec_ctx->extradata_size = extradata_size;
+    codec_ctx->extradata = reinterpret_cast<UINT8 *>(extradata);
+    codec_ctx->channels = channels;
+    codec_ctx->sample_rate = sample_rate;
+    codec_ctx->bit_rate = bit_rate;
+    codec_ctx->sample_fmt = AV_SAMPLE_FMT_NONE;
+    codec_ctx->bits_per_coded_sample = bit_per_coded_sample;
+
+    return 0;
+__FAILED:
+    return -1;
+}
+
 

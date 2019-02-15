@@ -2,6 +2,7 @@ cmake_minimum_required( VERSION 2.8.8 )
 
 include_directories(GLRender)
 include_directories(FFMpeg)
+include_directories(mpi)
 
 set(RT_MEDIA_SRC
     RTGLApp.cpp
@@ -29,8 +30,8 @@ set(RT_MEDIA_SRC
     RTAllocator/RTAllocatorBase.cpp
     RTAllocator/RTAllocatorDrm.cpp
     RTAllocator/RTAllocatorStore.cpp
-    mpi/MpiAdapterCodec.cpp
     mpi/MpiAdapterUtils.cpp
+    mpi/MpiAdapterCodec.cpp
 )
 
 add_library(${RT_MEDIA_STATIC} STATIC ${RT_MEDIA_SRC})

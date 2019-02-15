@@ -21,15 +21,29 @@
 #define SRC_RT_MEDIA_FFMPEG_FFADAPTERCODEC_H_
 
 #include "FFAdapterUtils.h"  // NOLINT
+#include "RTMediaDef.h"      // NOLINT
+
+typedef struct AudioParams {
+    int freq;
+    int channels;
+    int64_t channel_layout;
+    enum AVSampleFormat fmt;
+    int frame_size;
+    int bytes_per_sec;
+} AudioParams;
 
 struct FACodecContext {
     AVCodecContext  *mAvCodecCtx;
+    RTTrackType      mTrackType;
+    AudioParams      mAudioSrc;
+    AudioParams      mAudioTgt;
+    SwrContext      *mSwrCtx;
 };
 
 class RtMetaData;
 class RTMediaBuffer;
 
-FACodecContext* fa_video_decode_create(RtMetaData *meta);
+FACodecContext* fa_decode_create(RtMetaData *meta);
 void fa_video_decode_destroy(FACodecContext** fc);
 
 FACodecContext* fa_video_encode_create(RtMetaData *meta);
@@ -46,6 +60,8 @@ RT_RET fa_encode_get_packet(FACodecContext* fc, RTMediaBuffer *buffer);
 void fa_codec_flush(FACodecContext* fc);
 void fa_codec_push(FACodecContext* fc, char* buffer, UINT32 size);
 void fa_codec_pull(FACodecContext* fc, char* buffer, UINT32* size);
+
+INT32 fa_init_audio_params_from_metadata(FACodecContext *ctx, RtMetaData *meta);
 
 #endif  // SRC_RT_MEDIA_FFMPEG_FFADAPTERCODEC_H_
 

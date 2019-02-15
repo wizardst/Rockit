@@ -17,23 +17,26 @@
  *   date: 20190122
  */
 
-#ifndef SRC_RT_NODE_RT_SINK_RTSINKDISPLAYNATIVE_H_
-#define SRC_RT_NODE_RT_SINK_RTSINKDISPLAYNATIVE_H_
+#ifndef SRC_RT_NODE_RT_SINK_INCLUDE_RTSINKDISPLAYGLES_H_
+#define SRC_RT_NODE_RT_SINK_INCLUDE_RTSINKDISPLAYGLES_H_
 
-#include "RTSinkDisplay.h"  // NOLINT
+#include "RTNode.h"    // NOLINT
+#include "rt_header.h" // NOLINT
 
-class RTSinkDisplayNative : public RTNode {
+class RTSinkDisplayGLES : public RTNode {
  public:
-    RTSinkDisplayNative();
-    virtual ~RTSinkDisplayNative();
+    RTSinkDisplayGLES();
+    virtual ~RTSinkDisplayGLES();
+    RT_RET runTask();
 
  public:
     // override RTNode public methods
     virtual RT_RET init(RtMetaData *metadata);
     virtual RT_RET release();
 
-    virtual RT_RET pullBuffer(RTMediaBuffer **frame);
-    virtual RT_RET pushBuffer(RTMediaBuffer*  packet);
+    // SinkDisplay is consumer only, not producer
+    virtual RT_RET pullBuffer(RTMediaBuffer **media_buf);
+    virtual RT_RET pushBuffer(RTMediaBuffer*  media_buf);
 
     virtual RT_RET runCmd(RT_NODE_CMD cmd, RtMetaData *metadata);
     virtual RT_RET setEventLooper(RTMsgLooper* eventLooper);
@@ -54,6 +57,6 @@ class RTSinkDisplayNative : public RTNode {
     virtual RT_RET onFireFrame();
 };
 
-extern struct RTNodeStub rt_sink_display_native;
+extern struct RTNodeStub rt_sink_display_gles;
 
-#endif  // SRC_RT_NODE_RT_SINK_RTSINKDISPLAYNATIVE_H_
+#endif  // SRC_RT_NODE_RT_SINK_INCLUDE_RTSINKDISPLAYGLES_H_

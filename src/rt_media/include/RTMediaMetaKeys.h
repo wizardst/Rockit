@@ -35,14 +35,14 @@ enum {
     kKeyCodecLevel       = MKTAG('c', 'l', 'e', 'v'),
     kKeyCodecFormat      = MKTAG('c', 'f', 'o', 'r'),
     kKeyCodecBitrate     = MKTAG('c', 'b', 'i', 't'),
+    kKeyCodecExtraData      = MKTAG('v', 'd', 'a', 't'),  // void *
+    kKeyCodecExtraSize      = MKTAG('v', 's', 'i', 'z'),  // INT32
 
     /* video track features*/
     kKeyVCodecWidth          = MKTAG('v', 'w', 'i', 'd'),
     kKeyVCodecHeight         = MKTAG('v', 'h', 'e', 'i'),
     kKeyVCodecVideoDelay     = MKTAG('v', 'v', 'd', 'e'),  // INT32
     kKeyVCodecFrameRate      = MKTAG('v', 'f', 'r', 'a'),  // INT32 23.976 x 1000
-    kKeyVCodecExtraData      = MKTAG('v', 'd', 'a', 't'),  // void *
-    kKeyVCodecExtraSize      = MKTAG('v', 's', 'i', 'z'),  // INT32
     kKeyVCodecFieldOrder     = MKTAG('v', 'f', 'i', 'e'),  // INT32
     kKeyVCodecColorRange     = MKTAG('v', 'c', 'r', 'a'),  // INT32
     kKeyVCodecColorPrimary   = MKTAG('v', 'c', 'p', 'r'),  // INT32
@@ -55,13 +55,14 @@ enum {
     kKeyVCodecMaxBFrames     = MKTAG('m', 'b', 'f', 'm'),  // INT32 encoder feature
 
     /* audio track features*/
-    kKeyACodecChanneLayout     = MKTAG('a', 'c', 'l', 'a'),
-    kKeyACodecChannels         = MKTAG('a', 'c', 'h', 'a'),
-    kKeyACodecSampleRate       = MKTAG('a', 's', 'r', 'a'),
-    kKeyACodecBlockAlign       = MKTAG('a', 'c', 'l', 'a'),
-    kKeyACodecFrameSize        = MKTAG('a', 'c', 'h', 'a'),
-    kKeyACodecInitialPadding   = MKTAG('a', 's', 'r', 'a'),
-    kKeyACodecTrailinglPadding = MKTAG('a', 's', 'r', 'a'),
+    kKeyACodecChanneLayout      = MKTAG('a', 'c', 'l', 'a'),
+    kKeyACodecChannels          = MKTAG('a', 'c', 'h', 'a'),
+    kKeyACodecSampleRate        = MKTAG('a', 's', 'r', 'a'),
+    kKeyACodecBlockAlign        = MKTAG('a', 'c', 'l', 'a'),
+    kKeyACodecFrameSize         = MKTAG('a', 'c', 'h', 'a'),
+    kKeyACodecInitialPadding    = MKTAG('a', 's', 'r', 'a'),
+    kKeyACodecTrailinglPadding  = MKTAG('a', 's', 'r', 'a'),
+    kKeyACodecBitPerCodedSample = MKTAG('a', 'b', 'p', 'c'),
 
     /* subtitle track features */
     kKeySCodecLanguage      = MKTAG('s', 'l', 'a', 'n'),  // char*

@@ -29,6 +29,7 @@ typedef struct {
 } FACodingTypeInfo;
 
 static FACodingTypeInfo kFdCodecMappingList[] = {
+    /* video */
     { RT_VIDEO_ID_MPEG2,         AV_CODEC_ID_MPEG2VIDEO },
     { RT_VIDEO_ID_H263,          AV_CODEC_ID_H263 },
     { RT_VIDEO_ID_MPEG4,         AV_CODEC_ID_MPEG4 },
@@ -40,6 +41,17 @@ static FACodingTypeInfo kFdCodecMappingList[] = {
     { RT_VIDEO_ID_HEVC,          AV_CODEC_ID_HEVC },
     { RT_VIDEO_ID_VC1,           AV_CODEC_ID_VC1 },
     { RT_VIDEO_ID_AVS,           AV_CODEC_ID_AVS },
+    /* audio */
+    { RT_AUDIO_ID_AAC,           AV_CODEC_ID_AAC },
+    { RT_AUDIO_ID_APE,           AV_CODEC_ID_APE },
+    { RT_AUDIO_ID_MP3,           AV_CODEC_ID_MP3 },
+    { RT_AUDIO_ID_WMALOSSLESS,   AV_CODEC_ID_WMALOSSLESS },
+    { RT_AUDIO_ID_WMAPRO,        AV_CODEC_ID_WMAPRO },
+    { RT_AUDIO_ID_WMAV1,         AV_CODEC_ID_WMAV1 },
+    { RT_AUDIO_ID_WMAV2,         AV_CODEC_ID_WMAV2 },
+    { RT_AUDIO_ID_ADPCM,         AV_CODEC_ID_ADPCM_IMA_QT },
+    { RT_AUDIO_ID_VORBIS,        AV_CODEC_ID_VORBIS },
+    { RT_AUDIO_ID_PCM,           AV_CODEC_ID_PCM_S16LE },
 };
 
 // trans AVCodecID to RTCodecID
@@ -75,7 +87,7 @@ UINT32 fa_utils_to_av_codec_id(UINT32 rt_codec_id) {
     if (found) {
         return kFdCodecMappingList[i].av_codec_id;
     } else {
-        RT_LOGE("Unknown RTCodecID(%02d,%s)", rt_codec_id);
+        RT_LOGE("Unknown RTCodecID(0x%x)", rt_codec_id);
         return AV_CODEC_ID_NONE;
     }
 }
@@ -125,7 +137,7 @@ UINT32 fa_utils_yuv420_to_rgb(void* src, unsigned char* dest, \
     const unsigned char *ysrc = (unsigned char*)src;
     const unsigned char *usrc, *vsrc;
 
-    usrc = (unsigned char*)(src + width * height);
+    usrc = (unsigned char*)(ysrc + width * height);
     vsrc = (unsigned char*)(usrc + (width * height) / 4);
 
     for (iy = 0; iy < height; iy++) {
@@ -150,3 +162,4 @@ UINT32 fa_utils_yuv420_to_rgb(void* src, unsigned char* dest, \
     }
     return 0;
 }
+

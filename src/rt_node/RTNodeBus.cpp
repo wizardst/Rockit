@@ -165,11 +165,11 @@ RT_RET RTNodeBus::registerCoreStubs() {
     registerStub(&hw_node_mpi_decoder);
     #endif
     registerStub(&ff_node_demuxer);
-    registerStub(&ff_node_video_decoder);
+    registerStub(&ff_node_decoder);
     registerStub(&ff_node_video_encoder);
-	#ifdef OS_WINDOWS
+    #ifdef OS_WINDOWS
     registerStub(&rt_sink_display_gles);
-	#endif
+    #endif
     return RT_OK;
 }
 
@@ -180,15 +180,15 @@ RTNodeStub* findStub(RT_NODE_TYPE nType) {
         stub = &ff_node_demuxer;
         break;
     case RT_NODE_TYPE_DECODER:
-        stub = &ff_node_video_decoder;
+        stub = &ff_node_decoder;
         break;
     case RT_NODE_TYPE_ENCODER:
         stub = &ff_node_video_encoder;
         break;
     case RT_NODE_TYPE_SINK:
-	    #ifdef OS_WINDOWS
+        #ifdef OS_WINDOWS
         stub = &rt_sink_display_gles;
-	    #endif
+        #endif
         break;
     default:
         break;

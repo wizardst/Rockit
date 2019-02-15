@@ -143,9 +143,7 @@ void fa_format_build_track_meta(const AVStream* stream, RTTrackParms* track) {
     }
     AVCodecParameters* cpar = stream->codecpar;
     track->mCodecType       = (RTTrackType)cpar->codec_type;
-    if (RTTRACK_TYPE_VIDEO == track->mCodecType) {
-        track->mCodecID     = (RTCodecID)fa_utils_to_rt_codec_id(cpar->codec_id);
-    }
+    track->mCodecID     = (RTCodecID)fa_utils_to_rt_codec_id(cpar->codec_id);
     track->mCodecFormat     =  cpar->format;
     track->mCodecProfile    =  cpar->profile;
     track->mCodecLevel      =  cpar->level;

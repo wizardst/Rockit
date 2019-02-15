@@ -39,7 +39,6 @@ RT_RET unit_test_ff_node_demuxer(INT32 index, INT32 total) {
     RTPacket       rt_pkt    = {0};
     RTMediaBuffer* rt_buf    = RT_NULL;
     RtMetaData*    node_meta = RT_NULL;
-    RtMetaData*    pkt_meta  = RT_NULL;
 
     RT_LOGD("nodestub(ptr=%p)", &ff_node_demuxer);
 

@@ -28,7 +28,7 @@
 /**
 * @ingroup rt_node
 * @brief Enumeration used to define the possible video compression codings.
-*        sync with the omx_video.h
+*        sync with the omx_video.h & omx_audio.h
 *
 * @note  This essentially refers to file extensions. If the coding is
 *        being used to specify the ENCODE type, then additional work
@@ -59,13 +59,50 @@ typedef enum {
      RT_VIDEO_ID_VP6,
      RT_VIDEO_ID_AVSPLUS,            /**< AVS+ */
      RT_VIDEO_ID_AVS,                /**< AVS profile=0x20 */
-
      /* *< Reserved region for introducing Khronos Standard Extensions */
-     RT_VIDEO_ID_KhronosExtensions = 0x6F000000,
-
+     RT_VIDEO_ID_KhronosExtensions = 0x2F000000,
      /* *< Reserved region for introducing Vendor Extensions */
-     RT_VIDEO_ID_VendorStartUnused = 0x7F000000,
-     RT_VIDEO_ID_Max = 0x7FFFFFFF
+     RT_VIDEO_ID_VendorStartUnused = 0x3F000000,
+     RT_VIDEO_ID_Max = 0x3FFFFFFF,
+
+     RT_AUDIO_ID_Unused = 0x40000000,  /**< Placeholder value when coding is N/A  */
+     RT_AUDIO_ID_AutoDetect,  /**< auto detection of audio format */
+     RT_AUDIO_ID_PCM,         /**< Any variant of PCM coding */
+     RT_AUDIO_ID_ADPCM,       /**< Any variant of ADPCM encoded data */
+     RT_AUDIO_ID_AMR,         /**< Any variant of AMR encoded data */
+     RT_AUDIO_ID_GSMFR,       /**< Any variant of GSM fullrate (i.e. GSM610) */
+     RT_AUDIO_ID_GSMEFR,      /**< Any variant of GSM Enhanced Fullrate encoded data*/
+     RT_AUDIO_ID_GSMHR,       /**< Any variant of GSM Halfrate encoded data */
+     RT_AUDIO_ID_PDCFR,       /**< Any variant of PDC Fullrate encoded data */
+     RT_AUDIO_ID_PDCEFR,      /**< Any variant of PDC Enhanced Fullrate encoded data */
+     RT_AUDIO_ID_PDCHR,       /**< Any variant of PDC Halfrate encoded data */
+     RT_AUDIO_ID_TDMAFR,      /**< Any variant of TDMA Fullrate encoded data (TIA/EIA-136-420) */
+     RT_AUDIO_ID_TDMAEFR,     /**< Any variant of TDMA Enhanced Fullrate encoded data (TIA/EIA-136-410) */
+     RT_AUDIO_ID_QCELP8,      /**< Any variant of QCELP 8kbps encoded data */
+     RT_AUDIO_ID_QCELP13,     /**< Any variant of QCELP 13kbps encoded data */
+     RT_AUDIO_ID_EVRC,        /**< Any variant of EVRC encoded data */
+     RT_AUDIO_ID_SMV,         /**< Any variant of SMV encoded data */
+     RT_AUDIO_ID_G711,        /**< Any variant of G.711 encoded data */
+     RT_AUDIO_ID_G723,        /**< Any variant of G.723 dot 1 encoded data */
+     RT_AUDIO_ID_G726,        /**< Any variant of G.726 encoded data */
+     RT_AUDIO_ID_G729,        /**< Any variant of G.729 encoded data */
+     RT_AUDIO_ID_AAC,         /**< Any variant of AAC encoded data */
+     RT_AUDIO_ID_MP3,         /**< Any variant of MP3 encoded data */
+     RT_AUDIO_ID_SBC,         /**< Any variant of SBC encoded data */
+     RT_AUDIO_ID_VORBIS,      /**< Any variant of VORBIS encoded data */
+     RT_AUDIO_ID_WMA,         /**< Any variant of WMA encoded data */
+     RT_AUDIO_ID_RA,          /**< Any variant of RA encoded data */
+     RT_AUDIO_ID_MIDI,        /**< Any variant of MIDI encoded data */
+     RT_AUDIO_ID_APE = 0x50000000,
+     /**< Reserved region for introducing Khronos Standard Extensions */
+     RT_AUDIO_CodingKhronosExtensions = 0x6F000000,
+     /**< Reserved region for introducing Vendor Extensions */
+     RT_AUDIO_CodingVendorStartUnused = 0x7F000000,
+     RT_AUDIO_ID_WMAV1,
+     RT_AUDIO_ID_WMAV2,
+     RT_AUDIO_ID_WMAPRO,
+     RT_AUDIO_ID_WMALOSSLESS,
+     RT_AUDIO_CodingMax = 0x7FFFFFFF
 } RTCodecID;
 
 enum RTFieldOrder {

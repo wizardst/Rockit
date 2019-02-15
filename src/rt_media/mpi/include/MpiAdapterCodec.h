@@ -17,8 +17,8 @@
  *   Date: 2019/01/18
  */
 
-#ifndef SRC_RT_MEDIA_MPI_MPIADAPTERCODEC_H_
-#define SRC_RT_MEDIA_MPI_MPIADAPTERCODEC_H_
+#ifndef SRC_RT_MEDIA_MPI_INCLUDE_MPIADAPTERCODEC_H_
+#define SRC_RT_MEDIA_MPI_INCLUDE_MPIADAPTERCODEC_H_
 
 #include "FFAdapterUtils.h"     // NOLINT
 #include "rt_header.h"          // NOLINT
@@ -45,5 +45,4 @@ RT_RET ma_decode_get_frame(MACodecContext *ctx, RTMediaBuffer **frame);
 RT_RET ma_commit_buffer_to_group(MACodecContext *ctx, RTMediaBuffer *buffer);
 RT_RET ma_fill_buffer_to_group(MACodecContext *ctx, RTMediaBuffer *buffer);
 
-
-#endif  // SRC_RT_MEDIA_MPI_MPIADAPTERCODEC_H_
+#endif  // SRC_RT_MEDIA_MPI_INCLUDE_MPIADAPTERCODEC_H_

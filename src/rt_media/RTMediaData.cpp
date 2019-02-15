@@ -128,6 +128,8 @@ RT_RET rt_medatdata_from_trackpar(RtMetaData* meta, RTTrackParms* tpar) {
     meta->setInt32(kKeyCodecProfile, tpar->mCodecProfile);
     meta->setInt32(kKeyCodecLevel,   tpar->mCodecLevel);
     meta->setInt64(kKeyCodecBitrate, tpar->mBitrate);
+    meta->setInt32(kKeyCodecExtraSize,      tpar->mExtraDataSize);
+    meta->setPointer(kKeyCodecExtraData,    tpar->mExtraData);
 
     switch (tpar->mCodecType) {
     case RTTRACK_TYPE_VIDEO:
@@ -136,8 +138,6 @@ RT_RET rt_medatdata_from_trackpar(RtMetaData* meta, RTTrackParms* tpar) {
         meta->setInt32(kKeyVCodecHeight,         tpar->mVideoHeight);
         meta->setInt32(kKeyVCodecVideoDelay,     tpar->mVideoDelay);
         meta->setInt32(kKeyVCodecFrameRate,      tpar->mVideoFrameRate);
-        meta->setPointer(kKeyVCodecExtraData,    tpar->mExtraData);
-        meta->setInt32(kKeyVCodecExtraSize,      tpar->mExtraDataSize);
         meta->setInt32(kKeyVCodecFieldOrder,     tpar->mFieldOrder);
         meta->setInt32(kKeyVCodecColorRange,     tpar->mColorRange);
         meta->setInt32(kKeyVCodecColorPrimary,   tpar->mColorPrimaries);
@@ -146,13 +146,14 @@ RT_RET rt_medatdata_from_trackpar(RtMetaData* meta, RTTrackParms* tpar) {
         meta->setInt32(kKeyVCodecChromaLocation, tpar->mChromaLocation);
         break;
     case RTTRACK_TYPE_AUDIO:
-        meta->setInt32(kKeyACodecChanneLayout,     tpar->mAudioChannelLayout);
-        meta->setInt32(kKeyACodecChannels,         tpar->mAudioChannels);
-        meta->setInt32(kKeyACodecSampleRate,       tpar->mAudioSampleRate);
-        meta->setInt32(kKeyACodecBlockAlign,       tpar->mAudioBlockAlign);
-        meta->setInt32(kKeyACodecFrameSize,        tpar->mAudioFrameSize);
-        meta->setInt32(kKeyACodecInitialPadding,   tpar->mAudioInitialPadding);
-        meta->setInt32(kKeyACodecTrailinglPadding, tpar->mAudioTrailingPadding);
+        meta->setInt32(kKeyACodecChanneLayout,      tpar->mAudioChannelLayout);
+        meta->setInt32(kKeyACodecChannels,          tpar->mAudioChannels);
+        meta->setInt32(kKeyACodecSampleRate,        tpar->mAudioSampleRate);
+        meta->setInt32(kKeyACodecBlockAlign,        tpar->mAudioBlockAlign);
+        meta->setInt32(kKeyACodecFrameSize,         tpar->mAudioFrameSize);
+        meta->setInt32(kKeyACodecInitialPadding,    tpar->mAudioInitialPadding);
+        meta->setInt32(kKeyACodecTrailinglPadding,  tpar->mAudioTrailingPadding);
+        meta->setInt32(kKeyACodecBitPerCodedSample, tpar->mAudiobitsPerCodedSample);
         break;
     case RTTRACK_TYPE_DATA:
         break;
@@ -175,6 +176,8 @@ RT_RET rt_medatdata_goto_trackpar(RtMetaData* meta, RTTrackParms* tpar) {
     meta->findInt32(kKeyCodecProfile, &(tpar->mCodecProfile));
     meta->findInt32(kKeyCodecLevel,   &(tpar->mCodecLevel));
     meta->findInt64(kKeyCodecBitrate, reinterpret_cast<INT64*>(&(tpar->mBitrate)));
+    meta->setPointer(kKeyCodecExtraData,     &(tpar->mExtraData));
+    meta->findInt32(kKeyCodecExtraSize,      &(tpar->mExtraDataSize));
 
     switch (tpar->mCodecType) {
     case RTTRACK_TYPE_VIDEO:
@@ -182,8 +185,6 @@ RT_RET rt_medatdata_goto_trackpar(RtMetaData* meta, RTTrackParms* tpar) {
         meta->findInt32(kKeyVCodecHeight,         &(tpar->mVideoHeight));
         meta->findInt32(kKeyVCodecVideoDelay,     &(tpar->mVideoDelay));
         meta->findInt32(kKeyVCodecFrameRate,      &(tpar->mVideoFrameRate));
-        meta->setPointer(kKeyVCodecExtraData,     &(tpar->mExtraData));
-        meta->findInt32(kKeyVCodecExtraSize,      &(tpar->mExtraDataSize));
         meta->findInt32(kKeyVCodecFieldOrder,     reinterpret_cast<INT32*>(&(tpar->mFieldOrder)));
         meta->findInt32(kKeyVCodecColorRange,     reinterpret_cast<INT32*>(&(tpar->mColorRange)));
         meta->findInt32(kKeyVCodecColorPrimary,   reinterpret_cast<INT32*>(&(tpar->mColorPrimaries)));
@@ -192,13 +193,14 @@ RT_RET rt_medatdata_goto_trackpar(RtMetaData* meta, RTTrackParms* tpar) {
         meta->findInt32(kKeyVCodecChromaLocation, reinterpret_cast<INT32*>(&(tpar->mChromaLocation)));
         break;
     case RTTRACK_TYPE_AUDIO:
-        meta->findInt64(kKeyACodecChanneLayout,     reinterpret_cast<INT64*>(&(tpar->mAudioChannelLayout)));
-        meta->findInt32(kKeyACodecChannels,         &(tpar->mAudioChannels));
-        meta->findInt32(kKeyACodecSampleRate,       &(tpar->mAudioSampleRate));
-        meta->findInt32(kKeyACodecBlockAlign,       &(tpar->mAudioBlockAlign));
-        meta->findInt32(kKeyACodecFrameSize,        &(tpar->mAudioFrameSize));
-        meta->findInt32(kKeyACodecInitialPadding,   &(tpar->mAudioInitialPadding));
-        meta->findInt32(kKeyACodecTrailinglPadding, &(tpar->mAudioTrailingPadding));
+        meta->findInt64(kKeyACodecChanneLayout,         reinterpret_cast<INT64*>(&(tpar->mAudioChannelLayout)));
+        meta->findInt32(kKeyACodecChannels,             &(tpar->mAudioChannels));
+        meta->findInt32(kKeyACodecSampleRate,           &(tpar->mAudioSampleRate));
+        meta->findInt32(kKeyACodecBlockAlign,           &(tpar->mAudioBlockAlign));
+        meta->findInt32(kKeyACodecFrameSize,            &(tpar->mAudioFrameSize));
+        meta->findInt32(kKeyACodecInitialPadding,       &(tpar->mAudioInitialPadding));
+        meta->findInt32(kKeyACodecTrailinglPadding,     &(tpar->mAudioTrailingPadding));
+        meta->findInt32(kKeyACodecBitPerCodedSample,    &(tpar->mAudiobitsPerCodedSample));
         break;
     case RTTRACK_TYPE_DATA:
         break;

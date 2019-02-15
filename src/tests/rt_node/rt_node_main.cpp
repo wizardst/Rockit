@@ -31,17 +31,19 @@ int main(int argc, char **argv) {
      * testcases: unit tests for node & nodebus 
      *    author: martin.cheng@rock-chips.com
      */
-    rt_tests_add(test_ctx, unit_test_node_bus, const_cast<char *>("UnitTest-NodeBus"));
-    rt_tests_add(test_ctx, unit_test_node_data_flow, const_cast<char *>("UnitTest-Dataflow"));
+    // rt_tests_add(test_ctx, unit_test_node_bus, const_cast<char *>("UnitTest-NodeBus"));
+    // rt_tests_add(test_ctx, unit_test_node_data_flow, const_cast<char *>("UnitTest-Dataflow"));
 
     /*
      * testcases: unit tests for plugins
      *    author: rimon.xu@rock-chips.com
      */
-    rt_tests_add(test_ctx, unit_test_node_decoder,
-                           const_cast<char *>("UnitTest-NodeCodecDecoder"));
-    rt_tests_add(test_ctx, unit_test_node_encoder,
-                           const_cast<char *>("UnitTest-NodeCodecEncoder"));
+    // rt_tests_add(test_ctx, unit_test_node_decoder,
+    //                        const_cast<char *>("UnitTest-NodeCodecDecoder"));
+    // rt_tests_add(test_ctx, unit_test_node_encoder,
+    //                        const_cast<char *>("UnitTest-NodeCodecEncoder"));
+    rt_tests_add(test_ctx, unit_test_node_audio_decoder,
+                             const_cast<char *>("UnitTest-NodeCodecAudioDecoder"));
 
     // ! run all testcases
     rt_tests_run(test_ctx, /*mem_dump=*/RT_TRUE);

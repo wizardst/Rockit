@@ -27,6 +27,7 @@ RT_RET unit_test_node_bus(INT32 index, INT32 total);
 RT_RET unit_test_node_data_flow(INT32 index, INT32 total);
 RT_RET unit_test_node_decoder(INT32 index, INT32 total);
 RT_RET unit_test_node_encoder(INT32 index, INT32 total);
+RT_RET unit_test_node_audio_decoder(INT32 index, INT32 total);
 RT_RET unit_test_ff_node_demuxer(INT32 index, INT32 total);
 RT_RET unit_test_node_render_gles(INT32 index, INT32 total);
 RT_RET unit_test_node_render_native(INT32 index, INT32 total);

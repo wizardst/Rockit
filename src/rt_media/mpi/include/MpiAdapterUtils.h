@@ -17,8 +17,8 @@
  *   Date: 2019/01/03
  */
 
-#ifndef SRC_RT_MEDIA_MPI_MPIADAPTERUTILS_H_
-#define SRC_RT_MEDIA_MPI_MPIADAPTERUTILS_H_
+#ifndef SRC_RT_MEDIA_MPI_INCLUDE_MPIADAPTERUTILS_H_
+#define SRC_RT_MEDIA_MPI_INCLUDE_MPIADAPTERUTILS_H_
 
 #include "rt_header.h"        // NOLINT
 #include "rk_mpi.h"           // NOLINT
@@ -28,5 +28,5 @@
 RTCodecID     fa_utils_find_codectype_from_mpp(MppCodingType mpp_coding_type);
 MppCodingType fa_utils_find_mpp_codectype_from_rt(RTCodecID rt_coding_type);
 
-#endif  // SRC_RT_MEDIA_MPI_MPIADAPTERUTILS_H_
+#endif  // SRC_RT_MEDIA_MPI_INCLUDE_MPIADAPTERUTILS_H_
 

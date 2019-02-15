@@ -244,7 +244,7 @@ RTNodeStub* FFNodeEncoder::queryStub() {
 RT_RET FFNodeEncoder::runTask() {
     RTMediaBuffer *input = NULL;
     RTMediaBuffer *output = NULL;
-    RT_BOOL encode_complete = RT_TRUE;
+
     while (mRunning) {
         RT_RET err = RT_OK;
         if (!input) {

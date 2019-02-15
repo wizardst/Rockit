@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Author: TOD - UNKOWN
+ * Author: rimon.xu@rock-chips.com
  *   Date: 2018/11/03
- *   Task: use ffmpeg as encoder and decoder
+ *   Task: use ffmpeg and decoder
  */
 
 #ifndef SRC_RT_NODE_FF_NODE_INCLUDE_FFNODEDECODER_H_
@@ -81,6 +81,6 @@ class FFNodeDecoder : public RTNodeCodec {
     RT_BOOL              mUsePool;
 };
 
-extern struct RTNodeStub ff_node_video_decoder;
+extern struct RTNodeStub ff_node_decoder;
 
 #endif  // SRC_RT_NODE_FF_NODE_INCLUDE_FFNODEDECODER_H_
