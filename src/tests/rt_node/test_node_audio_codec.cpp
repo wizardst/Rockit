@@ -34,10 +34,10 @@
 #ifdef OS_WINDOWS
 #define TEST_URI "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4"
 #else
-// #define TEST_URI "monkey.ape"
-// #define TEST_URI "llama_aac_audio.mp4"
-// #define TEST_URI "bear.mp3"
-#define TEST_URI "Kalimba.mp3"
+//  #define TEST_URI "monkey.ape"
+//  #define TEST_URI "llama_aac_audio.mp4"
+//  #define TEST_URI "bear.mp3"
+#define TEST_URI "test_720.mp4"
 #endif
 
 #define DEC_TEST_OUTPUT_FILE    "dec_output.bin"
@@ -70,8 +70,10 @@ RT_RET unit_test_node_audio_decoder_proc() {
         RTNodeAdapter::init(demuxer, demuxer_meta);
 
         INT32 audio_idx  = demuxer->queryTrackUsed(RTTRACK_TYPE_AUDIO);
+        INT32 video_idx  = demuxer->queryTrackUsed(RTTRACK_TYPE_VIDEO);
         RT_LOGE("RTTRACK_TYPE_AUDIO audio_idx:%d", audio_idx);
-        decoder_meta = demuxer->queryTrackMeta(audio_idx, RTTRACK_TYPE_AUDIO);
+        RT_LOGE("RTTRACK_TYPE_VIDEO video_idx:%d", video_idx);
+        decoder_meta = demuxer->queryTrackMeta(0, RTTRACK_TYPE_AUDIO);
 
         RTNodeAdapter::init(decoder, decoder_meta);
 
@@ -85,14 +87,32 @@ RT_RET unit_test_node_audio_decoder_proc() {
             // deqeue buffer from object pool
             RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
             if (RT_NULL != esPacket) {
-                // save es-packet to buffer
-                while (RTNodeAdapter::pullBuffer(demuxer, &esPacket) != RT_OK) {
-                    RtTime::sleepMs(10);
-                }
+                RT_BOOL got_pkt = RT_FALSE;
+                while (!got_pkt) {
+                    // save es-packet to buffer
+                    while (RTNodeAdapter::pullBuffer(demuxer, &esPacket) != RT_OK) {
+                        RtTime::sleepMs(10);
+                    }
+                    INT32 track_index = 0;
+                    esPacket->getMetaData()->findInt32(kKeyPacketIndex, &track_index);
 
-                UINT8 *data = reinterpret_cast<UINT8 *>(esPacket->getData());
-                UINT32 size = esPacket->getSize();
-                RT_LOGD("NEW audio MediaBuffer(ptr=0x%p, size=%d)", esPacket, size);
+                    RT_LOGD("track_index: %d, audio_idx: %d", track_index, audio_idx);
+                    if (track_index == audio_idx) {
+                        UINT8 *data = reinterpret_cast<UINT8 *>(esPacket->getData());
+                        UINT32 size = esPacket->getSize();
+                        RT_LOGD("NEW audio MediaBuffer(ptr=0x%p, size=%d)", esPacket, size);
+                        got_pkt = RT_TRUE;
+                    } else {
+                        /* pass other packet */
+                        INT32 eos = 0;
+                        esPacket->getMetaData()->findInt32(kKeyFrameEOS, &eos);
+                        if (eos) {
+                            RT_LOGD("receive eos , break");
+                            break;
+                        }
+                        continue;
+                    }
+                }
             }
             // push es-packet to decoder
             RTNodeAdapter::pushBuffer(decoder, esPacket);
@@ -111,6 +131,12 @@ RT_RET unit_test_node_audio_decoder_proc() {
                     }
                 }
                 RTNodeAdapter::queueCodecBuffer(decoder, frame, RT_PORT_OUTPUT);
+                INT32 eos = 0;
+                frame->getMetaData()->findInt32(kKeyFrameEOS, &eos);
+                if (eos) {
+                    RT_LOGD("receive eos , break");
+                    break;
+                }
                 frame = NULL;
             }
 

@@ -109,6 +109,7 @@ FACodecContext* fa_audio_decode_create(RtMetaData *meta) {
     AVCodecContext *codec_ctx = NULL;
     FACodecContext *ctx = rt_malloc(FACodecContext);
     ctx->mTrackType = RTTRACK_TYPE_AUDIO;
+    ctx->mSwrCtx = RT_NULL;
     ctx->mAvCodecCtx = avcodec_alloc_context3(NULL);
     CHECK_IS_NULL(ctx->mAvCodecCtx);
     codec_ctx = ctx->mAvCodecCtx;
@@ -241,7 +242,7 @@ __FAILED:
 }
 
 FACodecContext *fa_decode_create(RtMetaData *meta) {
-    RTTrackType type;
+    RTTrackType type = RTTRACK_TYPE_VIDEO;
     FACodecContext *ctx = RT_NULL;
     CHECK_IS_NULL(meta);
 
@@ -361,12 +362,13 @@ RT_RET fa_video_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
     int      linesize[4];
     // INT64  pts = AV_NOPTS_VALUE;
     UINT8 *dst = NULL;
+    INT32 ret = 0;
     RtMetaData *meta = NULL;
 
     AVFrame *frame = av_frame_alloc();
     if (frame) {
-        if (avcodec_receive_frame(fc->mAvCodecCtx, frame) == AVERROR(EAGAIN)) {
-            RT_LOGE("receive_frame returned EAGAIN, which is an API violation.\n");
+        ret = avcodec_receive_frame(fc->mAvCodecCtx, frame);
+        if (ret == AVERROR(EAGAIN)) {
             av_frame_unref(frame);
             return RT_ERR_TIMEOUT;
         }
@@ -404,7 +406,11 @@ RT_RET fa_video_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
     meta->setInt32(kKeyFrameW,   frame->width);
     meta->setInt32(kKeyFrameH,   frame->height);
     av_frame_unref(frame);
-
+    if (ret == AVERROR_EOF) {
+        RT_LOGE("reach EOS!");
+        avcodec_flush_buffers(fc->mAvCodecCtx);
+        meta->setInt32(kKeyFrameEOS, 1);
+    }
     buffer->setStatus(RT_MEDIA_BUFFER_STATUS_READY);
     return RT_OK;
 }
@@ -423,10 +429,10 @@ RT_RET fa_audio_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
         }
     }
 
+    meta = buffer->getMetaData();
     if (ret >= 0) {
         INT64 dec_channel_layout;
 
-        meta = buffer->getMetaData();
         dst = reinterpret_cast<UINT8 *>(buffer->getData());
 
         data_size = av_samples_get_buffer_size(NULL, frame->channels,
@@ -484,12 +490,15 @@ RT_RET fa_audio_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
 
         buffer->setRange(0, data_size);
         meta->setInt64(kKeyFramePts, frame->pts);
-
-        buffer->setStatus(RT_MEDIA_BUFFER_STATUS_READY);
-        return RT_OK;
+    }
+    if (ret == AVERROR_EOF) {
+        RT_LOGE("reach EOS!");
+        avcodec_flush_buffers(fc->mAvCodecCtx);
+        meta->setInt32(kKeyFrameEOS, 1);
     }
     av_frame_unref(frame);
-    return RT_ERR_TIMEOUT;
+    buffer->setStatus(RT_MEDIA_BUFFER_STATUS_READY);
+    return RT_OK;
 }
 
 

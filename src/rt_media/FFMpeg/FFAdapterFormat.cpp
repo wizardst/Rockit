@@ -233,7 +233,7 @@ INT32 fa_format_find_best_track(FAFormatContext* fc, RTTrackType tType) {
         default:
             avType = AVMEDIA_TYPE_UNKNOWN;
         }
-        bestIdx = av_find_best_stream(fc->mAvfc, avType, 1, -1, NULL, 0);
+        bestIdx = av_find_best_stream(fc->mAvfc, avType, -1, -1, NULL, 0);
     }
     return bestIdx;
 }

@@ -87,9 +87,11 @@ FFNodeDemuxer::~FFNodeDemuxer() {
     mNodeContext = RT_NULL;
 }
 
-void updateDefaultTrack(FAFormatContext* fa_ctx, RTTrackType tType) {
+INT32 updateDefaultTrack(FAFormatContext* fa_ctx, RTTrackType tType) {
     INT32 bestIndex = fa_format_find_best_track(fa_ctx, tType);
-    fa_format_select_track(fa_ctx, bestIndex, tType);
+    RT_LOGD("index: %d, type: %d", bestIndex, tType);
+    //  fa_format_select_track(fa_ctx, bestIndex, tType);
+    return bestIndex;
 }
 
 RT_RET FFNodeDemuxer::init(RtMetaData *metadata) {
@@ -112,9 +114,9 @@ RT_RET FFNodeDemuxer::init(RtMetaData *metadata) {
         return RT_ERR_UNKNOWN;
     }
     #endif
-    updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_VIDEO);
-    updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_AUDIO);
-    updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_SUBTITLE);
+    ctx->mIndexVideo = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_VIDEO);
+    ctx->mIndexAudio = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_AUDIO);
+    ctx->mIndexSubtitle = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_SUBTITLE);
 
     ctx->mMetaInput = metadata;
 
@@ -173,11 +175,13 @@ RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** media_buf) {
 
     void*       raw_pkt  = array_list_get_data(ctx->mListPacket, 0);
     RTPacket    rt_pkt   = {0};
+    RtMetaData *meta = (*media_buf)->getMetaData();
 
     if (RT_NULL == raw_pkt) {
-        // RT_LOGD("packet NULL");
         (*media_buf)->setData(RT_NULL, 0);
         if (ctx->mEosFlag) {
+            RT_LOGD("receive EOS buffer.");
+            meta->setInt32(kKeyFrameEOS, 1);
             return RT_OK;
         }
         return RT_ERR_UNKNOWN;
@@ -369,6 +373,7 @@ RT_RET FFNodeDemuxer::runTask() {
         INT32 err = fa_format_packet_read(ctx->mFormatCtx, &raw_pkt);
         if (err < 0) {
             RT_LOGE("%s read end", __FUNCTION__);
+            array_list_add(ctx->mListPacket, raw_pkt);
             ctx->mEosFlag = RT_TRUE;
             continue;
         }
