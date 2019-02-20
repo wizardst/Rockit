@@ -40,6 +40,7 @@
 #include "rt_dequeue.h" // NOLINT
 #include "RTMediaBuffer.h" // NOLINT
 #include "FFAdapterCodec.h" // NOLINT
+#include "rt_message.h"     // NOLINT
 
 #define MAX_INPUT_BUFFER_COUNT      30
 #define MAX_OUTPUT_BUFFER_COUNT     8
@@ -58,7 +59,8 @@ RTObject *allocOutputBuffer(void *) {
     return new RTMediaBuffer(1920 * 1088 * 3 / 2);
 }
 
-FFNodeDecoder::FFNodeDecoder() {
+FFNodeDecoder::FFNodeDecoder()
+        : mTrackType(RTTRACK_TYPE_UNKNOWN) {
     const char* name = "FFmpegDecoder";
     mProcThread = new RtThread(ff_codec_loop, reinterpret_cast<void*>(this));
     mProcThread->setName(name);
@@ -85,7 +87,12 @@ FFNodeDecoder::~FFNodeDecoder() {
 }
 
 RT_RET FFNodeDecoder::init(RtMetaData *metadata) {
-    mFFCodec = fa_decode_create(metadata);
+    if (!metadata->findInt32(kKeyCodecType, reinterpret_cast<INT32 *>(&mTrackType))) {
+        RT_LOGE("track type is unset!!");
+        return RT_ERR_UNKNOWN;
+    }
+
+    mFFCodec = fa_decode_create(metadata, mTrackType);
     if (!mFFCodec) {
         RT_LOGE("fa_video_decode_open failed");
         return RT_ERR_UNKNOWN;
@@ -166,6 +173,7 @@ RT_RET FFNodeDecoder::dequeBuffer(RTMediaBuffer **buffer, RTPortType type) {
         return RT_ERR_UNKNOWN;
     }
 
+    (*buffer)->getMetaData()->setInt32(kKeyCodecType, mTrackType);
     return RT_OK;
 }
 
@@ -230,6 +238,12 @@ RT_RET FFNodeDecoder::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
 RT_RET FFNodeDecoder::setEventLooper(RTMsgLooper* eventLooper) {
     mEventLooper = eventLooper;
     return RT_OK;
+}
+
+void FFNodeDecoder::signalError(UINT32 what) {
+    RTMessage *msg = new RTMessage();
+    msg->setWhat(what);
+    mEventLooper->post(msg, 0ll);
 }
 
 RtMetaData* FFNodeDecoder::queryFormat(RTPortType port) {

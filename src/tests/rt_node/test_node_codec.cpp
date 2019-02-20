@@ -141,19 +141,6 @@ RT_RET unit_test_node_decoder_proc() {
                 UINT8 *data = reinterpret_cast<UINT8 *>(esPacket->getData());
                 UINT32 size = esPacket->getSize();
                 RT_LOGD("NEW MediaBuffer(ptr=0x%p, size=%d)", esPacket, size);
-
-                // TODO(nal2annaB): must convert by demux!!!! this is test codec.
-                #if 1
-                while (size > 0) {
-                    UINT32 nal_length = (data[0] << 24) + (data[1] << 16) + (data[2] << 8) + data[3];
-                    data[0] = 0;
-                    data[1] = 0;
-                    data[2] = 0;
-                    data[3] = 1;
-                    data += nal_length + 4;
-                    size -= nal_length + 4;
-                }
-                #endif
             }
             // push es-packet to decoder
             RTNodeAdapter::pushBuffer(decoder, esPacket);

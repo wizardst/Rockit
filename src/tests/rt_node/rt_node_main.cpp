@@ -27,6 +27,7 @@ int main(int argc, char **argv) {
     RtTestCtx *test_ctx = rt_tests_init(const_cast<char *>("Rockit-Node-Test"));
     CHECK_IS_NULL(test_ctx);
 
+#if 0
     /*
      * testcases: unit tests for node & nodebus 
      *    author: martin.cheng@rock-chips.com
@@ -48,6 +49,9 @@ int main(int argc, char **argv) {
 #endif
     rt_tests_add(test_ctx, unit_test_node_audio_decoder,
                            const_cast<char *>("UnitTest-NodeCodecAudioDecoder"));
+#endif
+    rt_tests_add(test_ctx, unit_test_node_simple_player,
+                           const_cast<char *>("UnitTest-NodeCodecSimplePlayer"));
 
     // ! run all testcases
     rt_tests_run(test_ctx, /*mem_dump=*/RT_TRUE);

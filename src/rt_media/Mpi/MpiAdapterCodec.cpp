@@ -61,6 +61,13 @@ MADecodeContext* ma_decode_create(RtMetaData *meta) {
     // get parameters from metadata
     CHECK_EQ(meta->findInt32(kKeyCodecID, reinterpret_cast<INT32 *>(&type)), RT_TRUE);
     mpp_coding_type = (MppCodingType)ma_rt_to_mpp_codec_id(type);
+    if (mpp_coding_type == MPP_VIDEO_CodingUnused) {
+        RT_LOGE("unsupport rockit codec id: 0x%x", type);
+        goto __FAILED;
+    }
+    INT32 width, height;
+    CHECK_EQ(meta->findInt32(kKeyVCodecWidth,    &width), RT_TRUE);
+    CHECK_EQ(meta->findInt32(kKeyVCodecHeight,    &height), RT_TRUE);
 
     err = mpp_init(mpp_ctx, MPP_CTX_DEC, mpp_coding_type);
     CHECK_EQ(err, MPP_OK);
@@ -68,11 +75,11 @@ MADecodeContext* ma_decode_create(RtMetaData *meta) {
     {
         MppFrame frame = NULL;
         mpp_frame_init(&frame);
-        mpp_frame_set_width(frame, 608);
-        mpp_frame_set_height(frame, 1080);
+        mpp_frame_set_width(frame, width);
+        mpp_frame_set_height(frame, height);
         mpp_frame_set_fmt(frame, MPP_FMT_YUV420SP);
-        mpp_frame_set_hor_stride(frame, 608);
-        mpp_frame_set_ver_stride(frame, 1088);
+        mpp_frame_set_hor_stride(frame, width);
+        mpp_frame_set_ver_stride(frame, height);
         mpp_mpi->control(mpp_ctx, MPP_DEC_SET_FRAME_INFO, (MppParam)frame);
         mpp_frame_deinit(&frame);
     }
@@ -218,6 +225,10 @@ RT_RET ma_decode_send_packet(MADecodeContext *ctx, RTMediaBuffer *packet) {
     if (meta->findInt64(kKeyPacketPts, &pts)) {
         mpp_packet_set_pts(pkt, pts);
     }
+    INT32 is_extradata;
+    if (meta->findInt32(kKeyPacketIsExtra, &is_extradata)) {
+        mpp_packet_set_extra_data(pkt);
+    }
     mpp_packet_set_pos(pkt, packet->getData());
     mpp_packet_set_length(pkt, packet->getLength());
 
@@ -271,6 +282,8 @@ RT_RET ma_decode_get_frame(MADecodeContext *ctx, RTMediaBuffer **frame) {
             mpp_buffer_get(frm_grp, &buffer, 1);
             mpp_mpi->control(mpp_ctx, MPP_DEC_SET_EXT_BUF_GROUP, frm_grp);
             mpp_mpi->control(mpp_ctx, MPP_DEC_SET_INFO_CHANGE_READY, NULL);
+        } else if (mpp_frame_get_eos(mpp_frame)) {
+            mpp_buffer_get(frm_grp, &buffer, 1);
         } else {
             buffer = mpp_frame_get_buffer(mpp_frame);
         }
@@ -306,12 +319,11 @@ RT_RET ma_decode_get_frame(MADecodeContext *ctx, RTMediaBuffer **frame) {
             goto __FAILED;
         }
         meta = (*frame)->getMetaData();
+        meta->clear();
         frm_eos = mpp_frame_get_eos(mpp_frame);
         if (frm_eos) {
             meta->setInt32(kKeyFrameEOS, frm_eos);
         }
-
-        meta->clear();
         meta->setInt32(kKeyVCodecWidth,  mpp_frame_get_hor_stride(mpp_frame));
         meta->setInt32(kKeyVCodecHeight, mpp_frame_get_ver_stride(mpp_frame));
         meta->setInt32(kKeyFrameW,       mpp_frame_get_width(mpp_frame));

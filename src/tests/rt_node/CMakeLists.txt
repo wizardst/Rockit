@@ -8,9 +8,10 @@ set(RT_NODE_TEST_SRC
     test_node_codec.cpp
     test_node_ffmpeg_demuxer.cpp
     test_node_audio_codec.cpp
+    test_node_simple_player.cpp
 )
 
 add_executable(rt_node_test ${RT_NODE_TEST_SRC})
-target_link_libraries(rt_node_test ${RT_BASE_STATIC} ${RT_NODE_STATIC})
+target_link_libraries(rt_node_test ${RT_BASE_STATIC} ${RT_NODE_STATIC} ${RT_TASK_STATIC})
 
 message(STATUS "cmake version ${CMAKE_VERSION} [@@]config testcases for rt_node")

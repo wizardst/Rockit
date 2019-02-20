@@ -55,6 +55,8 @@ class HWNodeMpiDecoder : public RTNodeCodec {
     virtual RtMetaData* queryFormat(RTPortType port);
     virtual RTNodeStub* queryStub();
 
+    virtual void signalError(UINT32 what);
+
  protected:
     // override RTNode protected method
     virtual RT_RET onStart();

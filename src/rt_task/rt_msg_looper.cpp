@@ -34,7 +34,7 @@
 
 RTMsgLooper::RTMsgLooper() {
     mEventQueue = deque_create();
-    mHandlers   = array_list_create();
+    mHandler    = RT_NULL;
     mThread     = RT_NULL;
     mLock       = new RtMutex();
     mExecCond   = new RtCondition();
@@ -44,9 +44,8 @@ RTMsgLooper::RTMsgLooper() {
 
 RTMsgLooper::~RTMsgLooper() {
     deque_destory(&mEventQueue);
-    array_list_destroy(mHandlers);
     mEventQueue = RT_NULL;
-    mHandlers   = RT_NULL;
+    mHandler    = RT_NULL;
     rt_safe_delete(mThread);
     rt_safe_delete(mLock);
     rt_safe_delete(mExecCond);
@@ -124,6 +123,9 @@ RT_BOOL RTMsgLooper::msgLoop() {
         // Handler callback will handle this message
         RT_LOGD_IF(DEBUG_FLAG, "message(msg=%p; what=%d) delivering ...", msg, msg->getWhat());
         if (RT_NULL != msg) {
+            if (msg->getTarget() == RT_NULL && mHandler) {
+                msg->setTarget(mHandler);
+            }
             msg->deliver();
             rt_safe_delete(msg);
         }
@@ -135,14 +137,6 @@ RT_BOOL RTMsgLooper::msgLoop() {
     // won't be called again.
 
     return RT_TRUE;
-}
-
-void RTMsgLooper::registerHandler(struct RTMsgHandler* handler) {
-    array_list_add(mHandlers, reinterpret_cast<void*>(handler));
-}
-
-void RTMsgLooper::unregisterHandler(struct RTMsgHandler* handler) {
-    array_list_remove(mHandlers, reinterpret_cast<void*>(handler));
 }
 
 void* rt_thread_looper(void* ptr_this) {

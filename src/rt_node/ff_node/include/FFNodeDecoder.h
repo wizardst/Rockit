@@ -64,6 +64,9 @@ class FFNodeDecoder : public RTNodeCodec {
     virtual RT_RET queueBuffer(RTMediaBuffer*  data, RTPortType port);
 
  private:
+    void signalError(UINT32 what);
+
+ private:
     FACodecContext      *mFFCodec;
     RtThread            *mProcThread;
     RTObjectPool        *mUnusedInputPort;
@@ -74,6 +77,7 @@ class FFNodeDecoder : public RTNodeCodec {
     RtMetaData          *mMetaInput;
     RtMetaData          *mMetaOutput;
     RTTrackParms        *mTrackParms;
+    RTTrackType          mTrackType;
 
     RT_BOOL              mRunning;
     UINT32               mCountPull;

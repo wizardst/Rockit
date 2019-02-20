@@ -79,7 +79,7 @@ CMDPlayer::~CMDPlayer() {
 void CMDPlayer::postRandomMessage(UINT32 msg_cnt) {
     for (UINT32 idx = 0; idx < msg_cnt; idx++) {
         enum CTL_CMD cmd = (enum CTL_CMD)(idx%CMD_MAX);
-        RTMessage* msg = new RTMessage(cmd, this);
+        RTMessage* msg = new RTMessage(cmd, RT_NULL, this);
         RT_LOGE("message(msg=%p; what=%d; name=%s) was created", msg, cmd, mCmdNames[cmd].name);
         mLooper->post(msg, 0);
         RtTime::sleepMs(3000);
@@ -101,7 +101,7 @@ RT_RET unit_test_message(INT32 index, INT32 total) {
     RT_Deque* msg_queue = deque_create();
     for (UINT32 cmd = 0; cmd < MAX_TEST_COUNT; cmd++) {
         if (cmd % 3 == 0) {
-            struct RTMessage* msg = new RTMessage(cmd, RT_NULL);
+            struct RTMessage* msg = new RTMessage(cmd, RT_NULL, RT_NULL);
             // deque_push_head(msg_queue, reinterpret_cast<void*>(msg));
             deque_push_tail(msg_queue, reinterpret_cast<void*>(msg));
         } else {

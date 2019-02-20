@@ -35,8 +35,10 @@ RTMessage::RTMessage() {
     rt_memset(&mData, 0, sizeof(struct RTMsgData));
 }
 
-RTMessage::RTMessage(UINT32 what, struct RTMsgHandler* handler) {
+RTMessage::RTMessage(UINT32 what, RT_PTR data, struct RTMsgHandler* handler) {
+    rt_memset(&mData, 0, sizeof(struct RTMsgData));
     this->setWhat(what);
+    this->setData(data);
     this->setTarget(handler);
 }
 
@@ -46,6 +48,14 @@ void RTMessage::setWhat(UINT32 what) {
 
 const UINT32 RTMessage::getWhat() {
     return mData.mWhat;
+}
+
+void RTMessage::setData(RT_PTR data) {
+    mData.mArgPtr = data;
+}
+
+const RT_PTR RTMessage::getData() {
+    return mData.mArgPtr;
 }
 
 void RTMessage::setWhenUs(UINT64 when) {

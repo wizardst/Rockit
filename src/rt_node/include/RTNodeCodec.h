@@ -37,9 +37,11 @@ class RTNodeCodec : public RTNode {
     enum {
         CB_INPUT_AVAILABLE              = 1,
         CB_OUTPUT_AVAILABLE             = 2,
-        CB_ERROR                        = 3,
-        CB_OUTPUT_FORMAT_CHANGED        = 4,
-        CB_RESOURCE_RECLAIMED           = 5,
+        CB_OUTPUT_FORMAT_CHANGED        = 3,
+        CB_RESOURCE_RECLAIMED           = 4,
+        CB_ERROR_BASE                   = 0x300,
+        CB_ERROR_UNSUPPORT_VIDEO_CODEC  = 0x301,
+        CB_ERROR_UNSUPPORT_AUDIO_CODEC  = 0x302,
     };
 
     RTNodeCodec() {}
@@ -49,6 +51,8 @@ class RTNodeCodec : public RTNode {
     // borrow and return buffer for pool buffer
     virtual RT_RET dequeBuffer(RTMediaBuffer** data, RTPortType port) = 0;
     virtual RT_RET queueBuffer(RTMediaBuffer*  data, RTPortType port) = 0;
+
+    virtual void signalError(UINT32 what) = 0;
 };
 
 #ifdef  __cplusplus

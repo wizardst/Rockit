@@ -241,14 +241,10 @@ __FAILED:
     return NULL;
 }
 
-FACodecContext *fa_decode_create(RtMetaData *meta) {
-    RTTrackType type = RTTRACK_TYPE_VIDEO;
+FACodecContext *fa_decode_create(RtMetaData *meta, RTTrackType type) {
     FACodecContext *ctx = RT_NULL;
     CHECK_IS_NULL(meta);
 
-    if (!meta->findInt32(kKeyCodecType, reinterpret_cast<INT32*>(&type))) {
-        type = RTTRACK_TYPE_VIDEO;
-    }
     switch (type) {
     case RTTRACK_TYPE_VIDEO:
         ctx = fa_video_decode_create(meta);

@@ -184,8 +184,8 @@ INT32 fa_format_query_track(FAFormatContext* fc, UINT32 idx, \
     if ((RT_NULL != fc) && (RT_NULL != fc->mAvfc)) {
         AVFormatContext* avfc = fc->mAvfc;
         for (UINT32 ii = 0; ii < avfc->nb_streams; ii++) {
+            count++;
             if (avfc->streams[ii]->codecpar->codec_type == (AVMediaType)tType) {
-                count++;
                 if ((count-1) == idx) {
                     stream = avfc->streams[ii];
                     if ((RT_NULL != stream) && (RT_NULL != track)) {

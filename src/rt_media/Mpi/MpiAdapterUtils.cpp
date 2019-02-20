@@ -103,7 +103,7 @@ static MAVideoRCModeInfo kMARCModeMappingList[] = {
         if (found) {                                        \
             return map_list[i].rt_parm;                     \
         } else {                                            \
-            RT_LOGE("unknown mpp type: %d", type);          \
+            RT_LOGE("unknown mpp type: 0x%x", type);          \
             return rt_default;                              \
         }                                                   \
     }                                                       \
@@ -119,7 +119,7 @@ static MAVideoRCModeInfo kMARCModeMappingList[] = {
         if (found) {                                        \
             return map_list[i].mpp_parm;                    \
         } else {                                            \
-            RT_LOGE("unknown rt type: %d", type);           \
+            RT_LOGE("unknown rt type: 0x%x", type);           \
             return mpp_default;                             \
         }                                                   \
     }

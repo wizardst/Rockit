@@ -43,7 +43,7 @@ struct FACodecContext {
 class RtMetaData;
 class RTMediaBuffer;
 
-FACodecContext* fa_decode_create(RtMetaData *meta);
+FACodecContext* fa_decode_create(RtMetaData *meta, RTTrackType type);
 void fa_video_decode_destroy(FACodecContext** fc);
 
 FACodecContext* fa_video_encode_create(RtMetaData *meta);

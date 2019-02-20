@@ -181,6 +181,35 @@ RT_RET RTNodeBus::registerCoreStubs() {
     return RT_OK;
 }
 
+RTNodeStub* findStub(RT_NODE_TYPE nType, BUS_LINE_TYPE lType) {
+    RTNodeStub* stub = RT_NULL;
+    switch (nType) {
+    case RT_NODE_TYPE_DEMUXER:
+        stub = &ff_node_demuxer;
+        break;
+    case RT_NODE_TYPE_DECODER:
+        if (lType == BUS_LINE_AUDIO)
+            stub = &ff_node_decoder;
+        else if (lType == BUS_LINE_VIDEO)
+            stub = &hw_node_mpi_decoder;
+        break;
+    case RT_NODE_TYPE_ENCODER:
+        stub = &ff_node_video_encoder;
+        break;
+    case RT_NODE_TYPE_SINK:
+        #ifdef OS_WINDOWS
+        stub = &rt_sink_display_gles;
+        #endif
+        break;
+    case RT_NODE_TYPE_AUDIO_SINK:
+        stub = &rt_sink_audio_alsa;
+        break;
+    default:
+        break;
+    }
+    return stub;
+}
+
 RTNodeStub* findStub(RT_NODE_TYPE nType) {
     RTNodeStub* stub = RT_NULL;
     switch (nType) {
@@ -200,11 +229,13 @@ RTNodeStub* findStub(RT_NODE_TYPE nType) {
         break;
     case RT_NODE_TYPE_AUDIO_SINK:
         stub = &rt_sink_audio_alsa;
+        break;
     default:
         break;
     }
     return stub;
 }
+
 
 RT_RET RTNodeBus::registerStub(RTNodeStub *nStub) {
     RT_ASSERT((RT_NULL != mBusCtx) && (RT_NULL != nStub));

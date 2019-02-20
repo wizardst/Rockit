@@ -90,6 +90,7 @@ enum {
     kKeyPacketIndex      = MKTAG('p', 'i', 'd', 'x'),   // INT32 AVPacket index
     kKeyPacketData       = MKTAG('p', 'd', 'a', 't'),   // AVPacket data
     kKeyPacketEOS        = MKTAG('p', 'e', 'o', 's'),   // INT32 EOS
+    kKeyPacketIsExtra    = MKTAG('p', 'i', 'e', 'e'),   // INT32 is extradata
 
     // memory features
     kKeyMemAlign            = MKTAG('m', 'e', 'a', 'l'),  // INT32

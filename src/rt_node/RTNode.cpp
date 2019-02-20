@@ -96,6 +96,11 @@ RT_RET RTNodeAdapter::runCmd(RTNode* pNode, RT_NODE_CMD cmd, RtMetaData* metadat
     return CHECK_ERR(pNode, err);
 }
 
+RT_RET RTNodeAdapter::setEventLooper(RTNode* pNode, RTMsgLooper* eventLooper) {
+    RT_RET err = pNode->setEventLooper(eventLooper);
+    return CHECK_ERR(pNode, err);
+}
+
 RtMetaData* RTNodeAdapter::queryFormat(RTNode* pNode, RTPortType port) {
     return pNode->queryFormat(port);
 }

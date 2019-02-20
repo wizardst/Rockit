@@ -38,8 +38,9 @@ struct RTMsgLooper {
     RTMsgLooper();
     virtual ~RTMsgLooper();
 
-    void   registerHandler(struct RTMsgHandler* handler);
-    void unregisterHandler(struct RTMsgHandler* handler);
+    void setHandler(struct RTMsgHandler* handler) {
+        mHandler = handler;
+    }
 
     RT_BOOL msgLoop();
     RT_RET  start(INT32 priority = 0);
@@ -55,13 +56,13 @@ struct RTMsgLooper {
  private:
     friend struct RTMessage;       // post()
 
-    std::string  mName;
-    RT_BOOL      mExitFlag;
-    RT_Deque*    mEventQueue;
-    RtArrayList* mHandlers;
-    RtThread*    mThread;
-    RtMutex*     mLock;
-    RtCondition* mExecCond;
+    std::string          mName;
+    RT_BOOL              mExitFlag;
+    RT_Deque*            mEventQueue;
+    struct RTMsgHandler *mHandler;
+    RtThread*            mThread;
+    RtMutex*             mLock;
+    RtCondition*         mExecCond;
 };
 
 #ifdef __cplusplus

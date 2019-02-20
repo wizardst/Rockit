@@ -37,18 +37,24 @@ struct RTMessage {
         UINT64  mWhenUs;
         UINT32  mArgU32;
         UINT64  mArgU64;
-        RT_PTR* mArgPtr;
+        RT_PTR  mArgPtr;
     };
 
  public:
     RTMessage();
-    RTMessage(UINT32 what, struct RTMsgHandler* handler);
+    RTMessage(UINT32 what, RT_PTR data);
+    RTMessage(UINT32 what, RT_PTR data, struct RTMsgHandler* handler = RT_NULL);
 
     void           setWhat(UINT32 what);
     const UINT32   getWhat();
+    void           setData(RT_PTR data);
+    const RT_PTR   getData();
     void           setWhenUs(UINT64 when);
     const UINT64   getWhenUs();
     void           setTarget(struct RTMsgHandler* handler);
+    struct RTMsgHandler *getTarget() {
+        return mHandler;
+    }
     RT_RET         post(INT64 delayUs = 0);
     RTMessage*     dup();   // performs message deep copy
     const char*    toString();

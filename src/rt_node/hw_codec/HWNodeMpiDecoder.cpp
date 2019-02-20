@@ -18,10 +18,22 @@
  *   Task: hardware mpi decoder
  */
 
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "HWMpiDecoder"
+
+#ifdef DEBUG_FLAG
+#undef DEBUG_FLAG
+#endif
+#define DEBUG_FLAG 0x0
+
+
 #include "HWNodeMpiDecoder.h"       // NOLINT
 #include "RTAllocatorBase.h"        // NOLINT
 #include "RTAllocatorStore.h"       // NOLINT
 #include "MpiAdapterCodec.h"        // NOLINT
+#include "rt_message.h"             // NOLINT
 
 #define MAX_INPUT_BUFFER_COUNT      30
 #define MAX_OUTPUT_BUFFER_COUNT     30
@@ -32,11 +44,11 @@ void* hw_decode_loop(void* ptr_node) {
     return RT_NULL;
 }
 
-RTObject *allocInputBuffer(void *) {
+RTObject *allocHWInputBuffer(void *) {
     return new RTMediaBuffer(NULL, 0);
 }
 
-RTObject *allocOutputBuffer(void *ctx) {
+RTObject *allocHWOutputBuffer(void *ctx) {
     HWNodeMpiDecoder *hw_ctx = reinterpret_cast<HWNodeMpiDecoder*>(ctx);
     RTAllocator *allocator = hw_ctx->getLinearAllocator();
     RTMediaBuffer *buffer = RT_NULL;
@@ -106,13 +118,14 @@ RT_RET HWNodeMpiDecoder::init(RtMetaData *metadata) {
         return ret;
     }
 
-    mUnusedInputPort = new RTObjectPool(allocInputBuffer, MAX_INPUT_BUFFER_COUNT, this);
+    mUnusedInputPort = new RTObjectPool(allocHWInputBuffer, MAX_INPUT_BUFFER_COUNT, this);
     mUsedInputPort = new RTObjectPool(RT_NULL, MAX_INPUT_BUFFER_COUNT);
-    mAvailOutputPort = new RTObjectPool(allocOutputBuffer, MAX_OUTPUT_BUFFER_COUNT, this);
+    mAvailOutputPort = new RTObjectPool(allocHWOutputBuffer, MAX_OUTPUT_BUFFER_COUNT, this);
 
     mMpiAdapterCtx = ma_decode_create(metadata);
     if (mMpiAdapterCtx == RT_NULL) {
         RT_LOGE("mpi adapter context create failed!");
+        signalError(CB_ERROR_UNSUPPORT_VIDEO_CODEC);
         return RT_ERR_UNKNOWN;
     }
 
@@ -190,6 +203,12 @@ RT_RET HWNodeMpiDecoder::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
     }
 
     return err;
+}
+
+void HWNodeMpiDecoder::signalError(UINT32 what) {
+    RTMessage *msg = new RTMessage();
+    msg->setWhat(what);
+    mEventLooper->post(msg, 0ll);
 }
 
 RT_RET HWNodeMpiDecoder::setEventLooper(RTMsgLooper* eventLooper) {
@@ -273,7 +292,7 @@ RT_RET HWNodeMpiDecoder::dequeBuffer(RTMediaBuffer** data, RTPortType port) {
     if (!*data) {
         return RT_ERR_UNKNOWN;
     }
-
+    (*data)->getMetaData()->setInt32(kKeyCodecType, RTTRACK_TYPE_VIDEO);
     return RT_OK;
 }
 

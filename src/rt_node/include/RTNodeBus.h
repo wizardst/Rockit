@@ -42,6 +42,7 @@ typedef enum _BUS_LINE_TYPE {
 } BUS_LINE_TYPE;
 
 RTNodeStub* findStub(RT_NODE_TYPE nType);
+RTNodeStub* findStub(RT_NODE_TYPE nType, BUS_LINE_TYPE lType);
 
 class RTNodeBus {
  public:
