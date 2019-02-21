@@ -32,10 +32,11 @@ set(RT_MEDIA_SRC
     RTAllocator/RTAllocatorStore.cpp
     Mpi/MpiAdapterUtils.cpp
     Mpi/MpiAdapterCodec.cpp
+    ALSALib/ALSAAapterImpl.cpp
 )
 
 add_library(${RT_MEDIA_STATIC} STATIC ${RT_MEDIA_SRC})
 set_target_properties(${RT_MEDIA_STATIC} PROPERTIES FOLDER "rt_media")
-target_link_libraries(${RT_MEDIA_STATIC} ${RT_BASE_STATIC})
+target_link_libraries(${RT_MEDIA_STATIC} ${RT_BASE_STATIC} -lffmpeg_4_0 -lasound)
 
 message(STATUS "cmake version ${CMAKE_VERSION} [@@]config library: rt_media")

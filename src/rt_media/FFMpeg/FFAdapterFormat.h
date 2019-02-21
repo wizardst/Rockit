@@ -45,6 +45,7 @@ INT32  fa_format_packet_free(void*  raw_pkt);
 INT32 fa_format_query_track(FAFormatContext* fc, UINT32 idx, RTTrackType tType, RTTrackParms* track);
 INT32 fa_format_query_used_track(FAFormatContext* fc, RTTrackType tType);
 INT32 fa_format_select_track(FAFormatContext* fc, UINT32 idx, RTTrackType tType);
+INT32 fa_format_find_track(FAFormatContext* fc, RTTrackType tType);
 INT32 fa_format_find_best_track(FAFormatContext* fc, RTTrackType tType);
 INT32 fa_format_count_tracks(FAFormatContext* fc, RTTrackType tType);
 

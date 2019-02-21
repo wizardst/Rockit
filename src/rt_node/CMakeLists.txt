@@ -18,9 +18,11 @@ set(RT_NODE_SRC
     RTNodeDemuxer.cpp
     RTNodeFilter.cpp
     RTNodeMuxer.cpp
+    RTNodeSink.cpp
     rt_node_define.cpp
     rt_sink/RTSinkDisplayGLES.cpp
     rt_sink/RTSinkDisplayNative.cpp
+    rt_sink/RTSinkAudioALSA.cpp
     ${FF_NODE_SRC}
     hw_codec/HWNodeMpiDecoder.cpp
     hw_codec/HWNodeMpiEncoder.cpp

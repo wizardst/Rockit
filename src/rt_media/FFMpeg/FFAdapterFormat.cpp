@@ -216,6 +216,19 @@ INT32 fa_format_select_track(FAFormatContext* fc, UINT32 idx, RTTrackType tType)
     return -1;
 }
 
+INT32 fa_format_find_track(FAFormatContext* fc, RTTrackType tType) {
+    UINT32 count = 0;
+    if ((RT_NULL != fc) && (RT_NULL != fc->mAvfc)) {
+        AVFormatContext* avfc = fc->mAvfc;
+        for (UINT32 idx = 0; idx < avfc->nb_streams; idx++) {
+            if (avfc->streams[idx]->codecpar->codec_type == (AVMediaType)tType) {
+                return idx;
+            }
+        }
+    }
+    return -1;
+}
+
 INT32 fa_format_find_best_track(FAFormatContext* fc, RTTrackType tType) {
     INT32 bestIdx = -1;
     enum AVMediaType avType;
@@ -234,6 +247,10 @@ INT32 fa_format_find_best_track(FAFormatContext* fc, RTTrackType tType) {
             avType = AVMEDIA_TYPE_UNKNOWN;
         }
         bestIdx = av_find_best_stream(fc->mAvfc, avType, -1, -1, NULL, 0);
+    }
+    if (-1 == bestIdx) {
+        bestIdx = fa_format_find_track(fc, tType);
+        RT_LOGE("Fail to find_best_track, use find_track instead! bestIdx=%d", bestIdx);
     }
     return bestIdx;
 }

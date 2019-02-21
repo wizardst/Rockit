@@ -26,6 +26,7 @@
 #include "FFNodeDecoder.h"    // NOLINT
 #include "FFNodeEncoder.h"    // NOLINT
 #include "FFNodeDemuxer.h"    // NOLINT
+#include "RTSinkAudioALSA.h"  // NOLINT"
 
 #ifdef OS_LINUX
 #include "HWNodeMpiDecoder.h" // NOLINT
@@ -170,6 +171,7 @@ RT_RET RTNodeBus::registerCoreStubs() {
     registerStub(&hw_node_mpi_decoder);
     registerStub(&hw_node_mpi_encoder);
     #endif
+    registerStub(&rt_sink_audio_alsa);
     registerStub(&ff_node_demuxer);
     registerStub(&ff_node_decoder);
     registerStub(&ff_node_video_encoder);
@@ -196,6 +198,8 @@ RTNodeStub* findStub(RT_NODE_TYPE nType) {
         stub = &rt_sink_display_gles;
         #endif
         break;
+    case RT_NODE_TYPE_AUDIO_SINK:
+        stub = &rt_sink_audio_alsa;
     default:
         break;
     }

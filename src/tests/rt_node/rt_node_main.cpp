@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
      * testcases: unit tests for node & nodebus 
      *    author: martin.cheng@rock-chips.com
      */
+#if 0
     rt_tests_add(test_ctx, unit_test_node_bus, const_cast<char *>("UnitTest-NodeBus"));
     rt_tests_add(test_ctx, unit_test_node_data_flow, const_cast<char *>("UnitTest-Dataflow"));
 
@@ -44,6 +45,7 @@ int main(int argc, char **argv) {
                            const_cast<char *>("UnitTest-NodeCodecEncoder"));
     rt_tests_add(test_ctx, unit_test_node_encoder,
                            const_cast<char *>("UnitTest-NodeCodecEncoder"));
+#endif
     rt_tests_add(test_ctx, unit_test_node_audio_decoder,
                            const_cast<char *>("UnitTest-NodeCodecAudioDecoder"));
 

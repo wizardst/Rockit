@@ -30,22 +30,29 @@
 #include "RTMediaMetaKeys.h" // NOLINT
 #include "RTMediaDef.h"      // NOLINT
 #include "FFAdapterUtils.h"  // NOLINT
+#include "RTNodeSink.h"
 
 #ifdef OS_WINDOWS
-#define TEST_URI "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4"
+// #define TEST_URI "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4"
 #else
 //  #define TEST_URI "monkey.ape"
 //  #define TEST_URI "llama_aac_audio.mp4"
 //  #define TEST_URI "bear.mp3"
-#define TEST_URI "test_720.mp4"
 #endif
 
-#define DEC_TEST_OUTPUT_FILE    "dec_output.bin"
+#define TEST_URI "test.mp3"
+
+
+#define DEC_TEST_OUTPUT_FILE    "output.pcm"
 
 RTNode* createRTNode(RT_NODE_TYPE node_type) {
     RTNodeStub* stub     = findStub(node_type);
     RTNode*     node     = stub->mCreateNode();
     return node;
+}
+
+RT_VOID audioCodecBufferCallback(RTNode* pNode, RTMediaBuffer* data) {
+    RTNodeAdapter::queueCodecBuffer(pNode, data, RT_PORT_OUTPUT);
 }
 
 RT_RET unit_test_node_audio_decoder_proc() {
@@ -63,6 +70,7 @@ RT_RET unit_test_node_audio_decoder_proc() {
 
     RTNodeDemuxer *demuxer = reinterpret_cast<RTNodeDemuxer*>(createRTNode(RT_NODE_TYPE_DEMUXER));
     RTNode        *decoder = createRTNode(RT_NODE_TYPE_DECODER);
+    RTNodeSink    *audiosink = reinterpret_cast<RTNodeSink*>(createRTNode(RT_NODE_TYPE_AUDIO_SINK));
     if ((RT_NULL != demuxer)&&(RT_NULL != decoder)) {
         demuxer_meta = new RtMetaData();
         demuxer_meta->setCString(kKeyFormatUri, TEST_URI);
@@ -75,10 +83,15 @@ RT_RET unit_test_node_audio_decoder_proc() {
         RT_LOGE("RTTRACK_TYPE_VIDEO video_idx:%d", video_idx);
         decoder_meta = demuxer->queryTrackMeta(0, RTTRACK_TYPE_AUDIO);
 
+        audiosink->queueCodecBuffer = audioCodecBufferCallback;
+        audiosink->callback_ptr = decoder;
+
         RTNodeAdapter::init(decoder, decoder_meta);
+        RTNodeAdapter::init(audiosink, NULL);
 
         RTNodeAdapter::runCmd(demuxer, RT_NODE_CMD_START, NULL);
         RTNodeAdapter::runCmd(decoder, RT_NODE_CMD_START, NULL);
+        RTNodeAdapter::runCmd(audiosink, RT_NODE_CMD_START, NULL);
 
         RTMediaBuffer *frame = RT_NULL;
         RTMediaBuffer* esPacket;
@@ -113,7 +126,9 @@ RT_RET unit_test_node_audio_decoder_proc() {
                         continue;
                     }
                 }
-            }
+             } else {
+                 continue;
+             }
             // push es-packet to decoder
             RTNodeAdapter::pushBuffer(decoder, esPacket);
 
@@ -126,11 +141,12 @@ RT_RET unit_test_node_audio_decoder_proc() {
                     char* data = reinterpret_cast<char *>(frame->getData());
 
                     if (NULL != write_fd) {
-                        fwrite(frame->getData(), frame->getLength(), 1, write_fd);
-                        fflush(write_fd);
+                    //    fwrite(frame->getData(), frame->getLength(), 1, write_fd);
+                    //    fflush(write_fd);
                     }
+                    RTNodeAdapter::pushBuffer(audiosink, frame);
                 }
-                RTNodeAdapter::queueCodecBuffer(decoder, frame, RT_PORT_OUTPUT);
+              //  RTNodeAdapter::queueCodecBuffer(decoder, frame, RT_PORT_OUTPUT);
                 INT32 eos = 0;
                 frame->getMetaData()->findInt32(kKeyFrameEOS, &eos);
                 if (eos) {
@@ -156,9 +172,12 @@ RT_RET unit_test_node_audio_decoder_proc() {
 
         RTNodeAdapter::runCmd(decoder, RT_NODE_CMD_STOP, NULL);
         RTNodeAdapter::runCmd(demuxer, RT_NODE_CMD_STOP, NULL);
+        RTNodeAdapter::runCmd(audiosink, RT_NODE_CMD_STOP, NULL);
 
         decoder->release();
         demuxer->release();
+        audiosink->release();
+
         if (write_fd) {
             fclose(write_fd);
         }

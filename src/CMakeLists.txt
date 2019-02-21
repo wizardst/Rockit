@@ -8,6 +8,7 @@ include_directories(rt_node/include)
 include_directories(rt_node/ff_node/include)
 include_directories(rt_node/hw_codec/include)
 include_directories(rt_task/include)
+include_directories(rt_media/ALSALib)
 
 add_subdirectory(rt_base)
 add_subdirectory(rt_media)

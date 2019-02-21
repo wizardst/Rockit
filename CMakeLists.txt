@@ -21,6 +21,7 @@ endif (HAS_PTHREAD)
 include_directories(include)
 
 include_directories(third-party/prebuilt/headers/ffmpeg-4.0/include)
+include_directories(third-party/prebuilt/headers/alsa-lib/include)
 link_directories(third-party/prebuilt/arm32)
 
 include_directories(third-party/drm)
