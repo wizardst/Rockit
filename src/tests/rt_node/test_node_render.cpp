@@ -18,9 +18,9 @@
  */
 
 #include "RTMediaData.h"
-#include "RTSinkDisplay.h"    // NOLINT
-#include "RTSinkDisplayGLES.h"    // NOLINT
-#include "RTMediaMetaKeys.h"  // NOLINT
+#include "RTSinkDisplay.h"        // NOLINT
+#include "RTNodeSinkGLES.h"    // NOLINT
+#include "RTMediaMetaKeys.h"      // NOLINT
 
 UINT8* allocVideoBuf(INT32 width, INT32 height) {
     UINT8* pixels = reinterpret_cast<UINT8*>(rt_malloc_size(UINT8, width*height*3));

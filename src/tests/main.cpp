@@ -30,7 +30,7 @@ RT_RET unit_test_best_practice() {
     RTObject::resetTraces();
 
     /* your unit test */
-    unit_test_node_bus(0, 0);
+    unit_test_node_decoder_with_render(0, 0);
 
     rt_mem_record_dump();
     RTObject::dumpTraces();

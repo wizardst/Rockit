@@ -14,15 +14,20 @@
  * limitations under the License.
  *
  * author: martin.cheng@rock-chips.com
- *   date: 20190122
+ *   date: 20190225
  */
 
-#include "RTSinkDisplayGLES.h"  // NOLINT
+#include "RTNodeSinkGLES.h"     // NOLINT
 #include "RTMediaData.h"        // NOLINT
 #include "rt_thread.h"          // NOLINT
 #include "RTGLApp.h"            // NOLINT
 
-typedef struct _RTSinkDisplayCtx {
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "NodeSinkAWindow"
+
+typedef struct _RTSinkGLESCtx {
     RtMetaData         *mMetaInput;
     RtMutex            *mLockPacket;
     RTMsgLooper        *mEventLooper;
@@ -30,10 +35,10 @@ typedef struct _RTSinkDisplayCtx {
     RtThread           *mThread;
     RTGLApp            *mGLApp;
     UINT32              mLoop;
-} RTSinkDisplayCtx;
+} RTSinkGLESCtx;
 
 void* render_loop(void* ptr_node) {
-    RTSinkDisplayGLES* sink = reinterpret_cast<RTSinkDisplayGLES*>(ptr_node);
+    RTNodeSinkGLES* sink = reinterpret_cast<RTNodeSinkGLES*>(ptr_node);
     if (RT_NULL != sink) {
         sink->runTask();
     }
@@ -41,14 +46,14 @@ void* render_loop(void* ptr_node) {
 }
 
 void FrameUpdate(void* ptr_node, RT_FLOAT interval) {
-    RTSinkDisplayGLES* sink = reinterpret_cast<RTSinkDisplayGLES*>(ptr_node);
+    RTNodeSinkGLES* sink = reinterpret_cast<RTNodeSinkGLES*>(ptr_node);
     if (RT_NULL != sink) {
         sink->onFireFrame();
     }
 }
 
-RT_RET RTSinkDisplayGLES::runTask() {
-    RTSinkDisplayCtx* ctx = reinterpret_cast<RTSinkDisplayCtx*>(mNodeContext);
+RT_RET RTNodeSinkGLES::runTask() {
+    RTSinkGLESCtx* ctx = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
 
     INT32 video_w = 0;
     INT32 video_h = 0;
@@ -63,9 +68,9 @@ RT_RET RTSinkDisplayGLES::runTask() {
     return RT_OK;
 }
 
-RTSinkDisplayGLES::RTSinkDisplayGLES() {
-    RTSinkDisplayCtx* ctx = rt_malloc(RTSinkDisplayCtx);
-    rt_memset(ctx, 0, sizeof(RTSinkDisplayCtx));
+RTNodeSinkGLES::RTNodeSinkGLES() {
+    RTSinkGLESCtx* ctx = rt_malloc(RTSinkGLESCtx);
+    rt_memset(ctx, 0, sizeof(RTSinkGLESCtx));
 
     ctx->mLockPacket = new RtMutex();
     RT_ASSERT(RT_NULL != ctx->mLockPacket);
@@ -73,23 +78,20 @@ RTSinkDisplayGLES::RTSinkDisplayGLES() {
     ctx->mDequePacket = deque_create(3);
     RT_ASSERT(RT_NULL != ctx->mDequePacket);
 
-    ctx->mThread = new RtThread(render_loop, reinterpret_cast<void*>(this));
-    RT_ASSERT(RT_NULL != ctx->mThread);
-
     // save private context to mNodeContext
     mNodeContext = ctx;
 }
 
-RTSinkDisplayGLES::~RTSinkDisplayGLES() {
+RTNodeSinkGLES::~RTNodeSinkGLES() {
     release();
     mNodeContext = RT_NULL;
 }
 
 // override RTSinkDisplay public methods
-RT_RET RTSinkDisplayGLES::onFireFrame() {
+RT_RET RTNodeSinkGLES::onFireFrame() {
     RTMediaBuffer*     media_buf = RT_NULL;
     RTFrame            rt_frame  = {0};
-    RTSinkDisplayCtx*  ctx       = reinterpret_cast<RTSinkDisplayCtx*>(mNodeContext);
+    RTSinkGLESCtx*  ctx       = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
     pullBuffer(&media_buf);
     if (RT_NULL != media_buf) {
         rt_mediabuf_goto_frame(media_buf, &rt_frame);
@@ -101,21 +103,21 @@ RT_RET RTSinkDisplayGLES::onFireFrame() {
 }
 
 // override RTNode public methods
-RT_RET RTSinkDisplayGLES::init(RtMetaData *metadata) {
+RT_RET RTNodeSinkGLES::init(RtMetaData *metadata) {
     INT32 video_w = 0;
     INT32 video_h = 0;
-    RTSinkDisplayCtx* ctx = reinterpret_cast<RTSinkDisplayCtx*>(mNodeContext);
+    RTSinkGLESCtx* ctx = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
     ctx->mMetaInput = metadata;
     ctx->mMetaInput->findInt32(kKeyFrameW, &video_w);
     ctx->mMetaInput->findInt32(kKeyFrameH, &video_h);
 
     ctx->mThread = new RtThread(render_loop, reinterpret_cast<void*>(this));
-    ctx->mThread->setName("SinkDisplayGLES");
+    ctx->mThread->setName("SinkGLES2.0");
     return RT_OK;
 }
 
-RT_RET RTSinkDisplayGLES::release() {
-    RTSinkDisplayCtx* ctx = reinterpret_cast<RTSinkDisplayCtx*>(mNodeContext);
+RT_RET RTNodeSinkGLES::release() {
+    RTSinkGLESCtx* ctx = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
     RT_ASSERT(RT_NULL != ctx);
 
     if (RT_NULL != ctx->mLockPacket) {
@@ -135,12 +137,12 @@ RT_RET RTSinkDisplayGLES::release() {
     return RT_OK;
 }
 
-RT_RET RTSinkDisplayGLES::pullBuffer(RTMediaBuffer **media_buf) {
-    // make media_buf RT_NULL only.
+RT_RET RTNodeSinkGLES::pullBuffer(RTMediaBuffer **media_buf) {
+    // make media_buf RT_NULL only.NodeSink doesn't allocate buffer
     *media_buf  = RT_NULL;
     RT_RET  err = RT_ERR_NULL_PTR;
-    RTSinkDisplayCtx* ctx   = reinterpret_cast<RTSinkDisplayCtx*>(mNodeContext);
-    RT_DequeEntry     entry = deque_pop(ctx->mDequePacket);
+    RTSinkGLESCtx*  ctx   = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
+    RT_DequeEntry   entry = deque_pop(ctx->mDequePacket);
     if (RT_NULL != entry.data) {
          *media_buf = reinterpret_cast<RTMediaBuffer*>(entry.data);
          err = RT_OK;
@@ -148,10 +150,10 @@ RT_RET RTSinkDisplayGLES::pullBuffer(RTMediaBuffer **media_buf) {
     return err;
 }
 
-RT_RET RTSinkDisplayGLES::pushBuffer(RTMediaBuffer*  media_buf) {
+RT_RET RTNodeSinkGLES::pushBuffer(RTMediaBuffer*  media_buf) {
     RTFrame rt_frame;
     RT_RET  err = RT_ERR_NULL_PTR;
-    RTSinkDisplayCtx* ctx = reinterpret_cast<RTSinkDisplayCtx*>(mNodeContext);
+    RTSinkGLESCtx* ctx = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
     RT_ASSERT(RT_NULL != ctx);
 
     if (RT_NULL != media_buf) {
@@ -164,7 +166,7 @@ RT_RET RTSinkDisplayGLES::pushBuffer(RTMediaBuffer*  media_buf) {
     return err;
 }
 
-RT_RET RTSinkDisplayGLES::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
+RT_RET RTNodeSinkGLES::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
     RT_RET err = RT_OK;
     switch (cmd) {
     case RT_NODE_CMD_INIT:
@@ -191,59 +193,59 @@ RT_RET RTSinkDisplayGLES::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
     return err;
 }
 
-RT_RET RTSinkDisplayGLES::setEventLooper(RTMsgLooper* eventLooper) {
-    RTSinkDisplayCtx* ctx = reinterpret_cast<RTSinkDisplayCtx*>(mNodeContext);
+RT_RET RTNodeSinkGLES::setEventLooper(RTMsgLooper* eventLooper) {
+    RTSinkGLESCtx* ctx = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
     ctx->mEventLooper = eventLooper;
     return RT_OK;
 }
 
-RtMetaData* RTSinkDisplayGLES::queryFormat(RTPortType port) {
-    RTSinkDisplayCtx* ctx = reinterpret_cast<RTSinkDisplayCtx*>(mNodeContext);
+RtMetaData* RTNodeSinkGLES::queryFormat(RTPortType port) {
+    RTSinkGLESCtx* ctx = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
     if (RT_PORT_INPUT == port) {
         return ctx->mMetaInput;
     }
     return RT_NULL;
 }
 
-RTNodeStub* RTSinkDisplayGLES::queryStub() {
+RTNodeStub* RTNodeSinkGLES::queryStub() {
     return &rt_sink_display_gles;
 }
 
 // override RTNode protected method
-RT_RET RTSinkDisplayGLES::onStart() {
+RT_RET RTNodeSinkGLES::onStart() {
     RT_RET            err = RT_OK;
-    RTSinkDisplayCtx* ctx = reinterpret_cast<RTSinkDisplayCtx*>(mNodeContext);
+    RTSinkGLESCtx* ctx = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
     ctx->mLoop = RT_FALSE;
     ctx->mThread->start();
     return err;
 }
 
-RT_RET RTSinkDisplayGLES::onPause() {
+RT_RET RTNodeSinkGLES::onPause() {
     return RT_ERR_UNIMPLIMENTED;
 }
 
-RT_RET RTSinkDisplayGLES::onStop() {
-    RTSinkDisplayCtx* ctx = reinterpret_cast<RTSinkDisplayCtx*>(mNodeContext);
+RT_RET RTNodeSinkGLES::onStop() {
+    RTSinkGLESCtx* ctx = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
     ctx->mThread->join();
+    return RT_OK;
+}
+
+RT_RET RTNodeSinkGLES::onReset() {
     return RT_ERR_UNIMPLIMENTED;
 }
 
-RT_RET RTSinkDisplayGLES::onReset() {
-    return RT_ERR_UNIMPLIMENTED;
-}
-
-RT_RET RTSinkDisplayGLES::onFlush() {
+RT_RET RTNodeSinkGLES::onFlush() {
     return RT_ERR_UNIMPLIMENTED;
 }
 
 static RTNode* createSinkDisplay() {
-    return new RTSinkDisplayGLES();
+    return new RTNodeSinkGLES();
 }
 
 struct RTNodeStub rt_sink_display_gles {
     .mCreateNode     = createSinkDisplay,
     .mNodeType       = RT_NODE_TYPE_SINK,
     .mUsePool        = RT_FALSE,
-    .mNodeName       = "rt_sink_display_gles",
+    .mNodeName       = "rt_sink_gles2.0",
     .mNodeVersion    = "v1.0",
 };

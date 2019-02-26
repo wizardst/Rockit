@@ -29,6 +29,9 @@ include_directories(third-party/drm)
 # linked mpp
 include_directories(third-party/prebuilt/headers/mpp)
 
+# linked sink-osal (AWindow/AudioTrack/GLES)
+include_directories(third-party/prebuilt/headers/sink-osal)
+
 add_subdirectory(src)
 
 message(STATUS "cmake version ${CMAKE_VERSION}")

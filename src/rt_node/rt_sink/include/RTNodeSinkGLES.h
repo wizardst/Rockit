@@ -17,16 +17,16 @@
  *   date: 20190122
  */
 
-#ifndef SRC_RT_NODE_RT_SINK_INCLUDE_RTSINKDISPLAYGLES_H_
-#define SRC_RT_NODE_RT_SINK_INCLUDE_RTSINKDISPLAYGLES_H_
+#ifndef SRC_RT_NODE_RT_SINK_INCLUDE_RTNODESINKGLES_H_
+#define SRC_RT_NODE_RT_SINK_INCLUDE_RTNODESINKGLES_H_
 
 #include "RTNode.h"    // NOLINT
 #include "rt_header.h" // NOLINT
 
-class RTSinkDisplayGLES : public RTNode {
+class RTNodeSinkGLES : public RTNode {
  public:
-    RTSinkDisplayGLES();
-    virtual ~RTSinkDisplayGLES();
+    RTNodeSinkGLES();
+    virtual ~RTNodeSinkGLES();
     RT_RET runTask();
 
  public:
@@ -59,4 +59,4 @@ class RTSinkDisplayGLES : public RTNode {
 
 extern struct RTNodeStub rt_sink_display_gles;
 
-#endif  // SRC_RT_NODE_RT_SINK_INCLUDE_RTSINKDISPLAYGLES_H_
+#endif  // SRC_RT_NODE_RT_SINK_INCLUDE_RTNODESINKGLES_H_

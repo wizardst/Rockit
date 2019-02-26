@@ -27,8 +27,8 @@ set(ROCKIT_TEST_SRC
     rt_base/test_base_memory.cpp
     rt_base/test_base_mutex_thread.cpp
     # Testcase for RT_NODE
-    rt_node/test_node_bus.cpp
-    rt_node/test_node_data_flow.cpp
+    rt_node/test_node_codec_with_render.cpp
+    # rt_node/test_node_data_flow.cpp
     # Testcase for RT_TASK
     rt_task/test_task_taskpool.cpp
 )

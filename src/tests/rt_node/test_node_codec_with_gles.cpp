@@ -265,11 +265,11 @@ RT_RET unit_test_node_encoder_proc() {
 }
 
 
-RT_RET unit_test_node_decoder(INT32 index, INT32 total) {
+RT_RET unit_test_node_decoder_with_gles(INT32 index, INT32 total) {
     return unit_test_node_decoder_proc();
 }
 
-RT_RET unit_test_node_encoder(INT32 index, INT32 total) {
+RT_RET unit_test_node_encoder_with_gles(INT32 index, INT32 total) {
     return unit_test_node_encoder_proc();
 }
 

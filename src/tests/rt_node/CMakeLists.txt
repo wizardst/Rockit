@@ -5,7 +5,8 @@ set(RT_NODE_TEST_SRC
     rt_node_main.cpp
     test_node_bus.cpp
     test_node_data_flow.cpp
-    test_node_codec.cpp
+    test_node_codec_with_gles.cpp
+    test_node_codec_with_render.cpp
     test_node_ffmpeg_demuxer.cpp
     test_node_audio_codec.cpp
     test_node_simple_player.cpp
