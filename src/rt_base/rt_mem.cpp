@@ -45,7 +45,7 @@
 static UINT8 debug = 0;
 static RTMemService _gMemService;
 
-void *rt_mem_malloc(const char *caller, UINT32 size) {
+void *rt_mem_malloc(const char *caller, size_t size) {
     UINT32 size_align = MEM_ALIGNED(size);
     UINT32 size_real = (debug & MEM_EXT_ROOM) ? (size_align + 2 * MEM_ALIGN) :
                        (size_align);
@@ -59,14 +59,14 @@ void *rt_mem_malloc(const char *caller, UINT32 size) {
     return ptr;
 }
 
-void *rt_mem_calloc(const char *caller, UINT32 size) {
+void *rt_mem_calloc(const char *caller, size_t size) {
     void *ptr = rt_mem_malloc(caller, size);
     if (ptr)
         memset(ptr, 0, size);
     return ptr;
 }
 
-void *rt_mem_realloc(const char *caller, void *ptr, UINT32 size) {
+void *rt_mem_realloc(const char *caller, void *ptr, size_t size) {
     void *ret;
 
     if (NULL == ptr)

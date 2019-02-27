@@ -119,8 +119,8 @@ void rt_hash_table_dump(struct RtHashTable *ht) {
         idx    = 0;
         list = &(ht->buckets[bucket]);
         for (node = list->next; node != RT_NULL; node = node->next) {
-            RT_LOGE("buckets[%02d:%02d]: %p, node->key:%03d, node->data:%p",
-                         bucket, idx++, node, (UINT32)node->key, node->data);
+            RT_LOGE("buckets[%02d:%02d]: %p, node->key:%p, node->data:%p",
+                         bucket, idx++, node, node->key, node->data);
         }
     }
 }
@@ -226,7 +226,8 @@ UINT32 hash_string_func(const void *key) {
 UINT32 hash_ptr_func(UINT32 bucktes, const void *key) {
     // return *((UINT32 *)(key)) % bucktes;
     // return (UINT32)((uintptr_t) key / sizeof(void *));
-    return ((UINT32)key) % bucktes;
+    UINT32 iKey = reinterpret_cast<uintptr_t>(key);
+    return (iKey % bucktes);
 }
 
 UINT32 hash_ptr_compare(const void *key1, const void *key2) {

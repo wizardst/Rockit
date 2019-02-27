@@ -154,14 +154,14 @@ UINT32 array_list_get_size(RtArrayList* self) {
     return self->size;
 }
 
-void* array_list_get_data(RtArrayList* self, UINT32 index) {
+void* array_list_get_data(RtArrayList* self, size_t index) {
     if (index < self->size) {
         return self->entries[index].data;
     }
     return RT_NULL;
 }
 
-RtArrayListEntry* array_list_get_entry(RtArrayList* self, UINT32 index) {
+RtArrayListEntry* array_list_get_entry(RtArrayList* self, size_t index) {
     if (index < self->size) {
         return &(self->entries[index]);
     }
@@ -169,7 +169,7 @@ RtArrayListEntry* array_list_get_entry(RtArrayList* self, UINT32 index) {
 }
 
 
-INT8 array_list_set(RtArrayList* self, UINT32 index, void* element) {
+INT8 array_list_set(RtArrayList* self, size_t index, void* element) {
     if (index < self->size) {
         self->entries[index].data = element;
         return RT_OK;

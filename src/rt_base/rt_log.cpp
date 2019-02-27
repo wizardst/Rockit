@@ -26,10 +26,6 @@
 
 typedef void (*rt_log_callback)(const char*, const char*, va_list);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static UINT32   rt_log_flag = 0;
 static RtMutex* rt_log_lock = RT_NULL;
 
@@ -70,8 +66,4 @@ void rt_err(const char *tag, const char *fmt, const char *fname,
     rt_log_full(rt_os_err, tag, fmt, fname, row, args);
     va_end(args);
 }
-
-#ifdef __cplusplus
-}
-#endif
 

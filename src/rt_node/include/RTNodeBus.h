@@ -63,7 +63,11 @@ class RTNodeBus : public RTMsgHandler {
  public:
     RTNodeBus();
     ~RTNodeBus();
+
+    /* use metadata to init node_bus */
     RT_RET      autoBuild(NodeBusSetting *setting);
+
+    /* commit control operations */
     RT_RET      reset();
     RT_RET      prepare();
     RT_RET      start();
@@ -71,15 +75,17 @@ class RTNodeBus : public RTMsgHandler {
     RT_RET      stop();
     RT_RET      seekToAsync(INT64 usec);
     RT_RET      seekTo(INT64 usec);
-    RT_RET      startDataLooper();
     RT_RET      setCurState(UINT32 newState);
     UINT32      getCurState();
 
+    /* decode proc */
+    RT_RET      startDataLooper();
+    RT_RET      startAudioPlayerProc();
+
+    /* node manager */
     RT_RET      summary(INT32 fd, RT_BOOL full = RT_FALSE);
     RT_RET      registerStub(RTNodeStub *nStub);
     RT_RET      registerNode(RTNode     *pNode);
-
-
     RTNodeStub* findStub(RT_NODE_TYPE nType, BUS_LINE_TYPE lType);
     RTNode*     findNode(RT_NODE_TYPE nType, BUS_LINE_TYPE lType);
 

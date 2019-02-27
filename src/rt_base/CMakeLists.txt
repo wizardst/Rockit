@@ -4,6 +4,16 @@ set(RT_BUFFER_SRC
     rt_buffer/rt_buffer.cpp
 )
 
+add_definitions(-DOS_LINUX)
+
+if (HAVE_DRM)
+    add_definitions(-DHAVE_DRM)
+    set(DRM_FILES linux/rt_drm.cpp)
+    message(STATUS "build with DRM Support")
+else()
+    message(STATUS "build without DRM Support")
+endif()
+
 set(RT_BASE_LINUX_SRC
     linux/rt_os_cpu_info.cpp
     linux/rt_os_log.cpp
@@ -11,7 +21,7 @@ set(RT_BASE_LINUX_SRC
     linux/rt_os_mutex.cpp
     linux/rt_os_thread.cpp
     linux/rt_os_time.cpp
-    linux/rt_drm.cpp
+    ${DRM_FILES}
 )
 
 set(RT_BASE_SRC
@@ -20,7 +30,6 @@ set(RT_BASE_SRC
     rt_hash_table.cpp
     rt_linked_list.cpp
     rt_mem.cpp
-
     rt_log.cpp
     rt_string_utils.cpp
     rt_test.cpp

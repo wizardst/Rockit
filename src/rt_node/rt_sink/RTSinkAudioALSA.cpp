@@ -56,8 +56,9 @@ RTSinkAudioALSA::~RTSinkAudioALSA() {
 
 RT_RET RTSinkAudioALSA::init(RtMetaData *metadata) {
     mHDMICard = 1;
-    openSoundCard(mHDMICard, 0, metadata);
-    return RT_OK;
+    if (RT_OK != openSoundCard(mHDMICard, 0, metadata)) {
+        RT_LOGE("Fail to openSoundCard");
+    }
 }
 
 RT_RET RTSinkAudioALSA::release() {

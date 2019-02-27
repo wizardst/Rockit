@@ -13,6 +13,6 @@ set(RT_BASE_TEST_SRC
 )
 
 add_executable(rt_base_test ${RT_BASE_TEST_SRC})
-target_link_libraries(rt_base_test ${RT_BASE_STATIC})
+target_link_libraries(rt_base_test ${RT_BASE_STATIC} -pthread )
 
 message(STATUS "cmake version ${CMAKE_VERSION} [@@]config testcases for rt_base, [Done]")

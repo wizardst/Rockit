@@ -33,7 +33,25 @@ set(ROCKIT_TEST_SRC
     rt_task/test_task_taskpool.cpp
 )
 
+if (FFMPEG_SINGLE)
+    set( FFMPEG_LIBS -lffmpeg )
+else()
+    set( FFMPEG_LIBS
+        ${LINUX_SYSROOT}/usr/lib/libavformat.so
+        ${LINUX_SYSROOT}/usr/lib/libavutil.so
+        ${LINUX_SYSROOT}/usr/lib/libavcodec.so
+        ${LINUX_SYSROOT}/usr/lib/libswresample.so
+    )
+endif()
+
+if (HAVE_MPI)
+    set( MPI_LIBS -lmpp -lsink_osal)
+    message(STATUS "build with RK-MPI Support")
+else()
+    message(STATUS "build without RK-MPI Support")
+endif()
+
 add_executable(rockit_test ${ROCKIT_TEST_SRC})
-target_link_libraries(rockit_test ${RT_BASE_STATIC} ${RT_MEDIA_STATIC} ${RT_NODE_STATIC} ${RT_TASK_STATIC})
+target_link_libraries(rockit_test ${RT_BASE_STATIC} ${RT_MEDIA_STATIC} ${RT_NODE_STATIC} ${RT_TASK_STATIC} -lasound -pthread ${MPI_LIBS} ${FFMPEG_LIBS} )
 
 message(STATUS "cmake version ${CMAKE_VERSION} [@@]config testcase(rockit_test), [Done]")

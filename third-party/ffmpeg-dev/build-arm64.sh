@@ -11,10 +11,13 @@
 # @Todo: verify default opus decoder availability
 # @Todo: deep detection for android level compatibility
 #
+# ${HOME_NDK}/sysroot/usr/include/media
+# ${HOME_NDK}/platforms/android-XX/arch-arm/usr/lib/libmediandk.so
+#
 
 HOME_NDK=/home/mid_sdk/android-ndk-r16b
 
-TARGET_PLATFORM_LEVEL=24
+TARGET_PLATFORM_LEVEL=23
 SYS_ROOT=${HOME_NDK}/platforms/android-${TARGET_PLATFORM_LEVEL}/arch-arm64
 SYS_HEADER=${HOME_NDK}/sysroot
 TOOLCHAINS=${HOME_NDK}/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64
@@ -80,7 +83,7 @@ fi
                         -Wno-attributes -Wno-unused-function \
                         -Wno-psabi -fno-short-enums \
                         -fno-strict-aliasing \
-                        -finline-limit=300 ${OPTIMIZE_CFLAGS} " \
+                        -finline-limit=300 ${OPTIMIZE_CFLAGS}" \
             --disable-shared \
             --disable-debug \
             --enable-static \
@@ -97,7 +100,7 @@ fi
             --enable-decoders \
             --disable-muxers \
             --enable-demuxers \
-            --disable-swscale  \
+            --disable-swscale \
             --disable-swscale-alpha \
             --disable-ffmpeg \
             --disable-ffplay \
@@ -127,22 +130,26 @@ make -j8 install
 #adds -fuse-ld=bfd and -fuse-ld=gold options to GCC driver.  It changes
 #collect2.c to pick either ld.bfd or ld.gold.
 
+ls ${TOOLCHAINS}/bin/${OS_CROSS}-ar
+ls $TOOLCHAINS/bin/${OS_CROSS}-ld
+ls ${TOOLCHAINS}/lib/gcc/${OS_CROSS}/4.9.x/libgcc.a
+
 ${TOOLCHAINS}/bin/${OS_CROSS}-ar d libavcodec/libavcodec.a inverse.o
 
-$TOOLCHAINS/bin/${OS_CROSS}-ld \
+rm ../prebuilt/arm64/libffmpeg* -rf
+${TOOLCHAINS}/bin/${OS_CROSS}-ld \
+          -rpath-link=${SYS_ROOT}/usr/lib \
           -L${SYS_ROOT}/usr/lib \
-          -L${PREFIX}/lib \
           -L${HOME_PREBUILT}/arm64 \
+          -soname libffmpeg.so -shared -nostdlib  -z noexecstack -Bsymbolic \
+          --whole-archive --no-undefined -o ${PREFIX}/libffmpeg.so \
           libavcodec/libavcodec.a libavformat/libavformat.a \
           libavutil/libavutil.a libswresample/libswresample.a \
-          -soname libffmpeg.so -shared -o ${PREFIX}/libffmpeg.so \
           -lc -lm -lz -ldl -llog -lssl -lcrypto -lopus \
-          -z noexecstack -Bsymbolic --whole-archive \
-          --no-undefined \
           --dynamic-linker=/system/bin/linker \
           ${TOOLCHAINS}/lib/gcc/${OS_CROSS}/4.9.x/libgcc.a
 
-rm ../prebuilt/arm64/libffmpeg.so -rf
 cp ${PREFIX}/libffmpeg.so ../prebuilt/arm64/libffmpeg.so -rf
 rm ../prebuilt/headers/ffmpeg-4.0/include -rf
 cp ${PREFIX}/include ../prebuilt/headers/ffmpeg-4.0/ -rf
+ls -alh ../prebuilt/arm64/

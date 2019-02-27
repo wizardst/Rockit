@@ -57,10 +57,6 @@
 #define rt_safe_delete(p) { if (p) {delete(p); (p)=NULL;} }
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void *rt_mem_malloc(const char *caller, size_t size);
 void *rt_mem_calloc(const char *caller, size_t size);
 void *rt_mem_realloc(const char *caller, void *ptr, size_t size);
@@ -71,9 +67,5 @@ void      *rt_memcpy(void *dst, const void *src, size_t n);
 
 void rt_mem_record_dump();
 void rt_mem_record_reset();
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif  // SRC_RT_BASE_INCLUDE_RT_MEM_H_

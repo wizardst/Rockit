@@ -42,7 +42,7 @@ __FAILED:
 RtTestCtx *rt_tests_init(char *name) {
     RtTestCtx *ctx = rt_malloc(RtTestCtx);
     CHECK_IS_NULL(ctx);
-    memset(ctx, 0, sizeof(RtTestCtx));
+    rt_memset(ctx, 0, sizeof(RtTestCtx));
 
     /* init params */
     CHECK_IS_NULL(name);
@@ -67,7 +67,7 @@ RT_RET rt_tests_run(RtTestCtx *ctx, RT_BOOL mem_dump) {
     for (int i = 0; i < total_count; i++) {
         RtTestNode *node = NULL;
         char full_name[256];
-        memset(full_name, 0, 256);
+        rt_memset(full_name, 0, 256);
         node = reinterpret_cast<RtTestNode *>
                    (array_list_get_data(ctx->list, 0));
         CHECK_IS_NULL(node);

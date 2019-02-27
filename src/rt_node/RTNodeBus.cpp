@@ -22,7 +22,9 @@
 #include "RTMediaMetaKeys.h"  // NOLINT
 #include "RTNodeBus.h"        // NOLINT
 #include "RTNodeDemuxer.h"    // NOLINT
+#include "RTNodeSink.h"       // NOLINT
 #include "RTNodeHeader.h"     // NOLINT
+
 #include "FFNodeDecoder.h"    // NOLINT
 #include "FFNodeEncoder.h"    // NOLINT
 #include "FFNodeDemuxer.h"    // NOLINT
@@ -230,6 +232,8 @@ RT_RET RTNodeBus::start() {
       case RTM_PLAYER_PAUSED:
         // @TODO: do resume player
         this->excuteCommand(RT_NODE_CMD_START);
+        // @TODO: decode proc with thread
+        this->startAudioPlayerProc();
 
         msg = new RTMessage(RT_MEDIA_STARTED, RT_NULL, this);
         mBusCtx->mLooper->send(msg, 0);
@@ -374,7 +378,7 @@ RT_RET RTNodeBus::summary(INT32 fd, RT_BOOL full /*= RT_FALSE*/) {
 
 RT_RET RTNodeBus::registerCoreStubs() {
     RT_ASSERT(RT_NULL != mBusCtx);
-    #ifdef RK_HW_CODEC
+    #ifdef HAVE_MPI
     registerStub(&hw_node_mpi_decoder);
     registerStub(&hw_node_mpi_encoder);
     #endif
@@ -401,7 +405,7 @@ RTNodeStub* findStub(RT_NODE_TYPE nType, BUS_LINE_TYPE lType) {
         if (lType == BUS_LINE_AUDIO) {
             stub = &ff_node_decoder;
         } else if (lType == BUS_LINE_VIDEO) {
-            #ifdef OS_LINUX
+            #ifdef HAVE_MPI
             stub = &hw_node_mpi_decoder;
             #endif
             #ifdef OS_WINDOWS
@@ -513,6 +517,88 @@ RT_RET RTNodeBus::nodeChainDumper(BUS_LINE_TYPE lType) {
     }
 
     return RT_OK;
+}
+
+RT_VOID audio_sink_feed_callback(RTNode* pNode, RTMediaBuffer* data) {
+    RTNodeAdapter::queueCodecBuffer(pNode, data, RT_PORT_OUTPUT);
+}
+
+RT_RET RTNodeBus::startAudioPlayerProc() {
+    RTNodeDemuxer *demuxer = mBusCtx->mDemuxer;
+    RTNode        *decoder = mBusCtx->mRootNodes[BUS_LINE_AUDIO];
+    RTNodeSink    *audiosink = RT_NULL;
+    if (RT_NULL != decoder) {
+        audiosink = reinterpret_cast<RTNodeSink*>(decoder->mNext);
+        audiosink->queueCodecBuffer = audio_sink_feed_callback;
+        audiosink->callback_ptr     = decoder;
+    }
+    INT32 audio_idx  = demuxer->queryTrackUsed(RTTRACK_TYPE_AUDIO);
+
+
+    if ((RT_NULL != demuxer)&&(RT_NULL != decoder)) {
+        RTMediaBuffer *frame = RT_NULL;
+        RTMediaBuffer* esPacket;
+
+        do {
+            // deqeue buffer from object pool
+            RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
+            if (RT_NULL != esPacket) {
+                RT_BOOL got_pkt = RT_FALSE;
+                while (!got_pkt) {
+                    // save es-packet to buffer
+                    while (RTNodeAdapter::pullBuffer(demuxer, &esPacket) != RT_OK) {
+                        RtTime::sleepMs(10);
+                    }
+                    INT32 track_index = 0;
+                    esPacket->getMetaData()->findInt32(kKeyPacketIndex, &track_index);
+
+                    RT_LOGD("track_index: %d, audio_idx: %d", track_index, audio_idx);
+                    if (track_index == audio_idx) {
+                        UINT8 *data = reinterpret_cast<UINT8 *>(esPacket->getData());
+                        UINT32 size = esPacket->getSize();
+                        RT_LOGD("NEW audio MediaBuffer(ptr=0x%p, size=%d)", esPacket, size);
+                        got_pkt = RT_TRUE;
+                    } else {
+                        /* pass other packet */
+                        INT32 eos = 0;
+                        esPacket->getMetaData()->findInt32(kKeyFrameEOS, &eos);
+                        if (eos) {
+                            RT_LOGD("receive eos , break");
+                            break;
+                        }
+                        continue;
+                    }
+                }
+             } else {
+                 continue;
+             }
+            // push es-packet to decoder
+            RTNodeAdapter::pushBuffer(decoder, esPacket);
+
+            // pull av-frame from decoder
+            RTNodeAdapter::pullBuffer(decoder, &frame);
+
+            if (frame) {
+                if (frame->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
+                    RT_LOGD("NEW Frame(ptr=0x%p, size=%d)", frame->getData(), frame->getLength());
+                    char* data = reinterpret_cast<char *>(frame->getData());
+
+                    RTNodeAdapter::pushBuffer(audiosink, frame);
+                }
+              //  RTNodeAdapter::queueCodecBuffer(decoder, frame, RT_PORT_OUTPUT);
+                INT32 eos = 0;
+                frame->getMetaData()->findInt32(kKeyFrameEOS, &eos);
+                if (eos) {
+                    RT_LOGD("receive eos , break");
+                    break;
+                }
+                frame = NULL;
+            }
+
+            // dump AVFrame
+            RtTime::sleepMs(5);
+        } while (true);
+    }
 }
 
 RT_RET RTNodeBus::nodeChainDriver(RTNode *pNode, BUS_LINE_TYPE lType) {

@@ -32,6 +32,7 @@ int main(int argc, char **argv) {
      * testcases: unit tests for node&nodebus 
      *    author: martin.cheng@rock-chips.com
      */
+    #ifdef HAVE_MPI
     rt_tests_add(test_ctx,
                  unit_test_display_gles,
                  const_cast<char *>("UnitTest-Display-GLES"));
@@ -39,6 +40,7 @@ int main(int argc, char **argv) {
     rt_tests_add(test_ctx,
                  unit_test_allocator,
                  const_cast<char *>("UnitTest-Allocator"));
+    #endif
 
     // ! run all testcases
     rt_tests_run(test_ctx, /*mem_dump=*/RT_TRUE);

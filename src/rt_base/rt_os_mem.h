@@ -20,21 +20,13 @@
 #ifndef SRC_RT_BASE_RT_OS_MEM_H_
 #define SRC_RT_BASE_RT_OS_MEM_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "rt_type.h" // NOLINT
 
 #define MEM_ALIGN               32
 
-int  rt_os_malloc(void **memptr, UINT32 alignment, UINT32 size);
-int  rt_os_realloc(void *src, void **dst, UINT32 alignment, UINT32 size);
+int  rt_os_malloc(void **memptr, size_t alignment, size_t size);
+int  rt_os_realloc(void *src, void **dst, size_t alignment, size_t size);
 void rt_os_free(void *ptr);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif  // SRC_RT_BASE_RT_OS_MEM_H_
 

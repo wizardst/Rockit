@@ -22,15 +22,7 @@
 
 #define MAX_LINE_LEN 256
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void rt_os_log(const char* tag, const char* msg, va_list list);
 void rt_os_err(const char* tag, const char* msg, va_list list);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif  // SRC_RT_BASE_RT_OS_LOG_H_

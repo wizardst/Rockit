@@ -4,10 +4,40 @@ include_directories(GLRender)
 include_directories(FFMpeg)
 include_directories(Mpi/include)
 
+if (HAVE_MPI)
+    add_definitions(-DHAVE_MPI)
+    set(MPI_FILES
+            Mpi/MpiAdapterUtils.cpp
+            Mpi/MpiAdapterCodec.cpp)
+    message(STATUS "build with RK-MPI Support")
+else()
+    message(STATUS "build without RK-MPI Support")
+endif()
+
+if (HAVE_GLES)
+    add_definitions(-DHAVE_GLES)
+    set(GLES_FILES
+            RTGLApp.cpp
+            RTGLView.cpp
+            RTGLVideoScene.cpp
+            GLRender/MathMat4.cpp
+            GLRender/RTAction.cpp
+            GLRender/RTCamera.cpp
+            GLRender/RTScene.cpp
+            GLRender/RTShaderUtil.cpp
+            GLRender/RTSpriteVideo.cpp
+            GLRender/MathVec4.cpp
+            GLRender/RTActionManager.cpp
+            GLRender/RTDirector.cpp
+            GLRender/RTScheduler.cpp
+            GLRender/RTSprite.cpp
+    )
+    message(STATUS "build with GLES-EGL Support")
+else()
+    message(STATUS "build without GLES-EGL Support")
+endif()
+
 set(RT_MEDIA_SRC
-    RTGLApp.cpp
-    RTGLVideoScene.cpp
-    RTGLView.cpp
     RTMediaBuffer.cpp
     RTMediaData.cpp
     RTObject.cpp
@@ -16,27 +46,34 @@ set(RT_MEDIA_SRC
     FFMpeg/FFAdapterFilter.cpp
     FFMpeg/FFAdapterFormat.cpp
     FFMpeg/FFAdapterUtils.cpp
-    GLRender/MathMat4.cpp
-    GLRender/MathVec4.cpp
-    GLRender/RTAction.cpp
-    GLRender/RTActionManager.cpp
-    GLRender/RTCamera.cpp
-    GLRender/RTDirector.cpp
-    GLRender/RTScene.cpp
-    GLRender/RTScheduler.cpp
-    GLRender/RTShaderUtil.cpp
-    GLRender/RTSprite.cpp
-    GLRender/RTSpriteVideo.cpp
+    ${GLES_FILES}
     RTAllocator/RTAllocatorBase.cpp
     RTAllocator/RTAllocatorDrm.cpp
     RTAllocator/RTAllocatorStore.cpp
-    Mpi/MpiAdapterUtils.cpp
-    Mpi/MpiAdapterCodec.cpp
+    ${MPI_FILES}
     ALSALib/ALSAAapterImpl.cpp
 )
 
+if (FFMPEG_SINGLE)
+    set( FFMPEG_LIBS -lffmpeg )
+else()
+    set( FFMPEG_LIBS
+        ${LINUX_SYSROOT}/usr/lib/libavformat.so
+        ${LINUX_SYSROOT}/usr/lib/libavutil.so
+        ${LINUX_SYSROOT}/usr/lib/libavcodec.so
+        ${LINUX_SYSROOT}/usr/lib/libswresample.so
+    )
+endif()
+
+if (HAVE_MPI)
+    set( MPI_LIBS -lmpp -lsink_osal)
+    message(STATUS "build with RK-MPI Support")
+else()
+    message(STATUS "build without RK-MPI Support")
+endif()
+
 add_library(${RT_MEDIA_STATIC} STATIC ${RT_MEDIA_SRC})
 set_target_properties(${RT_MEDIA_STATIC} PROPERTIES FOLDER "rt_media")
-target_link_libraries(${RT_MEDIA_STATIC} ${RT_BASE_STATIC} -lffmpeg_4_0 -lasound)
+target_link_libraries(${RT_MEDIA_STATIC} ${RT_BASE_STATIC} -lasound -pthread ${MPI_LIBS} ${FFMPEG_LIBS})
 
 message(STATUS "cmake version ${CMAKE_VERSION} [@@]config library: rt_media")

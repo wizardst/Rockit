@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Clean Project
-if [ "$1" = "clear" -o "$1" = "-c" ];
+if [ "$1" = "clean" -o "$1" = "-c" ];
 then
     ls | grep -v "build.sh" | xargs rm -rf
     echo "clean succeed!";
@@ -21,19 +21,26 @@ else
     exit 1
 fi
 
+ROCKIT_PWD=`pwd`
+ROCKIT_TOP=${ROCKIT_PWD}/../../..
+
 PLATFORM=$ANDROID_NDK/platforms/android-21/arch-arm
 
-cmake ../../../                                                             \
-      -DCMAKE_TOOLCHAIN_FILE=../android.toolchain.cmake                     \
-      -DCMAKE_BUILD_TYPE=Debug                                              \
-      -DANDROID_FORCE_ARM_BUILD=ON                                          \
-      -DANDROID_NDK=${ANDROID_NDK}                                          \
-      -DANDROID_SYSROOT=${PLATFORM}                                         \
-      -DANDROID_ABI="armeabi-v7a with NEON"                                 \
-      -DANDROID_TOOLCHAIN_NAME="arm-linux-androideabi-4.8"                  \
-      -DANDROID_NATIVE_API_LEVEL=android-21                                 \
-      -DOS_LINUX=ON                                                         \
-      -DHAS_PTHREAD=ON
+cmake   -DCMAKE_TOOLCHAIN_FILE=../android.toolchain.cmake                     \
+        -DCMAKE_BUILD_TYPE=Debug                                              \
+        -DANDROID_FORCE_ARM_BUILD=ON                                          \
+        -DANDROID_NDK=${ANDROID_NDK}                                          \
+        -DANDROID_SYSROOT=${PLATFORM}                                         \
+        -DANDROID_ABI="armeabi-v7a with NEON"                                 \
+        -DANDROID_TOOLCHAIN_NAME="arm-linux-androideabi-4.8"                  \
+        -DANDROID_NATIVE_API_LEVEL=android-21                                 \
+        -DHAVE_PTHREAD=ON                                                     \
+        -DHAVE_MPI=ON                                                         \
+        -DHAVE_GLES=ON                                                        \
+        -DHAVE_DRM=ON                                                         \
+        -DOS_LINUX=ON                                                         \
+        -DFFMPEG_SINGLE=ON                                                    \
+        ${ROCKIT_TOP}
 
 # ----------------------------------------------------------------------------
 # usefull cmake debug flag

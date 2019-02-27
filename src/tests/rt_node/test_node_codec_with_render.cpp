@@ -91,12 +91,12 @@ RTNode* utils_create_render_node(RT_RENDER_TYPE rType) {
     RTNode*     node = RT_NULL;
     switch (rType) {
       case RENDER_TYPE_GLES:
-        #if OS_WINDOWS
+        #ifdef OS_WINDOWS
         stub = &rt_sink_display_gles;
         #endif
         break;
       case RENDER_TYPE_AWIN:
-        #if OS_LINUX
+        #ifdef HAVE_MPI
         stub = &rt_sink_display_awindow;
         #endif
         break;

@@ -158,7 +158,7 @@ RT_RET alsa_set_snd_hw_params(ALSASinkContext *ctx, int flag) {
     }
 
     RT_LOGD("audio type flag: %d\n", flag);
-    err = snd_pcm_hw_params_set_flags(ctx->theInstance, hardwareParams, flag);
+    // err = snd_pcm_hw_params_set_flags(ctx->theInstance, hardwareParams, flag);
     if (err < 0)
         RT_LOGE("snd_pcm_hw_params_set_flags fail.");
 

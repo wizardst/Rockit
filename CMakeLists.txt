@@ -15,23 +15,30 @@ if (OS_LINUX)
     add_definitions(-DRK_HW_CODEC)
 endif (OS_LINUX)
 
-if (HAS_PTHREAD)
+if (HAVE_PTHREAD)
     add_definitions(-DHAS_PTHREAD)
-endif (HAS_PTHREAD)
+endif (HAVE_PTHREAD)
 
 include_directories(include)
 
+# include third-party pre-built headers
 include_directories(third-party/prebuilt/headers/ffmpeg-4.0/include)
 include_directories(third-party/prebuilt/headers/alsa-lib/include)
-link_directories(third-party/prebuilt/arm32)
-
 include_directories(third-party/drm)
-
-# linked mpp
 include_directories(third-party/prebuilt/headers/mpp)
-
-# linked sink-osal (AWindow/AudioTrack/GLES)
 include_directories(third-party/prebuilt/headers/sink-osal)
+
+# link third-party pre-built libraries
+if( X86_64 OR ARM64_V8A )
+    link_directories(third-party/prebuilt/arm64)
+    link_directories(${LINUX_SYSROOT}/usr/lib)
+    link_directories(/disk2/cmc/android_projects/sdk_develop/rk3308_linux/buildroot/output/rockchip_rk3308_release/host/aarch64-rockchip-linux-gnu/sysroot/usr/lib/)
+    message(STATUS "build with ARM64 prebilt libraries")
+else()
+    link_directories(third-party/prebuilt/arm32)
+    link_directories(${LINUX_SYSROOT}/usr/lib)
+    message(STATUS "build with ARM32 prebilt libraries")
+endif()
 
 add_subdirectory(src)
 

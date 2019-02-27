@@ -143,6 +143,11 @@ struct timespec1 {
 	time_t		tv_sec;		/* seconds */
 	long		tv_nsec;	/* nanoseconds */
 };
+# else
+struct timespec1 {
+        time_t          tv_sec;         /* seconds */
+        long            tv_nsec;        /* nanoseconds */
+};
 #endif
 
 /** Timestamp */
