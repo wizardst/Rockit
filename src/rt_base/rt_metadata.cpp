@@ -81,20 +81,21 @@ RtMetaData::~RtMetaData() {
 }
 
 void RtMetaData::clear() {
-    struct rt_hash_node *node, *next, *list;
+    struct rt_hash_node *list, *node;
     typed_data *item = NULL;
 
-    for (UINT32 i = 0; i < rt_hash_table_get_num_buckets(mHashTable); i++) {
-        list = rt_hash_table_get_bucket(mHashTable, i);
-        for (node = (list)->next; node != list; node = next) {
-            next = (node)->next;
+    for (UINT32 bucket = 0; bucket < rt_hash_table_get_num_buckets(mHashTable); bucket++) {
+        list = rt_hash_table_get_bucket(mHashTable, bucket);
+        for (node = list->next; node != RT_NULL; node = node->next) {
             item = reinterpret_cast<typed_data *>(node->data);
             if (NULL != item) {
                 item->clear();
                 rt_free(item);
             }
+            node->data = RT_NULL;
         }
     }
+
     rt_hash_table_clear(mHashTable);
 }
 

@@ -45,7 +45,8 @@ struct RTMsgLooper {
     RT_BOOL msgLoop();
     RT_RET  start(INT32 priority = 0);
     RT_RET  stop();
-    RT_RET  post(RTMessage* msg, INT64 delayUs = 0);
+    RT_RET  post(RTMessage* msg, INT64 delayUs = 0);   // async handler
+    RT_RET  send(RTMessage* msg, INT64 delayUs = 0);   //  sync handler
 
     static INT64 getNowUs();
     void         setName(const char *name);
@@ -63,6 +64,9 @@ struct RTMsgLooper {
     RtThread*            mThread;
     RtMutex*             mLock;
     RtCondition*         mExecCond;
+
+ public:
+    RtCondition*         mSyncCond;
 };
 
 #ifdef __cplusplus

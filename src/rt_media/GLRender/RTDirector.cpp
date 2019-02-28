@@ -90,11 +90,11 @@ void RTDirector::drawScene() {
 
     if (!mPaused) {
         mScheduler->update(mDeltaTime);
-        #if TO_DO_FLAG
+        #if TODO_FLAG
             mEventDispatcher->dispatchEvent(_eventAfterUpdate);
         #endif
         mTaskScene->render();
-        #if TO_DO_FLAG
+        #if TODO_FLAG
             mEventDispatcher->dispatchEvent(_eventAfterVisit);
         #endif
         mFrameNum++;

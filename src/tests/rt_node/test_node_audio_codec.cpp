@@ -45,8 +45,8 @@
 
 #define DEC_TEST_OUTPUT_FILE    "output.pcm"
 
-RTNode* createRTNode(RT_NODE_TYPE node_type) {
-    RTNodeStub* stub     = findStub(node_type);
+RTNode* createRTNode(RT_NODE_TYPE node_type, BUS_LINE_TYPE lType) {
+    RTNodeStub* stub     = findStub(node_type, lType);
     RTNode*     node     = stub->mCreateNode();
     return node;
 }
@@ -68,9 +68,9 @@ RT_RET unit_test_node_audio_decoder_proc() {
         return RT_ERR_UNKNOWN;
     }
 
-    RTNodeDemuxer *demuxer = reinterpret_cast<RTNodeDemuxer*>(createRTNode(RT_NODE_TYPE_DEMUXER));
-    RTNode        *decoder = createRTNode(RT_NODE_TYPE_DECODER);
-    RTNodeSink    *audiosink = reinterpret_cast<RTNodeSink*>(createRTNode(RT_NODE_TYPE_AUDIO_SINK));
+    RTNodeDemuxer *demuxer = reinterpret_cast<RTNodeDemuxer*>(createRTNode(RT_NODE_TYPE_DEMUXER, BUS_LINE_SOURCE));
+    RTNode        *decoder = createRTNode(RT_NODE_TYPE_DECODER, BUS_LINE_AUDIO);
+    RTNodeSink    *audiosink = reinterpret_cast<RTNodeSink*>(createRTNode(RT_NODE_TYPE_SINK, BUS_LINE_AUDIO));
     if ((RT_NULL != demuxer)&&(RT_NULL != decoder)) {
         demuxer_meta = new RtMetaData();
         demuxer_meta->setCString(kKeyFormatUri, TEST_URI);

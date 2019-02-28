@@ -71,7 +71,7 @@ RT_RET RTAllocatorStore::priorAvailLinearAllocator(RtMetaData *config, RTAllocat
 }
 
 RTAllocator *RTAllocatorStore::fetchIonAllocator(RtMetaData *config) {
-    #if TO_DO_FLAG
+    #if TODO_FLAG
     RTAllocator *allocator = NULL;
     RT_BOOL avail = RTAllocatorIon::checkAvail();
     if (avail) {
@@ -96,7 +96,7 @@ RTAllocator *RTAllocatorStore::fetchDrmAllocator(RtMetaData *config) {
 }
 
 RTAllocator *RTAllocatorStore::fetchGrallocAllocator(RtMetaData *config) {
-    #if TO_DO_FLAG
+    #if TODO_FLAG
     RTAllocator *allocator = NULL;
     RT_BOOL avail = RTAllocatorGralloc::checkAvail();
     if (avail) {

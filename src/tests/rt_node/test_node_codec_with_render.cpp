@@ -49,14 +49,13 @@
 #endif
 #define LOG_TAG "TestCodecWithRender"
 
-
 typedef enum _RT_RENDER_TYPE {
     RENDER_TYPE_AWIN,
     RENDER_TYPE_GLES,
     RENDER_TYPE_MAX,
 } RT_RENDER_TYPE;
 
-RT_RET init_decoder_meta(RtMetaData *meta) {
+RT_RET utils_init_decoder_meta(RtMetaData *meta) {
     CHECK_IS_NULL(meta);
 
     meta->setInt32(kKeyVCodecWidth,  DEFAULT_WIDTH);
@@ -67,13 +66,13 @@ __FAILED:
     return RT_ERR_UNKNOWN;
 }
 
-UINT8* allocVideoBuf2(INT32 width, INT32 height) {
+UINT8* utils_alloc_video_buffer(INT32 width, INT32 height) {
     UINT8* pixels = reinterpret_cast<UINT8*>(rt_malloc_size(UINT8, width*height*3));
     RT_LOGE("pixels(%p) - %dx%d", pixels, width, height);
     return pixels;
 }
 
-RT_RET init_encoder_meta(RtMetaData *meta) {
+RT_RET utils_init_encoder_meta(RtMetaData *meta) {
     CHECK_IS_NULL(meta);
 
     meta->setInt32(kKeyVCodecWidth,     DEFAULT_WIDTH);
@@ -87,15 +86,19 @@ __FAILED:
     return RT_ERR_UNKNOWN;
 }
 
-RTNode* createRenderNode(RT_RENDER_TYPE rType) {
+RTNode* utils_create_render_node(RT_RENDER_TYPE rType) {
     RTNodeStub* stub = RT_NULL;
     RTNode*     node = RT_NULL;
     switch (rType) {
       case RENDER_TYPE_GLES:
-        // stub = &rt_sink_display_gles;
+        #if OS_WINDOWS
+        stub = &rt_sink_display_gles;
+        #endif
         break;
       case RENDER_TYPE_AWIN:
+        #if OS_LINUX
         stub = &rt_sink_display_awindow;
+        #endif
         break;
       default:
         break;
@@ -106,16 +109,16 @@ RTNode* createRenderNode(RT_RENDER_TYPE rType) {
     return node;
 }
 
-RTNode* createRTNode(RT_NODE_TYPE node_type) {
+RTNode* utils_create_rt_node(RT_NODE_TYPE node_type) {
     RTNode*     node = RT_NULL;
-    RTNodeStub* stub = findStub(node_type);
+    RTNodeStub* stub = findStub(node_type, BUS_LINE_MAX);
     if (RT_NULL != stub) {
         node = stub->mCreateNode();
     }
     return node;
 }
 
-RT_RET unit_test_node_decoder_proc() {
+RT_RET testcase_node_decoder_proc() {
     UINT32         v_width   = 1280;
     UINT32         v_height  = 720;
     RTFrame        rt_frame  = {0};
@@ -124,15 +127,15 @@ RT_RET unit_test_node_decoder_proc() {
     RtMetaData    *decoder_meta = RT_NULL;
     RtMetaData    *vrender_meta = RT_NULL;
 
-    RTNodeDemuxer *demuxer = reinterpret_cast<RTNodeDemuxer*>(createRTNode(RT_NODE_TYPE_DEMUXER));
-    RTNode        *decoder = createRTNode(RT_NODE_TYPE_DECODER);
-    RTNode        *vrender = createRenderNode(RENDER_TYPE_AWIN);
+    RTNodeDemuxer *demuxer = reinterpret_cast<RTNodeDemuxer*>(utils_create_rt_node(RT_NODE_TYPE_DEMUXER));
+    RTNode        *decoder = utils_create_rt_node(RT_NODE_TYPE_DECODER);
+    RTNode        *vrender = utils_create_render_node(RENDER_TYPE_AWIN);
     if ((RT_NULL != demuxer)&&(RT_NULL != decoder)) {
         demuxer_meta = new RtMetaData();
         // decoder_meta = new RtMetaData();
         vrender_meta = new RtMetaData();
 
-        init_decoder_meta(decoder_meta);
+        utils_init_decoder_meta(decoder_meta);
         demuxer_meta->setCString(kKeyFormatUri, TEST_URI);
 
         vrender_meta->setInt32(kKeyFrameW, v_width);
@@ -155,7 +158,7 @@ RT_RET unit_test_node_decoder_proc() {
         RTMediaBuffer* esPacket;
 
         /* faked random frame */
-        rt_frame.mData = allocVideoBuf2(v_width, v_height);
+        rt_frame.mData = utils_alloc_video_buffer(v_width, v_height);
         rt_frame.mSize = v_width*v_height*3;
         rt_frame.mFrameW = rt_frame.mDisplayW = v_width;
         rt_frame.mFrameH = rt_frame.mDisplayH = v_height;
@@ -230,7 +233,7 @@ RT_RET unit_test_node_decoder_proc() {
     return RT_OK;
 }
 
-RT_RET unit_test_node_encoder_proc() {
+RT_RET testcase_node_encoder_proc() {
     FILE *write_fd = fopen(ENC_TEST_OUTPUT_FILE, "wb");
     if (!write_fd) {
         RT_LOGE("%s open failed!!", ENC_TEST_OUTPUT_FILE);
@@ -243,12 +246,12 @@ RT_RET unit_test_node_encoder_proc() {
         return RT_ERR_UNKNOWN;
     }
 
-    RTNode* encoder = createRTNode(RT_NODE_TYPE_ENCODER);
+    RTNode* encoder = utils_create_rt_node(RT_NODE_TYPE_ENCODER);
     if (RT_NULL != encoder) {
         RtMetaData *encoder_meta = RT_NULL;
         encoder_meta = new RtMetaData();
 
-        init_encoder_meta(encoder_meta);
+        utils_init_encoder_meta(encoder_meta);
 
         RTNodeAdapter::init(encoder, encoder_meta);
         RTNodeAdapter::runCmd(encoder, RT_NODE_CMD_START, NULL);
@@ -305,10 +308,10 @@ RT_RET unit_test_node_encoder_proc() {
 
 
 RT_RET unit_test_node_decoder_with_render(INT32 index, INT32 total) {
-    return unit_test_node_decoder_proc();
+    return testcase_node_decoder_proc();
 }
 
 RT_RET unit_test_node_encoder_with_render(INT32 index, INT32 total) {
-    return unit_test_node_encoder_proc();
+    return testcase_node_encoder_proc();
 }
 

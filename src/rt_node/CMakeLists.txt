@@ -22,7 +22,6 @@ set(RT_NODE_SRC
     rt_node_define.cpp
     rt_sink/RTSinkAudioALSA.cpp
     rt_sink/RTNodeSinkAWindow.cpp
-    rt_sink/RTNodeSinkGLES.cpp
     ${FF_NODE_SRC}
     hw_codec/HWNodeMpiDecoder.cpp
     hw_codec/HWNodeMpiEncoder.cpp

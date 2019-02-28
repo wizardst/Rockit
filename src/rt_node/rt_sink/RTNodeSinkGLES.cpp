@@ -96,7 +96,7 @@ RT_RET RTNodeSinkGLES::onFireFrame() {
     if (RT_NULL != media_buf) {
         rt_mediabuf_goto_frame(media_buf, &rt_frame);
         // RT_LOGE("RTFrame(%p) %dx%d", rt_frame.mData, rt_frame.mFrameW, rt_frame.mFrameH);
-        ctx->mGLApp->updateFrame(reinterpret_cast<UCHAR*>(rt_frame.mData), rt_frame.mFrameW, rt_frame.mFrameH);
+        ctx->mGLApp->updateFrame(reinterpret_cast<unsigned char*>(rt_frame.mData), rt_frame.mFrameW, rt_frame.mFrameH);
         return RT_OK;
     }
     return RT_ERR_BAD;

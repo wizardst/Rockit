@@ -18,8 +18,8 @@
  *    ref: ffmpeg/libavutil/pixfmt.h
  */
 
-#ifndef SRC_RT_MEDIA_INCLUDE_RTPIXELDEF_H_
-#define SRC_RT_MEDIA_INCLUDE_RTPIXELDEF_H_
+#ifndef SRC_RT_MEDIA_INCLUDE_RTMEDIAPIXEL_H_
+#define SRC_RT_MEDIA_INCLUDE_RTMEDIAPIXEL_H_
 
 /**
   * Chromaticity coordinates of the source primaries.
@@ -134,4 +134,4 @@ enum RTChromaLocation {
     RTCHROMA_LOC_MAX              ///< Not part of ABI
 };
 
-#endif  // SRC_RT_MEDIA_INCLUDE_RTPIXELDEF_H_
+#endif  // SRC_RT_MEDIA_INCLUDE_RTMEDIAPIXEL_H_

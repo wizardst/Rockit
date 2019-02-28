@@ -33,6 +33,8 @@
 
 RTMessage::RTMessage() {
     rt_memset(&mData, 0, sizeof(struct RTMsgData));
+    mSync         = RT_FALSE;
+    mDoneListener = RT_FALSE;
 }
 
 RTMessage::RTMessage(UINT32 what, RT_PTR data, struct RTMsgHandler* handler) {
@@ -40,6 +42,18 @@ RTMessage::RTMessage(UINT32 what, RT_PTR data, struct RTMsgHandler* handler) {
     this->setWhat(what);
     this->setData(data);
     this->setTarget(handler);
+    mSync         = RT_FALSE;
+    mDoneListener = RT_FALSE;
+}
+
+RTMessage::RTMessage(UINT32 what, UINT32 arg32, UINT64 arg64, struct RTMsgHandler* handler /* = RT_NULL */) {
+    rt_memset(&mData, 0, sizeof(struct RTMsgData));
+    this->setWhat(what);
+    this->mData.mArgU32 = arg32;
+    this->mData.mArgU64 = arg64;
+    this->setTarget(handler);
+    mSync         = RT_FALSE;
+    mDoneListener = RT_FALSE;
 }
 
 void RTMessage::setWhat(UINT32 what) {
@@ -82,7 +96,7 @@ RTMessage*  RTMessage::dup() {
 }
 
 const char* RTMessage::toString() {
-#if TO_DO_FLAG
+#if TODO_FLAG
     buffer = rt_str_sprintf("RTMessage(what=%d, arg_s32=%d, arg_u32=%d, arg_ptr=%p)",
                                      mWhat,
                                      mData.mArgS32, mData.mArgU32,
@@ -105,7 +119,7 @@ RT_RET RTMessage::deliver() {
 }
 
 RT_RET RTMessage::post(INT64 delayUs /* = 0 */) {
-#if TO_DO_FLAG
+#if TODO_FLAG
     if (RT_NULL == mLooper) {
         RT_LOGE("Failed to post message as target looper(%p) is gone!", mLooper);
         return RT_ERR_BAD;

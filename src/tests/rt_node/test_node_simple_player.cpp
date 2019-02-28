@@ -127,7 +127,7 @@ RT_RET SimplePlayer::init(const char *uri) {
         RT_LOGE("demuxer create failed!");
         return RT_ERR_UNKNOWN;
     }
-    mAudioSink = reinterpret_cast<RTNodeSink*>(createRTNode(RT_NODE_TYPE_AUDIO_SINK, BUS_LINE_AUDIO));
+    mAudioSink = reinterpret_cast<RTNodeSink*>(createRTNode(RT_NODE_TYPE_SINK, BUS_LINE_AUDIO));
     if (!mAudioSink) {
         RT_LOGE("audio sink create failed");
         return RT_ERR_UNKNOWN;

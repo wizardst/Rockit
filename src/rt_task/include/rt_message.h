@@ -28,8 +28,82 @@
 extern "C" {
 #endif
 
+#if 0
+enum RTMediaEvent {
+    RT_MEDIA_NOP               = 0,  // interface test message
+    RT_MEDIA_PREPARED          = 1,
+    RT_MEDIA_PLAYBACK_COMPLETE = 2,
+    RT_MEDIA_BUFFERING_UPDATE  = 3,
+    RT_MEDIA_SEEK_COMPLETE     = 4,
+    RT_MEDIA_SET_VIDEO_SIZE    = 5,
+    RT_MEDIA_STARTED           = 6,
+    RT_MEDIA_PAUSED            = 7,
+    RT_MEDIA_STOPPED           = 8,
+    RT_MEDIA_SKIPPED           = 9,
+    RT_MEDIA_TIMED_TEXT        = 99,
+    RT_MEDIA_ERROR             = 100,
+    RT_MEDIA_INFO              = 200,
+    RT_MEDIA_SUBTITLE_DATA     = 201,
+};
+#else
+enum RTMediaEvent {
+    RT_MEDIA_NOP               = 0,  // interface test message
+    RT_MEDIA_PREPARED          = 1,
+    RT_MEDIA_PLAYBACK_COMPLETE = 2,
+    RT_MEDIA_BUFFERING_UPDATE  = 3,
+    RT_MEDIA_SEEK_COMPLETE     = 4,
+    RT_MEDIA_SET_VIDEO_SIZE    = 5,
+    RT_MEDIA_STARTED           = 6,
+    RT_MEDIA_PAUSED            = 7,
+    RT_MEDIA_STOPPED           = 8,
+    RT_MEDIA_SKIPPED           = 9,
+    RT_MEDIA_TIMED_TEXT        = 10,
+    RT_MEDIA_ERROR             = 11,
+    RT_MEDIA_INFO              = 12,
+    RT_MEDIA_SUBTITLE_DATA     = 13,
+    RT_MEDIA_SEEK_ASYNC        = 14,
+};
+
+typedef struct _rt_media_event {
+    UINT32      cmd;
+    const char *name;
+} rt_media_event;
+
+static const rt_media_event mEventNames[] = {
+    { RT_MEDIA_NOP,               "EVENT_NOP" },
+    { RT_MEDIA_PREPARED,          "EVENT_PREPARED" },
+    { RT_MEDIA_PLAYBACK_COMPLETE, "EVENT_COMPLETE" },
+    { RT_MEDIA_BUFFERING_UPDATE,  "EVENT_BUFFERING_UPDATE" },
+    { RT_MEDIA_SEEK_COMPLETE,     "EVENT_SEEK_COMPLETE" },
+    { RT_MEDIA_SET_VIDEO_SIZE,    "EVENT_SET_VIDEO_SIZE" },
+    { RT_MEDIA_STARTED,           "EVENT_STARTED" },
+    { RT_MEDIA_PAUSED,            "EVENT_PAUSED" },
+    { RT_MEDIA_STOPPED,           "EVENT_STOPPED" },
+    { RT_MEDIA_SKIPPED,           "EVENT_SKIPPED" },
+    { RT_MEDIA_TIMED_TEXT,        "EVENT_TIMED_TEXT" },
+    { RT_MEDIA_ERROR,             "EVENT_ERROR" },
+    { RT_MEDIA_INFO,              "EVENT_INFO" },
+    { RT_MEDIA_SUBTITLE_DATA,     "SUBTITLE_DATA" },
+    { RT_MEDIA_SEEK_ASYNC,        "SEEK_ASYNC" },
+};
+#endif
+
+enum RTMediaState {
+    RTM_PLAYER_STATE_ERROR        = 0,
+    RTM_PLAYER_IDLE               = 1 << 0,
+    RTM_PLAYER_INITIALIZED        = 1 << 1,
+    RTM_PLAYER_PREPARING          = 1 << 2,
+    RTM_PLAYER_PREPARED           = 1 << 3,
+    RTM_PLAYER_STARTED            = 1 << 4,
+    RTM_PLAYER_PAUSED             = 1 << 5,
+    RTM_PLAYER_STOPPED            = 1 << 6,
+    RTM_PLAYER_PLAYBACK_COMPLETE  = 1 << 7
+};
+
 struct RTMsgHandler;
 struct RTMsgLooper;
+
+typedef int (*DoneListener)(void* looper, UINT32 what);
 
 struct RTMessage {
     struct RTMsgData {
@@ -43,6 +117,7 @@ struct RTMessage {
  public:
     RTMessage();
     RTMessage(UINT32 what, RT_PTR data);
+    RTMessage(UINT32 what, UINT32 arg32, UINT64 arg64, struct RTMsgHandler* handler = RT_NULL);
     RTMessage(UINT32 what, RT_PTR data, struct RTMsgHandler* handler = RT_NULL);
 
     void           setWhat(UINT32 what);
@@ -56,13 +131,15 @@ struct RTMessage {
         return mHandler;
     }
     RT_RET         post(INT64 delayUs = 0);
-    RTMessage*     dup();   // performs message deep copy
+    RTMessage*     dup();      // performs message deep copy
     const char*    toString();
 
     struct RTMsgData mData;
+    RT_BOOL          mSync;
+    DoneListener     mDoneListener;
 
  private:
-    friend struct        RTMsgLooper;  // deliver()
+    friend struct    RTMsgLooper;  // deliver()
 
     struct RTMsgHandler* mHandler;
 

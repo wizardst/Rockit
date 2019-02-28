@@ -13,4 +13,4 @@ set(RT_MEDIA_TEST_SRC
 
 add_executable(rt_media_test ${RT_MEDIA_TEST_SRC})
 target_link_libraries(rt_media_test ${RT_BASE_STATIC} ${RT_MEDIA_STATIC})
-message(STATUS "cmake version ${CMAKE_VERSION} [@@]config testcases for rt_media")
+message(STATUS "cmake version ${CMAKE_VERSION} [@@]config testcases for rt_media, [Done]")

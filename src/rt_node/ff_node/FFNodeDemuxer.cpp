@@ -97,7 +97,9 @@ FFNodeDemuxer::~FFNodeDemuxer() {
 
 INT32 updateDefaultTrack(FAFormatContext* fa_ctx, RTTrackType tType) {
     INT32 bestIndex = fa_format_find_best_track(fa_ctx, tType);
-    RT_LOGD("index: %d, type: %d", bestIndex, tType);
+    if (bestIndex < 0) {
+        bestIndex = -1;
+    }
     return bestIndex;
 }
 
@@ -115,14 +117,14 @@ RT_RET FFNodeDemuxer::init(RtMetaData *metadata) {
 
     ctx->mFormatCtx = fa_format_open(uri, FLAG_DEMUXER);
 
-    #if TO_DO_FLAG
+    #if TODO_FLAG
     if (avformat_find_stream_info(ctx->mFormatCtx, NULL) < 0) {
         RT_LOGE("Couldn't find stream information.\n");
         return RT_ERR_UNKNOWN;
     }
     #endif
-    ctx->mIndexVideo = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_VIDEO);
-    ctx->mIndexAudio = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_AUDIO);
+    ctx->mIndexVideo    = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_VIDEO);
+    ctx->mIndexAudio    = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_AUDIO);
     ctx->mIndexSubtitle = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_SUBTITLE);
 
     ctx->mMetaInput = metadata;
@@ -259,7 +261,13 @@ RT_RET FFNodeDemuxer::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
     case RT_NODE_CMD_STOP:
         this->onStop();
         break;
+    case RT_NODE_CMD_PAUSE:
+        this->onPause();
+        break;
     case RT_NODE_CMD_SEEK:
+        break;
+    case RT_NODE_CMD_RESET:
+        this->onReset();
         break;
     default:
         RT_LOGE("demuxer not support the cmd\n");
@@ -421,7 +429,7 @@ RT_RET FFNodeDemuxer::runTask() {
             continue;
         }
 
-        #if TO_DO_FLAG
+        #if TODO_FLAG
             int flags = 0;
             ret = avformat_seek_file(ctx->mFormatCtx, 0/*seekStrmIdx*/,
                                      RT_INT64_MIN, 0/*timeus*/, RT_INT64_MAX, flags);

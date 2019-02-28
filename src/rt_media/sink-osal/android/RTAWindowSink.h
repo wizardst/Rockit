@@ -21,8 +21,6 @@
 #ifndef SRC_RT_MEDIA_SINK_OSAL_ANDROID_RTAWINDOWSINK_H_
 #define SRC_RT_MEDIA_SINK_OSAL_ANDROID_RTAWINDOWSINK_H_
 
-#include "RTVideoSink.h"
-
 class RTAWindowSink : public RTVideoSink {
  public:
     RTAWindowSink();

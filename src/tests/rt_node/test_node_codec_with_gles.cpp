@@ -75,7 +75,7 @@ __FAILED:
 }
 
 RTNode* createRTNode(RT_NODE_TYPE node_type) {
-    RTNodeStub* stub     = findStub(node_type);
+    RTNodeStub* stub     = findStub(node_type, BUS_LINE_MAX);
     RTNode*     node     = stub->mCreateNode();
     return node;
 }

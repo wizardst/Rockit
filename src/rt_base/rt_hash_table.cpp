@@ -60,7 +60,7 @@ struct RtHashTable *rt_hash_table_create(UINT32 num_buckets,
         for (i = 0; i < num_buckets; i++) {
             do {
                 struct rt_hash_node *node = & ht->buckets[i];
-                node->prev = node->next  = node;
+                node->next = RT_NULL;
             }while(0);
         }
     }
@@ -74,68 +74,66 @@ void rt_hash_table_destory(struct RtHashTable *ht, RT_BOOL free_data) {
 }
 
 #define foreach_list(ptr, list)     \
-        for (ptr = (list)->next; ptr != list; ptr = (ptr)->next)
+        for (ptr = (list)->next; (ptr != RT_NULL); ptr = (ptr)->next)
 
-#define is_empty_list(list)    ((list)->next == (list))
+#define is_empty_list(list)  ((list)->next == (RT_NULL))
 
-#define insert_at_head(list, elem)      \
-do {                        \
-    (elem)->prev = list;             \
-    (elem)->next = (list)->next;         \
-    (list)->next->prev = elem;           \
-    (list)->next = elem;             \
-}while(0)
+void insert_at_head(rt_hash_node* list, rt_hash_node* elem) {
+    do {
+        elem->next = list->next;
+        list->next = elem;
+    } while (0);
+}
 
-#define remove_from_list(elem)          \
-do {                        \
-    (elem)->next->prev = (elem)->prev;       \
-    (elem)->prev->next = (elem)->next;       \
-}while (0)
-
+void remove_at_head(rt_hash_node* list, rt_hash_node* elem) {
+    do {
+        list->next = elem->next;
+    } while (0);
+}
 
 void rt_hash_table_clear(struct RtHashTable *ht, RT_BOOL free_data) {
-    struct rt_hash_node *node, *next, *list;
+    struct rt_hash_node *list, *node, *next;
 
-    for (UINT32 i = 0; i < ht->num_buckets; i++) {
-        list = & ht->buckets[i];
-        for (node = (list)->next; node != list; node = next) {
-            next = (node)->next;
-            remove_from_list(node);
-            if (free_data && NULL != node->data) {
+    for (UINT32 bucket = 0; bucket < rt_hash_table_get_num_buckets(ht); bucket++) {
+        list = rt_hash_table_get_bucket(ht, bucket);
+        for (node = list->next; node != RT_NULL; node = next) {
+            next = node->next;
+            remove_at_head(list, node);
+            if (free_data && (NULL != node->data)) {
                 rt_free(node->data);
             }
             rt_free(node);
         }
 
-        RT_ASSERT(is_empty_list(& ht->buckets[i]));
+        RT_ASSERT(is_empty_list(& ht->buckets[bucket]));
     }
 }
 
 void rt_hash_table_dump(struct RtHashTable *ht) {
     RT_LOGE("hash=%p; buckets=%02d", ht, ht->num_buckets);
-    struct rt_hash_node *node;
+    UINT32 bucket = 0;
+    UINT32 idx    = 0;
+    struct rt_hash_node *list, *node;
 
-    for (UINT32 i = 0; i < ht->num_buckets; i++) {
-        INT32 idx = 0;
-        foreach_list(node, & ht->buckets[i]) {
+    for (bucket = 0; bucket < ht->num_buckets; bucket++) {
+        idx    = 0;
+        list = &(ht->buckets[bucket]);
+        for (node = list->next; node != RT_NULL; node = node->next) {
             RT_LOGE("buckets[%02d:%02d]: %p, node->key:%03d, node->data:%p",
-                         i, idx++, node, (UINT32)node->key, node->data);
+                         bucket, idx++, node, (UINT32)node->key, node->data);
         }
-
-        RT_ASSERT(is_empty_list(& ht->buckets[i]));
     }
 }
 
 static struct rt_hash_node * get_node(struct RtHashTable *ht, const void *key) {
     const UINT32 hash_value = (*ht->hash)(ht->num_buckets, key);
     const UINT32 bucket     = hash_value % ht->num_buckets;
-    struct rt_hash_node *node, *hn;
+    struct rt_hash_node *list, *node;
 
-    foreach_list(node, & ht->buckets[bucket]) {
-       hn = (struct rt_hash_node *) node;
-
-       if ((*ht->compare)(hn->key, key) == 0) {
-           return hn;
+    list = &(ht->buckets[bucket]);
+    for (node = list->next; node != RT_NULL; node = node->next) {
+       if ((*ht->compare)(node->key, key) == 0) {
+           return node;
        }
     }
 
@@ -167,35 +165,39 @@ RT_BOOL rt_hash_table_replace(
         struct RtHashTable *ht,
         const void *key,
         void *data) {
-    const UINT32 hash_value = (*ht->hash)(ht->num_buckets, key);
-    const UINT32 bucket     = hash_value % ht->num_buckets;
-
-    struct rt_hash_node *node, *hn;
-    foreach_list(node, & ht->buckets[bucket]) {
-       hn = (struct rt_hash_node *) node;
-       if ((*ht->compare)(hn->key, key) == 0) {
-           hn->data = data;
-           return RT_TRUE;
-       }
+    struct rt_hash_node *node = get_node(ht, key);
+    if (RT_NULL != node) {
+        node->data = data;
+        return RT_TRUE;
+    } else {
+        RT_LOGE("Fail to find_node with key(%d)，so insert", key);
+        rt_hash_table_insert(ht, key, data);
     }
-    rt_hash_table_insert(ht, key, data);
-
-    return RT_FALSE;
+    return RT_TRUE;
 }
 
 RT_BOOL rt_hash_table_remove(struct RtHashTable *ht, const void *key, RT_BOOL free_data) {
-    struct rt_hash_node *node = (struct rt_hash_node *)get_node(ht, key);
-    if (RT_NULL != node) {
-        remove_from_list(node);
-        if (free_data && NULL != node->data) {
-            rt_free(node->data);
-        }
-        rt_free(node);
-        return RT_TRUE;
-    } else {
-        RT_LOGE("don't find node from the key!");
-        return RT_FALSE;
+    const UINT32 hash_value   = (*ht->hash)(ht->num_buckets, key);
+    const UINT32 bucket       = hash_value % ht->num_buckets;
+    struct rt_hash_node* list = &(ht->buckets[bucket]);
+    struct rt_hash_node* node_cur = RT_NULL;
+    struct rt_hash_node* node_old = list;
+
+    for (node_cur = list->next; (node_cur != RT_NULL); node_cur = node_cur->next) {
+       if ((*ht->compare)(node_cur->key, key) == 0) {
+           node_old->next = node_cur->next;
+           node_cur->next = RT_NULL;
+           if (free_data && NULL != node_cur->data) {
+               rt_free(node_cur->data);
+           }
+           rt_free(node_cur);
+           return RT_TRUE;
+       } else {
+           node_old = node_cur;
+       }
     }
+    RT_LOGE("don't find node from the key!");
+    return RT_FALSE;
 }
 
 UINT32 rt_hash_table_get_num_buckets(struct RtHashTable *hash) {

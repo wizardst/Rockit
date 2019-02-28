@@ -24,6 +24,9 @@
 #include "rt_header.h"     // NOLINT
 #include "rt_hash_table.h" // NOLINT
 #include "rt_array_list.h" // NOLINT
+#include "rt_message.h"      // NOLINT
+#include "rt_msg_handler.h"  // NOLINT
+#include "rt_msg_looper.h"   // NOLINT
 
 struct NodeBusContext;
 
@@ -34,30 +37,53 @@ typedef struct _NodeBusSetting {
 } NodeBusSetting;
 
 typedef enum _BUS_LINE_TYPE {
-    BUS_LINE_SOURCE,
+    BUS_LINE_SOURCE = 0,
     BUS_LINE_VIDEO,
     BUS_LINE_AUDIO,
-    BUS_LINE_SUBTITLE,
+    BUS_LINE_SUBTE,
     BUS_LINE_MAX,
 } BUS_LINE_TYPE;
 
-RTNodeStub* findStub(RT_NODE_TYPE nType);
+typedef struct _BUS_LINE_NAME {
+    UINT32      cmd;
+    const char *name;
+} BUS_LINE_NAME;
+
+static const BUS_LINE_NAME mBusLineNames[] = {
+    { BUS_LINE_SOURCE, "BUS_LINE_SOURCE" },
+    { BUS_LINE_VIDEO,  "BUS_LINE_VIDEO" },
+    { BUS_LINE_AUDIO,  "BUS_LINE_AUDIO" },
+    { BUS_LINE_SUBTE,  "BUS_LINE_SUBTE" },
+    { BUS_LINE_MAX,    "BUS_LINE_MAX" },
+};
+
 RTNodeStub* findStub(RT_NODE_TYPE nType, BUS_LINE_TYPE lType);
 
-class RTNodeBus {
+class RTNodeBus : public RTMsgHandler {
  public:
     RTNodeBus();
     ~RTNodeBus();
     RT_RET      autoBuild(NodeBusSetting *setting);
-    RT_RET      release();
+    RT_RET      reset();
+    RT_RET      prepare();
+    RT_RET      start();
+    RT_RET      pause();
+    RT_RET      stop();
+    RT_RET      seekToAsync(INT64 usec);
+    RT_RET      seekTo(INT64 usec);
+    RT_RET      startDataLooper();
+    RT_RET      setCurState(UINT32 newState);
+    UINT32      getCurState();
 
     RT_RET      summary(INT32 fd, RT_BOOL full = RT_FALSE);
     RT_RET      registerStub(RTNodeStub *nStub);
     RT_RET      registerNode(RTNode     *pNode);
 
+
     RTNodeStub* findStub(RT_NODE_TYPE nType, BUS_LINE_TYPE lType);
     RTNode*     findNode(RT_NODE_TYPE nType, BUS_LINE_TYPE lType);
-    RT_RET      coreLoopDriver();
+
+    void        onMessageReceived(struct RTMessage* msg);
 
  private:
     RT_RET      registerCoreStubs();

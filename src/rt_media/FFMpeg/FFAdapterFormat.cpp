@@ -217,7 +217,6 @@ INT32 fa_format_select_track(FAFormatContext* fc, UINT32 idx, RTTrackType tType)
 }
 
 INT32 fa_format_find_track(FAFormatContext* fc, RTTrackType tType) {
-    UINT32 count = 0;
     if ((RT_NULL != fc) && (RT_NULL != fc->mAvfc)) {
         AVFormatContext* avfc = fc->mAvfc;
         for (UINT32 idx = 0; idx < avfc->nb_streams; idx++) {

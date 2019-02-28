@@ -34,12 +34,13 @@
 #include <gui/SurfaceComposerClient.h>
 #include <gui/ISurfaceComposer.h>
 
-#include <ui/GraphicBufferMapper.h>        // NOLINT
-#include <ui/GraphicBuffer.h>              // NOLINT
+#include <ui/GraphicBufferMapper.h>
+#include <ui/GraphicBuffer.h>
 
-#include "RTAWindowSink.h"                 // NOLINT
+using namespace android;      // NOLINT
 
-using namespace android;                   // NOLINT
+#include "rt_header.h"        // NOLINT
+#include "RTAWindowSink.h"    // NOLINT
 
 #ifdef LOG_TAG
 #undef LOG_TAG

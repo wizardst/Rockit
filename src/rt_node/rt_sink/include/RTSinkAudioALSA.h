@@ -23,7 +23,9 @@
 
 #include "RTNodeSink.h"
 #include "rt_header.h" // NOLINT
+#if OS_LINUX
 #include "ALSAAapterImpl.h"
+#endif
 #include "RTObjectPool.h" // NOLINT
 #include "rt_thread.h" // NOLINT
 #include "rt_dequeue.h" // NOLINT
@@ -53,8 +55,8 @@ class RTSinkAudioALSA : public RTNodeSink {
     virtual RT_RET onReset();
 
  private:
-    RT_VOID openSoundCard(int card, int devices, RtMetaData *metadata);
-    RT_VOID closeSoundCard();
+    RT_RET openSoundCard(int card, int devices, RtMetaData *metadata);
+    RT_RET closeSoundCard();
 
     RT_Deque        *mDeque;
     ALSASinkContext *mALSASinkCtx;

@@ -38,11 +38,13 @@ RTMsgLooper::RTMsgLooper() {
     mThread     = RT_NULL;
     mLock       = new RtMutex();
     mExecCond   = new RtCondition();
+    mSyncCond   = new RtCondition();
     mExitFlag   = RT_FALSE;
     RT_LOGD_IF(DEBUG_FLAG, "+Constructor");
 }
 
 RTMsgLooper::~RTMsgLooper() {
+    mSyncCond->broadcast();
     deque_destory(&mEventQueue);
     mEventQueue = RT_NULL;
     mHandler    = RT_NULL;
@@ -52,10 +54,24 @@ RTMsgLooper::~RTMsgLooper() {
     RT_LOGD_IF(DEBUG_FLAG, "~Destructor");
 }
 
+RT_RET RTMsgLooper::send(struct RTMessage* msg, INT64 delayUs /* = 0 */) {
+    // @TODO fix this bug
+    msg->mSync = RT_TRUE;
+    return post(msg, delayUs);
+}
+
+int LooperDoneListener(void* looper, UINT32 what) {
+    RTMsgLooper* pLooper = reinterpret_cast<RTMsgLooper*>(looper);
+    if (RT_NULL != pLooper->mSyncCond) {
+        pLooper->mSyncCond->signal();
+    }
+    return 0;
+}
+
 RT_RET RTMsgLooper::post(struct RTMessage* msg, INT64 delayUs /* = 0 */) {
     RtMutex::RtAutolock autoLock(mLock);
 
-#if TO_DO_FLAG
+#if TODO_FLAG
     INT64 whenUs;
     if (delayUs > 0) {
         whenUs = getNowUs() + delayUs;
@@ -88,6 +104,11 @@ RT_RET RTMsgLooper::post(struct RTMessage* msg, INT64 delayUs /* = 0 */) {
     deque_push_head(mEventQueue, reinterpret_cast<void*>(msg));
 #endif
     mExecCond->broadcast();
+
+    if (RT_TRUE == msg->mSync) {
+        msg->mDoneListener = LooperDoneListener;
+        mSyncCond->wait(mLock);
+    }
 
     RT_LOGD_IF(DEBUG_FLAG, "message(msg=%p; what=%d) posted to msg-queue", msg, msg->getWhat());
 
@@ -127,6 +148,7 @@ RT_BOOL RTMsgLooper::msgLoop() {
                 msg->setTarget(mHandler);
             }
             msg->deliver();
+            msg->mDoneListener(this, msg->getWhat());
             rt_safe_delete(msg);
         }
     }

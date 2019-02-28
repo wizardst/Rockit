@@ -23,7 +23,7 @@
 #include "RTMediaDef.h"
 #include "RTMediaBuffer.h"
 #include "RTMediaMetaKeys.h"
-#include "RTPixelDef.h"
+#include "RTMediaPixel.h"
 
 typedef INT32 (*RT_RAW_FREE)(void*);
 

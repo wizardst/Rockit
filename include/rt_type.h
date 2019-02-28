@@ -24,7 +24,7 @@
 
 #define RT_NULL 0
 
-#define TO_DO_FLAG 0
+#define TODO_FLAG 0
 
 #define RT_BOOL  char
 #define RT_TRUE  1

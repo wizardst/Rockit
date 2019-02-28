@@ -25,6 +25,9 @@
 #include "rt_check.h" // NOLINT
 #include "RTObject.h"   // NOLINT
 
+#include "rt_player/RTPairAudioCases.h"   // NOLINT
+
+
 RT_RET unit_test_best_practice() {
     rt_mem_record_reset();
     RTObject::resetTraces();

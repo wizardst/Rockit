@@ -4,13 +4,13 @@ include_directories(rt_base)
 include_directories(rt_media)
 include_directories(rt_node)
 include_directories(rt_task)
+include_directories(rt_player)
 
 add_subdirectory(rt_base)
 add_subdirectory(rt_media)
 add_subdirectory(rt_node)
 add_subdirectory(rt_task)
-
-message(STATUS "cmake version ${CMAKE_VERSION} [@@]config unit-testcases")
+add_subdirectory(rt_player)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
@@ -36,4 +36,4 @@ set(ROCKIT_TEST_SRC
 add_executable(rockit_test ${ROCKIT_TEST_SRC})
 target_link_libraries(rockit_test ${RT_BASE_STATIC} ${RT_MEDIA_STATIC} ${RT_NODE_STATIC} ${RT_TASK_STATIC})
 
-message(STATUS "cmake version ${CMAKE_VERSION} [@@]config rockit_test")
+message(STATUS "cmake version ${CMAKE_VERSION} [@@]config testcase(rockit_test), [Done]")

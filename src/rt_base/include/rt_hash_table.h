@@ -26,7 +26,7 @@ struct RtHashTable;
 
 struct rt_hash_node {
     struct rt_hash_node *next;
-    struct rt_hash_node *prev;
+    // struct rt_hash_node *prev;
     const void  *key;
     void        *data;
 };

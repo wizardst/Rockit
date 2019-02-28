@@ -11,4 +11,5 @@ set(RT_TASK_TEST_SRC
 
 add_executable(rt_task_test ${RT_TASK_TEST_SRC})
 target_link_libraries(rt_task_test ${RT_BASE_STATIC} ${RT_TASK_STATIC})
-message(STATUS "cmake version ${CMAKE_VERSION} [@@]config testcases for rt_task")
+
+message(STATUS "cmake version ${CMAKE_VERSION} [@@]config testcases for rt_task, [Done]")

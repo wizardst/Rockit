@@ -26,7 +26,7 @@
 #include "rt_string_utils.h"         // NOLINT
 #include <stdio.h>                   // NOLINT
 
-#if HAVE_WINDOW_WIN32
+#if OS_WINDOWS
 #include <windows.h>
 #include <GLES2/gl2.h>
 
@@ -89,7 +89,8 @@ void RTGLApp::setVideoScheduler(SchedulerFunc callback, void* target) {
     }
 }
 
-void RTGLApp::updateFrame(UCHAR* frame, INT32 width, INT32 height) {
+void RTGLApp::updateFrame(unsigned char* frame, INT32 width, INT32 height) {
+    //
     if (RT_NULL != mScene) {
         mScene->updateFrame(frame, width, height);
     }
@@ -135,7 +136,7 @@ HWND native_window_create(const char* title, INT32 width, INT32 height) {
         // return FALSE;
     }
 
-    #if TO_DO_FLAG
+    #if TODO_FLAG
     DWORD wStyle = WS_VISIBLE | WS_POPUP | WS_BORDER | WS_SYSMENU | WS_CAPTION;
     egl_ctx->mWnd = CreateWindow(
                          "Rockit",

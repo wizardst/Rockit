@@ -101,7 +101,7 @@ RT_RET unit_test_message(INT32 index, INT32 total) {
     RT_Deque* msg_queue = deque_create();
     for (UINT32 cmd = 0; cmd < MAX_TEST_COUNT; cmd++) {
         if (cmd % 3 == 0) {
-            struct RTMessage* msg = new RTMessage(cmd, RT_NULL, RT_NULL);
+            struct RTMessage* msg = new RTMessage(cmd, 0, 0, RT_NULL);
             // deque_push_head(msg_queue, reinterpret_cast<void*>(msg));
             deque_push_tail(msg_queue, reinterpret_cast<void*>(msg));
         } else {

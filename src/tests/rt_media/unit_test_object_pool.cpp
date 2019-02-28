@@ -91,7 +91,7 @@ void* unit_test_obj_malloc_reuse(void* ptr) {
 
 RT_RET unit_test_object_pool(INT32 index, INT32 total_index) {
     RTObjectPool* objectPool = new RTObjectPool(ObjectAllocator, 16);
-    #if TO_DO_FLAG
+    #if TODO_FLAG
     RtThread* test_a = new RtThread(unit_test_obj_malloc_reuse, objectPool);
     RtThread* test_b = new RtThread(unit_test_obj_malloc_reuse, objectPool);
     test_a->start();

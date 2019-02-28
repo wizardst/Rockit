@@ -21,7 +21,7 @@
 #ifndef SRC_RT_MEDIA_INCLUDE_RTMEDIADEF_H_
 #define SRC_RT_MEDIA_INCLUDE_RTMEDIADEF_H_
 
-#include "RTPixelDef.h"   // NOLINT
+#include "RTMediaPixel.h"   // NOLINT
 #include "rt_type.h"      // NOLINT
 #include "rt_metadata.h"  // NOLINT
 

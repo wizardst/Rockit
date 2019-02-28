@@ -36,7 +36,7 @@ class RTGLApp : public RTObject {
     void runtime();
     void eventLoop();
     void setVideoScheduler(SchedulerFunc callback, void* target);
-    void updateFrame(UCHAR* frame, INT32 width, INT32 height);
+    void updateFrame(unsigned char* frame, INT32 width, INT32 height);
 
     // override pure virtual methods of RTObject class
     virtual void summary(INT32 fd) {}

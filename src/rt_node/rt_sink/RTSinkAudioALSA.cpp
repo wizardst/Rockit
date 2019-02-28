@@ -168,15 +168,16 @@ RT_RET RTSinkAudioALSA::onReset() {
     return RT_OK;
 }
 
-RT_VOID RTSinkAudioALSA::openSoundCard(int card, int devices, RtMetaData *metadata) {
+RT_RET RTSinkAudioALSA::openSoundCard(int card, int devices, RtMetaData *metadata) {
     RT_RET err = RT_OK;
     char devicename[10] = "";
     snprintf(devicename, sizeof(devicename), "hw:%d,%d", card, devices);
 
     mALSASinkCtx = alsa_snd_create(devicename, metadata);
 
-    if (!mALSASinkCtx) {
-        RT_LOGE("alsa_snd_create failed");
+    if (RT_NULL == mALSASinkCtx) {
+        RT_LOGE("Fail to alsa_snd_create");
+        return RT_ERR_NULL_PTR;
     }
 
     err = alsa_set_snd_hw_params(mALSASinkCtx, 0);
@@ -196,10 +197,11 @@ RT_VOID RTSinkAudioALSA::openSoundCard(int card, int devices, RtMetaData *metada
         if (mALSASinkCtx)
             alsa_snd_destroy(mALSASinkCtx);
     }
+    return err;
 }
 
-RT_VOID RTSinkAudioALSA::closeSoundCard() {
-    if (mALSASinkCtx) {
+RT_RET RTSinkAudioALSA::closeSoundCard() {
+    if (RT_NULL != mALSASinkCtx) {
         alsa_snd_destroy(mALSASinkCtx);
     }
 }
@@ -238,7 +240,7 @@ static RTNode* createSinkAudioALSA() {
 
 struct RTNodeStub rt_sink_audio_alsa {
     .mCreateNode   = createSinkAudioALSA,
-    .mNodeType     = RT_NODE_TYPE_AUDIO_SINK,
+    .mNodeType     = RT_NODE_TYPE_SINK,
     .mUsePool      = RT_TRUE,
     .mNodeName     = "rt_sink_audio_alsa",
     .mNodeVersion  = "v1.0",

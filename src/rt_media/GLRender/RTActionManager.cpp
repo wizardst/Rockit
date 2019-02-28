@@ -61,15 +61,12 @@ __FAILED:
 void RTActionManager::removeAllActions() {
     UINT32               idx = 0;
     tHashElement*        item;
-    struct rt_hash_node *node;
-    struct rt_hash_node *next;
-    struct rt_hash_node *list;
+    struct rt_hash_node *list, *node;
 
     for (idx = 0; idx < rt_hash_table_get_num_buckets(this->mActionTable); idx++) {
         list = rt_hash_table_get_bucket(this->mActionTable, idx);
-        for (node = (list)->next; node != list; node = next) {
-            next = (node)->next;
-            item = reinterpret_cast<tHashElement*>(node->data);
+        for (node = list->next; node != RT_NULL; node = node->next) {
+            item  = reinterpret_cast<tHashElement*>(node->data);
             rt_safe_free(item);
         }
     }

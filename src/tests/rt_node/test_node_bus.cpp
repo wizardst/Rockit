@@ -61,12 +61,12 @@ RT_RET unit_test_node_bus(INT32 index, INT32 total) {
     pNodeBus->summary(0);
 
     // driver core data-flow
-    pNodeBus->coreLoopDriver();
+    pNodeBus->startDataLooper();
 
     // unit_test_node_operations(pNodeBus);
 
     // release and reconfigure node bus
-    #if TO_DO_FLAG
+    #if TODO_FLAG
     pNodeBus->release();
     pNodeBus->autoBuild(&setting);
     pNodeBus->summary(0);
