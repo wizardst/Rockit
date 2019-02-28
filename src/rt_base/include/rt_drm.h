@@ -28,9 +28,10 @@ static const char *DRM_DEV_NAME = "/dev/dri/card0";
 INT32 drm_open();
 INT32 drm_close(INT32 fd);
 INT32 drm_ioctl(INT32 fd, INT32 req, void* arg);
+INT32 drm_get_phys(int fd, UINT32 handle, UINT32 *phy, UINT32 heaps);
 INT32 drm_handle_to_fd(INT32 fd, UINT32 handle, INT32 *map_fd, UINT32 flags);
 INT32 drm_fd_to_handle(INT32 fd, INT32 map_fd, UINT32 *handle, UINT32 flags);
-INT32 drm_alloc(INT32  fd, UINT32 len, UINT32 align, UINT32 *handle, UINT32 flags);
+INT32 drm_alloc(INT32  fd, UINT32 len, UINT32 align, UINT32 *handle, UINT32 flags, UINT32 heaps);
 INT32 drm_free(INT32  fd, UINT32 handle);
 
 #ifdef OS_LINUX
@@ -43,6 +44,7 @@ INT32 drm_map(INT32  fd,
                INT32  flags,
                INT32  offset,
                void **ptr,
-               INT32 *map_fd);
+               INT32 *map_fd,
+               UINT32 heaps);
 
 #endif  // SRC_RT_BASE_INCLUDE_RT_DRM_H_

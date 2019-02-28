@@ -45,6 +45,26 @@ INT32 drm_close(INT32 fd) {
     return ret;
 }
 
+
+int drm_get_phys(int fd, UINT32 handle, UINT32 *phy, UINT32 heaps) {
+    struct drm_rockchip_gem_phys phys_arg;
+    phys_arg.handle = handle;
+    int ret = drm_ioctl(fd, DRM_IOCTL_ROCKCHIP_GEM_GET_PHYS, &phys_arg);
+    if (ret < 0) {
+        if (heaps != ROCKCHIP_BO_SECURE || heaps != ROCKCHIP_BO_CONTIG) {
+            RT_LOGD("not have phys addr if not cma or secure buffer");
+            *phy = 0;
+            return RT_OK;
+        } else {
+            RT_LOGE("drm_get_phys failed ret = %d", ret);
+            return ret;
+        }
+    } else {
+        *phy = phys_arg.phy_addr;
+    }
+    return ret;
+}
+
 int drm_ioctl(INT32 fd, INT32 req, void* arg) {
     INT32 ret = ioctl(fd, req, arg);
     if (ret < 0) {
@@ -110,7 +130,8 @@ INT32 drm_alloc(
         UINT32 len,
         UINT32 align,
         UINT32 *handle,
-        UINT32 flags) {
+        UINT32 flags,
+        UINT32 heaps) {
     (void)flags;
     INT32 ret;
     struct drm_mode_create_dumb dmcb;
@@ -121,7 +142,7 @@ INT32 drm_alloc(
     dmcb.bpp = 8;
     dmcb.width = (len + align - 1) & (~(align - 1));
     dmcb.height = 1;
-    dmcb.flags = 4;
+    dmcb.flags = heaps;
 
     if (handle == NULL) {
         RT_LOGE("drm_alloc: handle is NULL");
@@ -178,7 +199,7 @@ inline void *drm_mmap(void *addr, UINT32 length, INT32 prot, INT32 flags,
 #endif
 
 INT32 drm_map(INT32 fd, UINT32 handle, UINT32 length, INT32 prot,
-                   INT32 flags, INT32 offset, void **ptr, INT32 *map_fd) {
+                   INT32 flags, INT32 offset, void **ptr, INT32 *map_fd, UINT32 heaps) {
     INT32 ret;
     struct drm_mode_map_dumb dmmd;
     static UINT32 pagesize_mask = 0;
@@ -214,13 +235,19 @@ INT32 drm_map(INT32 fd, UINT32 handle, UINT32 length, INT32 prot,
 
     *ptr = drm_mmap(NULL, length, prot, MAP_SHARED, fd, dmmd.offset);
     if (*ptr == MAP_FAILED) {
-        close(*map_fd);
-        *map_fd = -1;
-        RT_LOGE("mmap failed: %s length: %d\n", strerror(errno), length);
-        return -errno;
+        if (heaps == ROCKCHIP_BO_SECURE) {
+            RT_LOGD("not have phys addr if not cma or secure buffer");
+            close(*map_fd);
+            *map_fd = -1;
+            return RT_OK;
+        } else {
+            close(*map_fd);
+            *map_fd = -1;
+            RT_LOGE("mmap failed: %s length: %d\n", strerror(errno), length);
+            return -errno;
+        }
     }
 
     return ret;
 }
-
 #endif  // OS_LINUX

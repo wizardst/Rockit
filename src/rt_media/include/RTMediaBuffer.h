@@ -55,7 +55,9 @@ class RTMediaBuffer : public RTObject {
     UINT32 getLength() const;
     INT32  getFd() const;
     INT32  getHandle() const;
+    UINT32 getPhyAddr() const;
     void   setData(void* data, UINT32 size);
+    void   setPhyAddr(UINT32 phyaddr);
     void   setRange(UINT32 offset, UINT32 length);
     void   setStatus(RtMediaBufferStatus status);
     RtMediaBufferStatus getStatus();
@@ -67,8 +69,9 @@ class RTMediaBuffer : public RTObject {
  private:
     void*   mData;
     UINT32  mSize, mRangeOffset, mRangeLength;
-    INT32 mHandle;
-    INT32 mFd;
+    INT32   mHandle;
+    INT32   mFd;
+    UINT32  mPhyAddr;
     RT_BOOL mOwnsData;
 
     RtMetaData* mMetaData;

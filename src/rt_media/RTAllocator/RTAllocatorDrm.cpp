@@ -61,7 +61,7 @@ RT_RET RTAllocatorDrm::newBuffer(UINT32 capacity, RTMediaBuffer **buffer) {
 
     INT32 err = 0;
     UINT32 handle = 0;
-    err = drm_alloc(mDrmFd, capacity, mAlign, &handle, mFlags);
+    err = drm_alloc(mDrmFd, capacity, mAlign, &handle, mFlags, mHeapMask);
     if (err) {
         RT_LOGE("drm alloc failed");
         ret = RT_ERR_UNKNOWN;
@@ -70,9 +70,17 @@ RT_RET RTAllocatorDrm::newBuffer(UINT32 capacity, RTMediaBuffer **buffer) {
 
     INT32 fd = 0;
     void *data = RT_NULL;
-    err = drm_map(mDrmFd, handle, capacity, mUsage, mFlags, 0, &data, &fd);
+    err = drm_map(mDrmFd, handle, capacity, mUsage, mFlags, 0, &data, &fd, mHeapMask);
     if (err) {
         RT_LOGE("drm map failed!");
+        ret = RT_ERR_UNKNOWN;
+        return ret;
+    }
+
+    UINT32 phy;
+    err = drm_get_phys(mDrmFd, handle, &phy, mHeapMask);
+    if (err) {
+        RT_LOGE("drm get phy failed!");
         ret = RT_ERR_UNKNOWN;
         return ret;
     }
@@ -83,7 +91,7 @@ RT_RET RTAllocatorDrm::newBuffer(UINT32 capacity, RTMediaBuffer **buffer) {
         ret = RT_ERR_UNKNOWN;
         return ret;
     }
-
+    buffer_impl->setPhyAddr(phy);
     *buffer = buffer_impl;
 
     return ret;
@@ -150,8 +158,8 @@ RT_RET RTAllocatorDrm::init(RtMetaData *config) {
     if (!config->findInt32(kKeyMemFlags, &mFlags)) {
         mFlags = MAP_SHARED;
     }
-    if (!config->findInt32(kKeyMemFlags, &mHeapMask)) {
-        mHeapMask = ROCKCHIP_BO_CONTIG;
+    if (!config->findInt32(kKeyMemHeapMask, &mHeapMask)) {
+        mHeapMask = 0;
     }
 
     return ret;

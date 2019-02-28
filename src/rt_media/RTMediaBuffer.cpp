@@ -82,6 +82,10 @@ void RTMediaBuffer::setData(void* data, UINT32 size) {
     }
 }
 
+void RTMediaBuffer::setPhyAddr(UINT32 phyaddr) {
+    mPhyAddr = phyaddr;
+}
+
 void RTMediaBuffer::setRange(UINT32 offset, UINT32 length) {
     if (offset + length <= mSize) {
         mRangeOffset = offset;
@@ -110,6 +114,10 @@ INT32  RTMediaBuffer::getFd() const {
 }
 INT32  RTMediaBuffer::getHandle() const {
     return mHandle;
+}
+
+UINT32  RTMediaBuffer::getPhyAddr() const {
+    return mPhyAddr;
 }
 
 RtMetaData* RTMediaBuffer::getMetaData() {
