@@ -22,7 +22,7 @@
 #include "RTMediaMetaKeys.h"  // NOLINT
 #include "RTNodeBus.h"        // NOLINT
 #include "RTNodeDemuxer.h"    // NOLINT
-#include "RTNodeSink.h"       // NOLINT
+#include "RTNodeAudioSink.h"  // NOLINT
 #include "RTNodeHeader.h"     // NOLINT
 
 #include "FFNodeDecoder.h"    // NOLINT
@@ -37,7 +37,7 @@
 #endif
 
 #ifdef OS_WINDOWS
-#include "RTNodeSinkGLES.h" // NOLINT
+#include "RTNodeAudioSinkGLES.h" // NOLINT
 #endif
 
 #ifdef LOG_TAG
@@ -530,9 +530,9 @@ RT_VOID audio_sink_feed_callback(RTNode* pNode, RTMediaBuffer* data) {
 RT_RET RTNodeBus::startAudioPlayerProc() {
     RTNodeDemuxer *demuxer = mBusCtx->mDemuxer;
     RTNode        *decoder = mBusCtx->mRootNodes[BUS_LINE_AUDIO];
-    RTNodeSink    *audiosink = RT_NULL;
+    RTNodeAudioSink    *audiosink = RT_NULL;
     if (RT_NULL != decoder) {
-        audiosink = reinterpret_cast<RTNodeSink*>(decoder->mNext);
+        audiosink = reinterpret_cast<RTNodeAudioSink*>(decoder->mNext);
         audiosink->queueCodecBuffer = audio_sink_feed_callback;
         audiosink->callback_ptr     = decoder;
     }

@@ -30,7 +30,7 @@ set(RT_NODE_SRC
     RTNodeDemuxer.cpp
     RTNodeFilter.cpp
     RTNodeMuxer.cpp
-    RTNodeSink.cpp
+    RTNodeAudioSink.cpp
     rt_node_define.cpp
     rt_sink/RTSinkAudioALSA.cpp
     ${MPI_CODEC_SRC}

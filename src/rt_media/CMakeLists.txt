@@ -52,6 +52,8 @@ set(RT_MEDIA_SRC
     RTAllocator/RTAllocatorStore.cpp
     ${MPI_FILES}
     ALSALib/ALSAAapterImpl.cpp
+    ALSALib/ALSAAapterUtils.cpp
+    ALSALib/ALSAVolumeManager.cpp
 )
 
 if (FFMPEG_SINGLE)

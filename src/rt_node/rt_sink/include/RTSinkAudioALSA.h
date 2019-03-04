@@ -21,7 +21,7 @@
 #ifndef SRC_RT_NODE_RT_SINK_INCLUDE_RTSINKAUDIOALSA_H_
 #define SRC_RT_NODE_RT_SINK_INCLUDE_RTSINKAUDIOALSA_H_
 
-#include "RTNodeSink.h"
+#include "RTNodeAudioSink.h"
 #include "rt_header.h" // NOLINT
 #if OS_LINUX
 #include "ALSAAapterImpl.h"
@@ -29,8 +29,9 @@
 #include "RTObjectPool.h" // NOLINT
 #include "rt_thread.h" // NOLINT
 #include "rt_dequeue.h" // NOLINT
+#include "ALSAVolumeManager.h"
 
-class RTSinkAudioALSA : public RTNodeSink {
+class RTSinkAudioALSA : public RTNodeAudioSink {
  public:
     RTSinkAudioALSA();
     virtual ~RTSinkAudioALSA();
@@ -46,8 +47,15 @@ class RTSinkAudioALSA : public RTNodeSink {
     virtual RtMetaData* queryFormat(RTPortType port);
     virtual RTNodeStub* queryStub();
 
+ public:
+    // override RTNodeAudioSink methods
+    virtual RT_VOID  SetVolume(int volume);
+    virtual INT32    GetVolume();
+    virtual bool     GetMute();
+    virtual RT_VOID  Mute(bool muted);
+
  protected:
-    // override RTNodeCodec method
+    // override RTNodeAudioSink methods
     virtual RT_RET onStart();
     virtual RT_RET onStop();
     virtual RT_RET onPause();
@@ -58,20 +66,21 @@ class RTSinkAudioALSA : public RTNodeSink {
     RT_RET openSoundCard(int card, int devices, RtMetaData *metadata);
     RT_RET closeSoundCard();
 
-    RT_Deque        *mDeque;
-    ALSASinkContext *mALSASinkCtx;
-    RtThread        *mThread;
-    RtMutex         *mLockBuffer;
-    RT_Deque        *mQueueBuffer;
-    RTObjectPool    *mPoolBuffer;
-    INT32            mCodecId;
-    INT32            mProfile;
-    INT32            mHDMICard;
-    UINT32           mSize;
-    RT_BOOL          mStart;
-    UINT32           mCountPull;
-    UINT32           mCountPush;
-    RTMsgLooper     *mEventLooper;
+    RT_Deque          *mDeque;
+    ALSASinkContext   *mALSASinkCtx;
+    RtThread          *mThread;
+    RtMutex           *mLockBuffer;
+    RT_Deque          *mQueueBuffer;
+    RTObjectPool      *mPoolBuffer;
+    INT32              mCodecId;
+    INT32              mProfile;
+    INT32              mHDMICard;
+    UINT32             mSize;
+    RT_BOOL            mStart;
+    UINT32             mCountPull;
+    UINT32             mCountPush;
+    RTMsgLooper       *mEventLooper;
+    ALSAVolumeManager *mVolManager;
 };
 
 extern struct RTNodeStub rt_sink_audio_alsa;

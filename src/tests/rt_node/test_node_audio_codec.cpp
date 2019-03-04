@@ -30,7 +30,7 @@
 #include "RTMediaMetaKeys.h" // NOLINT
 #include "RTMediaDef.h"      // NOLINT
 #include "FFAdapterUtils.h"  // NOLINT
-#include "RTNodeSink.h"
+#include "RTNodeAudioSink.h"
 
 #ifdef OS_WINDOWS
 // #define TEST_URI "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4"
@@ -40,8 +40,9 @@
 //  #define TEST_URI "bear.mp3"
 #endif
 
-#define TEST_URI "test.mp3"
+#define AUDIO_VOL_TEST
 
+#define TEST_URI "test.mp3"
 
 #define DEC_TEST_OUTPUT_FILE    "output.pcm"
 
@@ -70,7 +71,8 @@ RT_RET unit_test_node_audio_decoder_proc() {
 
     RTNodeDemuxer *demuxer = reinterpret_cast<RTNodeDemuxer*>(createRTNode(RT_NODE_TYPE_DEMUXER, BUS_LINE_SOURCE));
     RTNode        *decoder = createRTNode(RT_NODE_TYPE_DECODER, BUS_LINE_AUDIO);
-    RTNodeSink    *audiosink = reinterpret_cast<RTNodeSink*>(createRTNode(RT_NODE_TYPE_SINK, BUS_LINE_AUDIO));
+    RTNodeAudioSink    *audiosink = reinterpret_cast<RTNodeAudioSink*>(createRTNode(RT_NODE_TYPE_SINK, BUS_LINE_AUDIO));
+
     if ((RT_NULL != demuxer)&&(RT_NULL != decoder)) {
         demuxer_meta = new RtMetaData();
         demuxer_meta->setCString(kKeyFormatUri, TEST_URI);
@@ -95,6 +97,9 @@ RT_RET unit_test_node_audio_decoder_proc() {
 
         RTMediaBuffer *frame = RT_NULL;
         RTMediaBuffer* esPacket;
+        INT32 counter = 0;
+        bool is_muted = false;
+        INT32 vol = 0;
 
         do {
             // deqeue buffer from object pool
@@ -109,11 +114,11 @@ RT_RET unit_test_node_audio_decoder_proc() {
                     INT32 track_index = 0;
                     esPacket->getMetaData()->findInt32(kKeyPacketIndex, &track_index);
 
-                    RT_LOGD("track_index: %d, audio_idx: %d", track_index, audio_idx);
+                 //   RT_LOGD("track_index: %d, audio_idx: %d", track_index, audio_idx);
                     if (track_index == audio_idx) {
                         UINT8 *data = reinterpret_cast<UINT8 *>(esPacket->getData());
                         UINT32 size = esPacket->getSize();
-                        RT_LOGD("NEW audio MediaBuffer(ptr=0x%p, size=%d)", esPacket, size);
+                     //   RT_LOGD("NEW audio MediaBuffer(ptr=0x%p, size=%d)", esPacket, size);
                         got_pkt = RT_TRUE;
                     } else {
                         /* pass other packet */
@@ -137,7 +142,7 @@ RT_RET unit_test_node_audio_decoder_proc() {
 
             if (frame) {
                 if (frame->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
-                    RT_LOGD("NEW Frame(ptr=0x%p, size=%d)", frame->getData(), frame->getLength());
+                  //  RT_LOGD("NEW Frame(ptr=0x%p, size=%d)", frame->getData(), frame->getLength());
                     char* data = reinterpret_cast<char *>(frame->getData());
 
                     if (NULL != write_fd) {
@@ -145,6 +150,51 @@ RT_RET unit_test_node_audio_decoder_proc() {
                     //    fflush(write_fd);
                     }
                     RTNodeAdapter::pushBuffer(audiosink, frame);
+#ifdef AUDIO_VOL_TEST
+                    RT_LOGD("unit_test_node_audio_decoder_proc test counter=%d", counter);
+
+                    if (counter == 100) {
+                        is_muted = audiosink->GetMute();
+                        vol = audiosink->GetVolume();
+                        RT_LOGD("get vol = %d,counter = %d", vol, counter);
+                        RT_LOGD("get is_muted = %d,counter = %d", is_muted, counter);
+                        audiosink->SetVolume(40);
+                    }
+
+                    if (counter == 400) {
+                        vol = audiosink->GetVolume();
+                        RT_LOGD("get vol = %d,counter = %d", vol, counter);
+                        audiosink->Mute(true);
+                        is_muted = audiosink->GetMute();
+                        vol = audiosink->GetVolume();
+                        RT_LOGD("get vol = %d,counter = %d", vol, counter);
+                        RT_LOGD("get is_muted = %d,counter = %d", is_muted, counter);
+                    }
+
+                    if (counter == 600) {
+                        audiosink->Mute(false);
+                        is_muted = audiosink->GetMute();
+                        vol = audiosink->GetVolume();
+                        RT_LOGD("get vol = %d,counter = %d", vol, counter);
+                        RT_LOGD("get is_muted = %d,counter = %d", is_muted, counter);
+                    }
+
+                    if (counter == 800) {
+                        audiosink->Mute(true);
+                        RT_LOGD("get is_muted = %d,counter = %d", is_muted, counter);
+                    }
+
+                    if (counter == 1000) {
+                        audiosink->Mute(false);
+                        audiosink->SetVolume(10);
+                        is_muted = audiosink->GetMute();
+                        vol = audiosink->GetVolume();
+                        RT_LOGD("get vol = %d,counter = %d", vol, counter);
+                        RT_LOGD("get is_muted = %d,counter = %d", is_muted, counter);
+                    }
+
+                    counter++;
+#endif
                 }
               //  RTNodeAdapter::queueCodecBuffer(decoder, frame, RT_PORT_OUTPUT);
                 INT32 eos = 0;

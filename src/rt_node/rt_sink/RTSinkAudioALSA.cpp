@@ -47,6 +47,7 @@ RTSinkAudioALSA::RTSinkAudioALSA() {
     mThread->setName(name);
     mDeque = deque_create(10);
     RT_ASSERT(RT_NULL != mDeque);
+    mVolManager = new ALSAVolumeManager();
 }
 
 RTSinkAudioALSA::~RTSinkAudioALSA() {
@@ -67,6 +68,10 @@ RT_RET RTSinkAudioALSA::release() {
 
     if (mDeque != NULL) {
         deque_destory(&mDeque);
+    }
+
+    if (mVolManager) {
+        mVolManager = NULL;
     }
 
     closeSoundCard();
@@ -143,6 +148,50 @@ RTNodeStub* RTSinkAudioALSA::queryStub() {
     return &rt_sink_audio_alsa;
 }
 
+RT_VOID  RTSinkAudioALSA::SetVolume(int user_vol) {
+    RT_LOGD("SetVolume user_vol = %d", user_vol);
+    if (mVolManager) {
+        mVolManager->ISetVolume(user_vol);
+    } else {
+        RT_LOGE("mVolManager is NULL");
+    }
+}
+
+INT32 RTSinkAudioALSA::GetVolume() {
+    int user_vol = 0;
+
+    if (mVolManager) {
+        user_vol = mVolManager->IGetVolume();
+    } else {
+        RT_LOGE("mVolManager is NULL");
+    }
+
+    RT_LOGD("GetVolume user_vol = %d", user_vol);
+    return user_vol;
+}
+
+RT_VOID RTSinkAudioALSA::Mute(bool muted) {
+    RT_LOGD("set Mute muted = %d", muted);
+    if (mVolManager) {
+        mVolManager->IMute(muted);
+    } else {
+        RT_LOGE("mVolManager is NULL");
+    }
+}
+
+bool RTSinkAudioALSA::GetMute() {
+    bool muted = false;
+
+    if (mVolManager) {
+        muted = mVolManager->IGetMute();
+    } else {
+        RT_LOGE("mVolManager is NULL");
+    }
+
+    RT_LOGD("GetMute muted = %d", muted);
+    return muted;
+}
+
 RT_RET RTSinkAudioALSA::onStart() {
     RT_RET err = RT_OK;
     mStart = RT_TRUE;
@@ -172,9 +221,8 @@ RT_RET RTSinkAudioALSA::onReset() {
 RT_RET RTSinkAudioALSA::openSoundCard(int card, int devices, RtMetaData *metadata) {
     RT_RET err = RT_OK;
     char devicename[10] = "";
-    snprintf(devicename, sizeof(devicename), "hw:%d,%d", card, devices);
 
-    mALSASinkCtx = alsa_snd_create(devicename, metadata);
+    mALSASinkCtx = alsa_snd_create(WRITE_DEVICE_NAME, metadata);
 
     if (RT_NULL == mALSASinkCtx) {
         RT_LOGE("Fail to alsa_snd_create");
@@ -246,4 +294,3 @@ struct RTNodeStub rt_sink_audio_alsa {
     .mNodeName     = "rt_sink_audio_alsa",
     .mNodeVersion  = "v1.0",
 };
-

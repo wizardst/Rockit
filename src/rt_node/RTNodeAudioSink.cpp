@@ -21,5 +21,5 @@
 #ifdef LOG_TAG
 #undef LOG_TAG
 #endif
-#define LOG_TAG "RTNodeSink"
+#define LOG_TAG "RTNodeAudioSink"
 

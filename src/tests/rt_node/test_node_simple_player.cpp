@@ -30,7 +30,7 @@
 #include "rt_message.h"      // NOLINT
 #include "rt_msg_handler.h"  // NOLINT
 #include "rt_msg_looper.h"   // NOLINT
-#include "RTNodeSink.h"      // NOLINT
+#include "RTNodeAudioSink.h" // NOLINT
 
 #ifdef OS_WINDOWS
 #define TEST_URI "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4"
@@ -73,7 +73,7 @@ class SimplePlayer: public RTMsgHandler {
     RTNodeDemuxer *mDemuxer;
     RTNode *mVideoDecoder;
     RTNode *mAudioDecoder;
-    RTNodeSink *mAudioSink;
+    RTNodeAudioSink *mAudioSink;
 
     INT32 mVideoStreamIndex;
     INT32 mAudioStreamIndex;
@@ -127,7 +127,7 @@ RT_RET SimplePlayer::init(const char *uri) {
         RT_LOGE("demuxer create failed!");
         return RT_ERR_UNKNOWN;
     }
-    mAudioSink = reinterpret_cast<RTNodeSink*>(createRTNode(RT_NODE_TYPE_SINK, BUS_LINE_AUDIO));
+    mAudioSink = reinterpret_cast<RTNodeAudioSink*>(createRTNode(RT_NODE_TYPE_SINK, BUS_LINE_AUDIO));
     if (!mAudioSink) {
         RT_LOGE("audio sink create failed");
         return RT_ERR_UNKNOWN;

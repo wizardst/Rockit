@@ -17,8 +17,8 @@
  *   date: 2019/02/21
  */
 
-#ifndef SRC_RT_NODE_INCLUDE_RTNODESINK_H_
-#define SRC_RT_NODE_INCLUDE_RTNODESINK_H_
+#ifndef SRC_RT_NODE_INCLUDE_RTNODEAUDIOSINK_H_
+#define SRC_RT_NODE_INCLUDE_RTNODEAUDIOSINK_H_
 
 #include "RTNode.h"  // NOLINT
 #include "rt_type.h" // NOLINT
@@ -29,15 +29,20 @@ extern "C" {
 
 typedef void (*AudioQueueCodecBuffer) (RTNode* pNode, RTMediaBuffer* data);
 
-class RTNodeSink : public RTNode {
+class RTNodeAudioSink : public RTNode {
  public:
     RTNode  *callback_ptr;
     AudioQueueCodecBuffer  queueCodecBuffer;
+
+    virtual RT_VOID  SetVolume(int volume) = 0;
+    virtual INT32    GetVolume() = 0;
+    virtual bool     GetMute() = 0;
+    virtual RT_VOID  Mute(bool mute) = 0;
 };
 
 #ifdef  __cplusplus
 }
 #endif
 
-#endif  // SRC_RT_NODE_INCLUDE_RTNODESINK_H_
+#endif  // SRC_RT_NODE_INCLUDE_RTNODEAUDIOSINK_H_
 

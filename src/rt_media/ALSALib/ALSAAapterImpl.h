@@ -25,6 +25,7 @@
 #include "rt_mem.h"          // NOLINT
 #include "rt_log.h"          // NOLINT
 #include "rt_common.h"       // NOLINT
+#include "ALSAAapterUtils.h" // NOLINT
 
 #define DEFAULT_OUT_LATENCY     139319
 #define DEFAULT_OUT_BUFFERSIZE  1536
@@ -56,6 +57,8 @@ int alsa_snd_write_data(ALSASinkContext *ctx, void *data, int bytes);
 ALSASinkContext* alsa_snd_create(const char *name, RtMetaData *metadata);
 
 RT_VOID alsa_snd_destroy(ALSASinkContext *ctx);
+
+int alsa_amixer_cset_vol_impl(char *audio_vol, bool roflag);
 
 #endif  // SRC_RT_MEDIA_ALSALIB_ALSAAAPTERIMPL_H_
 

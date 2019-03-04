@@ -31,7 +31,7 @@
 #ifdef DEBUG_FLAG
 #undef DEBUG_FLAG
 #endif
-#define DEBUG_FLAG 0x1
+#define DEBUG_FLAG 0x0
 
 RT_RET alsa_set_snd_hw_params(ALSASinkContext *ctx, int flag) {
     snd_pcm_hw_params_t *hardwareParams;
@@ -346,3 +346,107 @@ RT_VOID alsa_snd_destroy(ALSASinkContext *ctx) {
         ctx = RT_NULL;
     }
 }
+
+int alsa_amixer_cset_vol_impl(char *audio_vol, bool roflag) {
+    int err;
+    int ret = 0;
+    static snd_ctl_t *handle = NULL;
+    snd_ctl_elem_info_t *info;
+    snd_ctl_elem_id_t *id;
+    snd_ctl_elem_value_t *control;
+    snd_ctl_elem_type_t type;
+    unsigned int idx, count;
+    snd_ctl_elem_info_alloca(&info);
+    snd_ctl_elem_id_alloca(&id);
+    snd_ctl_elem_value_alloca(&control);
+    char card[64] = "default";
+    int keep_handle = 0;
+    INT32 tmp;
+
+    if (parse_control_id(SOFTVOL_ELEM, id)) {
+        RT_LOGE("Wrong control identifier: %s", SOFTVOL_ELEM);
+        return -1;
+    }
+
+    show_control_id(id);
+
+    if (handle == NULL &&
+        (err = snd_ctl_open(&handle, card, 0)) < 0) {
+            RT_LOGD("Control %s open error: %d\n", card, err);
+            return err;
+    }
+
+    snd_ctl_elem_info_set_id(info, id);
+
+    if ((err = snd_ctl_elem_info(handle, info)) < 0) {
+        RT_LOGD("Cannot find the given element from control %s\n", card);
+        if (!keep_handle) {
+            snd_ctl_close(handle);
+            handle = NULL;
+        }
+
+        return err;
+    }
+    /* FIXME: Remove it when hctl find works ok !!! */
+    snd_ctl_elem_info_get_id(info, id);
+    type = snd_ctl_elem_info_get_type(info);
+    count = snd_ctl_elem_info_get_count(info);
+    snd_ctl_elem_value_set_id(control, id);
+    char *ptr;
+
+    if (roflag) {
+        ptr = audio_vol;
+        for (idx = 0; idx < count && idx < 128 && ptr && *ptr; idx++) {
+            switch (type) {
+                case SND_CTL_ELEM_TYPE_INTEGER:
+                    RT_LOGD("SND_CTL_ELEM_TYPE_INTEGER...");
+                    tmp = get_integer(&ptr,
+                        snd_ctl_elem_info_get_min(info),
+                        snd_ctl_elem_info_get_max(info));
+                    snd_ctl_elem_value_set_integer(control, idx, tmp);
+                    break;
+                default:
+                    break;
+            }
+
+            if (!strchr(audio_vol, ','))
+                ptr = audio_vol;
+            else if (*ptr == ',')
+                ptr++;
+            }
+
+            if ((err = snd_ctl_elem_write(handle, control)) < 0) {
+                RT_LOGD("Control %s element write error: %s\n", card, snd_strerror(err));
+                if (!keep_handle) {
+                    snd_ctl_close(handle);
+                    handle = NULL;
+                }
+                return err;
+            }
+    } else {
+        int vol_l, vol_r;
+        snd_ctl_elem_value_set_id(control, id);
+
+        if ((err = snd_ctl_elem_read(handle, control)) < 0) {
+            RT_LOGD("Cannot read the given element from control %s\n", card);
+            if (!keep_handle) {
+                snd_ctl_close(handle);
+                handle = NULL;
+            }
+
+            return err;
+        }
+
+        vol_l = snd_ctl_elem_value_get_integer(control, 0);
+        vol_r = snd_ctl_elem_value_get_integer(control, 1);
+        ret = (vol_l + vol_r) >> 1;
+    }
+
+    if (!keep_handle) {
+        snd_ctl_close(handle);
+        handle = NULL;
+    }
+
+    return ret;
+}
+
