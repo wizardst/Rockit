@@ -174,6 +174,35 @@ RT_RET RTMsgLooper::start(INT32 priority) {
     return RT_OK;
 }
 
+
+RT_RET RTMsgLooper::flush() {
+    RtMutex::RtAutolock autoLock(mLock);
+    while (deque_size(mEventQueue)) {
+        deque_pop(mEventQueue);
+    }
+    return RT_OK;
+}
+
+
+RT_RET RTMsgLooper::flush_message(INT32 mWhat) {
+    RtMutex::RtAutolock autoLock(mLock);
+    RT_DequeEntry* head = deque_head(mEventQueue);
+    RT_DequeEntry* it   = head;
+    INT32          idx  = 0;
+
+    while (++idx <= deque_size(mEventQueue)) {
+        struct RTMessage* msg = reinterpret_cast<struct RTMessage*>deque_data(it);
+        if (msg->getWhat() == mWhat)
+            break;
+        it =  deque_next(it);
+    }
+
+    if (idx <= deque_size(mEventQueue))
+        deque_del_index(mEventQueue, idx);
+    return RT_OK;
+}
+
+
 RT_RET RTMsgLooper::stop() {
     mExitFlag = RT_TRUE;
     mThread->join();

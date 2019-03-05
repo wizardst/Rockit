@@ -172,6 +172,25 @@ RT_RET deque_push_head(RT_Deque *list, const void *data) {
     return deque_push(list, data, header);
 }
 
+RT_RET deque_del_index(RT_Deque *list, int index) {
+    RT_DequeEntry* entry = list->head;
+    if (deque_size(list) == 1) {
+        list->head = NULL;
+        list->tail = NULL;
+    } else if (deque_size(list) == index) {
+        list->tail->prev->next = NULL;
+        list->tail = list->tail->prev;
+    } else {
+        while (--index) {
+            entry = entry->next;
+        }
+        entry->prev->next = entry->next;
+        entry->next->prev = entry->prev;
+    }
+    list->size--;
+    return RT_OK;
+}
+
 void*  deque_get(RT_Deque *list, int index) {
     RT_DequeEntry* entry = list->head;
     while (RT_NULL != entry) {
