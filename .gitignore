@@ -10,4 +10,4 @@ build/CodeBlock/obj
 build/android/
 
 # Ignore ffpeg
-third-party/ffmpeg-dev
+third-party/ffmpeg-dev/FFmpeg

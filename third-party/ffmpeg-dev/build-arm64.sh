@@ -1,5 +1,4 @@
-#!/bin/sh
-
+#! /usr/bin/env bash
 #
 # build script for cross compiling ffmpeg for android-arm64
 # Just configure the ${HOME_NDK}
@@ -16,6 +15,10 @@
 #
 
 HOME_NDK=/home/mid_sdk/android-ndk-r16b
+HOME_NDK=~/ndk16/android-ndk-r16b
+
+FFMPEG_ROOT=`pwd`
+ROCKIT_ROOT=${FFMPEG_ROOT}/../../
 
 TARGET_PLATFORM_LEVEL=23
 SYS_ROOT=${HOME_NDK}/platforms/android-${TARGET_PLATFORM_LEVEL}/arch-arm64
@@ -26,8 +29,31 @@ TOOLCHAINS=${HOME_NDK}/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_6
 [ -d ${SYS_ROOT}   ] && echo "Found ${SYS_ROOT}"   || echo "NOT Found:${SYS_ROOT}"
 [ -d ${TOOLCHAINS} ] && echo "Found ${TOOLCHAINS}" || echo "NOT Found:${TOOLCHAINS}"
 
+echo "build ffmpeg project."
+
+CLEAN_PROJECT=0
+MODULE_CONFIG_FILE_NAME="module_config_default.sh"
+
+while getopts "cf:" opt
+do
+    case $opt in
+        c)
+        echo "clean ffmpeg project"
+        CLEAN_PROJECT=1
+        ;;
+        f)
+        echo "select config: module_config_$OPTARG.sh"
+        MODULE_CONFIG_FILE_NAME="module_config_$OPTARG.sh"
+        ;;
+        ?)
+        echo "Unknown Options! $opt"
+        exit 1;;
+    esac
+done
+
 FFMPG_GIT=https://github.com/FFmpeg/FFmpeg
-if [ -d ".git" ];then
+if [ -d "${FFMPEG_ROOT}/FFmpeg/.git" ];
+then
     git remote -v
     git branch
 else
@@ -41,25 +67,32 @@ OS_CROSS=${OS_ARCH}-linux-android
 
 # https://gcc.gnu.org/onlinedocs/gcc/ARM-Options.html
 OPTIMIZE_CFLAGS="-march=${CPU_ARCH} -mtune=cortex-a53"
-PREFIX=./android/${CPU_ARCH}
+PREFIX=${FFMPEG_ROOT}/FFmpeg/android/${CPU_ARCH}
 
 HOME_FFMPEG=${PWD}
-HOME_PREBUILT=${HOME_FFMPEG}/../../prebuilt
+HOME_PREBUILT=${FFMPEG_ROOT}/../prebuilt
 HEADER_SSL=${HOME_PREBUILT}/headers/boringssl/include
 HEADER_OPUS=${HOME_PREBUILT}/headers/libopus/include
 
-echo "${0} -f [ac3]  -- enable AC3/DTS"
-if [ "${1}" = "-f" ] && [ "${2}" = "ac3" ];then
-FLAG_AC3_DTS=
-echo "${0} FLAG_AC3_DTS=@AC3/@DTS"
+# ffmpeg build params
+if [ -f ${FFMPEG_ROOT}/config/${MODULE_CONFIG_FILE_NAME} ]
+then
+    export COMMON_FF_CFG_FLAGS=
+    source ${FFMPEG_ROOT}/config/${MODULE_CONFIG_FILE_NAME}
 else
-FLAG_AC3_DTS="--disable-decoder=dca     --disable-decoder=ac3 \
-              --disable-decoder=eac3    --disable-decoder=atrac3 \
-              --disable-decoder=atrac3p --disable-decoder=truehd \
-              --disable-decoder=vp6     --disable-decoder=vp6f \
-              --disable-decoder=vp6a"
-echo "${0} FLAG_AC3_DTS=@NULL"
+    echo "Invail config file name: ${MODULE_CONFIG_FILE_NAME}"
+    exit 1
 fi
+
+cd ${FFMPEG_ROOT}/FFmpeg/
+
+if [ ${CLEAN_PROJECT} -eq 1 ]
+then
+    make clean
+    exit 0
+fi
+
+echo ${COMMON_FF_CFG_FLAGS}
 
 ./configure --target-os=android \
             --prefix=${PREFIX} \
@@ -84,45 +117,24 @@ fi
                         -Wno-psabi -fno-short-enums \
                         -fno-strict-aliasing \
                         -finline-limit=300 ${OPTIMIZE_CFLAGS}" \
-            --disable-shared \
-            --disable-debug \
-            --enable-static \
-            --disable-pthreads \
             --extra-ldflags="-Wl,-rpath-link=${SYS_ROOT}/usr/lib \
                         -L${SYS_ROOT}/usr/lib \
                         -L${PREFIX}/lib \
                         -L${HOME_PREBUILT}/arm64 \
                         -nostdlib -lc -lm -ldl -llog -lssl -lcrypto" \
-            --enable-gpl \
-            --enable-nonfree \
-            --enable-parsers \
-            --disable-encoders \
-            --enable-decoders \
-            --disable-muxers \
-            --enable-demuxers \
-            --disable-swscale \
-            --disable-swscale-alpha \
-            --disable-ffmpeg \
-            --disable-ffplay \
-            --disable-ffprobe \
-            --enable-network  \
-            --disable-indevs \
-            --disable-bsfs \
-            --disable-filters \
-            --disable-avfilter \
-            --enable-openssl \
-            --enable-protocols \
-            --disable-libopus \
             --enable-asm \
             --enable-neon \
-            ${FLAG_AC3_DTS}
+            ${COMMON_FF_CFG_FLAGS}
 
 # make clean
 
 # update git verison
 # ./version.sh
 
-make -j8 install
+# build ffmpeg library if config is ok
+if [ $? -eq 0 ]; then
+    make -j8 install
+fi
 
 #Binutils supports 2 linkers, ld.gold and ld.bfd.  One of them is
 #configured as the default linker, ld, which is used by GCC.  Sometimes,
@@ -140,8 +152,8 @@ ${TOOLCHAINS}/bin/${OS_CROSS}-ld \
           -rpath-link=${SYS_ROOT}/usr/lib \
           -L${SYS_ROOT}/usr/lib \
           -L${HOME_PREBUILT}/arm64 \
-          -soname libffmpeg.so -shared -nostdlib  -z noexecstack -Bsymbolic \
-          --whole-archive --no-undefined -o ${PREFIX}/libffmpeg.so \
+          -soname libffmpeg_58.so -shared -nostdlib  -z noexecstack -Bsymbolic \
+          --whole-archive --no-undefined -o ${PREFIX}/libffmpeg_58.so \
           libavcodec/libavcodec.a libavformat/libavformat.a \
           libavutil/libavutil.a libswresample/libswresample.a \
           -lc -lm -lz -ldl -llog -lssl -lcrypto -lopus \
@@ -155,3 +167,5 @@ if [ $? -eq 0 ]; then
     cp ${PREFIX}/include ${HOME_PREBUILT}/headers/ffmpeg-4.0/ -rf
     ls -alh ${HOME_PREBUILT}/arm64/
 fi
+
+cd -
