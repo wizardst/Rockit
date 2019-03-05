@@ -176,6 +176,7 @@ RT_RET RTNodeBus::stop() {
       case RTM_PLAYER_PLAYBACK_COMPLETE:
         // @TODO: do stop player
         this->excuteCommand(RT_NODE_CMD_STOP);
+        mBusCtx->mLooper->flush();
         break;
     }
 
@@ -230,6 +231,7 @@ RT_RET RTNodeBus::start() {
     switch (curState) {
       case RTM_PLAYER_PREPARED:
       case RTM_PLAYER_PAUSED:
+      case RTM_PLAYER_PLAYBACK_COMPLETE:
         // @TODO: do resume player
         this->excuteCommand(RT_NODE_CMD_START);
         // @TODO: decode proc with thread
@@ -276,8 +278,10 @@ RT_RET RTNodeBus::seekTo(INT64 usec) {
         break;
       case RTM_PLAYER_PAUSED:
       case RTM_PLAYER_STARTED:
+      case RTM_PLAYER_PLAYBACK_COMPLETE:
         // @TODO: do pause player
         mBusCtx->mWantSeekTimeUs = usec;
+        mBusCtx->mLooper->flush_message(RT_MEDIA_SEEK_ASYNC);
         // async seek message
         msg = new RTMessage(RT_MEDIA_SEEK_ASYNC, 0, usec, this);
         mBusCtx->mLooper->post(msg, 0);
