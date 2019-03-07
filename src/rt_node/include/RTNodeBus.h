@@ -73,6 +73,7 @@ class RTNodeBus : public RTMsgHandler {
     RT_RET      start();
     RT_RET      pause();
     RT_RET      stop();
+    RT_RET      wait();
     RT_RET      seekToAsync(INT64 usec);
     RT_RET      seekTo(INT64 usec);
     RT_RET      setCurState(UINT32 newState);

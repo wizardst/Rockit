@@ -206,7 +206,7 @@ struct RTTrackParms {
     INT32  mCodecProfile;
     INT32  mCodecLevel;
 
-    UINT64   mBitrate;
+    INT64    mBitrate;
     uint8_t *mExtraData;
     INT32    mExtraDataSize;
 

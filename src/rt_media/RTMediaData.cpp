@@ -25,7 +25,7 @@
 #ifdef LOG_TAG
 #undef LOG_TAG
 #endif
-#define LOG_TAG "RTCodecDef"
+#define LOG_TAG "RTCodecData"
 
 #ifdef DEBUG_FLAG
 #undef DEBUG_FLAG
@@ -215,13 +215,21 @@ RT_RET rt_medatdata_goto_trackpar(RtMetaData* meta, RTTrackParms* tpar) {
 
 RT_RET rt_utils_dump_track(RTTrackParms* tpar, RT_BOOL full/*=false*/) {
     INT32 avCodeID = tpar->mCodecID;
-    if (tpar->mCodecType == RTTRACK_TYPE_VIDEO) {
+    switch (tpar->mCodecType) {
+      case RTTRACK_TYPE_VIDEO:
+      case RTTRACK_TYPE_AUDIO:
         avCodeID = fa_utils_to_av_codec_id(tpar->mCodecID);
+        break;
+      default:
+        break;
     }
-    RT_LOGD("%12s: %04s; %12s: %04d; %12s: %05dk", \
-            "CodecID", fa_utils_codec_name(avCodeID), \
-            "Profile", tpar->mCodecProfile, \
-            "Bitrate", tpar->mBitrate/1024);
+
+    INT32 profile = (tpar->mCodecProfile > 0)? tpar->mCodecProfile:-1;
+    INT64 bitrate = (tpar->mBitrate > 0)? tpar->mBitrate/1024:-1;
+    RT_LOGD("%12s: %4s; %12s: %4d; %12s: %5lldk", \
+            "CodecID:", fa_utils_codec_name(avCodeID), \
+            "Profile:", profile, \
+            "Bitrate:", bitrate);
     switch (tpar->mCodecType) {
     case RTTRACK_TYPE_VIDEO:
         RT_LOGD("%12s: %04d; %12s: %04d; %12s: %04d", \

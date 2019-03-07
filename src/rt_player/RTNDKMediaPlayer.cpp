@@ -200,6 +200,13 @@ rt_status RTNDKMediaPlayer::reset() {
     return RTE_NO_ERROR;
 }
 
+rt_status RTNDKMediaPlayer::wait() {
+    RT_LOGD("node_bus wait until playback done");
+    mPlayerCtx->mNodeBus->wait();
+    RT_LOGD("node_bus playback has done...");
+    return RTE_NO_ERROR;
+}
+
 rt_status RTNDKMediaPlayer::getState() {
     if (RT_NULL != mPlayerCtx) {
         return mPlayerCtx->mState;

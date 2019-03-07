@@ -8,21 +8,22 @@ set(RT_PLAYER_STATIC rt_player_static)
 
 if (OS_WINDOWS)
     add_definitions(-DOS_WINDOWS)
+    add_definitions(-DHAS_PTHREAD)
 endif (OS_WINDOWS)
 
 if (OS_LINUX)
     add_definitions(-DOS_LINUX)
     add_definitions(-DRK_HW_CODEC)
-endif (OS_LINUX)
-
-if (HAVE_PTHREAD)
     add_definitions(-DHAS_PTHREAD)
-endif (HAVE_PTHREAD)
+endif (OS_LINUX)
 
 include_directories(include)
 
 # include third-party pre-built headers
-include_directories(third-party/prebuilt/headers/ffmpeg-4.0/include)
+if (FFMPEG_SINGLE)
+    include_directories(third-party/prebuilt/headers/ffmpeg-4.0/include)
+endif()
+
 include_directories(third-party/prebuilt/headers/alsa-lib/include)
 include_directories(third-party/drm)
 include_directories(third-party/prebuilt/headers/mpp)
@@ -32,11 +33,10 @@ include_directories(third-party/prebuilt/headers/sink-osal)
 if( X86_64 OR ARM64_V8A )
     link_directories(third-party/prebuilt/arm64)
     link_directories(${LINUX_SYSROOT}/usr/lib)
-    link_directories(/disk2/cmc/android_projects/sdk_develop/rk3308_linux/buildroot/output/rockchip_rk3308_release/host/aarch64-rockchip-linux-gnu/sysroot/usr/lib/)
     message(STATUS "build with ARM64 prebilt libraries")
 else()
     link_directories(third-party/prebuilt/arm32)
-    link_directories(${LINUX_SYSROOT}/usr/lib)
+    # link_directories(${LINUX_SYSROOT}/usr/lib)
     message(STATUS "build with ARM32 prebilt libraries")
 endif()
 

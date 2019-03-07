@@ -75,7 +75,6 @@ class FFNodeEncoder : public RTNodeCodec {
     RTObjectPool        *mUsedOutputPort;
     RTMsgLooper         *mEventLooper;
 
-    RT_BOOL              mRunning;
     UINT32               mCountPull;
     UINT32               mCountPush;
     RT_BOOL              mUsePool;

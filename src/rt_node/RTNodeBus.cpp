@@ -63,6 +63,7 @@ struct NodeBusContext {
     NodeBusSetting *mSetting;
     RTNodeDemuxer  *mDemuxer;
     RTNode*         mRootNodes[BUS_LINE_MAX];
+    RtThread*       mThreadBusData;  // thread used for data transfer between plugins
     struct RTMsgLooper* mLooper;
     UINT32          mState;
     INT64           mWantSeekTimeUs;
@@ -91,6 +92,9 @@ RTNodeBus::RTNodeBus() {
     mBusCtx->mDemuxer = RT_NULL;
 
     registerCoreStubs();
+
+    // thread used for data transfer between plugins
+    mBusCtx->mThreadBusData = NULL;
 
     // Message Queue Mechanism
     mBusCtx->mLooper = new RTMsgLooper();
@@ -183,6 +187,23 @@ RT_RET RTNodeBus::stop() {
     return RT_OK;
 }
 
+RT_RET RTNodeBus::wait() {
+    UINT32 curState = RTM_PLAYER_IDLE;
+    UINT32 loopFlag = 1;
+    do {
+        curState = getCurState();
+        switch (curState) {
+          case RTM_PLAYER_STATE_ERROR:
+          case RTM_PLAYER_PLAYBACK_COMPLETE:
+            loopFlag = 0;
+            break;
+          default:
+            RtTime::sleepMs(5);
+            break;
+        }
+    } while (1 == loopFlag);
+}
+
 RT_RET RTNodeBus::reset() {
     UINT32 curState = getCurState();
     if (RTM_PLAYER_IDLE == curState) {
@@ -192,6 +213,12 @@ RT_RET RTNodeBus::reset() {
     if (RTM_PLAYER_STOPPED != curState) {
         RT_LOGE("Need stop() before reset(), state(%d)", curState);
         this->stop();
+    }
+
+    if (RT_NULL != mBusCtx->mThreadBusData) {
+        mBusCtx->mThreadBusData->join();
+        rt_safe_delete(mBusCtx->mThreadBusData);
+        mBusCtx->mThreadBusData = RT_NULL;
     }
 
     // @TODO: do reset player
@@ -225,6 +252,15 @@ RT_RET RTNodeBus::prepare() {
     return RT_OK;
 }
 
+void* nodebus_data_proc(void* node_bus) {
+    RTNodeBus* nodeBus = reinterpret_cast<RTNodeBus*>(node_bus);
+    if (RT_NULL != nodeBus) {
+        // @TODO data transferring between plugins
+        // @THIS data transferring for audio player
+        nodeBus->startAudioPlayerProc();
+    }
+}
+
 RT_RET RTNodeBus::start() {
     UINT32 curState = getCurState();
     RTMessage* msg  = RT_NULL;
@@ -234,8 +270,13 @@ RT_RET RTNodeBus::start() {
       case RTM_PLAYER_PLAYBACK_COMPLETE:
         // @TODO: do resume player
         this->excuteCommand(RT_NODE_CMD_START);
-        // @TODO: decode proc with thread
-        this->startAudioPlayerProc();
+
+        // thread used for data transferring between plugins
+        if (RT_NULL == mBusCtx->mThreadBusData) {
+            mBusCtx->mThreadBusData = new RtThread(nodebus_data_proc, this);
+            mBusCtx->mThreadBusData->setName("BusDataProc");
+            mBusCtx->mThreadBusData->start();
+        }
 
         msg = new RTMessage(RT_MEDIA_STARTED, RT_NULL, this);
         mBusCtx->mLooper->send(msg, 0);
@@ -538,12 +579,11 @@ RT_RET RTNodeBus::startAudioPlayerProc() {
     }
     INT32 audio_idx  = demuxer->queryTrackUsed(RTTRACK_TYPE_AUDIO);
 
-
     if ((RT_NULL != demuxer)&&(RT_NULL != decoder)) {
         RTMediaBuffer *frame = RT_NULL;
         RTMediaBuffer* esPacket;
 
-        do {
+        while (mBusCtx->mThreadBusData->getState() == THREAD_LOOP) {
             // deqeue buffer from object pool
             RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
             if (RT_NULL != esPacket) {
@@ -601,7 +641,7 @@ RT_RET RTNodeBus::startAudioPlayerProc() {
 
             // dump AVFrame
             RtTime::sleepMs(5);
-        } while (true);
+        }
     }
 }
 
@@ -638,7 +678,8 @@ RT_RET RTNodeBus::startDataLooper() {
 
 RT_RET RTNodeBus::excuteCommand(RT_NODE_CMD cmd) {
     RT_LOGD("node_bus delivers %s to active nodes", rt_node_cmd_name(cmd));
-    RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_SOURCE], cmd, RT_NULL);
+
+    RTNodeAdapter::runCmd(mBusCtx->mDemuxer, cmd, RT_NULL);
     RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_VIDEO],  cmd, RT_NULL);
     RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_AUDIO],  cmd, RT_NULL);
     RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_SUBTE],  cmd, RT_NULL);
@@ -687,8 +728,7 @@ RTNode* bus_find_and_add_codec(RTNodeBus *pNodeBus, RTNode *demuxer, \
     RTNode     *node_codec  = RT_NULL;
 
     if (BUS_LINE_AUDIO == lType) {
-        RT_LOGE("%-16s -> no audio track, fix this bug!", mBusLineNames[lType].name);
-        track_idx = 0;
+        RT_LOGE("%-16s -> audio track (id=%d)", mBusLineNames[lType].name, track_idx);
     }
 
     if (track_idx >= 0) {

@@ -33,7 +33,7 @@
 #ifdef DEBUG_FLAG
 #undef DEBUG_FLAG
 #endif
-#define DEBUG_FLAG 0x0
+#define DEBUG_FLAG 0x1
 
 #define MAX_THREAD_NAME_LEN 12
 
@@ -42,6 +42,7 @@ typedef struct _rt_pthread_data {
     RT_BOOL        mValid;
     pthread_attr_t mAttr;
     void*          mPtrData;
+    ThreadState    mLoopState;
     char           mName[MAX_THREAD_NAME_LEN];
     RtThread::RTThreadProc mLoopProc;
 } RtThreadData;
@@ -49,10 +50,11 @@ typedef struct _rt_pthread_data {
 static void* thread_looping(void* arg) {
     RtThreadData* data = static_cast<RtThreadData*>(arg);
     // Call entry point only if thread was not canceled before starting.
-    INT32 tid = (INT32)(data->mTid);
-    RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:%03d) Loop Start...", data->mName, tid);
+    INT64 tid = (INT64)(data->mTid);
+    data->mLoopState = THREAD_LOOP;
+    RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:%lld) Loop Start...", data->mName, tid%10000);
     data->mLoopProc(data->mPtrData);
-    RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:%03d) Loop DONE!", data->mName, tid);
+    RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:%lld) Loop DONE!", data->mName, tid%10000);
     return NULL;
 }
 
@@ -65,6 +67,7 @@ RtThread::RtThread(RTThreadProc entryPoint, void* ptr_data) {
         data->mValid      = RT_FALSE;
         mData             = data;
     }
+    data->mLoopState = THREAD_IDLE;
     this->setName("name-??");
 }
 
@@ -89,16 +92,26 @@ RT_BOOL RtThread::start() {
     return RT_FALSE;
 }
 
+INT32 RtThread::getState() {
+    if (RT_NULL != mData) {
+        RtThreadData* data = static_cast<RtThreadData*>(mData);
+        return data->mLoopState;
+    }
+    return THREAD_IDLE;
+}
+
 void RtThread::join() {
     if (RT_NULL != mData) {
         RtThreadData* data = static_cast<RtThreadData*>(mData);
+        data->mLoopState =  THREAD_EXIT;
         if (!data->mValid) {
             return;
         }
-        INT32 tid = (INT32)(data->mTid);
-        RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:%03d) Joining...", data->mName, tid);
+        data->mLoopState =  THREAD_EXIT;
+        INT64 tid = (INT64)(data->mTid);
+        RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:lld) Joining...", data->mName, tid%1000);
         pthread_join(data->mTid, RT_NULL);
-        RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:%03d) Join DONE",  data->mName, tid);
+        RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:lld) Join DONE",  data->mName, tid%10000);
         data->mTid   = 0;
         data->mValid = RT_FALSE;
     }

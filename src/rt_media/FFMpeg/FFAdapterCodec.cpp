@@ -55,22 +55,21 @@ FACodecContext* fa_video_decode_create(RtMetaData *meta) {
     CHECK_EQ(meta->findInt32(kKeyVCodecHeight, &height), RT_TRUE);
 
     // non necessary parameters
-    RT_PTR extradata;
-    INT32 extradata_size;
-    if (!meta->findPointer(kKeyCodecExtraData, &extradata)) {
-        extradata = NULL;
+    RT_PTR extra_data;
+    INT32  extra_size;
+    if (!meta->findPointer(kKeyCodecExtraData, &extra_data)) {
+        extra_data = NULL;
     }
-    if (!meta->findInt32(kKeyCodecExtraSize, &extradata_size)) {
-        extradata_size = 0;
+    if (!meta->findInt32(kKeyCodecExtraSize, &extra_size)) {
+        extra_size = 0;
     }
-    RT_LOGE("Codec Extra(ptr=0x%p, size=%d)", extradata, extradata_size);
-    RT_LOGE("Codec Extra(ptr=0x%p, size=%d)", extradata, extradata_size);
+    RT_LOGE("Codec Extra(ptr=0x%p, size=%d)", extra_data, extra_size);
 
     // codec context parameters configure
-    codec_ctx->codec_type = AVMEDIA_TYPE_VIDEO;
+    codec_ctx->codec_type = AVMEDIA_TYPE_AUDIO;
     codec_ctx->codec_id   = (AVCodecID)fa_utils_to_av_codec_id(codecID);
-    codec_ctx->extradata_size = extradata_size;
-    codec_ctx->extradata = reinterpret_cast<UINT8 *>(extradata);
+    codec_ctx->extradata_size = extra_size;
+    codec_ctx->extradata = reinterpret_cast<UINT8 *>(extra_data);
     codec_ctx->width  = width;
     codec_ctx->height = height;
 
@@ -106,13 +105,32 @@ __FAILED:
 
 FACodecContext* fa_audio_decode_create(RtMetaData *meta) {
     INT32 err = 0;
-    AVCodecContext *codec_ctx = NULL;
+    // AVCodecContext *codec_ctx = NULL;
     FACodecContext *ctx = rt_malloc(FACodecContext);
-    ctx->mTrackType = RTTRACK_TYPE_AUDIO;
-    ctx->mSwrCtx = RT_NULL;
-    ctx->mAvCodecCtx = avcodec_alloc_context3(NULL);
-    CHECK_IS_NULL(ctx->mAvCodecCtx);
-    codec_ctx = ctx->mAvCodecCtx;
+    rt_memset(ctx, 0, sizeof(FACodecContext));
+    ctx->mTrackType     = RTTRACK_TYPE_AUDIO;
+    ctx->mSwrCtx        = RT_NULL;
+    ctx->mAvCodecCtx    = RT_NULL;
+    // codec_ctx = ctx->mAvCodecCtx;
+
+    // necessary parameters
+    INT32 rt_codec_id;
+    meta->findInt32(kKeyCodecID, reinterpret_cast<INT32 *>(&rt_codec_id));
+    AVCodecID av_codec_id = (AVCodecID)fa_utils_to_av_codec_id(rt_codec_id);
+
+    // find decoder again as codec_id may have changed
+    AVCodec* audio_codec = avcodec_find_decoder(av_codec_id);
+    if (NULL == audio_codec) {
+        RT_LOGE("Fail to avcodec_find_decoder for %s", avcodec_get_name(av_codec_id));
+        goto __FAILED;
+    }
+
+    ctx->mAvCodecCtx = avcodec_alloc_context3(audio_codec);
+    if (RT_NULL == ctx->mAvCodecCtx) {
+        RT_LOGE("Fail to avcodec_alloc_context3 for %s", avcodec_get_name(av_codec_id));
+        goto __FAILED;
+    }
+    ctx->mAvCodecCtx->codec_id = av_codec_id;
 
     err = fa_init_audio_params_from_metadata(ctx, meta);
     if (err < 0) {
@@ -120,21 +138,11 @@ FACodecContext* fa_audio_decode_create(RtMetaData *meta) {
         goto __FAILED;
     }
 
-    // find decoder again as codec_id may have changed
-    codec_ctx->codec = avcodec_find_decoder(codec_ctx->codec_id);
-    if (NULL == codec_ctx->codec) {
-        RT_LOGE("Fail to find decoder(%s)", avcodec_get_name(codec_ctx->codec_id));
+    err = avcodec_open2(ctx->mAvCodecCtx, audio_codec, NULL);
+    if (fa_utils_check_error(err, "avcodec_open2") < 0) {
         goto __FAILED;
     }
-
-    RT_LOGD("Try to create decoder(%s)", avcodec_get_name(codec_ctx->codec_id));
-    err = avcodec_open2(codec_ctx, codec_ctx->codec, NULL);
-    if (err < 0) {
-        RT_LOGE("Fail to create decoder(%s) err=%d", \
-                 avcodec_get_name(codec_ctx->codec_id), err);
-        goto __FAILED;
-    }
-    RT_LOGD("Success to open ffmpeg decoder(%s)!", avcodec_get_name(codec_ctx->codec_id));
+    RT_LOGD("Success to open ffmpeg decoder(%s)!", avcodec_get_name(av_codec_id));
 
     ctx->mAudioSrc.fmt = AV_SAMPLE_FMT_S16;
 
@@ -577,18 +585,14 @@ INT32 fa_init_audio_params_from_metadata(FACodecContext *ctx, RtMetaData *meta) 
 
     codec_ctx = ctx->mAvCodecCtx;
 
-    // necessary parameters
-    RTCodecID codecID;
-    CHECK_EQ(meta->findInt32(kKeyCodecID, reinterpret_cast<INT32 *>(&codecID)), RT_TRUE);
-
     // non necessary parameters
-    RT_PTR extradata;
-    INT32 extradata_size;
-    if (!meta->findPointer(kKeyCodecExtraData, &extradata)) {
-        extradata = NULL;
+    RT_PTR extra_data;
+    INT32 extra_size;
+    if (!meta->findPointer(kKeyCodecExtraData, &extra_data)) {
+        extra_data = NULL;
     }
-    if (!meta->findInt32(kKeyCodecExtraSize, &extradata_size)) {
-        extradata_size = 0;
+    if (!meta->findInt32(kKeyCodecExtraSize, &extra_size)) {
+        extra_size = 0;
     }
     INT32 channels;
     if (!meta->findInt32(kKeyACodecChannels, &channels)) {
@@ -607,17 +611,16 @@ INT32 fa_init_audio_params_from_metadata(FACodecContext *ctx, RtMetaData *meta) 
         bit_per_coded_sample = 0;
     }
 
-    RT_LOGE("Codec Extra(ptr=0x%p, size=%d)", extradata, extradata_size);
+    RT_LOGE("Codec Extra(ptr=0x%p, size=%d)", extra_data, extra_size);
 
     // codec context parameters configure
     codec_ctx->codec_type = AVMEDIA_TYPE_AUDIO;
-    codec_ctx->codec_id   = (AVCodecID)fa_utils_to_av_codec_id(codecID);
-    codec_ctx->extradata_size = extradata_size;
-    codec_ctx->extradata = reinterpret_cast<UINT8 *>(extradata);
-    codec_ctx->channels = channels;
+    codec_ctx->extradata_size  = extra_size;
+    codec_ctx->extradata   = reinterpret_cast<UINT8 *>(extra_data);
+    codec_ctx->channels    = channels;
     codec_ctx->sample_rate = sample_rate;
-    codec_ctx->bit_rate = bit_rate;
-    codec_ctx->sample_fmt = AV_SAMPLE_FMT_NONE;
+    codec_ctx->bit_rate    = bit_rate;
+    codec_ctx->sample_fmt  = AV_SAMPLE_FMT_NONE;
     codec_ctx->bits_per_coded_sample = bit_per_coded_sample;
 
     return 0;

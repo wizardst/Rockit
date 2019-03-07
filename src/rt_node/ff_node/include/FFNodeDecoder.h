@@ -79,7 +79,6 @@ class FFNodeDecoder : public RTNodeCodec {
     RTTrackParms        *mTrackParms;
     RTTrackType          mTrackType;
 
-    RT_BOOL              mRunning;
     UINT32               mCountPull;
     UINT32               mCountPush;
     RT_BOOL              mUsePool;

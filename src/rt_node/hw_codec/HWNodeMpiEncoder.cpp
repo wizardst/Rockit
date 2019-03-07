@@ -57,9 +57,8 @@ RTObject *hwAllocOutputBuffer(void *ctx) {
 }
 
 HWNodeMpiEncoder::HWNodeMpiEncoder() {
-    const char* name = "HWMpiEncoder";
     mProcThread = new RtThread(hw_encode_loop, reinterpret_cast<void*>(this));
-    mProcThread->setName(name);
+    mProcThread->setName("MPIEncoder");
 
     mAllocatorStore = new RTAllocatorStore();
 }
@@ -71,7 +70,7 @@ HWNodeMpiEncoder::~HWNodeMpiEncoder() {
 RT_RET HWNodeMpiEncoder::runTask() {
     RTMediaBuffer *input = NULL;
     RTMediaBuffer *output = NULL;
-    while (mRunning) {
+    while (THREAD_LOOP == mProcThread->getState()) {
         RT_RET err = RT_OK;
         if (!input) {
             input = reinterpret_cast<RTMediaBuffer *>(mUsedInputPort->borrowObj());
@@ -228,7 +227,6 @@ RTNodeStub* HWNodeMpiEncoder::queryStub() {
 
 RT_RET HWNodeMpiEncoder::onStart() {
     RT_RET          err = RT_OK;
-    mRunning = RT_TRUE;
     mProcThread->start();
     return err;
 }
@@ -238,7 +236,6 @@ RT_RET HWNodeMpiEncoder::onPause() {
 
 RT_RET HWNodeMpiEncoder::onStop() {
     RT_RET          err = RT_OK;
-    mRunning = RT_FALSE;
     mProcThread->join();
     return err;
 }

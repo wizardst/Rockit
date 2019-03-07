@@ -27,7 +27,8 @@
 #include "rt_header.h" // NOLINT
 
 #define SOFTVOL_ELEM "name=Master Playback Volume"
-#define WRITE_DEVICE_NAME "softvol"
+// #define WRITE_DEVICE_NAME "softvol"
+#define WRITE_DEVICE_NAME "hw:1,0"
 
 #undef isdigit
 #define isdigit(c) ((unsigned int) ((c) - '0') < 10)

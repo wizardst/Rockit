@@ -5,9 +5,13 @@ set( TARGET_TOOLCHAIN ${LINUX_TOOLCHAIN} )
 message( STATUS " TARGET_LINUX_ABI=\"${TARGET_LINUX_ABI}\" is specified." )
 message( STATUS " TARGET_TOOLCHAIN=\"${TARGET_TOOLCHAIN}\" is specified." )
 
-# config os
+# config --sysroot
 set( LINUX_SDK_ROOT "/disk2/cmc/android_projects/sdk_develop/rk3308_linux" )
-set( LINUX_SYSROOT "${LINUX_SDK_ROOT}/buildroot/output/rockchip_rk3308_release/host/${TARGET_TOOLCHAIN}/sysroot" )
+set( LINUX_SYSROOT "${LINUX_SDK_ROOT}/buildroot/output/rockchip_rk3308_release/host/aarch64-rockchip-linux-gnu/sysroot" )
+set( CMAKE_SYSROOT "${LINUX_SYSROOT}")
+message( STATUS " CMAKE_SYSROOT=\"${CMAKE_SYSROOT}\" is specified." )
+
+# operating system on which CMake is targeting
 set( CMAKE_SYSTEM_NAME Linux )
 
 # set target LINUX_ABI options
@@ -37,7 +41,6 @@ endif()
 # config rootfs and linker
 set( LINUX_LINKER_FLAGS "-Wl,--allow-multiple-definition" )
 
-# set( CMAKE_SYSROOT "")
 # set( LD_LIBRARY_PATH "${LINUX_SYSROOT}/usr/lib" )
 # set( LINUX_LINKER_FLAGS "${LINUX_LINKER_FLAGS} -Wl, -Wno-undef, -lstdc++" )
 # set( CMAKE_SHARED_LINKER_FLAGS "${LINUX_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS}" )

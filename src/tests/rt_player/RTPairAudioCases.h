@@ -27,8 +27,8 @@
 extern "C" {
 #endif
 
-RT_RET unit_test_pair_audio_player_case_easy(INT32 index, INT32 total);
-RT_RET unit_test_pair_audio_player_case_hard(INT32 index, INT32 total);
+RT_RET unit_test_pair_audio_player_case_easy(const char* media_one, const char* media_two);
+RT_RET unit_test_pair_audio_player_case_hard(const char* media_one, const char* media_two);
 
 #ifdef  __cplusplus
 }

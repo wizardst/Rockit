@@ -117,12 +117,6 @@ RT_RET FFNodeDemuxer::init(RtMetaData *metadata) {
 
     ctx->mFormatCtx = fa_format_open(uri, FLAG_DEMUXER);
 
-    #if TODO_FLAG
-    if (avformat_find_stream_info(ctx->mFormatCtx, NULL) < 0) {
-        RT_LOGE("Couldn't find stream information.\n");
-        return RT_ERR_UNKNOWN;
-    }
-    #endif
     ctx->mIndexVideo    = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_VIDEO);
     ctx->mIndexAudio    = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_AUDIO);
     ctx->mIndexSubtitle = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_SUBTITLE);
@@ -421,7 +415,8 @@ RT_RET FFNodeDemuxer::onFlush() {
 RT_RET FFNodeDemuxer::runTask() {
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
     void* raw_pkt = RT_NULL;
-    while (RT_FALSE == ctx->mEosFlag) {
+    RT_LOGD_IF(DEBUG_FLAG, "cache_thread begin");
+    while ((!ctx->mEosFlag) && (THREAD_LOOP == ctx->mThread->getState())) {
         INT32 err = fa_format_packet_read(ctx->mFormatCtx, &raw_pkt);
         if (err < 0) {
             RT_LOGE("%s read end", __FUNCTION__);
@@ -444,11 +439,14 @@ RT_RET FFNodeDemuxer::runTask() {
                 RtMutex::RtAutolock autoLock(ctx->mLockAudioPacket);
                 array_list_add(ctx->mAudioPktList, raw_pkt);
                 RT_LOGD("read audio packet");
+            } else {
+                RT_LOGE("FFPacket(0x%p), track=%d, but select(v=%d,a=%d)",
+                         raw_pkt, stream_index, ctx->mIndexVideo, ctx->mIndexAudio);
             }
         } while (0);
         RtTime::sleepUs(2000);
     }
-    RT_LOGD_IF(DEBUG_FLAG, "thread done");
+    RT_LOGD_IF(DEBUG_FLAG, "cache_thread done");
     return RT_OK;
 }
 

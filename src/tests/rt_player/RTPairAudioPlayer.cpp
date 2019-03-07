@@ -35,6 +35,12 @@ rt_status RTPairAudioPlayer::init() {
     return RTE_NO_ERROR;
 }
 
+rt_status RTPairAudioPlayer::wait() {
+    if (RT_NULL != mAudioCur) {
+        mAudioCur->wait();
+    }
+}
+
 rt_status RTPairAudioPlayer::playUri(const char* uri) {
     swapAudio();
     if (NULL != mAudioCur) {

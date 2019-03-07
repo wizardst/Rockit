@@ -40,23 +40,58 @@ struct FAFormatContext {
     FC_FLAG          mFcFlag;
 };
 
+static void ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_list vl) {
+    char mesg[1024];
+    vsprintf(mesg, fmt, vl);
+    size_t len = strlen(mesg);
+    if (len > 0 && len < 1024&&mesg[len - 1] == '\n') {
+        mesg[len - 1] = '\0';
+    }
+
+    RT_LOGD("ffmpeg-%d: %s", LIBAVFORMAT_VERSION_MAJOR, mesg);
+}
+
+void fa_ffmpeg_runtime_init() {
+    av_log_set_callback(ffmpeg_log_callback);
+
+    #if (LIBAVFORMAT_VERSION_MAJOR < 80)
+        /* register all formats and codecs */
+        // av_register_all();
+        // avformat_network_init();
+    #endif
+}
+
 FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag /*FLAG_DEMUXER*/) {
     INT32 err = 0;
     FAFormatContext* fafc = rt_malloc(FAFormatContext);
     fafc->mAvfc           = RT_NULL;
     fafc->mFcFlag         = flag;
+    AVDictionary*    opts = NULL;
 
     RT_LOGE_IF(DEBUG_FLAG, "uri = %s", uri);
-
+    fa_ffmpeg_runtime_init();
     switch (flag) {
-    case FLAG_DEMUXER:
-        // MUST initialize or it will cause crash in avformat_open_input
-        err = avformat_open_input(&(fafc->mAvfc), uri, NULL, NULL);
+      case FLAG_DEMUXER:
+        /* register all formats and codecs */
+        av_register_all();
+
+        /* open input file, and allocate format context */
+        err = avformat_open_input(&(fafc->mAvfc), uri, NULL, &opts);
         if (fa_utils_check_error(err, "avformat_open_input") < 0) {
             goto error_func;
         }
+
+        av_dump_format(fafc->mAvfc, 0, uri, 0);
+
+        /* retrieve stream information */
+        #if 0
+        err = avformat_find_stream_info(fafc->mAvfc, NULL);
+        if (fa_utils_check_error(err, "avformat_find_stream_info") < 0) {
+            goto error_func;
+        }
+        #endif
         break;
-    case FLAG_MUXER:
+      case FLAG_MUXER:
         fafc->mAvfc = avformat_alloc_context();
         fafc->mAvfc->oformat = av_guess_format(NULL, uri, NULL);
         err = avio_open(&fafc->mAvfc->pb, uri, AVIO_FLAG_WRITE);
@@ -64,7 +99,7 @@ FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag /*FLAG_DEMUXER*/) 
             goto error_func;
         }
         break;
-    default:
+      default:
         break;
     }
     return fafc;
@@ -244,13 +279,15 @@ INT32 fa_format_find_best_track(FAFormatContext* fc, RTTrackType tType) {
             break;
         default:
             avType = AVMEDIA_TYPE_UNKNOWN;
+            break;
         }
         bestIdx = av_find_best_stream(fc->mAvfc, avType, -1, -1, NULL, 0);
     }
-    if (-1 == bestIdx) {
+    if (bestIdx < 0) {
+        fa_utils_check_error(bestIdx, "av_find_best_stream");
         bestIdx = fa_format_find_track(fc, tType);
-        RT_LOGE("Fail to find_best_track, use find_track instead! bestIdx=%d", bestIdx);
     }
+    RT_LOGD("av_find_best_stream(best_id=%2d) for %s", bestIdx, av_get_media_type_string(avType));
     return bestIdx;
 }
 

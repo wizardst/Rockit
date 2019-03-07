@@ -15,20 +15,23 @@
  *
  * author: martin.cheng@rock-chips.com
  *   date: 2019/02/27
+ *
+ * $ objdump -x rt_player_test | grep NEEDED
  */
 
 #include "rt_header.h"          // NOLINT
+#include "rt_time.h"            // NOLINT
 #include "RTPairAudioPlayer.h"  // NOLINT
 #include "RTPairAudioCases.h"   // NOLINT
 
-#define TEST_AUDIO "man_sea.mp3"
-
-RT_RET unit_test_pair_audio_player_case_easy(INT32 index, INT32 total) {
+RT_RET unit_test_pair_audio_player_case_easy(const char* media_one, const char* media_two) {
     RTPairAudioPlayer* aPlayer = new RTPairAudioPlayer();
     aPlayer->init();
     for (int idx = 0; idx < 2; idx++) {
-        aPlayer->playUri(TEST_AUDIO);
-        aPlayer->playPcm(TEST_AUDIO);
+        aPlayer->playUri(media_one);
+        aPlayer->wait();
+        aPlayer->playPcm(media_two);
+        aPlayer->wait();
     }
     aPlayer->deinit();
     delete aPlayer;
@@ -36,12 +39,12 @@ RT_RET unit_test_pair_audio_player_case_easy(INT32 index, INT32 total) {
     return RT_OK;
 }
 
-RT_RET unit_test_pair_audio_player_case_hard(INT32 index, INT32 total) {
+RT_RET unit_test_pair_audio_player_case_hard(const char* media_one, const char* media_two) {
     RTPairAudioPlayer* aPlayer = new RTPairAudioPlayer();
     aPlayer->init();
     for (int idx = 0; idx < 2; idx++) {
-        aPlayer->playUri(TEST_AUDIO);
-        aPlayer->playPcm(TEST_AUDIO);
+        aPlayer->playUri(media_one);
+        aPlayer->playPcm(media_two);
     }
     aPlayer->deinit();
     delete aPlayer;

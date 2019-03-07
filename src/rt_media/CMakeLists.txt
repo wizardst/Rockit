@@ -65,6 +65,7 @@ else()
         ${LINUX_SYSROOT}/usr/lib/libavcodec.so
         ${LINUX_SYSROOT}/usr/lib/libswresample.so
     )
+    # include_directories(${LINUX_SDK_ROOT}/buildroot/output/rockchip_rk3308_release/target/usr/include)
 endif()
 
 if (HAVE_MPI)

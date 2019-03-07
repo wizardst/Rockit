@@ -100,7 +100,7 @@ INT32 fa_utils_check_error(const INT32 errnum, const char* func_name) {
     if (errnum < 0) {
         char errbuf[AV_ERROR_MAX_STRING_SIZE] = {0};
         fa_utils_error_string(errnum, errbuf, AV_ERROR_MAX_STRING_SIZE);
-        RT_LOGE("FFMPEG Fail to %s; Error[%d:%s]", func_name, errnum, errbuf);
+        RT_LOGE("Fail to %s; Error[%d:%s]", func_name, errnum, errbuf);
     }
     return errnum;
 }

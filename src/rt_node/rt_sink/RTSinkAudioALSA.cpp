@@ -42,9 +42,8 @@ void* sink_audio_alsa_loop(void* ptr_node) {
 }
 
 RTSinkAudioALSA::RTSinkAudioALSA() {
-    const char* name = "RTSinkAudioALSA";
     mThread = new RtThread(sink_audio_alsa_loop, reinterpret_cast<void*>(this));
-    mThread->setName(name);
+    mThread->setName("SinkAlsa");
     mDeque = deque_create(10);
     RT_ASSERT(RT_NULL != mDeque);
     mVolManager = new ALSAVolumeManager();
@@ -194,14 +193,13 @@ bool RTSinkAudioALSA::GetMute() {
 
 RT_RET RTSinkAudioALSA::onStart() {
     RT_RET err = RT_OK;
-    mStart = RT_TRUE;
+    RT_LOGD("Audio Sink Thread... begin");
     mThread->start();
     return err;
 }
 
 RT_RET RTSinkAudioALSA::onStop() {
     RT_RET err = RT_OK;
-    mStart = RT_FALSE;
     mThread->join();
     return err;
 }
@@ -258,13 +256,14 @@ RT_RET RTSinkAudioALSA::closeSoundCard() {
 RT_RET RTSinkAudioALSA::runTask() {
     RTMediaBuffer *input = NULL;
 
-    while (mStart) {
+    while (THREAD_LOOP == mThread->getState()) {
         RT_RET err = RT_OK;
         if (!input) {
             pullBuffer(&input);
         }
 
         if (!input || !input->getData()) {
+            RtTime::sleepMs(5);
             continue;
         }
 
@@ -277,6 +276,9 @@ RT_RET RTSinkAudioALSA::runTask() {
         } else {
             RT_LOGE("callback_ptr is NULL!");
         }
+
+        // dump AVFrame
+        RtTime::sleepMs(5);
 
         input = NULL;
     }

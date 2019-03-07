@@ -198,9 +198,9 @@ RT_RET SimplePlayer::start() {
         RTNodeAdapter::runCmd(mAudioDecoder, RT_NODE_CMD_START, NULL);
         RTNodeAdapter::runCmd(mAudioSink, RT_NODE_CMD_START, NULL);
     }
-    const char* name = "SimplePlayerTaskProcess";
+
     mProcThread = new RtThread(simple_player_process, reinterpret_cast<void*>(this));
-    mProcThread->setName(name);
+    mProcThread->setName("SimplePlayer");
 
     mProcRunning = RT_TRUE;
     mProcThread->start();

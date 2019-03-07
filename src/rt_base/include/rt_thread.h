@@ -27,6 +27,13 @@ struct RtRunnable {
     virtual void run(void* args) = 0;
 };
 
+typedef enum {
+    THREAD_IDLE  = 0,
+    THREAD_LOOP,
+    THREAD_EXIT,
+    THREAD_MAX,
+} ThreadState;
+
 class RtThread  {
  public:
     typedef void* (*RTThreadProc)(void*);
@@ -46,8 +53,9 @@ class RtThread  {
     /**
      * Set and Get Thread Name.
      */
-    void setName(const char* name);
+    void        setName(const char* name);
     const char* getName();
+    INT32       getState();
 
     /**
      * Waits for the thread to finish.
@@ -60,7 +68,7 @@ class RtThread  {
     static INT32 get_tid();
 
  private:
-    void* mData;
+    void*       mData;
 };
 
 #endif  // SRC_RT_BASE_INCLUDE_RT_THREAD_H_

@@ -30,6 +30,8 @@ class RTMediaPlayerImpl : public MediaPlayerInterface {
     RTMediaPlayerImpl();
     virtual ~RTMediaPlayerImpl();
 
+    void    setListener(const wp<MediaPlayerBase> &listener);
+
     virtual status_t initCheck();
 
     virtual status_t setUID(uid_t uid);

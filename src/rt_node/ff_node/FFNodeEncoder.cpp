@@ -60,9 +60,8 @@ RTObject *allocEncOutputBuffer(void *) {
 
 
 FFNodeEncoder::FFNodeEncoder() {
-    const char* name = "FFEncoder";
     mProcThread = new RtThread(ff_encode_loop, reinterpret_cast<void*>(this));
-    mProcThread->setName(name);
+    mProcThread->setName("FFEncoder");
 
     mUnusedInputPort  = RT_NULL;
     mUsedInputPort = RT_NULL;
@@ -245,7 +244,7 @@ RT_RET FFNodeEncoder::runTask() {
     RTMediaBuffer *input = NULL;
     RTMediaBuffer *output = NULL;
 
-    while (mRunning) {
+    while (THREAD_LOOP == mProcThread->getState()) {
         RT_RET err = RT_OK;
         if (!input) {
             input = reinterpret_cast<RTMediaBuffer *>(mUsedInputPort->borrowObj());
@@ -280,8 +279,7 @@ RT_RET FFNodeEncoder::runTask() {
 }
 
 RT_RET FFNodeEncoder::onStart() {
-    RT_RET          err = RT_OK;
-    mRunning = RT_TRUE;
+    RT_RET err = RT_OK;
     mProcThread->start();
     return err;
 }
@@ -291,8 +289,7 @@ RT_RET FFNodeEncoder::onPause() {
 }
 
 RT_RET FFNodeEncoder::onStop() {
-    RT_RET          err = RT_OK;
-    mRunning = RT_FALSE;
+    RT_RET err = RT_OK;
     mProcThread->join();
     return err;
 }
