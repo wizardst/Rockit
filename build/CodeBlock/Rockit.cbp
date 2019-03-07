@@ -91,11 +91,14 @@
 		<Unit filename="../../src/rt_base/include/rt_string_utils.h" />
 		<Unit filename="../../src/rt_base/include/rt_thread.h" />
 		<Unit filename="../../src/rt_base/include/rt_time.h" />
+		<Unit filename="../../src/rt_base/include/rt_trust.h" />
+                <Unit filename="../../src/rt_base/include/tee_client_api.h" />
 		<Unit filename="../../src/rt_base/linux/rt_drm.cpp" />
 		<Unit filename="../../src/rt_base/linux/rt_os_cpu_info.cpp" />
 		<Unit filename="../../src/rt_base/linux/rt_os_mutex.cpp" />
 		<Unit filename="../../src/rt_base/linux/rt_os_thread.cpp" />
 		<Unit filename="../../src/rt_base/linux/rt_os_time.cpp" />
+		<Unit filename="../../src/rt_base/linux/rt_os_trust.cpp" />
 		<Unit filename="../../src/rt_base/rt_array_list.cpp" />
 		<Unit filename="../../src/rt_base/rt_dequeue.cpp" />
 		<Unit filename="../../src/rt_base/rt_hash_table.cpp" />
