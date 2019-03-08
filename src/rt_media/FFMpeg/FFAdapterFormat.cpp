@@ -84,12 +84,10 @@ FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag /*FLAG_DEMUXER*/) 
         av_dump_format(fafc->mAvfc, 0, uri, 0);
 
         /* retrieve stream information */
-        #if 0
         err = avformat_find_stream_info(fafc->mAvfc, NULL);
         if (fa_utils_check_error(err, "avformat_find_stream_info") < 0) {
             goto error_func;
         }
-        #endif
         break;
       case FLAG_MUXER:
         fafc->mAvfc = avformat_alloc_context();
@@ -178,7 +176,7 @@ void fa_format_build_track_meta(const AVStream* stream, RTTrackParms* track) {
     }
     AVCodecParameters* cpar = stream->codecpar;
     track->mCodecType       = (RTTrackType)cpar->codec_type;
-    track->mCodecID     = (RTCodecID)fa_utils_to_rt_codec_id(cpar->codec_id);
+    track->mCodecID         = (RTCodecID)fa_utils_to_rt_codec_id(cpar->codec_id);
     track->mCodecFormat     =  cpar->format;
     track->mCodecProfile    =  cpar->profile;
     track->mCodecLevel      =  cpar->level;

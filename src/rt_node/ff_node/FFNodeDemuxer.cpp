@@ -328,6 +328,7 @@ RtMetaData* FFNodeDemuxer::queryTrackMeta(UINT32 index, RTTrackType tType) {
     RT_ASSERT(RT_NULL != ctx);
 
     RTTrackParms  track_par;
+    rt_memset(&track_par, 0, sizeof(RTTrackParms));
     RtMetaData   *track_meta = new RtMetaData();
     fa_format_query_track(ctx->mFormatCtx, index, tType, &track_par);
     rt_medatdata_from_trackpar(track_meta, &track_par);

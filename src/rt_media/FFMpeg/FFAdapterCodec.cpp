@@ -177,8 +177,8 @@ FACodecContext* fa_video_encode_create(RtMetaData *meta) {
     CHECK_EQ(meta->findInt32(kKeyVCodecHeight, &height), RT_TRUE);
 
     // non necessary parameters
-    INT32 bitrate;
-    if (!meta->findInt32(kKeyCodecBitrate, &bitrate)) {
+    INT64 bitrate;
+    if (!meta->findInt64(kKeyCodecBitrate, &bitrate)) {
         bitrate = 2000000;
     }
 
@@ -602,8 +602,8 @@ INT32 fa_init_audio_params_from_metadata(FACodecContext *ctx, RtMetaData *meta) 
     if (!meta->findInt32(kKeyACodecSampleRate, &sample_rate)) {
         sample_rate = 44100;
     }
-    INT32 bit_rate;
-    if (!meta->findInt32(kKeyCodecBitrate, &bit_rate)) {
+    INT64 bit_rate;
+    if (!meta->findInt64(kKeyCodecBitrate, &bit_rate)) {
         bit_rate = 0;
     }
     INT32 bit_per_coded_sample;
@@ -611,7 +611,8 @@ INT32 fa_init_audio_params_from_metadata(FACodecContext *ctx, RtMetaData *meta) 
         bit_per_coded_sample = 0;
     }
 
-    RT_LOGE("Codec Extra(ptr=0x%p, size=%d)", extra_data, extra_size);
+    RT_LOGE("audio meta_data(ptr=0x%p, size=%d, channel=%d, sample_rate=%2.1fk)",
+             extra_data, extra_size, channels, sample_rate/1000.0);
 
     // codec context parameters configure
     codec_ctx->codec_type = AVMEDIA_TYPE_AUDIO;

@@ -127,7 +127,7 @@ RT_RET rt_medatdata_from_trackpar(RtMetaData* meta, RTTrackParms* tpar) {
     meta->setInt32(kKeyCodecFormat,  tpar->mCodecFormat);
     meta->setInt32(kKeyCodecProfile, tpar->mCodecProfile);
     meta->setInt32(kKeyCodecLevel,   tpar->mCodecLevel);
-    meta->setInt64(kKeyCodecBitrate, tpar->mBitrate);
+    meta->setInt64(kKeyCodecBitrate, tpar->mBitrate);   // INT64
     meta->setInt32(kKeyCodecExtraSize,      tpar->mExtraDataSize);
     meta->setPointer(kKeyCodecExtraData,    tpar->mExtraData);
 
@@ -146,7 +146,7 @@ RT_RET rt_medatdata_from_trackpar(RtMetaData* meta, RTTrackParms* tpar) {
         meta->setInt32(kKeyVCodecChromaLocation, tpar->mChromaLocation);
         break;
     case RTTRACK_TYPE_AUDIO:
-        meta->setInt32(kKeyACodecChanneLayout,      tpar->mAudioChannelLayout);
+        meta->setInt64(kKeyACodecChanneLayout,      tpar->mAudioChannelLayout);
         meta->setInt32(kKeyACodecChannels,          tpar->mAudioChannels);
         meta->setInt32(kKeyACodecSampleRate,        tpar->mAudioSampleRate);
         meta->setInt32(kKeyACodecBlockAlign,        tpar->mAudioBlockAlign);
@@ -253,6 +253,7 @@ RT_RET rt_utils_dump_track(RTTrackParms* tpar, RT_BOOL full/*=false*/) {
 
 RT_RET rt_utils_dump_track(RtMetaData* meta, RT_BOOL full/*=false*/) {
     RTTrackParms track_par;
+    rt_memset(&track_par, 0, sizeof(RTTrackParms));
     rt_medatdata_goto_trackpar(meta, &track_par);
     rt_utils_dump_track(&track_par, full);
     return RT_OK;
