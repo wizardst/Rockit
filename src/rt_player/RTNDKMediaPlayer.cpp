@@ -70,6 +70,7 @@ rt_status RTNDKMediaPlayer::setUID(uid_t uid) {
 }
 
 rt_status RTNDKMediaPlayer::setDataSource(const char *url, const char *headers) {
+    RT_RET  ret = RT_OK;
     if ((RT_NULL == mPlayerCtx) || (RT_NULL == mPlayerCtx->mNodeBus)) {
         return RTE_NO_MEMORY;
     }
@@ -85,7 +86,11 @@ rt_status RTNDKMediaPlayer::setDataSource(const char *url, const char *headers) 
     }
 
     // auto build node bus and initialization
-    mPlayerCtx->mNodeBus->autoBuild(&setting);
+    ret = mPlayerCtx->mNodeBus->autoBuild(&setting);
+    if (RT_OK != ret) {
+        RT_LOGE("setDataSource fail\n");
+        return RT_ERR_UNKNOWN;
+    }
     mPlayerCtx->mNodeBus->summary(0);
 
     return RTE_NO_ERROR;

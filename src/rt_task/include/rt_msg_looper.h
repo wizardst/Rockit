@@ -49,6 +49,7 @@ struct RTMsgLooper {
     RT_RET  flush_message(INT32 mWhat);
     RT_RET  post(RTMessage* msg, INT64 delayUs = 0);   // async handler
     RT_RET  send(RTMessage* msg, INT64 delayUs = 0);   //  sync handler
+    RT_RET  requestExit();
 
     static INT64 getNowUs();
     void         setName(const char *name);
@@ -64,7 +65,9 @@ struct RTMsgLooper {
     RT_Deque*            mEventQueue;
     struct RTMsgHandler *mHandler;
     RtThread*            mThread;
-    RtMutex*             mLock;
+    RtMutex*             mDataLock;
+    RtMutex*             mSyncLock;
+    RtMutex*             mExecLock;
     RtCondition*         mExecCond;
 
  public:

@@ -130,7 +130,19 @@ RTNodeBus::~RTNodeBus() {
 RT_RET RTNodeBus::autoBuild(NodeBusSetting *setting) {
     // create [demxuer] by setting
     mBusCtx->mDemuxer = reinterpret_cast<RTNodeDemuxer*>(bus_find_and_add_demuxer(this, setting));
-
+    if (RT_NULL == mBusCtx->mDemuxer) {
+        RT_LOGE("Bus autoBuild init demuxer fail\n");
+        // Message Queue Mechanism
+        if (RT_NULL != mBusCtx->mLooper) {
+            mBusCtx->mLooper->flush();
+        }
+        RT_LOGE("Bus autoBuild init demuxer fail 1\n");
+        RTMessage* msg = new RTMessage(RT_MEDIA_ERROR, RT_NULL, this);
+        mBusCtx->mLooper->send(msg, 0);
+        mBusCtx->mLooper->requestExit();
+        RT_LOGE("Bus autoBuild init demuxer fail 2\n");
+        return RT_ERR_UNKNOWN;
+    }
     // create [codecs] by meta from demxuer
     RTNode *codec_v = bus_find_and_add_codec(this, mBusCtx->mDemuxer, \
                                        RTTRACK_TYPE_VIDEO, BUS_LINE_VIDEO);
@@ -178,6 +190,7 @@ RT_RET RTNodeBus::stop() {
       case RTM_PLAYER_STARTED:
       case RTM_PLAYER_PAUSED:
       case RTM_PLAYER_PLAYBACK_COMPLETE:
+      case RTM_PLAYER_STATE_ERROR:
         // @TODO: do stop player
         this->excuteCommand(RT_NODE_CMD_STOP);
         mBusCtx->mLooper->flush();
@@ -699,14 +712,18 @@ RTNode* bus_find_and_add_demuxer(RTNodeBus *pNodeBus, NodeBusSetting *setting) {
     RTNodeStub *nStub   = &ff_node_demuxer;
     RTNode     *demuxer = RT_NULL;
     RtMetaData *nMeta   = RT_NULL;
-
+    RT_RET      ret     = RT_OK;
     // init node demuxer
     if (RT_TRUE == check_setting(setting)) {
         demuxer = nStub->mCreateNode();
         nMeta   =  new RtMetaData();
         nMeta->setCString(kKeyFormatUri, setting->mUri);
         nMeta->setCString(kKeyUserAgent, setting->mUserAgent);
-        RTNodeAdapter::init(demuxer, nMeta);
+        ret = RTNodeAdapter::init(demuxer, nMeta);
+        if (RT_OK != ret) {
+            RTNodeAdapter::release(demuxer);
+            return RT_NULL;
+        }
         pNodeBus->registerNode(demuxer);
     } else {
         RT_LOGE("Fail to create demxuer(uri=0x%p), invalid par...", setting->mUri);

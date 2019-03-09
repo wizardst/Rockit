@@ -44,7 +44,7 @@ OPTIMIZE_CFLAGS="-march=${CPU_ARCH} -mtune=cortex-a53"
 PREFIX=./android/${CPU_ARCH}
 
 HOME_FFMPEG=${PWD}
-HOME_PREBUILT=${HOME_FFMPEG}/../prebuilt
+HOME_PREBUILT=${HOME_FFMPEG}/../../prebuilt
 HEADER_SSL=${HOME_PREBUILT}/headers/boringssl/include
 HEADER_OPUS=${HOME_PREBUILT}/headers/libopus/include
 
@@ -136,7 +136,6 @@ ls ${TOOLCHAINS}/lib/gcc/${OS_CROSS}/4.9.x/libgcc.a
 
 ${TOOLCHAINS}/bin/${OS_CROSS}-ar d libavcodec/libavcodec.a inverse.o
 
-rm ../prebuilt/arm64/libffmpeg* -rf
 ${TOOLCHAINS}/bin/${OS_CROSS}-ld \
           -rpath-link=${SYS_ROOT}/usr/lib \
           -L${SYS_ROOT}/usr/lib \
@@ -149,7 +148,10 @@ ${TOOLCHAINS}/bin/${OS_CROSS}-ld \
           --dynamic-linker=/system/bin/linker \
           ${TOOLCHAINS}/lib/gcc/${OS_CROSS}/4.9.x/libgcc.a
 
-cp ${PREFIX}/libffmpeg.so ../prebuilt/arm64/libffmpeg.so -rf
-rm ../prebuilt/headers/ffmpeg-4.0/include -rf
-cp ${PREFIX}/include ../prebuilt/headers/ffmpeg-4.0/ -rf
-ls -alh ../prebuilt/arm64/
+# copy new files to prebuilt if linux-android-ld is ok.
+if [ $? -eq 0 ]; then
+    cp ${PREFIX}/libffmpeg_58.so ${HOME_PREBUILT}/arm64/libffmpeg_58.so -rf
+    rm ${HOME_PREBUILT}/headers/ffmpeg-4.0/include -rf
+    cp ${PREFIX}/include ${HOME_PREBUILT}/headers/ffmpeg-4.0/ -rf
+    ls -alh ${HOME_PREBUILT}/arm64/
+fi

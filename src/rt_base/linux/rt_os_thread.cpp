@@ -53,7 +53,7 @@ static void* thread_looping(void* arg) {
     // Call entry point only if thread was not canceled before starting.
     INT64 tid = (INT64)(data->mTid);
     data->mLoopState = THREAD_LOOP;
-    RT_LOGD_IF(DEBUG_FLAG, " try, pthread_looper(name:%-010s tid:%lld)", data->mName, tid%10000);
+    RT_LOGD_IF(DEBUG_FLAG, "call, pthread_looper(name:%-010s tid:%lld)", data->mName, tid%10000);
 
     if (RT_NULL != data->mTaskSlot) {
         data->mTaskSlot(data->mPtrData);
@@ -128,7 +128,7 @@ void RtThread::join() {
     if (RT_NULL != mData) {
         RtThreadData* data = static_cast<RtThreadData*>(mData);
         INT64 tid = (INT64)(data->mTid);
-        RT_LOGD_IF(DEBUG_FLAG, " try, pthread_join(name:%-010s tid:%lld)", data->mName, tid%10000);
+        RT_LOGD_IF(DEBUG_FLAG, "call, pthread_join(name:%-010s tid:%lld)", data->mName, tid%10000);
         pthread_join(data->mTid, RT_NULL);
         RT_LOGD_IF(DEBUG_FLAG, "done, pthread_join(name:%-010s tid:%lld)", data->mName, tid%10000);
         data->mLoopState =  THREAD_EXIT;
@@ -146,8 +146,7 @@ void RtThread::requestInterruption() {
 void RtThread::setName(const char* name) {
     if (RT_NULL != mData) {
         RtThreadData* data = static_cast<RtThreadData*>(mData);
-        RT_LOGE("src=%p, dst=%p", data->mName, data->mName);
-        rt_str_snprintf(data->mName, MAX_THREAD_NAME_LEN-1, "%s", name);
+        rt_str_snprintf(data->mName, MAX_THREAD_NAME_LEN, "%s", name);
     }
 }
 

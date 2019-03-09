@@ -57,7 +57,7 @@ set(RT_MEDIA_SRC
 )
 
 if (FFMPEG_SINGLE)
-    set( FFMPEG_LIBS -lffmpeg )
+    set( FFMPEG_LIBS -lffmpeg_58 )
 else()
     set( FFMPEG_LIBS
         ${LINUX_SYSROOT}/usr/lib/libavformat.so

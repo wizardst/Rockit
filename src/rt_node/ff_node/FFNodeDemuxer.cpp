@@ -116,6 +116,10 @@ RT_RET FFNodeDemuxer::init(RtMetaData *metadata) {
     RT_LOGD_IF(DEBUG_FLAG, "uri = %s", uri);
 
     ctx->mFormatCtx = fa_format_open(uri, FLAG_DEMUXER);
+    if (RT_NULL == ctx->mFormatCtx) {
+        RT_LOGE("demuxer open url err.\n");
+        return RT_ERR_UNKNOWN;
+    }
 
     ctx->mIndexVideo    = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_VIDEO);
     ctx->mIndexAudio    = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_AUDIO);
