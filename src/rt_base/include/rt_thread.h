@@ -22,7 +22,9 @@
 #ifndef SRC_RT_BASE_INCLUDE_RT_THREAD_H_
 #define SRC_RT_BASE_INCLUDE_RT_THREAD_H_
 
-struct RtRunnable {
+// RtTaskSlot: atomic task, short time consumption
+class RtRunnable {
+ public:
     virtual ~RtRunnable() {}
     virtual void run(void* args) = 0;
 };
@@ -34,11 +36,13 @@ typedef enum {
     THREAD_MAX,
 } ThreadState;
 
-class RtThread  {
+class RtThread {
  public:
-    typedef void* (*RTThreadProc)(void*);
+    // RtTaskSlot: atomic task, short time consumption
+    typedef void* (*RtTaskSlot)(void*);
 
-    explicit RtThread(RTThreadProc entryPoint, void* data = NULL);
+    explicit RtThread(RtTaskSlot  taskslot, void* data = NULL);
+    explicit RtThread(RtRunnable* runnable, void* data = NULL);
 
     /**
      * Non-virtual, do not subclass.
@@ -62,13 +66,13 @@ class RtThread  {
      * If the thread has not started, returns immediately.
      */
     void join();
-    int mIndex;
+    void requestInterruption();
 
  public:
-    static INT32 get_tid();
+    static INT32 getThreadID();
 
- private:
-    void*       mData;
+ public:
+    void*  mData;
 };
 
 #endif  // SRC_RT_BASE_INCLUDE_RT_THREAD_H_

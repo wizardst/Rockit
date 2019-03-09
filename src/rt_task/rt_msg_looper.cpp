@@ -125,7 +125,7 @@ RT_BOOL RTMsgLooper::msgLoop() {
         }
 
         if (0 == deque_size(mEventQueue)) {
-            RT_LOGD_IF(DEBUG_FLAG, "[0]wait condition ...pid(%d)", mThread->get_tid());
+            RT_LOGD_IF(DEBUG_FLAG, "[0]wait condition ...pid(%d)", mThread->getThreadID());
             mExecCond->wait(mLock);
         }
 
@@ -136,7 +136,7 @@ RT_BOOL RTMsgLooper::msgLoop() {
         if (whenUs > nowUs) {
             INT64 delayUs = whenUs - nowUs;
             mExecCond->timedwait(mLock, delayUs);
-            RT_LOGD_IF(DEBUG_FLAG, "[0]timedwait condition ...pid(%d)", mThread->get_tid());
+            RT_LOGD_IF(DEBUG_FLAG, "[0]timedwait condition ...pid(%d)", mThread->getThreadID());
         }
 
         msg = reinterpret_cast<struct RTMessage*>(deque_pop(mEventQueue).data);

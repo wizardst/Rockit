@@ -39,7 +39,7 @@ class UnitTestObject : public RTObject {
 
 void UnitTestObject::unitTest(UINT32 used, UINT32 idle) {
     RT_LOGE("Thread[%d] reuse object(%p) %02d times, ObjPool(used:%02d, idle:%02d)",
-            RtThread::get_tid(), this, ++mCount, used, idle);
+            RtThread::getThreadID(), this, ++mCount, used, idle);
 }
 
 RT_RET unit_test_object(INT32 index, INT32 total_index) {
@@ -69,7 +69,7 @@ void* unit_test_obj_malloc_reuse(void* ptr) {
         rt_memset(objs, RT_NULL, sizeof(UnitTestObject*)*MAX_ALLOC_NUM);
 
         UINT32 objNum = ii + 1;
-        RT_LOGE("Thread[%d] Pitch(%02d) ObjNum(%02d)", RtThread::get_tid(), ii, objNum);
+        RT_LOGE("Thread[%d] Pitch(%02d) ObjNum(%02d)", RtThread::getThreadID(), ii, objNum);
         for (idx = 0; idx < objNum; idx++) {
             objs[idx] = reinterpret_cast<UnitTestObject*>(objPool->borrowObj());
             if (RT_NULL != objs[idx]) {

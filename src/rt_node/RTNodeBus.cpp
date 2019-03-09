@@ -37,7 +37,7 @@
 #endif
 
 #ifdef OS_WINDOWS
-#include "RTNodeAudioSinkGLES.h" // NOLINT
+#include "RTNodeSinkGLES.h" // NOLINT
 #endif
 
 #ifdef LOG_TAG

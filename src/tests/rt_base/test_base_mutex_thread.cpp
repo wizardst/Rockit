@@ -108,12 +108,12 @@ void* callback_lock_unlock(void* fake_ctx) {
         }
         if (idx % (cnt_test / 10) == 0) {
             RT_LOGE("stats: [pid=%d; cnt_lock=%03d; cnt_auto=%03d; pass=%03d/%03d]",
-                           RtThread::get_tid(), cnt_lock, cnt_auto, idx+1, cnt_test);
+                           RtThread::getThreadID(), cnt_lock, cnt_auto, idx+1, cnt_test);
         }
         RtTime::sleepMs(1);
     }
     RT_LOGE("stats: [pid=%d; cnt_lock=%03d; cnt_auto=%03d; pass=%03d/%03d] DONE",
-                           RtThread::get_tid(), cnt_lock, cnt_auto, idx, cnt_test);
+                           RtThread::getThreadID(), cnt_lock, cnt_auto, idx, cnt_test);
     return RT_NULL;
 }
 
@@ -127,14 +127,14 @@ void* callback_cond_lock(void* fake_ctx) {
     for (idx = 0; (idx < cnt_test) || (ctx->wait_cnt < cnt_test); idx++) {
         if (RT_TRUE == wait) {
             if (0 == ctx->lock0->trylock()) {
-                // RT_LOGE("stats: [pid=%d; idx=%3d]", RtThread::get_tid(), idx);
+                // RT_LOGE("stats: [pid=%d; idx=%3d]", RtThread::getThreadID(), idx);
                 ctx->rt_cond->wait(ctx->lock1);
                 ctx->wait_cnt++;
                 ctx->lock0->unlock();
             }
         } else {
             if (0 != ctx->lock0->trylock()) {
-                // RT_LOGE("stats: [pid=%d; idx=%3d]", RtThread::get_tid(), idx);
+                // RT_LOGE("stats: [pid=%d; idx=%3d]", RtThread::getThreadID(), idx);
                 ctx->rt_cond->signal();
                 cnt_sig++;
             } else {
@@ -143,12 +143,12 @@ void* callback_cond_lock(void* fake_ctx) {
         }
         if (ctx->wait_cnt % (cnt_test / 10) == 0) {
             RT_LOGE("stats: [pid=%d; cnt_wait=%03d; cnt_sig=%03d; pass=%03d/%03d]",
-                           RtThread::get_tid(), ctx->wait_cnt, cnt_sig, idx + 1, cnt_test);
+                           RtThread::getThreadID(), ctx->wait_cnt, cnt_sig, idx + 1, cnt_test);
         }
         RtTime::sleepMs(1);
     }
     RT_LOGE("stats: [pid=%d; cnt_wait=%03d; cnt_sig=%03d; pass=%03d/%03d] DONE",
-                           RtThread::get_tid(), ctx->wait_cnt, cnt_sig, idx, cnt_test);
+                           RtThread::getThreadID(), ctx->wait_cnt, cnt_sig, idx, cnt_test);
     return RT_NULL;
 }
 

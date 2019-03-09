@@ -55,7 +55,7 @@ RtTaskPool* rt_taskpool_init(UINT32 max_thread_num, UINT32 max_task_num) {
     for (UINT32 idx = 0; idx < taskpool->max_thread_num; idx++) {
         RtThread* thread =
             new RtThread(rt_taskpool_loop, reinterpret_cast<void*>(taskpool));
-        thread->mIndex = idx;
+        // thread->mIndex = idx;
         deque_push_tail(taskpool->pthreads, reinterpret_cast<void*>(thread));
         thread->start();
     }
@@ -148,7 +148,7 @@ static void* rt_taskpool_loop(void* args) {
 
     // Unreachable.
     RT_ASSERT(RT_NULL != taskpool);
-    INT32 tid = RtThread::get_tid();
+    INT32 tid = RtThread::getThreadID();
 
     while (true) {
         if ((kWaiting_State == taskpool->state)

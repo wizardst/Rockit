@@ -39,42 +39,63 @@
 
 typedef struct _rt_pthread_data {
     pthread_t      mTid;
-    RT_BOOL        mValid;
     pthread_attr_t mAttr;
     void*          mPtrData;
     ThreadState    mLoopState;
     char           mName[MAX_THREAD_NAME_LEN];
-    RtThread::RTThreadProc mLoopProc;
+    RtRunnable*    mRunnable;
+    RtThread::RtTaskSlot mTaskSlot;
 } RtThreadData;
 
 static void* thread_looping(void* arg) {
-    RtThreadData* data = static_cast<RtThreadData*>(arg);
+    RtThread*     thread = static_cast<RtThread*>(arg);
+    RtThreadData* data   = static_cast<RtThreadData*>(thread->mData);
     // Call entry point only if thread was not canceled before starting.
     INT64 tid = (INT64)(data->mTid);
     data->mLoopState = THREAD_LOOP;
-    RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:%lld) Loop Start...", data->mName, tid%10000);
-    data->mLoopProc(data->mPtrData);
-    RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:%lld) Loop DONE!", data->mName, tid%10000);
+    RT_LOGD_IF(DEBUG_FLAG, " try, pthread_looper(name:%-010s tid:%lld)", data->mName, tid%10000);
+
+    if (RT_NULL != data->mTaskSlot) {
+        data->mTaskSlot(data->mPtrData);
+    }
+
+    if (RT_NULL != data->mRunnable) {
+        data->mRunnable->run(data->mPtrData);
+    }
+
+    RT_LOGD_IF(DEBUG_FLAG, "done, pthread_looper(name:%-010s tid:%lld)", data->mName, tid%10000);
+    pthread_exit(0);
     return NULL;
 }
 
-RtThread::RtThread(RTThreadProc entryPoint, void* ptr_data) {
-    mData = RT_NULL;
-    RtThreadData  *data = rt_malloc(RtThreadData);
+RtThreadData* createThreadData(RtThread::RtTaskSlot task_slot, RtRunnable* runnable, void* ptr_data) {
+    RtThreadData* data = rt_malloc(RtThreadData);
+
+    // error: rt_memset will make string illegal address
+    // rt_memset(data, 0, sizeof(RtThreadData));
     if (RT_NULL != data) {
-        data->mLoopProc   = entryPoint;
+        data->mTid        = 0;
+        data->mTaskSlot   = task_slot;
+        data->mRunnable   = runnable;
         data->mPtrData    = ptr_data;
-        data->mValid      = RT_FALSE;
-        mData             = data;
+        data->mLoopState  = THREAD_IDLE;
     }
-    data->mLoopState = THREAD_IDLE;
-    this->setName("name-??");
+}
+
+RtThread::RtThread(RtTaskSlot task_slot, void* ptr_data) {
+    mData = createThreadData(task_slot, RT_NULL, ptr_data);
+    this->setName("thread-?");
+}
+
+RtThread::RtThread(RtRunnable* runnable, void* ptr_data) {
+    mData = createThreadData(RT_NULL, runnable, ptr_data);
+    this->setName("thread-?");
 }
 
 RtThread::~RtThread() {
     if (RT_NULL != mData) {
         RtThreadData* data = static_cast<RtThreadData*>(mData);
-        if (data->mValid) {
+        if (data->mTid > 0) {
             this->join();
         }
         rt_safe_free(mData);
@@ -82,14 +103,17 @@ RtThread::~RtThread() {
 }
 
 RT_BOOL RtThread::start() {
+    int err = RT_OK;
     if (RT_NULL != mData) {
         RtThreadData* data = static_cast<RtThreadData*>(mData);
-        int err = pthread_create(&(data->mTid), RT_NULL,
-                                 thread_looping, data);
-        data->mValid = (0 == err);
-        return data->mValid;
+        err = pthread_create(&(data->mTid), RT_NULL, thread_looping, this);
+        RT_LOGD("done, pthread_create with name=%s, error=%s",
+                   data->mName, strerror(err));
+        if (err != RT_OK) {
+            data->mLoopState  = THREAD_IDLE;
+            data->mTid        = 0;
+        }
     }
-    return RT_FALSE;
 }
 
 INT32 RtThread::getState() {
@@ -103,24 +127,27 @@ INT32 RtThread::getState() {
 void RtThread::join() {
     if (RT_NULL != mData) {
         RtThreadData* data = static_cast<RtThreadData*>(mData);
-        data->mLoopState =  THREAD_EXIT;
-        if (!data->mValid) {
-            return;
-        }
-        data->mLoopState =  THREAD_EXIT;
         INT64 tid = (INT64)(data->mTid);
-        RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:lld) Joining...", data->mName, tid%1000);
+        RT_LOGD_IF(DEBUG_FLAG, " try, pthread_join(name:%-010s tid:%lld)", data->mName, tid%10000);
         pthread_join(data->mTid, RT_NULL);
-        RT_LOGD_IF(DEBUG_FLAG, "pthread(name:%-010s tid:lld) Join DONE",  data->mName, tid%10000);
+        RT_LOGD_IF(DEBUG_FLAG, "done, pthread_join(name:%-010s tid:%lld)", data->mName, tid%10000);
+        data->mLoopState =  THREAD_EXIT;
         data->mTid   = 0;
-        data->mValid = RT_FALSE;
+    }
+}
+
+void RtThread::requestInterruption() {
+    if (RT_NULL != mData) {
+        RtThreadData* data = static_cast<RtThreadData*>(mData);
+        data->mLoopState   = THREAD_EXIT;
     }
 }
 
 void RtThread::setName(const char* name) {
     if (RT_NULL != mData) {
         RtThreadData* data = static_cast<RtThreadData*>(mData);
-        rt_str_snprintf(data->mName, MAX_THREAD_NAME_LEN, "%s", name);
+        RT_LOGE("src=%p, dst=%p", data->mName, data->mName);
+        rt_str_snprintf(data->mName, MAX_THREAD_NAME_LEN-1, "%s", name);
     }
 }
 
@@ -132,7 +159,7 @@ const char* RtThread::getName() {
     return "name-??";
 }
 
-INT32 RtThread::get_tid() {
+INT32 RtThread::getThreadID() {
     pthread_t tid = pthread_self();
     return (INT32)tid;
 }
