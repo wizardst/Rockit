@@ -36,7 +36,7 @@ typedef int32_t rt_status;
 #endif
 
 class  RTParcel;
-struct RTNDKPlayerContext;
+struct RtNDKPlayerContext;
 class RTNDKMediaPlayer {
  public:
     RTNDKMediaPlayer();
@@ -92,46 +92,7 @@ class RTNDKMediaPlayer {
     rt_status attachAuxEffect(int effectId);
 
  private:
-    struct RTNDKPlayerContext* mPlayerCtx;
-};
-
-enum RTMediaInfo {
-    // 0xx
-    RTM_INFO_UNKNOWN = 1,
-    // The player was started because it was used as the next player for another
-    // player, which just completed playback
-    RTM_INFO_STARTED_AS_NEXT = 2,
-    // The player just pushed the very first video frame for rendering
-    RTM_INFO_RENDERING_START = 3,
-
-    // 7xx
-    // The video is too complex for the decoder: it can't decode frames fast
-    // enough. Possibly only the audio plays fine at this stage.
-    RTM_INFO_VIDEO_TRACK_LAGGING = 700,
-    // pause playback internally in order to buffer more data.
-    RTM_INFO_BUFFERING_START = 701,
-    // resume playback after filling enough buffers.
-    RTM_INFO_BUFFERING_END = 702,
-    // Bandwidth in recent past
-    RTM_INFO_NETWORK_BANDWIDTH = 703,
-    // buffering percent of demuxer
-    RTM_INFO_BUFFERING_PERCENT = 705,
-    // loading percent of demuxer
-    RTM_INFO_LOADING_PERCENT = 706,
-
-    // 8xx
-    // Bad interleaving means that a media has been improperly interleaved or not
-    // interleaved at all, e.g has all the video samples first then all the audio
-    // ones. Video is playing but a lot of disk seek may be happening.
-    RTM_INFO_BAD_INTERLEAVING = 800,
-    // The media is not seekable (e.g live stream).
-    RTM_INFO_NOT_SEEKABLE     = 801,
-    // New media metadata is available.
-    RTM_INFO_METADATA_UPDATE  = 802,
-
-    // 9xx
-    RTM_INFO_TIMED_TEXT_ERROR = 900,
-    RTM_INFO_PLAYING_START    = 901,
+    struct RtNDKPlayerContext* mPlayerCtx;
 };
 
 #ifdef  __cplusplus

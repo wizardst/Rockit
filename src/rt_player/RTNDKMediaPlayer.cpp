@@ -19,7 +19,7 @@
  */
 
 #include "rt_header.h"         // NOLINT
-#include "RTNodeBus.h"         // NOLINT
+#include "RTNDKNodePlayer.h"   // NOLINT
 #include "RTNDKMediaPlayer.h"  // NOLINT
 #include "rt_string_utils.h"   // NOLINT
 
@@ -28,7 +28,7 @@
 #endif
 #define LOG_TAG "RTNDKMediaPlayer"
 
-typedef struct RTNDKPlayerContext {
+typedef struct RtNDKPlayerContext {
     uid_t       mUid;
     int32_t     mState;
     int32_t     mLastError;      // defined in RTMediaError.h
@@ -38,26 +38,27 @@ typedef struct RTNDKPlayerContext {
     int32_t     mLooping;
     const char* mUri;
     const char* mHeaders;
-    RTNodeBus*  mNodeBus;
-} _RTNDKPlayerContext;
+    RTNDKNodePlayer*  mNodePlayer;
+} RTNDKPlayerContext;
 
-rt_status setPlayerState(_RTNDKPlayerContext* playerCtx, int32_t new_state) {
+rt_status setPlayerState(RTNDKPlayerContext* playerCtx, int32_t new_state) {
     if (playerCtx->mState != new_state) {
         RT_LOGD("Old State is (%d); New State is (%d)", playerCtx->mState, new_state);
+        playerCtx->mState = new_state;
     }
     return RTE_NO_ERROR;
 }
-/* 
+/*
  * construction and destructor
  */
 RTNDKMediaPlayer::RTNDKMediaPlayer() {
-    mPlayerCtx           = rt_malloc(_RTNDKPlayerContext);
-    rt_memset(mPlayerCtx, 0, sizeof(_RTNDKPlayerContext));
-    mPlayerCtx->mNodeBus = new RTNodeBus();
+    mPlayerCtx              = rt_malloc(RTNDKPlayerContext);
+    rt_memset(mPlayerCtx, 0, sizeof(RTNDKPlayerContext));
+    mPlayerCtx->mNodePlayer = new RTNDKNodePlayer();
 }
 
 RTNDKMediaPlayer::~RTNDKMediaPlayer() {
-    rt_safe_delete(mPlayerCtx->mNodeBus);
+    rt_safe_delete(mPlayerCtx->mNodePlayer);
     rt_safe_free(mPlayerCtx);
 }
 
@@ -71,7 +72,7 @@ rt_status RTNDKMediaPlayer::setUID(uid_t uid) {
 
 rt_status RTNDKMediaPlayer::setDataSource(const char *url, const char *headers) {
     RT_RET  ret = RT_OK;
-    if ((RT_NULL == mPlayerCtx) || (RT_NULL == mPlayerCtx->mNodeBus)) {
+    if ((RT_NULL == mPlayerCtx) || (RT_NULL == mPlayerCtx->mNodePlayer)) {
         return RTE_NO_MEMORY;
     }
 
@@ -79,19 +80,19 @@ rt_status RTNDKMediaPlayer::setDataSource(const char *url, const char *headers) 
     mPlayerCtx->mHeaders = headers;
 
     // configure node bus and summary
-    NodeBusSetting setting = {0};
+    RTMediaUri setting = {0};
     rt_str_snprintf(setting.mUri, sizeof(setting.mUri), "%s", url);
     if (NULL != headers) {
         rt_str_snprintf(setting.mUserAgent, sizeof(setting.mUserAgent), "%s", headers);
     }
 
     // auto build node bus and initialization
-    ret = mPlayerCtx->mNodeBus->autoBuild(&setting);
+    ret = mPlayerCtx->mNodePlayer->setDataSource(&setting);
     if (RT_OK != ret) {
         RT_LOGE("setDataSource fail\n");
         return RT_ERR_UNKNOWN;
     }
-    mPlayerCtx->mNodeBus->summary(0);
+    mPlayerCtx->mNodePlayer->summary(0);
 
     return RTE_NO_ERROR;
 }
@@ -120,12 +121,12 @@ rt_status RTNDKMediaPlayer::setVideoSurface(void* surface) {
 }
 
 rt_status RTNDKMediaPlayer::initCheck() {
-    if ((RT_NULL == mPlayerCtx) || (RT_NULL == mPlayerCtx->mNodeBus)) {
+    if ((RT_NULL == mPlayerCtx) || (RT_NULL == mPlayerCtx->mNodePlayer)) {
         return RTE_NO_MEMORY;
     }
-    mPlayerCtx->mState = mPlayerCtx->mNodeBus->getCurState();
+    mPlayerCtx->mState = mPlayerCtx->mNodePlayer->getCurState();
 
-    if ((RT_NULL != mPlayerCtx) && (mPlayerCtx->mState >= RTM_PLAYER_INITIALIZED)) {
+    if ((RT_NULL != mPlayerCtx) && (mPlayerCtx->mState >= RT_STATE_INITIALIZED)) {
         return RTE_NO_ERROR;
     }
     return RTE_UNKNOWN;
@@ -138,7 +139,7 @@ rt_status RTNDKMediaPlayer::prepare() {
     }
     // driver core data-flow
     RT_LOGD("node_bus prepare");
-    mPlayerCtx->mNodeBus->prepare();
+    mPlayerCtx->mNodePlayer->prepare();
     return err;
 }
 
@@ -157,7 +158,7 @@ rt_status RTNDKMediaPlayer::seekTo(int64_t usec) {
     }
     RT_LOGD("node_bus seekTo(%lld us)", usec);
     mPlayerCtx->mUsSeek = usec;
-    mPlayerCtx->mNodeBus->seekTo(usec);
+    mPlayerCtx->mNodePlayer->seekTo(usec);
     return err;
 }
 
@@ -168,7 +169,7 @@ rt_status RTNDKMediaPlayer::start() {
     }
     // driver core data-flow
     RT_LOGD("node_bus start");
-    mPlayerCtx->mNodeBus->start();
+    mPlayerCtx->mNodePlayer->start();
     return err;
 }
 
@@ -179,7 +180,7 @@ rt_status RTNDKMediaPlayer::stop() {
     }
     RT_LOGD("node_bus stop");
     // driver core data-flow
-    mPlayerCtx->mNodeBus->stop();
+    mPlayerCtx->mNodePlayer->stop();
     return err;
 }
 
@@ -190,7 +191,7 @@ rt_status RTNDKMediaPlayer::pause() {
         return err;
     }
     RT_LOGD("node_bus pause");
-    mPlayerCtx->mNodeBus->pause();
+    mPlayerCtx->mNodePlayer->pause();
     return err;
 }
 
@@ -201,14 +202,14 @@ rt_status RTNDKMediaPlayer::reset() {
         return err;
     }
     RT_LOGD("node_bus reset");
-    mPlayerCtx->mNodeBus->reset();
+    mPlayerCtx->mNodePlayer->reset();
     return RTE_NO_ERROR;
 }
 
 rt_status RTNDKMediaPlayer::wait() {
-    RT_LOGD("node_bus wait until playback done");
-    mPlayerCtx->mNodeBus->wait();
-    RT_LOGD("node_bus playback has done...");
+    RT_LOGD("call, wait until playback done");
+    mPlayerCtx->mNodePlayer->wait();
+    RT_LOGD("done, playback has done...");
     return RTE_NO_ERROR;
 }
 
@@ -216,7 +217,7 @@ rt_status RTNDKMediaPlayer::getState() {
     if (RT_NULL != mPlayerCtx) {
         return mPlayerCtx->mState;
     }
-    return RTM_PLAYER_STATE_ERROR;
+    return RT_STATE_STATE_ERROR;
 }
 
 rt_status RTNDKMediaPlayer::getCurrentPosition(int64_t *usec) {
@@ -259,7 +260,7 @@ rt_status RTNDKMediaPlayer::getParameter(int key, RTParcel *reply) {
     return RTE_UNSUPPORTED;
 }
 
-/* 
+/*
  * basic operations for audiotrack
  * attachAuxEffect: attaches an auxiliary effect to the audio track
  */

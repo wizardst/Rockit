@@ -84,7 +84,7 @@ RT_RET RTMsgLooper::post(struct RTMessage* msg, INT64 delayUs /* = 0 */) {
     }
 
     do {
-	    RtMutex::RtAutolock autoLock(mDataLock);
+        RtMutex::RtAutolock autoLock(mDataLock);
 #if TODO_FLAG
         RT_DequeEntry* head = deque_head(mEventQueue);
         RT_DequeEntry* tail = deque_tail(mEventQueue);
@@ -111,7 +111,7 @@ RT_RET RTMsgLooper::post(struct RTMessage* msg, INT64 delayUs /* = 0 */) {
         msg->setWhenUs(whenUs);
         deque_push_head(mEventQueue, reinterpret_cast<void*>(msg));
 #endif
-    } while(0);
+    } while (0);
 
     mExecCond->broadcast();
 

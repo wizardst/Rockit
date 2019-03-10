@@ -69,7 +69,7 @@ RT_RET unit_test_node_audio_decoder_proc() {
         return RT_ERR_UNKNOWN;
     }
 
-    RTNodeDemuxer *demuxer = reinterpret_cast<RTNodeDemuxer*>(createRTNode(RT_NODE_TYPE_DEMUXER, BUS_LINE_SOURCE));
+    RTNodeDemuxer *demuxer = reinterpret_cast<RTNodeDemuxer*>(createRTNode(RT_NODE_TYPE_DEMUXER, BUS_LINE_ROOT));
     RTNode        *decoder = createRTNode(RT_NODE_TYPE_DECODER, BUS_LINE_AUDIO);
     RTNodeAudioSink    *audiosink = reinterpret_cast<RTNodeAudioSink*>(createRTNode(RT_NODE_TYPE_SINK, BUS_LINE_AUDIO));
 

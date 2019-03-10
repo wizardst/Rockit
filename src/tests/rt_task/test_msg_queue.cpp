@@ -27,7 +27,7 @@
 #include "rt_msg_handler.h" // NOLINT
 #include "rt_msg_looper.h"  // NOLINT
 
-#define MAX_TEST_COUNT 100
+#define MAX_TEST_COUNT 2
 
 enum CTL_CMD {
     CMD_INIT = 0x0,
@@ -82,18 +82,24 @@ void CMDPlayer::postRandomMessage(UINT32 msg_cnt) {
         RTMessage* msg = new RTMessage(cmd, RT_NULL, this);
         RT_LOGE("message(msg=%p; what=%d; name=%s) was created", msg, cmd, mCmdNames[cmd].name);
         mLooper->post(msg, 0);
-        RtTime::sleepMs(3000);
+        // RtTime::sleepMs(3000ull);
     }
 }
 
 void CMDPlayer::onMessageReceived(struct RTMessage* msg) {
-    RT_LOGE("message(msg=%p; what=%d) received", msg, msg->getWhat());
+    RT_LOGE("call, receive message(msg=%p; what=%d)", msg, msg->getWhat());
+    UINT64 callTime = RtTime::getNowTimeMs();
+    RtTime::sleepMs(RtTime::randInt()%1000);
+    UINT64 doneTime = RtTime::getNowTimeMs() - callTime;
+    RT_LOGE("done, receive message(msg=%p; what=%d) time=%lld", msg, msg->getWhat(), doneTime);
 }
 
 RT_RET unit_test_msgqueue(INT32 index, INT32 total) {
-    struct CMDPlayer* cmd_player =  new CMDPlayer();
-    cmd_player->postRandomMessage(MAX_TEST_COUNT);
-    rt_safe_delete(cmd_player);
+    for (INT32 idx = 0; idx < 10; idx++) {
+        struct CMDPlayer* cmd_player =  new CMDPlayer();
+        cmd_player->postRandomMessage(MAX_TEST_COUNT);
+        rt_safe_delete(cmd_player);
+    }
     return RT_OK;
 }
 

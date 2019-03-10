@@ -18,6 +18,8 @@
  *   Task: construct and manage pipeline of media node
  */
 
+#include "rt_hash_table.h"    // NOLINT
+
 #include "rt_string_utils.h"  // NOLINT
 #include "RTMediaMetaKeys.h"  // NOLINT
 #include "RTNodeBus.h"        // NOLINT
@@ -60,18 +62,12 @@ typedef enum _NODE_BUS_STATE {
 struct NodeBusContext {
     RtHashTable    *mNodeBus;
     RtHashTable    *mNodeAll;
-    NodeBusSetting *mSetting;
+    RTMediaUri     *mSetting;
     RTNodeDemuxer  *mDemuxer;
     RTNode*         mRootNodes[BUS_LINE_MAX];
-    RtThread*       mThreadBusData;  // thread used for data transfer between plugins
-    struct RTMsgLooper* mLooper;
-    UINT32          mState;
-    INT64           mWantSeekTimeUs;
-    INT64           mLastSeekTimeUs;
 } NodeBusContext;
 
-RT_RET  bus_release_nodes(RtHashTable *pNodeBus);
-RTNode* bus_find_and_add_demuxer(RTNodeBus *pNodeBus, NodeBusSetting *setting);
+RTNode* bus_find_and_add_demuxer(RTNodeBus *pNodeBus, RTMediaUri *setting);
 RTNode* bus_find_and_add_codec(RTNodeBus *pNodeBus, RTNode *demuxer, \
                          RTTrackType tType, BUS_LINE_TYPE lType);
 RTNode* bus_find_and_add_sink(RTNodeBus *pNodeBus, RTNode *codec, BUS_LINE_TYPE lType);
@@ -92,22 +88,12 @@ RTNodeBus::RTNodeBus() {
     mBusCtx->mDemuxer = RT_NULL;
 
     registerCoreStubs();
-
-    // thread used for data transfer between plugins
-    mBusCtx->mThreadBusData = NULL;
-
-    // Message Queue Mechanism
-    mBusCtx->mLooper = new RTMsgLooper();
-    mBusCtx->mLooper->setName("MsgLooper");
-    mBusCtx->mLooper->start();
-
-    setCurState(RTM_PLAYER_IDLE);
 }
 
 RTNodeBus::~RTNodeBus() {
     RT_ASSERT(RT_NULL != mBusCtx);
 
-    reset();
+    RT_LOGD("call, ~RTNodeBus");
     rt_hash_table_destory(mBusCtx->mNodeBus);
     rt_hash_table_destory(mBusCtx->mNodeAll);
 
@@ -118,31 +104,21 @@ RTNodeBus::~RTNodeBus() {
     mBusCtx->mSetting = RT_NULL;
     mBusCtx->mDemuxer = RT_NULL;
 
-    // Message Queue Mechanism
-    if (RT_NULL != mBusCtx->mLooper) {
-        mBusCtx->mLooper->stop();
-    }
-    rt_safe_delete(mBusCtx->mLooper);
-
     rt_safe_free(mBusCtx);
+
+    RT_LOGD("done, ~RTNodeBus");
 }
 
-RT_RET RTNodeBus::autoBuild(NodeBusSetting *setting) {
+RT_RET RTNodeBus::autoBuild(RTMediaUri* mediaUri) {
     // create [demxuer] by setting
-    mBusCtx->mDemuxer = reinterpret_cast<RTNodeDemuxer*>(bus_find_and_add_demuxer(this, setting));
+    mBusCtx->mDemuxer = reinterpret_cast<RTNodeDemuxer*>(bus_find_and_add_demuxer(this, mediaUri));
+    mBusCtx->mRootNodes[BUS_LINE_ROOT] = mBusCtx->mDemuxer;
+
     if (RT_NULL == mBusCtx->mDemuxer) {
-        RT_LOGE("Bus autoBuild init demuxer fail\n");
-        // Message Queue Mechanism
-        if (RT_NULL != mBusCtx->mLooper) {
-            mBusCtx->mLooper->flush();
-        }
-        RT_LOGE("Bus autoBuild init demuxer fail 1\n");
-        RTMessage* msg = new RTMessage(RT_MEDIA_ERROR, RT_NULL, this);
-        mBusCtx->mLooper->send(msg, 0);
-        mBusCtx->mLooper->requestExit();
-        RT_LOGE("Bus autoBuild init demuxer fail 2\n");
-        return RT_ERR_UNKNOWN;
+        RT_LOGE("fail to find and init node-demuxer");
+        return RT_ERR_NULL_PTR;
     }
+
     // create [codecs] by meta from demxuer
     RTNode *codec_v = bus_find_and_add_codec(this, mBusCtx->mDemuxer, \
                                        RTTRACK_TYPE_VIDEO, BUS_LINE_VIDEO);
@@ -172,244 +148,11 @@ RT_RET RTNodeBus::autoBuild(NodeBusSetting *setting) {
     nodeChainDumper(BUS_LINE_AUDIO);
     nodeChainDumper(BUS_LINE_SUBTE);
 
-    this->setCurState(RTM_PLAYER_INITIALIZED);
-    RTMessage* msg = new RTMessage(RT_MEDIA_PREPARED, RT_NULL, this);
-    mBusCtx->mLooper->send(msg, 0);
-
     return RT_OK;
 }
 
-RT_RET RTNodeBus::stop() {
-    UINT32 curState = getCurState();
-    switch (curState) {
-      case RTM_PLAYER_STOPPED:
-        RT_LOGE("Fail to stop, invalid state(%d)", curState);
-        break;
-      case RTM_PLAYER_PREPARING:
-      case RTM_PLAYER_PREPARED:
-      case RTM_PLAYER_STARTED:
-      case RTM_PLAYER_PAUSED:
-      case RTM_PLAYER_PLAYBACK_COMPLETE:
-      case RTM_PLAYER_STATE_ERROR:
-        // @TODO: do stop player
-        this->excuteCommand(RT_NODE_CMD_STOP);
-        mBusCtx->mLooper->flush();
-        break;
-    }
-
-    return RT_OK;
-}
-
-RT_RET RTNodeBus::wait() {
-    UINT32 curState = RTM_PLAYER_IDLE;
-    UINT32 loopFlag = 1;
-    do {
-        curState = getCurState();
-        switch (curState) {
-          case RTM_PLAYER_STATE_ERROR:
-          case RTM_PLAYER_PLAYBACK_COMPLETE:
-            loopFlag = 0;
-            break;
-          default:
-            RtTime::sleepMs(5);
-            break;
-        }
-    } while (1 == loopFlag);
-}
-
-RT_RET RTNodeBus::reset() {
-    UINT32 curState = getCurState();
-    if (RTM_PLAYER_IDLE == curState) {
-        RT_LOGE("Fail to reset, invalid state(%d)", curState);
-        return RT_OK;
-    }
-    if (RTM_PLAYER_STOPPED != curState) {
-        RT_LOGE("Need stop() before reset(), state(%d)", curState);
-        this->stop();
-    }
-
-    if (RT_NULL != mBusCtx->mThreadBusData) {
-        mBusCtx->mThreadBusData->join();
-        rt_safe_delete(mBusCtx->mThreadBusData);
-        mBusCtx->mThreadBusData = RT_NULL;
-    }
-
-    // @TODO: do reset player
-    this->excuteCommand(RT_NODE_CMD_RESET);
-
-    // release all [RTNodes] in node_bus;
-    // but NO NEED to release [NodeStub].
-    RT_RET err = bus_release_nodes(mBusCtx->mNodeBus);
-    setCurState(RTM_PLAYER_IDLE);
-
-    for (int cnt = 0; cnt < BUS_LINE_MAX; cnt++) {
-        mBusCtx->mRootNodes[cnt] = RT_NULL;
-    }
-    return err;
-}
-
-RT_RET RTNodeBus::prepare() {
-    UINT32 curState = getCurState();
-    if ((RTM_PLAYER_INITIALIZED != curState) && (RTM_PLAYER_STOPPED != curState)) {
-        RT_LOGE("Fail to prepare, invalid state(%d)", curState);
-        return RT_OK;
-    }
-
-    setCurState(RTM_PLAYER_PREPARING);
-
-    // @TODO: do prepare player
-    this->excuteCommand(RT_NODE_CMD_PREPARE);
-
-    RTMessage* msg = new RTMessage(RT_MEDIA_PREPARED, RT_NULL, this);
-    mBusCtx->mLooper->send(msg, 0);
-    return RT_OK;
-}
-
-void* nodebus_data_proc(void* node_bus) {
-    RTNodeBus* nodeBus = reinterpret_cast<RTNodeBus*>(node_bus);
-    if (RT_NULL != nodeBus) {
-        // @TODO data transferring between plugins
-        // @THIS data transferring for audio player
-        nodeBus->startAudioPlayerProc();
-    }
-}
-
-RT_RET RTNodeBus::start() {
-    UINT32 curState = getCurState();
-    RTMessage* msg  = RT_NULL;
-    switch (curState) {
-      case RTM_PLAYER_PREPARED:
-      case RTM_PLAYER_PAUSED:
-      case RTM_PLAYER_PLAYBACK_COMPLETE:
-        // @TODO: do resume player
-        this->excuteCommand(RT_NODE_CMD_START);
-
-        // thread used for data transferring between plugins
-        if (RT_NULL == mBusCtx->mThreadBusData) {
-            mBusCtx->mThreadBusData = new RtThread(nodebus_data_proc, this);
-            mBusCtx->mThreadBusData->setName("BusDataProc");
-            mBusCtx->mThreadBusData->start();
-        }
-
-        msg = new RTMessage(RT_MEDIA_STARTED, RT_NULL, this);
-        mBusCtx->mLooper->send(msg, 0);
-        break;
-      default:
-        RT_LOGE("Fail to start, invalid state(%d)", curState);
-        break;
-    }
-    return RT_OK;
-}
-
-RT_RET RTNodeBus::pause() {
-    UINT32 curState = getCurState();
-    RTMessage* msg  = RT_NULL;
-    switch (curState) {
-      case RTM_PLAYER_PAUSED:
-        RT_LOGE("Fail to pause, invalid state(%d)", curState);
-        break;
-      case RTM_PLAYER_STARTED:
-        // @TODO: do pause player
-
-        msg = new RTMessage(RTM_PLAYER_PAUSED, RT_NULL, this);
-        mBusCtx->mLooper->send(msg, 0);
-        break;
-      default:
-        RT_LOGE("Fail to pause, invalid state(%d)", curState);
-        break;
-    }
-    return RT_OK;
-}
-
-RT_RET RTNodeBus::seekTo(INT64 usec) {
-    UINT32 curState = getCurState();
-    RTMessage* msg  = RT_NULL;
-    switch (curState) {
-      case RTM_PLAYER_PREPARING:
-      case RTM_PLAYER_PREPARED:
-        mBusCtx->mWantSeekTimeUs = usec;
-        RT_LOGE("Fail to seekTo, invalid state(%d), save only", curState);
-        break;
-      case RTM_PLAYER_PAUSED:
-      case RTM_PLAYER_STARTED:
-      case RTM_PLAYER_PLAYBACK_COMPLETE:
-        // @TODO: do pause player
-        mBusCtx->mWantSeekTimeUs = usec;
-        mBusCtx->mLooper->flush_message(RT_MEDIA_SEEK_ASYNC);
-        // async seek message
-        msg = new RTMessage(RT_MEDIA_SEEK_ASYNC, 0, usec, this);
-        mBusCtx->mLooper->post(msg, 0);
-        break;
-      default:
-        RT_LOGE("Fail to seekTo, invalid state(%d)", curState);
-        break;
-    }
-
-    return RT_OK;
-}
-
-RT_RET RTNodeBus::RTNodeBus::seekToAsync(INT64 usec) {
-    // @TODO: do seek player
-    // ...
-
-    RTMessage* msg = new RTMessage(RT_MEDIA_SEEK_COMPLETE, RT_NULL, this);
-    mBusCtx->mLooper->post(msg, 0);
-    return RT_OK;
-}
-
-RT_RET RTNodeBus::setCurState(UINT32 newState) {
-    RT_ASSERT((RT_NULL != mBusCtx)&&(mBusCtx->mNodeBus));
-    mBusCtx->mState = newState;
-    return RT_OK;
-}
-
-UINT32 RTNodeBus::getCurState() {
-    RT_ASSERT((RT_NULL != mBusCtx)&&(mBusCtx->mNodeBus));
-    return mBusCtx->mState;
-}
-
-void RTNodeBus::onMessageReceived(struct RTMessage* msg) {
-    const char* msgName = mEventNames[msg->getWhat()].name;
-    RT_LOGE("RTMessage(ptr=%p, what=%d, name=%s) is Received", msg, msg->getWhat(), msgName);
-    switch (msg->getWhat()) {
-      case RT_MEDIA_PREPARED:
-        setCurState(RTM_PLAYER_PREPARED);
-        break;
-      case RT_MEDIA_PLAYBACK_COMPLETE:
-        setCurState(RTM_PLAYER_PLAYBACK_COMPLETE);
-        break;
-      case RT_MEDIA_STARTED:
-        setCurState(RTM_PLAYER_STARTED);
-        break;
-      case RT_MEDIA_PAUSED:
-        setCurState(RTM_PLAYER_PAUSED);
-        break;
-      case RT_MEDIA_ERROR:
-        setCurState(RTM_PLAYER_STATE_ERROR);
-        break;
-      case RT_MEDIA_STOPPED:
-        setCurState(RTM_PLAYER_STOPPED);
-        break;
-      case RT_MEDIA_BUFFERING_UPDATE:
-        break;
-      case RT_MEDIA_SEEK_COMPLETE:
-        break;
-      case RT_MEDIA_SET_VIDEO_SIZE:
-        break;
-      case RT_MEDIA_SKIPPED:
-        break;
-      case RT_MEDIA_TIMED_TEXT:
-        break;
-      case RT_MEDIA_INFO:
-        break;
-      case RT_MEDIA_SUBTITLE_DATA:
-        break;
-      case RT_MEDIA_SEEK_ASYNC:
-        seekToAsync(msg->mData.mArgU64);
-        break;
-      default:
-        break;
-    }
+RTNode* RTNodeBus::getRootNode(BUS_LINE_TYPE lType) {
+    return mBusCtx->mRootNodes[lType];
 }
 
 RT_RET RTNodeBus::summary(INT32 fd, RT_BOOL full /*= RT_FALSE*/) {
@@ -537,6 +280,29 @@ RTNode* RTNodeBus::findNode(RT_NODE_TYPE nType, BUS_LINE_TYPE lType) {
     return RT_NULL;
 }
 
+RT_RET RTNodeBus::releaseNodes() {
+    struct rt_hash_node *list, *node;
+    RTNode*      plugin   = NULL;
+    RtHashTable* pNodeBus = mBusCtx->mNodeAll;
+
+    for (UINT32 idx = 0; idx < rt_hash_table_get_num_buckets(pNodeBus); idx++) {
+        list = rt_hash_table_get_bucket(pNodeBus, idx);
+        for (node = list->next; node != RT_NULL; node = node->next) {
+            plugin = reinterpret_cast<RTNode*>(node->data);
+            if (RT_NULL != plugin) {
+                RTNodeAdapter::runCmd(plugin, RT_NODE_CMD_STOP, \
+                                      reinterpret_cast<RtMetaData *>(NULL));
+                RT_LOGD("%-16s RTNode(name=%s, ptr=%p)",
+                        rt_node_type_name(plugin->queryStub()->mNodeType),
+                        plugin->queryStub()->mNodeName, node->data);
+                rt_safe_delete(plugin);
+            }
+        }
+    }
+    rt_hash_table_clear(pNodeBus);
+    return RT_OK;
+}
+
 RT_RET RTNodeBus::nodeChainAppend(RTNode *pNode, BUS_LINE_TYPE lType) {
     RT_ASSERT(RT_NULL != mBusCtx);
     if ((RT_NULL == mBusCtx) || (NULL == pNode)) {
@@ -577,87 +343,6 @@ RT_RET RTNodeBus::nodeChainDumper(BUS_LINE_TYPE lType) {
     return RT_OK;
 }
 
-RT_VOID audio_sink_feed_callback(RTNode* pNode, RTMediaBuffer* data) {
-    RTNodeAdapter::queueCodecBuffer(pNode, data, RT_PORT_OUTPUT);
-}
-
-RT_RET RTNodeBus::startAudioPlayerProc() {
-    RTNodeDemuxer *demuxer = mBusCtx->mDemuxer;
-    RTNode        *decoder = mBusCtx->mRootNodes[BUS_LINE_AUDIO];
-    RTNodeAudioSink    *audiosink = RT_NULL;
-    if (RT_NULL != decoder) {
-        audiosink = reinterpret_cast<RTNodeAudioSink*>(decoder->mNext);
-        audiosink->queueCodecBuffer = audio_sink_feed_callback;
-        audiosink->callback_ptr     = decoder;
-    }
-    INT32 audio_idx  = demuxer->queryTrackUsed(RTTRACK_TYPE_AUDIO);
-
-    if ((RT_NULL != demuxer)&&(RT_NULL != decoder)) {
-        RTMediaBuffer *frame = RT_NULL;
-        RTMediaBuffer* esPacket;
-
-        while (mBusCtx->mThreadBusData->getState() == THREAD_LOOP) {
-            // deqeue buffer from object pool
-            RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
-            if (RT_NULL != esPacket) {
-                RT_BOOL got_pkt = RT_FALSE;
-                while (!got_pkt) {
-                    // save es-packet to buffer
-                    while (RTNodeAdapter::pullBuffer(demuxer, &esPacket) != RT_OK) {
-                        RtTime::sleepMs(10);
-                    }
-                    INT32 track_index = 0;
-                    esPacket->getMetaData()->findInt32(kKeyPacketIndex, &track_index);
-
-                    RT_LOGD("track_index: %d, audio_idx: %d", track_index, audio_idx);
-                    if (track_index == audio_idx) {
-                        UINT8 *data = reinterpret_cast<UINT8 *>(esPacket->getData());
-                        UINT32 size = esPacket->getSize();
-                        RT_LOGD("NEW audio MediaBuffer(ptr=0x%p, size=%d)", esPacket, size);
-                        got_pkt = RT_TRUE;
-                    } else {
-                        /* pass other packet */
-                        INT32 eos = 0;
-                        esPacket->getMetaData()->findInt32(kKeyFrameEOS, &eos);
-                        if (eos) {
-                            RT_LOGD("receive eos , break");
-                            break;
-                        }
-                        continue;
-                    }
-                }
-             } else {
-                 continue;
-             }
-            // push es-packet to decoder
-            RTNodeAdapter::pushBuffer(decoder, esPacket);
-
-            // pull av-frame from decoder
-            RTNodeAdapter::pullBuffer(decoder, &frame);
-
-            if (frame) {
-                if (frame->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
-                    RT_LOGD("NEW Frame(ptr=0x%p, size=%d)", frame->getData(), frame->getLength());
-                    char* data = reinterpret_cast<char *>(frame->getData());
-
-                    RTNodeAdapter::pushBuffer(audiosink, frame);
-                }
-              //  RTNodeAdapter::queueCodecBuffer(decoder, frame, RT_PORT_OUTPUT);
-                INT32 eos = 0;
-                frame->getMetaData()->findInt32(kKeyFrameEOS, &eos);
-                if (eos) {
-                    RT_LOGD("receive eos , break");
-                    break;
-                }
-                frame = NULL;
-            }
-
-            // dump AVFrame
-            RtTime::sleepMs(5);
-        }
-    }
-}
-
 RT_RET RTNodeBus::nodeChainDriver(RTNode *pNode, BUS_LINE_TYPE lType) {
     RTMediaBuffer *pMediaBuf;
     while (RT_NULL != pNode) {
@@ -668,25 +353,6 @@ RT_RET RTNodeBus::nodeChainDriver(RTNode *pNode, BUS_LINE_TYPE lType) {
         pNode = pNode->mNext;
     }
     return RT_OK;
-}
-
-RT_RET RTNodeBus::startDataLooper() {
-    excuteCommand(RT_NODE_CMD_START);
-    RTMediaBuffer *pMediaBuf = RT_NULL;
-    do {
-        RTNodeAdapter::pullBuffer(mBusCtx->mDemuxer, &pMediaBuf);
-
-        // NO packet, retry more
-        if (RT_NULL == pMediaBuf) {
-            RtTime::sleepMs(3);
-            continue;
-        }
-
-        nodeChainDriver(mBusCtx->mRootNodes[BUS_LINE_VIDEO], BUS_LINE_VIDEO);
-        nodeChainDriver(mBusCtx->mRootNodes[BUS_LINE_AUDIO], BUS_LINE_AUDIO);
-        nodeChainDriver(mBusCtx->mRootNodes[BUS_LINE_SUBTE], BUS_LINE_SUBTE);
-        RtTime::sleepMs(20);
-    } while (true);
 }
 
 RT_RET RTNodeBus::excuteCommand(RT_NODE_CMD cmd) {
@@ -700,7 +366,7 @@ RT_RET RTNodeBus::excuteCommand(RT_NODE_CMD cmd) {
     return RT_OK;
 }
 
-RT_BOOL check_setting(NodeBusSetting *setting) {
+RT_BOOL check_setting(RTMediaUri *setting) {
     // @TODO NEED more checks...
     if (RT_NULL == setting->mUri) {
         return RT_FALSE;
@@ -708,7 +374,7 @@ RT_BOOL check_setting(NodeBusSetting *setting) {
     return RT_TRUE;
 }
 
-RTNode* bus_find_and_add_demuxer(RTNodeBus *pNodeBus, NodeBusSetting *setting) {
+RTNode* bus_find_and_add_demuxer(RTNodeBus *pNodeBus, RTMediaUri *setting) {
     RTNodeStub *nStub   = &ff_node_demuxer;
     RTNode     *demuxer = RT_NULL;
     RtMetaData *nMeta   = RT_NULL;
@@ -791,26 +457,4 @@ RTNode* bus_find_and_add_sink(RTNodeBus *pNodeBus, RTNode *codec, BUS_LINE_TYPE 
         RT_LOGE("%-16s -> valid codec, but found no sink", mBusLineNames[lType].name);
     }
     return nSink;
-}
-
-RT_RET bus_release_nodes(RtHashTable *pNodeBus) {
-    struct rt_hash_node *list, *node;
-    RTNode *plugin = NULL;
-
-    for (UINT32 idx = 0; idx < rt_hash_table_get_num_buckets(pNodeBus); idx++) {
-        list = rt_hash_table_get_bucket(pNodeBus, idx);
-        for (node = list->next; node != RT_NULL; node = node->next) {
-            plugin = reinterpret_cast<RTNode*>(node->data);
-            if (RT_NULL != plugin) {
-                RTNodeAdapter::runCmd(plugin, RT_NODE_CMD_STOP, \
-                                      reinterpret_cast<RtMetaData *>(NULL));
-                RT_LOGD("%-16s RTNode(name=%s, ptr=%p)",
-                        rt_node_type_name(plugin->queryStub()->mNodeType),
-                        plugin->queryStub()->mNodeName, node->data);
-                rt_safe_delete(plugin);
-            }
-        }
-    }
-    rt_hash_table_clear(pNodeBus);
-    return RT_OK;
 }

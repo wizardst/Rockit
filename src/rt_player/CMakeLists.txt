@@ -5,6 +5,8 @@ include_directories(./)
 set(RT_PLAYER_SRC
     RTNDKMediaPlayer.cpp
     RTNDKIPTVPlayer.cpp
+    RTNDKNodePlayer.cpp
+    RTNDKMediaDef.cpp
 )
 
 add_library(${RT_PLAYER_STATIC} STATIC ${RT_PLAYER_SRC})

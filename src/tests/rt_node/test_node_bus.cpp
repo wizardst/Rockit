@@ -29,7 +29,7 @@
 #endif
 
 void unit_test_node_operations(RTNodeBus *pNodeBus) {
-    RTNodeStub* stub = pNodeBus->findStub(RT_NODE_TYPE_DEMUXER, BUS_LINE_SOURCE);
+    RTNodeStub* stub = pNodeBus->findStub(RT_NODE_TYPE_DEMUXER, BUS_LINE_ROOT);
     if (0 && RT_NULL != stub) {
         RTNode* demuxer = stub->mCreateNode();
         demuxer->init(RT_NULL);
@@ -52,7 +52,7 @@ void unit_test_node_operations(RTNodeBus *pNodeBus) {
 
 RT_RET unit_test_node_bus(INT32 index, INT32 total) {
     // configure node bus and summary
-    NodeBusSetting setting = {0};
+    RTMediaUri setting = {0};
     rt_str_snprintf(setting.mUri, sizeof(setting.mUri), "%s", TEST_URI);
     RTNodeBus *pNodeBus = new RTNodeBus();
 
@@ -61,7 +61,7 @@ RT_RET unit_test_node_bus(INT32 index, INT32 total) {
     pNodeBus->summary(0);
 
     // driver core data-flow
-    pNodeBus->startDataLooper();
+    // pNodeBus->startDataLooper();
 
     // unit_test_node_operations(pNodeBus);
 

@@ -40,6 +40,7 @@ class RtTime {
     static UINT64 getNowTimeMs();
     static void sleepMs(UINT64 time);
     static void sleepUs(UINT64 time);
+    static INT32 randInt();
 };
 
 class RtAutoTimeoutLog {

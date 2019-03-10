@@ -20,6 +20,7 @@
 #include "rt_time.h" // NOLINT
 #include <windows.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 #ifdef OS_WINDOWS
 
@@ -42,6 +43,12 @@ UINT64 RtTime::getNowTimeMs() {
     return getNowTimeUs()/1000;
 }
 
+INT32 RtTime::randInt() {
+    return rand();
+}
+
+
+
 UINT64 RtTime::getNowTimeUs() {
     LARGE_INTEGER curTime, freq;
     QueryPerformanceFrequency(&freq);
@@ -49,11 +56,20 @@ UINT64 RtTime::getNowTimeUs() {
     return (UINT64)((curTime.QuadPart * 1000000)/freq.QuadPart);
 }
 
-void RtTime::sleepMs(UINT64 time) {
-    usleep(time*1000);
+void RtTime::sleepMs(UINT64 timeMs) {
+#if 0
+    struct timeval time;
+    time.tv_sec  = timeMs/1000;
+    time.tv_usec = (timeMs*1000)%1000000;
+    select(0, NULL, NULL, NULL, &time);
+#endif
+    INT32 time = (0xFFFF & timeMs);
+    Sleep(time);
 }
-void RtTime::sleepUs(UINT64 time) {
-    usleep(time);
+
+void RtTime::sleepUs(UINT64 timeUs) {
+    INT32 time = (0xFFFF & timeUs);
+    Sleep(time/1000);
 }
 
 #endif

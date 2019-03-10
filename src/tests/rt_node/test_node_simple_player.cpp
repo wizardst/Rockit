@@ -122,7 +122,7 @@ SimplePlayer::~SimplePlayer() {
 
 RT_RET SimplePlayer::init(const char *uri) {
     RT_RET ret = RT_OK;
-    mDemuxer = reinterpret_cast<RTNodeDemuxer*>(createRTNode(RT_NODE_TYPE_DEMUXER, BUS_LINE_SOURCE));
+    mDemuxer = reinterpret_cast<RTNodeDemuxer*>(createRTNode(RT_NODE_TYPE_DEMUXER, BUS_LINE_ROOT));
     if (!mDemuxer) {
         RT_LOGE("demuxer create failed!");
         return RT_ERR_UNKNOWN;

@@ -37,6 +37,8 @@
 
 #define MAX_THREAD_NAME_LEN 12
 
+#include <string.h>
+
 typedef struct _rt_pthread_data {
     pthread_t      mTid;
     pthread_attr_t mAttr;

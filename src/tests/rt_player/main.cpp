@@ -19,10 +19,9 @@
 
 #include "RTPairAudioCases.h"   // NOLINT
 
-#define TEST_AUDIO "poetry_sea.mp3"
-// #define TEST_AUDIO "/userdata/bin/start.mp3"
+#define TEST_AUDIO_FILE "start.mp3"
 
 int main(int argc, char **argv) {
-    const char* media_name = (argc > 1)? argv[1]:TEST_AUDIO;
+    const char* media_name = (argc > 1)? argv[1]:TEST_AUDIO_FILE;
     return unit_test_pair_audio_player_case_easy(media_name, media_name);
 }

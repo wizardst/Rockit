@@ -88,18 +88,6 @@ static const rt_media_event mEventNames[] = {
 };
 #endif
 
-enum RTMediaState {
-    RTM_PLAYER_STATE_ERROR        = 0,
-    RTM_PLAYER_IDLE               = 1 << 0,
-    RTM_PLAYER_INITIALIZED        = 1 << 1,
-    RTM_PLAYER_PREPARING          = 1 << 2,
-    RTM_PLAYER_PREPARED           = 1 << 3,
-    RTM_PLAYER_STARTED            = 1 << 4,
-    RTM_PLAYER_PAUSED             = 1 << 5,
-    RTM_PLAYER_STOPPED            = 1 << 6,
-    RTM_PLAYER_PLAYBACK_COMPLETE  = 1 << 7
-};
-
 struct RTMsgHandler;
 struct RTMsgLooper;
 
