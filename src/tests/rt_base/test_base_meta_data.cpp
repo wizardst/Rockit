@@ -30,6 +30,55 @@ enum {
     kKeyTestNone    = MKTAG('t', 'n', 'o', 'e'),
 };
 
+enum {
+    kKeyCodecBitrates     = MKTAG('c', 'b', 'i', 't'),     // INT64
+    kKeyCodecCLayouts     = MKTAG('a', 'c', 'l', 'a'),     // INT64
+    kKeyCodecChannels     = MKTAG('a', 'c', 'h', 'a'),
+    kKeyCodecSampleRate   = MKTAG('a', 's', 'r', 'a'),
+    kKeyCodecPointer      = MKTAG('a', 'p', 't', 'r'),
+};
+
+struct TrackInfo {
+    INT64 mChannelLayout;
+    INT32 mChannels;
+    INT64 mBitrate;
+    INT32 mSampleRate;
+    void* mThis;
+};
+
+RT_RET unit_test_metadata_more(INT32 index, INT32 total_index) {
+    struct TrackInfo track_info;
+    RtMetaData*  metadata   = new RtMetaData();
+    rt_memset(&track_info, 0, sizeof(struct TrackInfo));
+    track_info.mBitrate       = 20000000;
+    track_info.mChannelLayout = 2000;
+    track_info.mChannels       = 2;
+    track_info.mSampleRate    = 44100;
+    track_info.mThis          = &track_info;
+
+    metadata->setInt64(kKeyCodecCLayouts,   track_info.mChannelLayout);
+    metadata->setInt64(kKeyCodecBitrates,   track_info.mBitrate);
+    metadata->setInt32(kKeyCodecChannels,   track_info.mChannels);
+    metadata->setInt32(kKeyCodecSampleRate, track_info.mSampleRate);
+    metadata->setPointer(kKeyCodecPointer,  track_info.mThis);
+
+    metadata->findInt64(kKeyCodecCLayouts,   &(track_info.mChannelLayout));
+    metadata->findInt64(kKeyCodecBitrates,   &(track_info.mBitrate));
+    metadata->findInt32(kKeyCodecChannels,   &(track_info.mChannels));
+    metadata->findInt32(kKeyCodecSampleRate, &(track_info.mSampleRate));
+    metadata->findPointer(kKeyCodecPointer,  &(track_info.mThis));
+
+    struct TrackInfo* binder = (struct TrackInfo*)(track_info.mThis);
+    RT_LOGD("bitrate=%lld, layouts=%lld, channels=%d, sample_rate=%d",
+             binder->mBitrate,  binder->mChannelLayout,
+             binder->mChannels, binder->mSampleRate);
+
+    delete metadata;
+    metadata = NULL;
+
+    return RT_OK;
+}
+
 RT_RET unit_test_metadata(INT32 index, INT32 total_index) {
     RtMetaData *metadata = NULL;
 
