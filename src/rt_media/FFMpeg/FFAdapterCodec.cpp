@@ -66,12 +66,14 @@ FACodecContext* fa_video_decode_create(RtMetaData *meta) {
     RT_LOGE("Codec Extra(ptr=0x%p, size=%d)", extra_data, extra_size);
 
     // codec context parameters configure
-    codec_ctx->codec_type = AVMEDIA_TYPE_AUDIO;
+    codec_ctx->codec_type = AVMEDIA_TYPE_VIDEO;
     codec_ctx->codec_id   = (AVCodecID)fa_utils_to_av_codec_id(codecID);
-    codec_ctx->extradata_size = extra_size;
-    codec_ctx->extradata = reinterpret_cast<UINT8 *>(extra_data);
     codec_ctx->width  = width;
     codec_ctx->height = height;
+    if (extra_data != RT_NULL && extra_size != 0) {
+        codec_ctx->extradata_size = extra_size;
+        codec_ctx->extradata = reinterpret_cast<UINT8 *>(extra_data);
+    }
 
     // find decoder again as codec_id may have changed
     codec_ctx->codec = avcodec_find_decoder(codec_ctx->codec_id);

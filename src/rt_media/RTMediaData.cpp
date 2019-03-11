@@ -176,7 +176,7 @@ RT_RET rt_medatdata_goto_trackpar(RtMetaData* meta, RTTrackParms* tpar) {
     meta->findInt32(kKeyCodecProfile, &(tpar->mCodecProfile));
     meta->findInt32(kKeyCodecLevel,   &(tpar->mCodecLevel));
     meta->findInt64(kKeyCodecBitrate, reinterpret_cast<INT64*>(&(tpar->mBitrate)));
-    meta->setPointer(kKeyCodecExtraData,     &(tpar->mExtraData));
+    meta->findPointer(kKeyCodecExtraData, reinterpret_cast<void **>(&(tpar->mExtraData)));
     meta->findInt32(kKeyCodecExtraSize,      &(tpar->mExtraDataSize));
 
     switch (tpar->mCodecType) {
