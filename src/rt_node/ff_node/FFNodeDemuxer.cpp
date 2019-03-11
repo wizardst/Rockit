@@ -91,8 +91,9 @@ FFNodeDemuxer::FFNodeDemuxer() {
 }
 
 FFNodeDemuxer::~FFNodeDemuxer() {
-    release();
+    this->release();
     mNodeContext = RT_NULL;
+    RT_LOGD("done ~FFNodeDemuxer()");
 }
 
 INT32 updateDefaultTrack(FAFormatContext* fa_ctx, RTTrackType tType) {
@@ -106,15 +107,11 @@ INT32 updateDefaultTrack(FAFormatContext* fa_ctx, RTTrackType tType) {
 RT_RET FFNodeDemuxer::init(RtMetaData *metadata) {
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
 
-    // av_register_all();
-    avformat_network_init();
-
     const char *uri;
     metadata->findCString(kKeyFormatUri, &uri);
     RT_ASSERT(RT_NULL != uri);
 
-    RT_LOGD_IF(DEBUG_FLAG, "uri = %s", uri);
-
+    ctx->mMetaInput = metadata;
     ctx->mFormatCtx = fa_format_open(uri, FLAG_DEMUXER);
     if (RT_NULL == ctx->mFormatCtx) {
         RT_LOGE("demuxer open url err.\n");
@@ -124,8 +121,6 @@ RT_RET FFNodeDemuxer::init(RtMetaData *metadata) {
     ctx->mIndexVideo    = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_VIDEO);
     ctx->mIndexAudio    = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_AUDIO);
     ctx->mIndexSubtitle = updateDefaultTrack(ctx->mFormatCtx, RTTRACK_TYPE_SUBTITLE);
-
-    ctx->mMetaInput = metadata;
 
     return RT_OK;
 }

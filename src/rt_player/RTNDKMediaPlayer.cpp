@@ -27,6 +27,10 @@
 #undef LOG_TAG
 #endif
 #define LOG_TAG "RTNDKMediaPlayer"
+#ifdef DEBUG_FLAG
+#undef DEBUG_FLAG
+#endif
+#define DEBUG_FLAG 0x1
 
 typedef struct RtNDKPlayerContext {
     uid_t       mUid;
@@ -60,6 +64,7 @@ RTNDKMediaPlayer::RTNDKMediaPlayer() {
 RTNDKMediaPlayer::~RTNDKMediaPlayer() {
     rt_safe_delete(mPlayerCtx->mNodePlayer);
     rt_safe_free(mPlayerCtx);
+    RT_LOGD("done, ~RTNDKMediaPlayer()");
 }
 
 rt_status RTNDKMediaPlayer::setUID(uid_t uid) {
@@ -178,14 +183,13 @@ rt_status RTNDKMediaPlayer::stop() {
     if (RTE_NO_ERROR != err) {
         return err;
     }
-    RT_LOGD("node_bus stop");
+    RT_LOGD("call, stop");
     // driver core data-flow
     mPlayerCtx->mNodePlayer->stop();
     return err;
 }
 
 rt_status RTNDKMediaPlayer::pause() {
-    RT_LOGD("play_ndk pause");
     int32_t err = initCheck();
     if (RTE_NO_ERROR != err) {
         return err;

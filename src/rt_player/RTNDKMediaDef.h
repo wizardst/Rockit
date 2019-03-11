@@ -87,10 +87,41 @@ class RTStateUtil {
  public:
     static const char* getStateName(UINT32 player_state);
     static void  dumpStateError(UINT32 state, const char* caller);
-    static void  setDebugLevel(UINT32 level);
+};
+
+enum RTLogLevel {
+    RT_LOG_LEVEL_NO = 0,
+    RT_LOG_LEVEL_FULL,
+    RT_LOG_LEVEL_WARRING,
+    RT_LOG_LEVEL_ERROR,
+    RT_LOG_LEVEL_FETAL,
+    RT_LOG_LEVEL_MAX,
+};
+
+struct RTMediaParams {
+    UINT32 mCountPacket;
+    UINT32 mCountFrame;
+    UINT32 mCountDisplay;
+    UINT32 mCountDeliver;
+    UINT32 mDebugLevel;
+};
+
+class RTMediaDirector {
+ public:
+    RTMediaDirector();
+    ~RTMediaDirector();
+    void   snapshot();
+    void   updatePacket(UINT32 delta = 1);
+    void   updateFrame(UINT32 delta = 1);
+    void   updateDisplay(UINT32 delta = 1);
+    void   updateDelivery(UINT32 delta = 1);
+    static void   setLogLevel(UINT32 level) { mLogLevel = level; }
+    static UINT32 getLogLevel() { return mLogLevel; }
 
  private:
-    static UINT32 mLevel;
+    RTMediaParams mParmasLast;
+    RTMediaParams mParmasCurr;
+    static UINT32 mLogLevel;
 };
 
 #endif  // SRC_RT_PLAYER_RTNDKMEDIADEF_H_

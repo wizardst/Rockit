@@ -86,14 +86,13 @@ RT_RET RTNodeAdapter::queueCodecBuffer(RTNode* pNode, RTMediaBuffer*  data, RTPo
 RT_RET RTNodeAdapter::runCmd(RTNode* pNode, RT_NODE_CMD cmd, RtMetaData* metadata) {
     RT_RET err = RT_OK;
     while (RT_NULL != pNode) {
-        err               = pNode->runCmd(cmd, metadata);
-        RTNodeStub *nStub = pNode->queryStub();
-        RT_LOGD_IF(DEBUG_FLAG, "%-12s { name:%-18s cmd:%-10s }", \
-                                    rt_node_type_name(nStub->mNodeType), \
-                                    nStub->mNodeName, rt_node_cmd_name(cmd));
+        err = pNode->runCmd(cmd, metadata);
+        if (RT_OK != CHECK_ERR(pNode, err)) {
+            return err;
+        }
         pNode = pNode->mNext;
     }
-    return CHECK_ERR(pNode, err);
+    return err;
 }
 
 RT_RET RTNodeAdapter::setEventLooper(RTNode* pNode, RTMsgLooper* eventLooper) {

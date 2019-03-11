@@ -84,6 +84,8 @@ RTNodeBus::RTNodeBus() {
                                        hash_ptr_func, hash_ptr_compare);
     mBusCtx->mNodeAll = rt_hash_table_create((RT_NODE_TYPE_MAX - RT_NODE_TYPE_BASE),
                                        hash_ptr_func, hash_ptr_compare);
+    RT_LOGD("mBusCtx->mNodeBus = %p; mBusCtx->mNodeAll=%p", \
+             mBusCtx->mNodeBus, mBusCtx->mNodeAll);
     mBusCtx->mSetting = RT_NULL;
     mBusCtx->mDemuxer = RT_NULL;
 
@@ -358,7 +360,7 @@ RT_RET RTNodeBus::nodeChainDriver(RTNode *pNode, BUS_LINE_TYPE lType) {
 RT_RET RTNodeBus::excuteCommand(RT_NODE_CMD cmd) {
     RT_LOGD("node_bus delivers %s to active nodes", rt_node_cmd_name(cmd));
 
-    RTNodeAdapter::runCmd(mBusCtx->mDemuxer, cmd, RT_NULL);
+    RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_ROOT], cmd, RT_NULL);
     RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_VIDEO],  cmd, RT_NULL);
     RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_AUDIO],  cmd, RT_NULL);
     RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_SUBTE],  cmd, RT_NULL);
@@ -377,17 +379,18 @@ RT_BOOL check_setting(RTMediaUri *setting) {
 RTNode* bus_find_and_add_demuxer(RTNodeBus *pNodeBus, RTMediaUri *setting) {
     RTNodeStub *nStub   = &ff_node_demuxer;
     RTNode     *demuxer = RT_NULL;
-    RtMetaData *nMeta   = RT_NULL;
-    RT_RET      ret     = RT_OK;
+    RtMetaData *pMeta   = RT_NULL;
+    RT_RET      err     = RT_OK;
     // init node demuxer
     if (RT_TRUE == check_setting(setting)) {
         demuxer = nStub->mCreateNode();
-        nMeta   =  new RtMetaData();
-        nMeta->setCString(kKeyFormatUri, setting->mUri);
-        nMeta->setCString(kKeyUserAgent, setting->mUserAgent);
-        ret = RTNodeAdapter::init(demuxer, nMeta);
-        if (RT_OK != ret) {
-            RTNodeAdapter::release(demuxer);
+        pMeta   =  new RtMetaData();
+        pMeta->setCString(kKeyFormatUri, setting->mUri);
+        pMeta->setCString(kKeyUserAgent, setting->mUserAgent);
+        err = RTNodeAdapter::init(demuxer, pMeta);
+        if (RT_OK != err) {
+            // pMeta will delete by demuxer
+            rt_safe_delete(demuxer);
             return RT_NULL;
         }
         pNodeBus->registerNode(demuxer);

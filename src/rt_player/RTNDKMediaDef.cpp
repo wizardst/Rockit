@@ -18,11 +18,11 @@
  *   Task: build player streamline with node bus.
  */
 
-#include "rt_type.h"          // NOLINT
+#include "rt_header.h"          // NOLINT
 #include "RTNDKNodePlayer.h"  // NOLINT
 #include "RTNDKMediaDef.h"    // NOLINT
 
-UINT32 RTStateUtil::mLevel = DEBUG_LEVEL_HIGH;  // or DEBUG_LEVEL_LOW
+UINT32 RTMediaDirector::mLogLevel = RT_LOG_LEVEL_FULL;
 
 typedef struct _rt_media_state {
     UINT32      state;
@@ -52,11 +52,13 @@ const char* RTStateUtil::getStateName(UINT32 state) {
 }
 
 void RTStateUtil::dumpStateError(UINT32 state, const char* caller) {
-    switch (mLevel) {
-      case DEBUG_LEVEL_LOW:
+    switch (RTMediaDirector::getLogLevel()) {
+      case RT_LOG_LEVEL_WARRING:
+      case RT_LOG_LEVEL_ERROR:
+      case RT_LOG_LEVEL_FETAL:
         RT_LOGE("fail to %s, invalid state(%d)", caller, state);
         break;
-      case DEBUG_LEVEL_HIGH:
+      case RT_LOG_LEVEL_FULL:
         RT_LOGE("fail to %s, invalid state(%s)", caller, getStateName(state));
         break;
       default:
@@ -64,9 +66,44 @@ void RTStateUtil::dumpStateError(UINT32 state, const char* caller) {
     }
 }
 
-void RTStateUtil::setDebugLevel(UINT32 level) {
-    mLevel = DEBUG_LEVEL_LOW;
-    if (level >= DEBUG_LEVEL_HIGH) {
-        mLevel = DEBUG_LEVEL_HIGH;
+RTMediaDirector::RTMediaDirector() {
+    rt_memset(&mParmasLast, 0, sizeof(RTMediaParams));
+    rt_memset(&mParmasCurr, 0, sizeof(RTMediaParams));
+}
+
+RTMediaDirector::~RTMediaDirector() {
+    rt_memset(&mParmasLast, 0, sizeof(RTMediaParams));
+    rt_memset(&mParmasCurr, 0, sizeof(RTMediaParams));
+}
+
+void RTMediaDirector::snapshot() {
+    if (mParmasCurr.mCountPacket == mParmasLast.mCountPacket) {
+        RT_LOGE("fail, no media packet");
     }
+    if (mParmasCurr.mCountFrame == mParmasLast.mCountFrame) {
+        RT_LOGE("fail, no media frame");
+    }
+    if (mParmasCurr.mCountDisplay == mParmasLast.mCountDisplay) {
+        RT_LOGE("fail, no frame displayed");
+    }
+    if (mParmasCurr.mCountDeliver == mParmasLast.mCountDeliver) {
+        RT_LOGE("fail, no data delivered");
+    }
+    rt_memcpy(&mParmasLast, &mParmasCurr, sizeof(RTMediaParams));
+}
+
+void RTMediaDirector::updatePacket(UINT32 delta /* = 1*/) {
+    mParmasCurr.mCountPacket += 1;
+}
+
+void RTMediaDirector::updateFrame(UINT32 delta /* = 1*/) {
+    mParmasCurr.mCountFrame += 1;
+}
+
+void RTMediaDirector::updateDisplay(UINT32 delta /* = 1*/) {
+    mParmasCurr.mCountDisplay += 1;
+}
+
+void RTMediaDirector::updateDelivery(UINT32 delta /* = 1*/) {
+    mParmasCurr.mCountDeliver += 1;
 }

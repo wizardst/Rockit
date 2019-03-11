@@ -29,8 +29,18 @@
 #include "rt_msg_handler.h"  // NOLINT
 #include "rt_msg_looper.h"   // NOLINT
 
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "RTNDKNodePlayer"
+#ifdef DEBUG_FLAG
+#undef DEBUG_FLAG
+#endif
+#define DEBUG_FLAG 0x1
+
 struct NodePlayerContext {
     RTNodeBus*          mNodeBus;
+    RTMediaDirector*    mDirector;
     // thread used for data transfer between plugins
     RtThread*           mDeliverThread;
     struct RTMsgLooper* mLooper;
@@ -60,6 +70,9 @@ RTNDKNodePlayer::RTNDKNodePlayer() {
     // Message Queue Mechanism
     mPlayerCtx->mLooper  = new RTMsgLooper();
 
+    // param config and performance collection
+    mPlayerCtx->mDirector = new RTMediaDirector();
+
     // thread used for data transfer between plugins
     mPlayerCtx->mDeliverThread = NULL;
 
@@ -72,10 +85,23 @@ RTNDKNodePlayer::~RTNDKNodePlayer() {
     RT_ASSERT(RT_NULL != mNodeBus);
     this->release();
     rt_safe_free(mNodeBus);
+    RT_LOGD("done, ~RTNDKNodePlayer()");
 }
 
 RT_RET RTNDKNodePlayer::release() {
+    RT_ASSERT(RT_NULL != mPlayerCtx);
+    RT_ASSERT(RT_NULL != mNodeBus);
+    RT_ASSERT(RT_NULL != mPlayerCtx->mLooper);
+
     rt_safe_delete(mNodeBus);
+    if (RT_NULL != mPlayerCtx->mLooper) {
+        mPlayerCtx->mLooper->stop();
+        rt_safe_delete(mPlayerCtx->mLooper);
+    }
+    if (RT_NULL != mPlayerCtx->mDirector) {
+        rt_safe_delete(mPlayerCtx->mDirector);
+    }
+    rt_safe_free(mPlayerCtx);
     return RT_OK;
 }
 

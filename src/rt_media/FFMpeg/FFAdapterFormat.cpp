@@ -74,6 +74,7 @@ FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag /*FLAG_DEMUXER*/) 
       case FLAG_DEMUXER:
         /* register all formats and codecs */
         av_register_all();
+        avformat_network_init();
 
         /* open input file, and allocate format context */
         err = avformat_open_input(&(fafc->mAvfc), uri, NULL, &opts);
@@ -103,6 +104,7 @@ FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag /*FLAG_DEMUXER*/) 
     return fafc;
 
 error_func:
+    rt_safe_free(fafc);
     return RT_NULL;
 }
 

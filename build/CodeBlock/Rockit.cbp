@@ -212,7 +212,6 @@
 		<Unit filename="../../src/rt_player/RTNDKMediaDef.h" />
 		<Unit filename="../../src/rt_player/RTNDKMediaPlayer.cpp" />
 		<Unit filename="../../src/rt_player/RTNDKMediaPlayer.h" />
-		<Unit filename="../../src/rt_player/RTNDKNodeApp.h" />
 		<Unit filename="../../src/rt_player/RTNDKNodePlayer.cpp" />
 		<Unit filename="../../src/rt_player/RTNDKNodePlayer.h" />
 		<Unit filename="../../src/rt_task/include/rt_event.h" />
