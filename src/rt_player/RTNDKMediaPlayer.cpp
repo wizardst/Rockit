@@ -45,13 +45,6 @@ typedef struct RtNDKPlayerContext {
     RTNDKNodePlayer*  mNodePlayer;
 } RTNDKPlayerContext;
 
-rt_status setPlayerState(RTNDKPlayerContext* playerCtx, int32_t new_state) {
-    if (playerCtx->mState != new_state) {
-        RT_LOGD("Old State is (%d); New State is (%d)", playerCtx->mState, new_state);
-        playerCtx->mState = new_state;
-    }
-    return RTE_NO_ERROR;
-}
 /*
  * construction and destructor
  */
@@ -143,7 +136,7 @@ rt_status RTNDKMediaPlayer::prepare() {
         return err;
     }
     // driver core data-flow
-    RT_LOGD("node_bus prepare");
+    RT_LOGD("NodePlayer prepare");
     mPlayerCtx->mNodePlayer->prepare();
     return err;
 }
@@ -161,7 +154,7 @@ rt_status RTNDKMediaPlayer::seekTo(int64_t usec) {
     if (RTE_NO_ERROR != err) {
         return err;
     }
-    RT_LOGD("node_bus seekTo(%lld us)", usec);
+    RT_LOGD("NodePlayer seekTo(%lld us)", usec);
     mPlayerCtx->mUsSeek = usec;
     mPlayerCtx->mNodePlayer->seekTo(usec);
     return err;
@@ -173,7 +166,7 @@ rt_status RTNDKMediaPlayer::start() {
         return err;
     }
     // driver core data-flow
-    RT_LOGD("node_bus start");
+    RT_LOGD("NodePlayer start");
     mPlayerCtx->mNodePlayer->start();
     return err;
 }
@@ -194,7 +187,7 @@ rt_status RTNDKMediaPlayer::pause() {
     if (RTE_NO_ERROR != err) {
         return err;
     }
-    RT_LOGD("node_bus pause");
+    RT_LOGD("NodePlayer pause");
     mPlayerCtx->mNodePlayer->pause();
     return err;
 }
@@ -205,7 +198,7 @@ rt_status RTNDKMediaPlayer::reset() {
     if (RTE_NO_ERROR != err) {
         return err;
     }
-    RT_LOGD("node_bus reset");
+    RT_LOGD("NodePlayer reset");
     mPlayerCtx->mNodePlayer->reset();
     return RTE_NO_ERROR;
 }

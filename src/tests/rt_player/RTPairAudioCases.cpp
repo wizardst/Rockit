@@ -29,8 +29,10 @@ RT_RET unit_test_pair_audio_player_case_easy(const char* media_one, const char* 
     aPlayer->init();
     for (int idx = 0; idx < 1; idx++) {
         aPlayer->playUri(media_one);
+        aPlayer->seekTo(2000*1000);
         aPlayer->wait();
         aPlayer->playPcm(media_two);
+        aPlayer->seekTo(2000*1000);
         aPlayer->wait();
     }
     aPlayer->deinit();

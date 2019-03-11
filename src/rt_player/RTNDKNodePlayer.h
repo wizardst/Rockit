@@ -46,7 +46,6 @@ class RTNDKNodePlayer : public RTMsgHandler {
     RT_RET    pause();
     RT_RET    stop();
     RT_RET    wait();
-    RT_RET    seekToAsync(INT64 usec);
     RT_RET    seekTo(INT64 usec);
     RT_RET    summary(INT32 fd);
     RT_RET    setCurState(UINT32 newState);
@@ -58,8 +57,12 @@ class RTNDKNodePlayer : public RTMsgHandler {
     RT_RET    startAudioPlayerProc();
 
  private:
+    RT_RET    postSeekIfNecessary();
+    RT_RET    onSeekTo(INT64 usec);
+
+ private:
     struct NodePlayerContext* mPlayerCtx;
-    RTNodeBus*         mNodeBus;
+    RTNodeBus*                mNodeBus;
 };
 
 #endif  // SRC_RT_PLAYER_RTNDKNODEPLAYER_H_

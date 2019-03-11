@@ -45,8 +45,10 @@ struct NodePlayerContext {
     RtThread*           mDeliverThread;
     struct RTMsgLooper* mLooper;
     UINT32              mState;
+    RTSeekType          mSeekFlag;
     INT64               mWantSeekTimeUs;
     INT64               mLastSeekTimeUs;
+    INT64               mSaveSeekTimeUs;
 };
 
 void* thread_deliver_proc(void* pNodePlayer) {
@@ -65,6 +67,9 @@ RT_VOID audio_sink_feed_callback(RTNode* pNode, RTMediaBuffer* data) {
 
 RTNDKNodePlayer::RTNDKNodePlayer() {
     mPlayerCtx = rt_malloc(NodePlayerContext);
+    rt_memset(mPlayerCtx, 0, sizeof(NodePlayerContext));
+
+    // node-bus manages node plugins
     mNodeBus = new RTNodeBus();
 
     // Message Queue Mechanism
@@ -268,33 +273,45 @@ RT_RET RTNDKNodePlayer::wait() {
     RT_LOGE("done, ndk-node-player completed playback!");
 }
 
-RT_RET RTNDKNodePlayer::seekToAsync(INT64 usec) {
-    // @TODO: do seek player
-    // ...
-
-    RTMessage* msg = new RTMessage(RT_MEDIA_SEEK_COMPLETE, RT_NULL, this);
-    mPlayerCtx->mLooper->post(msg, 0);
-    return RT_OK;
+RT_RET RTNDKNodePlayer::onSeekTo(INT64 usec) {
+    // workflow: pause flush (cache maybe) start
+    #if 0
+    mNodeBus->excuteCommand(RT_NODE_CMD_PAUSE);
+    mNodeBus->excuteCommand(RT_NODE_CMD_FLUSH);
+    mNodeBus->excuteCommand(RT_NODE_CMD_START);
+    #else
+    RT_LOGE("done, seek to target:%lldms", usec/1000);
+    RT_LOGE("done, seek to target:%lldms", usec/1000);
+    #endif
 }
 
 RT_RET RTNDKNodePlayer::seekTo(INT64 usec) {
     UINT32 curState = this->getCurState();
     RTMessage* msg  = RT_NULL;
     switch (curState) {
+      case RT_STATE_IDLE:
+      case RT_STATE_INITIALIZED:
       case RT_STATE_PREPARING:
-      case RT_STATE_PREPARED:
-        mPlayerCtx->mWantSeekTimeUs = usec;
+        mPlayerCtx->mWantSeekTimeUs = -1;
+        mPlayerCtx->mSaveSeekTimeUs = usec;
         RTStateUtil::dumpStateError(curState, "seekTo, save only");
         break;
+      case RT_STATE_PREPARED:
       case RT_STATE_PAUSED:
       case RT_STATE_STARTED:
       case RT_STATE_COMPLETE:
         // @TODO: do pause player
-        mPlayerCtx->mWantSeekTimeUs = usec;
-        mPlayerCtx->mLooper->flush_message(RT_MEDIA_SEEK_ASYNC);
-        // async seek message
-        msg = new RTMessage(RT_MEDIA_SEEK_ASYNC, 0, usec, this);
-        mPlayerCtx->mLooper->post(msg, 0);
+        switch (mPlayerCtx->mSeekFlag) {
+          case RT_SEEK_DOING:
+            mPlayerCtx->mWantSeekTimeUs = -1;
+            mPlayerCtx->mSaveSeekTimeUs = usec;
+            break;
+          default:
+            mPlayerCtx->mSaveSeekTimeUs = -1;
+            mPlayerCtx->mWantSeekTimeUs = usec;
+            postSeekIfNecessary();
+            break;
+        }
         break;
       default:
         RTStateUtil::dumpStateError(curState, __FUNCTION__);
@@ -302,6 +319,28 @@ RT_RET RTNDKNodePlayer::seekTo(INT64 usec) {
     }
 
     return RT_OK;
+}
+
+RT_RET RTNDKNodePlayer::postSeekIfNecessary() {
+    // restore seek position if necessary
+    if (-1 != mPlayerCtx->mSaveSeekTimeUs) {
+         mPlayerCtx->mWantSeekTimeUs = mPlayerCtx->mSaveSeekTimeUs;
+    }
+    if (-1 == mPlayerCtx->mWantSeekTimeUs) {
+        return RT_OK;
+    }
+    // mini seek margin is 500ms
+    INT64 seekDelta = RT_ABS(mPlayerCtx->mWantSeekTimeUs - mPlayerCtx->mLastSeekTimeUs);
+    if (seekDelta > 500*100) {
+        // async seek message
+        RTMessage* msg = new RTMessage(RT_MEDIA_SEEK_ASYNC, 0, mPlayerCtx->mWantSeekTimeUs, this);
+        mPlayerCtx->mLooper->flush_message(RT_MEDIA_SEEK_ASYNC);
+        mPlayerCtx->mLooper->post(msg, 0);
+        mPlayerCtx->mSeekFlag = RT_SEEK_DOING;
+    }
+    mPlayerCtx->mLastSeekTimeUs = mPlayerCtx->mWantSeekTimeUs;
+    mPlayerCtx->mWantSeekTimeUs = -1;
+    mPlayerCtx->mSaveSeekTimeUs = -1;
 }
 
 RT_RET RTNDKNodePlayer::summary(INT32 fd) {
@@ -331,9 +370,11 @@ void   RTNDKNodePlayer::onMessageReceived(struct RTMessage* msg) {
     switch (msg->getWhat()) {
       case RT_MEDIA_PREPARED:
         setCurState(RT_STATE_PREPARED);
+        postSeekIfNecessary();
         break;
       case RT_MEDIA_PLAYBACK_COMPLETE:
         setCurState(RT_STATE_COMPLETE);
+
         break;
       case RT_MEDIA_STARTED:
         setCurState(RT_STATE_STARTED);
@@ -350,6 +391,8 @@ void   RTNDKNodePlayer::onMessageReceived(struct RTMessage* msg) {
       case RT_MEDIA_BUFFERING_UPDATE:
         break;
       case RT_MEDIA_SEEK_COMPLETE:
+        mPlayerCtx->mSeekFlag = RT_SEEK_NO;
+        postSeekIfNecessary();
         break;
       case RT_MEDIA_SET_VIDEO_SIZE:
         break;
@@ -362,7 +405,7 @@ void   RTNDKNodePlayer::onMessageReceived(struct RTMessage* msg) {
       case RT_MEDIA_SUBTITLE_DATA:
         break;
       case RT_MEDIA_SEEK_ASYNC:
-        seekToAsync(msg->mData.mArgU64);
+        onSeekTo(msg->mData.mArgU64);
         break;
       default:
         break;

@@ -77,6 +77,14 @@ enum RTMediaInfo {
     RT_INFO_PLAYING_START    = 901,
 };
 
+enum RTSeekType {
+    RT_SEEK_NO         = 0,
+    RT_SEEK_DOING,
+    RT_SEEK_VIDEO_ONLY,
+    RT_SEEK_DONE,
+    RT_SEEK_MAX,
+};
+
 typedef struct _RTMediaUri {
     char   mUri[1024];
     char   mUserAgent[256];
