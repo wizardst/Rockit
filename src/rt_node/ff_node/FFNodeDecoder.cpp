@@ -225,6 +225,9 @@ RT_RET FFNodeDecoder::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
     case RT_NODE_CMD_PAUSE:
         err = this->onPause();
         break;
+    case RT_NODE_CMD_RESET:
+        err = this->onReset();
+        break;
     default:
         RT_LOGE("unkown command: %d", cmd);
         err = RT_ERR_UNKNOWN;
@@ -323,11 +326,14 @@ RT_RET FFNodeDecoder::onStop() {
 }
 
 RT_RET FFNodeDecoder::onReset() {
-    return RT_ERR_UNIMPLIMENTED;
+    RT_LOGD("call, reset and flush in decoder");
+    return onFlush();
 }
 
 RT_RET FFNodeDecoder::onFlush() {
-    return RT_ERR_UNIMPLIMENTED;
+    RT_RET err = RT_OK;
+    RT_LOGD("call, flush packet and frame in decoder!");
+    return err;
 }
 
 static RTNode* createFFDecoder() {

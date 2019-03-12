@@ -291,18 +291,13 @@ RTNode* RTNodeBus::findNode(RT_NODE_TYPE nType, BUS_LINE_TYPE lType) {
 RT_RET RTNodeBus::releaseNodes() {
     struct rt_hash_node *list, *node;
     RTNode*      plugin   = NULL;
-    RtHashTable* pNodeBus = mBusCtx->mNodeAll;
+    RtHashTable* pNodeBus = mBusCtx->mNodeBus;
 
     for (UINT32 idx = 0; idx < rt_hash_table_get_num_buckets(pNodeBus); idx++) {
         list = rt_hash_table_get_bucket(pNodeBus, idx);
         for (node = list->next; node != RT_NULL; node = node->next) {
             plugin = reinterpret_cast<RTNode*>(node->data);
             if (RT_NULL != plugin) {
-                RTNodeAdapter::runCmd(plugin, RT_NODE_CMD_STOP, \
-                                      reinterpret_cast<RtMetaData *>(NULL));
-                RT_LOGD("%-16s RTNode(name=%s, ptr=%p)",
-                        rt_node_type_name(plugin->queryStub()->mNodeType),
-                        plugin->queryStub()->mNodeName, node->data);
                 rt_safe_delete(plugin);
             }
         }

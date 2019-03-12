@@ -85,11 +85,11 @@ RT_RET RTNodeAdapter::queueCodecBuffer(RTNode* pNode, RTMediaBuffer*  data, RTPo
 
 RT_RET RTNodeAdapter::runCmd(RTNode* pNode, RT_NODE_CMD cmd, RtMetaData* metadata) {
     RT_RET err = RT_OK;
+
+    // run commands in all nodes of active node-chain
     while (RT_NULL != pNode) {
         err = pNode->runCmd(cmd, metadata);
-        if (RT_OK != CHECK_ERR(pNode, err)) {
-            return err;
-        }
+        err = CHECK_ERR(pNode, err);
         pNode = pNode->mNext;
     }
     return err;

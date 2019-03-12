@@ -143,7 +143,7 @@ RT_RET RTSinkAudioWASAPI::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
         err = this->onStart();
         break;
     case RT_NODE_CMD_STOP:
-        err = this->onPause();
+        err = this->onStop();
         break;
     case RT_NODE_CMD_RESET:
         err = this->onReset();
@@ -166,9 +166,8 @@ RT_RET RTSinkAudioWASAPI::runTask() {
     RT_ASSERT(RT_NULL != ctx);
 
     while (THREAD_LOOP == ctx->mThread->getState()) {
-        RT_RET err = RT_OK;
         if (!input) {
-            pullBuffer(&input);
+            this->pullBuffer(&input);
         }
 
         if (!input || !input->getData()) {
@@ -190,6 +189,7 @@ RT_RET RTSinkAudioWASAPI::runTask() {
             RT_LOGD("render EOS Flag, post EOS message");
             RTMessage* eosMsg = new RTMessage(RT_MEDIA_PLAYBACK_COMPLETE, nullptr, nullptr);
             ctx->mEventLooper->post(eosMsg);
+            return RT_OK;
         }
 
         // dump AVFrame
@@ -281,12 +281,15 @@ RT_RET RTSinkAudioWASAPI::onPause() {
 
 // override RTNode methods
 RT_RET RTSinkAudioWASAPI::onFlush()  {
-    return RT_OK;
+    RT_RET err = RT_OK;
+    RT_LOGD("call, flush packet and frame in audio sink");
+    return err;
 }
 
 // override RTNode methods
 RT_RET RTSinkAudioWASAPI::onReset() {
-    return RT_OK;
+    RT_LOGD("call, reset and flush in audio sink");
+    return onFlush();
 }
 
 static RTNode* createSinkAudioWAS() {
