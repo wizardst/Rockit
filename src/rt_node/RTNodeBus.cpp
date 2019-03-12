@@ -39,7 +39,8 @@
 #endif
 
 #ifdef OS_WINDOWS
-#include "RTNodeSinkGLES.h" // NOLINT
+#include "RTNodeSinkGLES.h"    // NOLINT
+#include "RTSinkAudioWASAPI.h" // NOLINT
 #endif
 
 #ifdef LOG_TAG
@@ -191,6 +192,7 @@ RT_RET RTNodeBus::registerCoreStubs() {
     registerStub(&ff_node_video_encoder);
     #ifdef OS_WINDOWS
     registerStub(&rt_sink_display_gles);
+    registerStub(&rt_sink_audio_wasapi);
     #endif
     #ifdef OS_LINUX
     registerStub(&rt_sink_audio_alsa);
@@ -230,6 +232,10 @@ RTNodeStub* findStub(RT_NODE_TYPE nType, BUS_LINE_TYPE lType) {
             #ifdef OS_LINUX
             stub = &rt_sink_audio_alsa;
             #endif
+            #ifdef OS_WINDOWS
+            stub = &rt_sink_audio_wasapi;
+            #endif
+            break;
             break;
           default:
             break;

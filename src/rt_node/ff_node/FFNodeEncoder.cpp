@@ -290,6 +290,7 @@ RT_RET FFNodeEncoder::onPause() {
 
 RT_RET FFNodeEncoder::onStop() {
     RT_RET err = RT_OK;
+    mProcThread->requestInterruption();
     mProcThread->join();
     return err;
 }

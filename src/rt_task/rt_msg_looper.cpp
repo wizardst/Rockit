@@ -68,6 +68,7 @@ int LooperDoneListener(void* looper, UINT32 what) {
     RTMsgLooper* pLooper = reinterpret_cast<RTMsgLooper*>(looper);
     if (RT_NULL != pLooper->mSyncCond) {
         pLooper->mSyncCond->signal();
+        RT_LOGE("mSyncCond->signal()");
     }
     return 0;
 }
@@ -116,10 +117,12 @@ RT_RET RTMsgLooper::post(struct RTMessage* msg, INT64 delayUs /* = 0 */) {
     mExecCond->broadcast();
 
     if (RT_TRUE == msg->mSync) {
+        RtMutex::RtAutolock autoLock(mSyncLock);
         msg->mDoneListener = LooperDoneListener;
         RT_LOGD_IF(DEBUG_FLAG, "call, condition->wait(lock=%p) for handled", mSyncLock);
         mSyncCond->wait(mSyncLock);
         RT_LOGD_IF(DEBUG_FLAG, "done, condition->wait(lock=%p) for handled", mSyncLock);
+        RT_LOGE("done, mSyncCond->wait(mSyncLock)");
     }
 
     RT_LOGD_IF(DEBUG_FLAG, "done, post message(msg=%p; what=%d)", msg, msg->getWhat());
@@ -134,27 +137,32 @@ RT_BOOL RTMsgLooper::msgLoop() {
         }
 
         if (0 == deque_size(mEventQueue)) {
+            RtMutex::RtAutolock autoLock(mExecLock);
             RT_LOGD_IF(DEBUG_FLAG, "call, condition->wait(exec=%p) for new msg", mExecLock);
             mExecCond->wait(mExecLock);
             RT_LOGD_IF(DEBUG_FLAG, "done, condition->wait(exec=%p) for new msg", mExecLock);
         }
 
-        RtMutex::RtAutolock autoLock(mDataLock);
-        RT_DequeEntry* head = deque_head(mEventQueue);
-        if (head == RT_NULL) {
-            continue;
-        }
-        struct RTMessage* msg = reinterpret_cast<struct RTMessage*>deque_data(deque_head(mEventQueue));
-        INT64 whenUs = msg->getWhenUs();
-        INT64 nowUs  = getNowUs();
+        struct RTMessage* msg = RT_NULL;
+        do {
+            RtMutex::RtAutolock autoLock(mDataLock);
+            RT_DequeEntry* header = deque_head(mEventQueue);
+            if (header == RT_NULL) {
+                continue;
+            }
+            // struct RTMessage* msg = reinterpret_cast<struct RTMessage*>deque_data(deque_head(mEventQueue));
+            msg = reinterpret_cast<struct RTMessage*>(deque_pop(mEventQueue).data);
+        } while (0);
 
-        if (whenUs > nowUs) {
-            INT64 delayUs = whenUs - nowUs;
-            mExecCond->timedwait(mExecLock, delayUs);
-            RT_LOGD_IF(DEBUG_FLAG, "done, condition->wait(exec=%p) for timeout", mExecLock);
+        if (RT_NULL != msg) {
+            INT64 whenUs = msg->getWhenUs();
+            INT64 nowUs  = getNowUs();
+            if (whenUs > nowUs) {
+                INT64 delayUs = whenUs - nowUs;
+                mExecCond->timedwait(mExecLock, delayUs);
+                RT_LOGD_IF(DEBUG_FLAG, "done, condition->wait(exec=%p) for timeout", mExecLock);
+            }
         }
-
-        msg = reinterpret_cast<struct RTMessage*>(deque_pop(mEventQueue).data);
 
         // Handler callback will handle this message
         RT_LOGD_IF(DEBUG_FLAG, "call, deliver message(msg=%p; what=%d)", msg, msg->getWhat());
@@ -200,7 +208,6 @@ RT_RET RTMsgLooper::flush() {
     }
     return RT_OK;
 }
-
 
 RT_RET RTMsgLooper::flush_message(INT32 mWhat) {
     RtMutex::RtAutolock autoLock(mDataLock);

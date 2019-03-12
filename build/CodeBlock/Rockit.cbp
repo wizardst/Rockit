@@ -205,7 +205,9 @@
 		<Unit filename="../../src/rt_node/include/rt_node_define.h" />
 		<Unit filename="../../src/rt_node/rt_node_define.cpp" />
 		<Unit filename="../../src/rt_node/rt_sink/RTNodeSinkGLES.cpp" />
+		<Unit filename="../../src/rt_node/rt_sink/RTSinkAudioWASAPI.cpp" />
 		<Unit filename="../../src/rt_node/rt_sink/include/RTNodeSinkGLES.h" />
+		<Unit filename="../../src/rt_node/rt_sink/include/RTSinkAudioWASAPI.h" />
 		<Unit filename="../../src/rt_player/RTNDKIPTVPlayer.cpp" />
 		<Unit filename="../../src/rt_player/RTNDKIPTVPlayer.h" />
 		<Unit filename="../../src/rt_player/RTNDKMediaDef.cpp" />

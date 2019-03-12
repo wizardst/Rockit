@@ -317,6 +317,7 @@ RT_RET FFNodeDecoder::onPause() {
 
 RT_RET FFNodeDecoder::onStop() {
     RT_RET err = RT_OK;
+    mProcThread->requestInterruption();
     mProcThread->join();
     return err;
 }

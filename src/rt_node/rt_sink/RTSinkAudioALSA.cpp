@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rockchip Electronics Co. LTD
+ * Copyright 2019 Rockchip Electronics Co. LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
  * Author: shika.zhou@rock-chips.com
  *   Date: 2019/2/21
  * Module: audio pcm data use alsa-lib output
- *
  *
  */
 
@@ -147,13 +146,14 @@ RTNodeStub* RTSinkAudioALSA::queryStub() {
     return &rt_sink_audio_alsa;
 }
 
-RT_VOID  RTSinkAudioALSA::SetVolume(int user_vol) {
+RT_RET  RTSinkAudioALSA::SetVolume(int user_vol) {
     RT_LOGD("SetVolume user_vol = %d", user_vol);
     if (mVolManager) {
         mVolManager->ISetVolume(user_vol);
     } else {
         RT_LOGE("mVolManager is NULL");
     }
+    return RT_OK;
 }
 
 INT32 RTSinkAudioALSA::GetVolume() {
@@ -169,17 +169,18 @@ INT32 RTSinkAudioALSA::GetVolume() {
     return user_vol;
 }
 
-RT_VOID RTSinkAudioALSA::Mute(bool muted) {
+RT_RET RTSinkAudioALSA::Mute(RT_BOOL muted) {
     RT_LOGD("set Mute muted = %d", muted);
     if (mVolManager) {
         mVolManager->IMute(muted);
     } else {
         RT_LOGE("mVolManager is NULL");
     }
+    return RT_OK;
 }
 
-bool RTSinkAudioALSA::GetMute() {
-    bool muted = false;
+RT_BOOL RTSinkAudioALSA::GetMute() {
+    RT_BOOL muted = RT_FALSE;
 
     if (mVolManager) {
         muted = mVolManager->IGetMute();

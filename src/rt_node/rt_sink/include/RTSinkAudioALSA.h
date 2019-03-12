@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rockchip Electronics Co. LTD
+ * Copyright 2019 Rockchip Electronics Co. LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  *
  * Author:shika.zhou@rock-chips.com
  *   Date: 2019/02/21
- *Module: audio pcm data use alsa-lib output
+ * Module: output audio pcm with ALSA
  */
 
 #ifndef SRC_RT_NODE_RT_SINK_INCLUDE_RTSINKAUDIOALSA_H_
@@ -49,13 +49,13 @@ class RTSinkAudioALSA : public RTNodeAudioSink {
 
  public:
     // override RTNodeAudioSink methods
-    virtual RT_VOID  SetVolume(int volume);
+    virtual RT_RET   SetVolume(int volume);
     virtual INT32    GetVolume();
-    virtual bool     GetMute();
-    virtual RT_VOID  Mute(bool muted);
+    virtual RT_BOOL  GetMute();
+    virtual RT_RET   Mute(RT_BOOL muted);
 
  protected:
-    // override RTNodeAudioSink methods
+    // override RTNode methods
     virtual RT_RET onStart();
     virtual RT_RET onStop();
     virtual RT_RET onPause();

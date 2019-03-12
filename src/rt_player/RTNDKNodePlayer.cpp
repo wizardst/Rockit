@@ -74,6 +74,7 @@ RTNDKNodePlayer::RTNDKNodePlayer() {
 
     // Message Queue Mechanism
     mPlayerCtx->mLooper  = new RTMsgLooper();
+    mPlayerCtx->mLooper->setHandler(this);  // message handler is player
 
     // param config and performance collection
     mPlayerCtx->mDirector = new RTMediaDirector();
@@ -273,18 +274,6 @@ RT_RET RTNDKNodePlayer::wait() {
     RT_LOGE("done, ndk-node-player completed playback!");
 }
 
-RT_RET RTNDKNodePlayer::onSeekTo(INT64 usec) {
-    // workflow: pause flush (cache maybe) start
-    #if 0
-    mNodeBus->excuteCommand(RT_NODE_CMD_PAUSE);
-    mNodeBus->excuteCommand(RT_NODE_CMD_FLUSH);
-    mNodeBus->excuteCommand(RT_NODE_CMD_START);
-    #else
-    RT_LOGE("done, seek to target:%lldms", usec/1000);
-    RT_LOGE("done, seek to target:%lldms", usec/1000);
-    #endif
-}
-
 RT_RET RTNDKNodePlayer::seekTo(INT64 usec) {
     UINT32 curState = this->getCurState();
     RTMessage* msg  = RT_NULL;
@@ -362,6 +351,28 @@ UINT32 RTNDKNodePlayer::getCurState() {
     return mPlayerCtx->mState;
 }
 
+RT_RET RTNDKNodePlayer::onSeekTo(INT64 usec) {
+    // workflow: pause flush (cache maybe) start
+    #if 0
+    mNodeBus->excuteCommand(RT_NODE_CMD_PAUSE);
+    mNodeBus->excuteCommand(RT_NODE_CMD_FLUSH);
+    mNodeBus->excuteCommand(RT_NODE_CMD_START);
+    #else
+    RT_LOGE("done, seek to target:%lldms", usec/1000);
+    RT_LOGE("done, seek to target:%lldms", usec/1000);
+    #endif
+}
+
+RT_RET RTNDKNodePlayer::onPlaybackDone() {
+    // workflow: pause flush (cache maybe) start
+    mNodeBus->excuteCommand(RT_NODE_CMD_PAUSE);
+    mNodeBus->excuteCommand(RT_NODE_CMD_FLUSH);
+    mNodeBus->excuteCommand(RT_NODE_CMD_RESET);
+    RT_LOGE("done, onPlaybackDone");
+
+    return RT_OK;
+}
+
 /* looper functions or callback of thread */
 void   RTNDKNodePlayer::onMessageReceived(struct RTMessage* msg) {
     const char* msgName = mEventNames[msg->getWhat()].name;
@@ -373,8 +384,8 @@ void   RTNDKNodePlayer::onMessageReceived(struct RTMessage* msg) {
         postSeekIfNecessary();
         break;
       case RT_MEDIA_PLAYBACK_COMPLETE:
+        onPlaybackDone();
         setCurState(RT_STATE_COMPLETE);
-
         break;
       case RT_MEDIA_STARTED:
         setCurState(RT_STATE_STARTED);
@@ -426,6 +437,8 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
         audiosink = reinterpret_cast<RTNodeAudioSink*>(decoder->mNext);
         audiosink->queueCodecBuffer = audio_sink_feed_callback;
         audiosink->callback_ptr     = decoder;
+        decoder->setEventLooper(mPlayerCtx->mLooper);
+        audiosink->setEventLooper(mPlayerCtx->mLooper);
     }
     INT32 audio_idx  = demuxer->queryTrackUsed(RTTRACK_TYPE_AUDIO);
 

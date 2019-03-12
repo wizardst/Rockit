@@ -28,7 +28,8 @@
 
 #define SOFTVOL_ELEM "name=Master Playback Volume"
 // #define WRITE_DEVICE_NAME "softvol"
-#define WRITE_DEVICE_NAME "hw:1,0"
+// #define WRITE_DEVICE_NAME "default"   // linux-3308
+#define WRITE_DEVICE_NAME "hw:1,0"       // android
 
 #undef isdigit
 #define isdigit(c) ((unsigned int) ((c) - '0') < 10)

@@ -59,6 +59,7 @@ class RTNDKNodePlayer : public RTMsgHandler {
  private:
     RT_RET    postSeekIfNecessary();
     RT_RET    onSeekTo(INT64 usec);
+    RT_RET    onPlaybackDone();
 
  private:
     struct NodePlayerContext* mPlayerCtx;

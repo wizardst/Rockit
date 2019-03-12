@@ -366,6 +366,7 @@ RT_RET FFNodeDemuxer::onStart() {
 RT_RET FFNodeDemuxer::onStop() {
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
     ctx->mEosFlag = RT_TRUE;
+    ctx->mThread->requestInterruption();
     ctx->mThread->join();
 
     // flush all packets in the caches
