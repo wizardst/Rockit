@@ -81,7 +81,9 @@ RtThreadData* createThreadData(RtThread::RtTaskSlot task_slot, RtRunnable* runna
         data->mRunnable   = runnable;
         data->mPtrData    = ptr_data;
         data->mLoopState  = THREAD_IDLE;
+        return data;
     }
+    return RT_NULL;
 }
 
 RtThread::RtThread(RtTaskSlot task_slot, void* ptr_data) {
