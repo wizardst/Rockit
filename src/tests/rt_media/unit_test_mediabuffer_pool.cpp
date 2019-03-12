@@ -47,7 +47,7 @@ RT_RET unit_test_mediabuffer_pool(INT32 index, INT32 total_index) {
 
     RT_RET               ret = RT_OK;
     RTAllocator         *allocator = NULL;
-    RTAllocatorStore    *allocator_store = new RTAllocatorStore();
+    RTAllocatorStore    *store = new RTAllocatorStore();
     RTMediaBuffer       *buffer[TEST_BUFFER_COUNT];
     RTMediaBuffer       *pool_buffer[TEST_BUFFER_COUNT];
     UINT8               *data[TEST_BUFFER_COUNT];
@@ -63,11 +63,10 @@ RT_RET unit_test_mediabuffer_pool(INT32 index, INT32 total_index) {
         thread = new RtThread(test_loop, pool);
         thread->setName(name);
 
-        allocator_store->fetchAllocator(RTAllocatorStore::RT_ALLOC_TYPE_DRM,
-                                        config,
-                                        &allocator);
+        store->priorAvailLinearAllocator(config,
+                                         &allocator);
         if (!allocator) {
-            allocator_store->priorAvailLinearAllocator(config, &allocator);
+            store->priorAvailLinearAllocator(config, &allocator);
             if (!allocator) {
                 ret = RT_ERR_UNKNOWN;
                 break;
@@ -130,7 +129,7 @@ __FAILED:
     rt_safe_delete(pool);
     rt_safe_delete(tmp);
     rt_safe_delete(allocator);
-    rt_safe_delete(allocator_store);
+    rt_safe_delete(store);
     rt_safe_delete(thread);
 
     return ret;

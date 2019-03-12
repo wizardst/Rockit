@@ -18,7 +18,8 @@
  *
  */
 
-#include "ALSAVolumeManager.h"
+#include "rt_type.h"            // NOLINT
+#include "ALSAVolumeManager.h"  // NOLINT
 
 #ifdef LOG_TAG
 #undef LOG_TAG

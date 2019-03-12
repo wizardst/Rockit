@@ -36,11 +36,11 @@ int main(int argc, char **argv) {
     rt_tests_add(test_ctx,
                  unit_test_display_gles,
                  const_cast<char *>("UnitTest-Display-GLES"));
+#endif
 
     rt_tests_add(test_ctx,
                  unit_test_allocator,
                  const_cast<char *>("UnitTest-Allocator"));
-    #endif
 
     rt_tests_add(test_ctx,
                 unit_test_mediabuffer_pool,

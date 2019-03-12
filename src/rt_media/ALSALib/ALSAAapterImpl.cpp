@@ -296,7 +296,7 @@ ALSASinkContext* alsa_snd_create(const char *name, RtMetaData *metadata) {
     INT32 samplerate;
     metadata->findInt32(kKeyACodecSampleRate, &samplerate);
 
-    RT_LOGD("alsa_snd_create channels =%d,samplerate =%d",channels,samplerate);
+    RT_LOGD("alsa_snd_create channels =%d,samplerate =%d", channels, samplerate);
 
     params_ctx->format = SND_PCM_FORMAT_S16_LE;
     params_ctx->channels = channels;

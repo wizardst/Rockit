@@ -56,7 +56,6 @@ RTAllocatorDrm::~RTAllocatorDrm() {
 
 RT_RET RTAllocatorDrm::newBuffer(UINT32 capacity, RTMediaBuffer **buffer) {
     RT_RET ret = RT_OK;
-
     RTMediaBuffer *buffer_impl = NULL;
 
     INT32 err = 0;

@@ -7,7 +7,6 @@ if (HAVE_MPI)
     add_definitions(-DHAVE_MPI)
     set(MPI_CASES_SRC
         unit_test_display_gles.cpp
-        unit_test_allocator.cpp
     )
     message(STATUS "build with MPI-Codec Support")
 else()
@@ -18,6 +17,7 @@ set(RT_MEDIA_TEST_SRC
     rt_media_main.cpp
     unit_test_object_pool.cpp
     unit_test_ffmpeg_adapter.cpp
+    unit_test_allocator.cpp
     unit_test_mediabuffer_pool.cpp
 )
 

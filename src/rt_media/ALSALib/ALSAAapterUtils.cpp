@@ -18,7 +18,8 @@
  *
  */
 
-#include "ALSAAapterUtils.h" // NOLINT
+#include "rt_type.h"          // NOLINT
+#include "ALSAAapterUtils.h"  // NOLINT
 
 #ifdef LOG_TAG
 #undef LOG_TAG

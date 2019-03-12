@@ -23,6 +23,7 @@ set(RT_BASE_LINUX_SRC
     linux/rt_os_time.cpp
     linux/rt_os_trust.cpp
     ${DRM_FILES}
+    linux/rt_ion.cpp
 )
 
 set(RT_BASE_SRC

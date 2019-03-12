@@ -51,6 +51,7 @@ set(RT_MEDIA_SRC
     RTAllocator/RTAllocatorBase.cpp
     RTAllocator/RTAllocatorMalloc.cpp
     RTAllocator/RTAllocatorDrm.cpp
+    RTAllocator/RTAllocatorIon.cpp
     RTAllocator/RTAllocatorStore.cpp
     ${MPI_FILES}
     ALSALib/ALSAAapterImpl.cpp

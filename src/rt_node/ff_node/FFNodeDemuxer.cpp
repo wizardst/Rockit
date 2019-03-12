@@ -263,14 +263,13 @@ RT_RET FFNodeDemuxer::onSeek(RtMetaData *options) {
         return RT_ERR_UNKNOWN;
     }
 
-    ctx->mNeedSeek = 1;
+    ctx->mNeedSeek   = 1;
     ctx->mSeekTimeUs = seekTimeUs;
-    
 }
 
 RT_RET FFNodeDemuxer::setEventLooper(RTMsgLooper* eventLooper) {
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
-    ctx->mEventLooper = eventLooper;
+    ctx->mEventLooper     = eventLooper;
     return RT_OK;
 }
 

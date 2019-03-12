@@ -77,18 +77,13 @@ RT_RET RTAllocatorStore::priorAvailLinearAllocator(RtMetaData* config, RTAllocat
     return RT_ERR_UNKNOWN;
 }
 
-RTAllocator* RTAllocatorStore::fetchIonAllocator(RtMetaData *config) {
-    #if TODO_FLAG
-    RTAllocator* allocator = NULL;
+RTAllocator *RTAllocatorStore::fetchIonAllocator(RtMetaData *config) {
+    RTAllocator *allocator = NULL;
     RT_BOOL avail = RTAllocatorIon::checkAvail();
     if (avail) {
         allocator = new RTAllocatorIon(config);
     }
     return allocator;
-    // TODO(ion allocator)
-    #else
-    return RT_NULL;
-    #endif
 }
 
 RTAllocator* RTAllocatorStore::fetchDrmAllocator(RtMetaData *config) {

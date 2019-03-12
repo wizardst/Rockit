@@ -33,7 +33,7 @@ RT_RET unit_test_allocator(INT32 index, INT32 total_index) {
 
     RT_RET ret = RT_OK;
     RTAllocator *allocator = NULL;
-    RTAllocatorStore *allocator_store = new RTAllocatorStore();
+    RTAllocatorStore *store = new RTAllocatorStore();
     RTMediaBuffer *buffer[16];
     UINT8 *data[16];
     RtMetaData *config = new RtMetaData();
@@ -42,9 +42,8 @@ RT_RET unit_test_allocator(INT32 index, INT32 total_index) {
      * drm allocator test
      */
     do {
-        allocator_store->fetchAllocator(RTAllocatorStore::RT_ALLOC_TYPE_DRM,
-                                        config,
-                                        &allocator);
+        store->priorAvailLinearAllocator(config,
+                                         &allocator);
         if (!allocator) {
             RT_LOGE("drm allocator fetch failed");
             break;
@@ -84,10 +83,8 @@ RT_RET unit_test_allocator(INT32 index, INT32 total_index) {
     } while (0);
 
 __FAILED:
-    if (config) {
-        delete (config);
-        config = NULL;
-    }
+    rt_safe_delete(config);
+    rt_safe_delete(store);
 
     return ret;
 }

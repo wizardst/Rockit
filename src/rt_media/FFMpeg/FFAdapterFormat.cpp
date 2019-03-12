@@ -219,8 +219,10 @@ void fa_format_build_track_meta(const AVStream* stream, RTTrackParms* track) {
     track->mAudioTrailingPadding    = cpar->trailing_padding;
     track->mAudiobitsPerCodedSample = cpar->bits_per_coded_sample;
     track->mAudiobitsPerRawSample   = cpar->bits_per_raw_sample;
-    RT_LOGD("audio params: channels %d, sample_rate %d, block_align %d, bits_per_coded_sample %d, bits_per_raw_sample %d",
-             cpar->channels, cpar->sample_rate, cpar->block_align, cpar->bits_per_coded_sample, cpar->bits_per_raw_sample);
+    RT_LOGD("audio params: channels %d, sample_rate %d, block_align %d," \
+             "bits_per_coded_sample %d, bits_per_raw_sample %d",
+             cpar->channels, cpar->sample_rate, cpar->block_align, \
+             cpar->bits_per_coded_sample, cpar->bits_per_raw_sample);
 }
 
 INT32 fa_format_query_track(FAFormatContext* fc, UINT32 idx, \

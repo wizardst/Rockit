@@ -25,8 +25,30 @@
 
 class RTAllocatorIon : public RTAllocator {
  public:
-    RTAllocatorIon();
+    explicit RTAllocatorIon(RtMetaData *config);
     ~RTAllocatorIon();
+
+    virtual const char* getName() { return "RTAllocatorIon"; }
+    virtual void summary(INT32 fd) {}
+
+    static RT_BOOL checkAvail();
+    virtual RT_RET newBuffer(UINT32 capacity, RTMediaBuffer **buffer);
+    virtual RT_RET newBuffer(UINT32 width,
+                            UINT32 height,
+                            UINT32 format,
+                            RTMediaBuffer **buffer);
+
+    virtual RT_RET freeBuffer(RTMediaBuffer **buffer);
+
+    RT_RET init(RtMetaData *meta);
+    RT_RET deinit();
+
+ private:
+    INT32               mIonFd;
+    INT32               mAlign;
+    INT32               mHeapMask;
+    INT32               mUsage;
+    INT32               mFlags;
 };
 
 #endif  // SRC_RT_MEDIA_INCLUDE_RTALLOCATORION_H_
