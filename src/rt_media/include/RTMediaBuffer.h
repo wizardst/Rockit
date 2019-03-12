@@ -21,8 +21,9 @@
 #ifndef SRC_RT_MEDIA_INCLUDE_RTMEDIABUFFER_H_
 #define SRC_RT_MEDIA_INCLUDE_RTMEDIABUFFER_H_
 
-#include "RTObject.h"   // NOLINT
-#include "rt_metadata.h"  // NOLINT
+#include "RTObject.h"               // NOLINT
+#include "rt_metadata.h"            // NOLINT
+#include "RTMediaBufferPool.h"      // NOLINT
 
 enum RtMediaBufferStatus {
     RT_MEDIA_BUFFER_STATUS_UNKONN = 0,
@@ -33,11 +34,18 @@ enum RtMediaBufferStatus {
     RT_MEDIA_BUFFER_STATUS_BOTTON,
 };
 
+class RTAllocator;
+
 class RTMediaBuffer : public RTObject {
  public:
     // The underlying data remains the responsibility of the caller!
     explicit RTMediaBuffer(void* data, UINT32 size);
-    explicit RTMediaBuffer(void* data, UINT32 size, INT32 handle, INT32 fd);
+    explicit RTMediaBuffer(
+                 void* data,
+                 UINT32 size,
+                 INT32 handle,
+                 INT32 fd,
+                 RTAllocator *alloctor = RT_NULL);
     explicit RTMediaBuffer(UINT32 size);
     explicit RTMediaBuffer(const RTMediaBuffer* data);
     virtual ~RTMediaBuffer();
@@ -63,19 +71,29 @@ class RTMediaBuffer : public RTObject {
     RtMediaBufferStatus getStatus();
     RtMetaData* getMetaData();
 
+    // refs manage
+    void   addRefs();
+    INT32  refsCount();
+    void   setObserver(RTMediaBufferObserver *observer);
+
     // Clears meta data and resets the range to the full extent.
     void reset();
 
  private:
-    void*   mData;
-    UINT32  mSize, mRangeOffset, mRangeLength;
-    INT32   mHandle;
-    INT32   mFd;
-    UINT32  mPhyAddr;
-    RT_BOOL mOwnsData;
+    void*           mData;
+    UINT32          mSize;
+    UINT32          mRangeOffset;
+    UINT32          mRangeLength;
+    INT32           mHandle;
+    INT32           mFd;
+    UINT32          mPhyAddr;
+    RT_BOOL         mOwnsData;
+    RtMetaData     *mMetaData;
+    RTAllocator    *mAllocator;
+    INT32           mRefCount;
 
-    RtMetaData* mMetaData;
-    RtMediaBufferStatus mStatus;
+    RtMediaBufferStatus     mStatus;
+    RTMediaBufferObserver  *mObserver;
 };
 
 #endif  // SRC_RT_MEDIA_INCLUDE_RTMEDIABUFFER_H_

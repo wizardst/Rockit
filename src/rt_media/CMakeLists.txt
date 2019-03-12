@@ -42,12 +42,14 @@ set(RT_MEDIA_SRC
     RTMediaData.cpp
     RTObject.cpp
     RTObjectPool.cpp
+    RTMediaBufferPool.cpp
     FFMpeg/FFAdapterCodec.cpp
     FFMpeg/FFAdapterFilter.cpp
     FFMpeg/FFAdapterFormat.cpp
     FFMpeg/FFAdapterUtils.cpp
     ${GLES_FILES}
     RTAllocator/RTAllocatorBase.cpp
+    RTAllocator/RTAllocatorMalloc.cpp
     RTAllocator/RTAllocatorDrm.cpp
     RTAllocator/RTAllocatorStore.cpp
     ${MPI_FILES}

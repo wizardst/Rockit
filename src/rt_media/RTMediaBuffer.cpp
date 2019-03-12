@@ -18,7 +18,8 @@
  * module: RTMediaBuffer
  */
 
-#include "RTMediaBuffer.h"
+#include "RTMediaBuffer.h"          // NOLINT
+#include "RTAllocatorBase.h"        // NOLINT
 
 RTMediaBuffer::RTMediaBuffer(void* data, UINT32 size) {
     RTObject::trace(this->getName(), this, sizeof(RTMediaBuffer));
@@ -27,12 +28,18 @@ RTMediaBuffer::RTMediaBuffer(void* data, UINT32 size) {
     setData(data, size);
 }
 
-RTMediaBuffer::RTMediaBuffer(void* data, UINT32 size, INT32 handle, INT32 fd) {
+RTMediaBuffer::RTMediaBuffer(
+        void* data,
+        UINT32 size,
+        INT32 handle,
+        INT32 fd,
+        RTAllocator *alloctor) {
     RTObject::trace(this->getName(), this, sizeof(RTMediaBuffer));
 
     mMetaData = RT_NULL;
     mHandle = handle;
     mFd = fd;
+    mAllocator = alloctor;
     setData(data, size);
 }
 
@@ -75,6 +82,7 @@ void RTMediaBuffer::setData(void* data, UINT32 size) {
     mSize = size;
     setRange(0, size);
     mOwnsData = RT_FALSE;
+    mRefCount = 0;
     if (RT_NULL != mMetaData) {
         mMetaData->clear();
     } else {
@@ -136,4 +144,46 @@ void RTMediaBuffer::setStatus(RtMediaBufferStatus status) {
 RtMediaBufferStatus RTMediaBuffer::getStatus() {
     return mStatus;
 }
+
+void RTMediaBuffer::addRefs() {
+    (void) __sync_fetch_and_add(&mRefCount, 1);
+}
+
+INT32 RTMediaBuffer::refsCount() {
+    return mRefCount;
+}
+
+void RTMediaBuffer::release() {
+    if (mObserver == RT_NULL && mRefCount == 0) {
+        if (mAllocator != RT_NULL) {
+            RTMediaBuffer *this_tmp = this;
+            mAllocator->freeBuffer(&this_tmp);
+        }
+        return;
+    }
+    if (mRefCount == 0) {
+        RT_LOGE("refs count is 0, should not release.");
+        return;
+    }
+
+    int prevCount = __sync_fetch_and_sub(&mRefCount, 1);
+    if (prevCount == 1) {
+        if (mObserver == RT_NULL) {
+            if (mAllocator != RT_NULL) {
+                RTMediaBuffer *this_tmp = this;
+                mAllocator->freeBuffer(&this_tmp);
+            }
+            delete this;
+            return;
+        }
+        mObserver->signalBufferReturned(this);
+    }
+}
+
+void RTMediaBuffer::setObserver(RTMediaBufferObserver *observer) {
+    RT_ASSERT(observer != RT_NULL);
+    mObserver = observer;
+}
+
+
 

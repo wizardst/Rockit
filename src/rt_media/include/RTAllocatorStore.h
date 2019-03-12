@@ -55,13 +55,14 @@ class RTAllocatorStore : public RTObject {
     RTAllocatorStore();
     ~RTAllocatorStore();
 
-    RT_RET fetchAllocator(RTAllocatorType type, RtMetaData *config, RTAllocator **allocator);
-    RT_RET priorAvailLinearAllocator(RtMetaData *config, RTAllocator **allocator);
+    RT_RET fetchAllocator(RTAllocatorType type, RtMetaData* config, RTAllocator **allocator);
+    RT_RET priorAvailLinearAllocator(RtMetaData* config, RTAllocator **allocator);
 
  private:
-    RTAllocator *fetchIonAllocator(RtMetaData *config);
-    RTAllocator *fetchDrmAllocator(RtMetaData *config);
-    RTAllocator *fetchGrallocAllocator(RtMetaData *config);
+    RTAllocator *fetchIonAllocator(RtMetaData* config);
+    RTAllocator *fetchDrmAllocator(RtMetaData* config);
+    RTAllocator *fetchGrallocAllocator(RtMetaData* config);
+    RTAllocator *fetchMallocAllocator(RtMetaData* config);
 };
 
 #endif  // SRC_RT_MEDIA_INCLUDE_RTALLOCATORSTORE_H_

@@ -35,6 +35,10 @@
 #endif
 #define DEBUG_FLAG 0x1
 
+#ifndef API_HAVE_AV_REGISTER_ALL
+#define API_HAVE_AV_REGISTER_ALL (LIBAVFORMAT_VERSION_MAJOR < 58)
+#endif
+
 struct FAFormatContext {
     AVFormatContext  *mAvfc;
     FC_FLAG          mFcFlag;
@@ -53,12 +57,6 @@ static void ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_list v
 
 void fa_ffmpeg_runtime_init() {
     av_log_set_callback(ffmpeg_log_callback);
-
-    #if (LIBAVFORMAT_VERSION_MAJOR < 80)
-        /* register all formats and codecs */
-        // av_register_all();
-        // avformat_network_init();
-    #endif
 }
 
 FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag /*FLAG_DEMUXER*/) {
@@ -73,7 +71,9 @@ FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag /*FLAG_DEMUXER*/) 
     switch (flag) {
       case FLAG_DEMUXER:
         /* register all formats and codecs */
+        #if API_HAVE_AV_REGISTER_ALL
         av_register_all();
+        #endif
         avformat_network_init();
 
         /* open input file, and allocate format context */

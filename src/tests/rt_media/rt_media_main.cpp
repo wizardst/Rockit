@@ -42,6 +42,10 @@ int main(int argc, char **argv) {
                  const_cast<char *>("UnitTest-Allocator"));
     #endif
 
+    rt_tests_add(test_ctx,
+                unit_test_mediabuffer_pool,
+                const_cast<char *>("UnitTest-MediaBufferPool"));
+
     // ! run all testcases
     rt_tests_run(test_ctx, /*mem_dump=*/RT_TRUE);
 

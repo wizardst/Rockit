@@ -29,8 +29,8 @@ then
 fi
 
 # Define and Check NDK toolchain
-#ANDROID_NDK=/disk2/cmc/android_projects/android_build_env/android-ndk-r10d
-ANDROID_NDK=~/ndk10/android-ndk-r10e/
+ANDROID_NDK=/disk2/cmc/android_projects/android_build_env/android-ndk-r10d
+#ANDROID_NDK=~/ndk10/android-ndk-r10e/
 
 if [ -d ${ANDROID_NDK} ]
 then

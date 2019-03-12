@@ -85,7 +85,7 @@ RT_RET RTAllocatorDrm::newBuffer(UINT32 capacity, RTMediaBuffer **buffer) {
         return ret;
     }
 
-    buffer_impl = new RTMediaBuffer(data, capacity, handle, fd);
+    buffer_impl = new RTMediaBuffer(data, capacity, handle, fd, this);
     if (!buffer_impl) {
         RT_LOGE("new buffer failed");
         ret = RT_ERR_UNKNOWN;
@@ -118,6 +118,8 @@ RT_RET RTAllocatorDrm::freeBuffer(RTMediaBuffer **buffer) {
     INT32 err = 0;
     RT_RET ret = RT_OK;
     if (handle >= 0 && handle) {
+        RT_LOGT("freeBuffer buffer: %p, fd: %d, handle: %d, fd: %d, data: %p",
+                 *buffer, mDrmFd, handle, fd, data);
         munmap(data, size);
         close(fd);
         err = drm_free(mDrmFd, handle);
