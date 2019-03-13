@@ -43,17 +43,15 @@ UINT64 RtTime::getNowTimeMs() {
     return getNowTimeUs()/1000;
 }
 
-INT32 RtTime::randInt() {
-    return rand();
-}
-
-
-
 UINT64 RtTime::getNowTimeUs() {
     LARGE_INTEGER curTime, freq;
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&curTime);
     return (UINT64)((curTime.QuadPart * 1000000)/freq.QuadPart);
+}
+
+INT32 RtTime::randInt() {
+    return rand();
 }
 
 void RtTime::sleepMs(UINT64 timeMs) {

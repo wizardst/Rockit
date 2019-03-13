@@ -53,9 +53,14 @@ UINT64 RtTime::getNowTimeUs() {
     return (UINT64) (tv.tv_sec * 1000000 + tv.tv_usec); /* microseconds */
 }
 
+INT32 RtTime::randInt() {
+    return rand();
+}
+
 void RtTime::sleepMs(UINT64 time) {
     usleep(time*1000);
 }
+
 void RtTime::sleepUs(UINT64 time) {
     usleep(time);
 }

@@ -358,13 +358,13 @@ RT_RET RTNodeBus::nodeChainDriver(RTNode *pNode, BUS_LINE_TYPE lType) {
     return RT_OK;
 }
 
-RT_RET RTNodeBus::excuteCommand(RT_NODE_CMD cmd) {
+RT_RET RTNodeBus::excuteCommand(RT_NODE_CMD cmd, RtMetaData *option) {
     RT_LOGD("node_bus delivers %s to active nodes", rt_node_cmd_name(cmd));
 
-    RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_ROOT], cmd, RT_NULL);
-    RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_VIDEO],  cmd, RT_NULL);
-    RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_AUDIO],  cmd, RT_NULL);
-    RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_SUBTE],  cmd, RT_NULL);
+    RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_ROOT],   cmd, option);
+    RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_VIDEO],  cmd, option);
+    RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_AUDIO],  cmd, option);
+    RTNodeAdapter::runCmd(mBusCtx->mRootNodes[BUS_LINE_SUBTE],  cmd, option);
     RT_LOGD("node_bus delivers %s to active nodes done!!!!!!\r\n", rt_node_cmd_name(cmd));
     return RT_OK;
 }

@@ -97,6 +97,10 @@ enum {
     kKeyMemFlags            = MKTAG('m', 'e', 'f', 'l'),  // INT32
     kKeyMemHeapMask         = MKTAG('m', 'h', 'm', 's'),  // INT32
     kKeyMemUsage            = MKTAG('m', 'e', 'u', 's'),  // INT32
+
+    /* command options */
+    kKeySeekTimeUs          = MKTAG('s', 't', 'u', 's'),  // INT64
+    kKeySeekMode            = MKTAG('s', 'm', 'o', 'd'),  // INT32
 };
 
 #endif  // SRC_RT_MEDIA_INCLUDE_RTMEDIAMETAKEYS_H_

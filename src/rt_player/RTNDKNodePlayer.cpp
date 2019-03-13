@@ -46,8 +46,9 @@ struct NodePlayerContext {
     struct RTMsgLooper* mLooper;
     UINT32              mState;
     RTSeekType          mSeekFlag;
+    RtMetaData         *mCmdOptions;
     INT64               mWantSeekTimeUs;
-    INT64               mLastSeekTimeUs;
+    INT64               mCurTimeUs;
     INT64               mSaveSeekTimeUs;
 };
 
@@ -82,6 +83,8 @@ RTNDKNodePlayer::RTNDKNodePlayer() {
     // thread used for data transfer between plugins
     mPlayerCtx->mDeliverThread = NULL;
 
+    mPlayerCtx->mCmdOptions = new RtMetaData();
+
     init();
 
     setCurState(RT_STATE_IDLE);
@@ -107,6 +110,7 @@ RT_RET RTNDKNodePlayer::release() {
     if (RT_NULL != mPlayerCtx->mDirector) {
         rt_safe_delete(mPlayerCtx->mDirector);
     }
+    rt_safe_free(mPlayerCtx->mCmdOptions);
     rt_safe_free(mPlayerCtx);
     return RT_OK;
 }
@@ -275,6 +279,7 @@ RT_RET RTNDKNodePlayer::wait() {
 }
 
 RT_RET RTNDKNodePlayer::seekTo(INT64 usec) {
+    RT_LOGE("seek %lld us", usec);
     UINT32 curState = this->getCurState();
     RTMessage* msg  = RT_NULL;
     switch (curState) {
@@ -283,6 +288,7 @@ RT_RET RTNDKNodePlayer::seekTo(INT64 usec) {
       case RT_STATE_PREPARING:
         mPlayerCtx->mWantSeekTimeUs = -1;
         mPlayerCtx->mSaveSeekTimeUs = usec;
+        RT_LOGE("seek %lld us", usec);
         RTStateUtil::dumpStateError(curState, "seekTo, save only");
         break;
       case RT_STATE_PREPARED:
@@ -290,12 +296,15 @@ RT_RET RTNDKNodePlayer::seekTo(INT64 usec) {
       case RT_STATE_STARTED:
       case RT_STATE_COMPLETE:
         // @TODO: do pause player
+        RT_LOGE("seek %lld us mPlayerCtx: %p mSeekFlag %d", usec, mPlayerCtx, mPlayerCtx->mSeekFlag);
         switch (mPlayerCtx->mSeekFlag) {
           case RT_SEEK_DOING:
+            RT_LOGE("seek %lld us", usec);
             mPlayerCtx->mWantSeekTimeUs = -1;
             mPlayerCtx->mSaveSeekTimeUs = usec;
             break;
           default:
+            RT_LOGE("seek %lld us", usec);
             mPlayerCtx->mSaveSeekTimeUs = -1;
             mPlayerCtx->mWantSeekTimeUs = usec;
             postSeekIfNecessary();
@@ -319,15 +328,18 @@ RT_RET RTNDKNodePlayer::postSeekIfNecessary() {
         return RT_OK;
     }
     // mini seek margin is 500ms
-    INT64 seekDelta = RT_ABS(mPlayerCtx->mWantSeekTimeUs - mPlayerCtx->mLastSeekTimeUs);
+    INT64 seekDelta = RT_ABS(mPlayerCtx->mWantSeekTimeUs - mPlayerCtx->mCurTimeUs);
+    RT_LOGE("seek want seek %lld us, mCurTimeUs: %lld us",
+             mPlayerCtx->mWantSeekTimeUs, mPlayerCtx->mCurTimeUs);
     if (seekDelta > 500*100) {
         // async seek message
         RTMessage* msg = new RTMessage(RT_MEDIA_SEEK_ASYNC, 0, mPlayerCtx->mWantSeekTimeUs, this);
         mPlayerCtx->mLooper->flush_message(RT_MEDIA_SEEK_ASYNC);
         mPlayerCtx->mLooper->post(msg, 0);
         mPlayerCtx->mSeekFlag = RT_SEEK_DOING;
+        RT_LOGE("seek seekDelta %lld us mPlayerCtx: %p mSeekFlag: %d", seekDelta, mPlayerCtx, mPlayerCtx->mSeekFlag);
     }
-    mPlayerCtx->mLastSeekTimeUs = mPlayerCtx->mWantSeekTimeUs;
+
     mPlayerCtx->mWantSeekTimeUs = -1;
     mPlayerCtx->mSaveSeekTimeUs = -1;
 }
@@ -352,13 +364,19 @@ UINT32 RTNDKNodePlayer::getCurState() {
 }
 
 RT_RET RTNDKNodePlayer::onSeekTo(INT64 usec) {
+    RTMessage* msg  = RT_NULL;
+    RT_LOGD("call, seek...");
     // workflow: pause flush (cache maybe) start
     #if 0
     mNodeBus->excuteCommand(RT_NODE_CMD_PAUSE);
     mNodeBus->excuteCommand(RT_NODE_CMD_FLUSH);
     mNodeBus->excuteCommand(RT_NODE_CMD_START);
     #else
-    RT_LOGE("done, seek to target:%lldms", usec/1000);
+    mPlayerCtx->mCmdOptions->clear();
+    mPlayerCtx->mCmdOptions->setInt64(kKeySeekTimeUs, usec);
+    mNodeBus->excuteCommand(RT_NODE_CMD_SEEK, mPlayerCtx->mCmdOptions);
+    msg = new RTMessage(RT_MEDIA_SEEK_COMPLETE, RT_NULL, this);
+    mPlayerCtx->mLooper->post(msg, 0);
     RT_LOGE("done, seek to target:%lldms", usec/1000);
     #endif
 }
@@ -403,6 +421,8 @@ void   RTNDKNodePlayer::onMessageReceived(struct RTMessage* msg) {
         break;
       case RT_MEDIA_SEEK_COMPLETE:
         mPlayerCtx->mSeekFlag = RT_SEEK_NO;
+        RT_LOGD("seek complete mPlayerCtx: %p mSeekFlag: %d", mPlayerCtx, mPlayerCtx->mSeekFlag);
+        mPlayerCtx->mCurTimeUs = mPlayerCtx->mWantSeekTimeUs;
         postSeekIfNecessary();
         break;
       case RT_MEDIA_SET_VIDEO_SIZE:
@@ -429,6 +449,7 @@ RT_RET RTNDKNodePlayer::startDataLooper() {
 }
 
 RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
+    INT32            eosFlag   = 0;
     RTNode*          root      = mNodeBus->getRootNode(BUS_LINE_ROOT);
     RTNodeDemuxer*   demuxer   = reinterpret_cast<RTNodeDemuxer*>(root);
     RTNode*          decoder   = mNodeBus->getRootNode(BUS_LINE_AUDIO);
@@ -465,9 +486,8 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
                         got_pkt = RT_TRUE;
                     } else {
                         /* pass other packet */
-                        INT32 eos = 0;
-                        esPacket->getMetaData()->findInt32(kKeyFrameEOS, &eos);
-                        if (eos) {
+                        esPacket->getMetaData()->findInt32(kKeyFrameEOS, &eosFlag);
+                        if (eosFlag) {
                             RT_LOGD("receive eos , break");
                             break;
                         }
@@ -485,13 +505,16 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
 
             if (frame) {
                 if (frame->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
-                    RT_LOGD_IF(DEBUG_FLAG, "audio frame(ptr=0x%p, size=%d)", frame->getData(), frame->getLength());
+                    INT64 timeUs = 0ll;
+                    frame->getMetaData()->findInt64(kKeyFramePts, &timeUs);
+                    RT_LOGD_IF(DEBUG_FLAG, "audio frame(ptr=0x%p, size=%d, timeUs=%lldms)",
+                            frame->getData(), frame->getLength(), timeUs/1000);
+
                     RTNodeAdapter::pushBuffer(audiosink, frame);
+                    mPlayerCtx->mCurTimeUs = timeUs;
                 }
-              //  RTNodeAdapter::queueCodecBuffer(decoder, frame, RT_PORT_OUTPUT);
-                INT32 eos = 0;
-                frame->getMetaData()->findInt32(kKeyFrameEOS, &eos);
-                if (eos) {
+                frame->getMetaData()->findInt32(kKeyFrameEOS, &eosFlag);
+                if (eosFlag) {
                     RT_LOGD("receive eos , break");
                     break;
                 }

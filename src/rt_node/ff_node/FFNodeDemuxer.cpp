@@ -59,6 +59,9 @@ typedef struct _FFNodeDemuxerCtx {
     INT32               mIndexVideo;
     INT32               mIndexAudio;
     INT32               mIndexSubtitle;
+
+    INT32               mNeedSeek;
+    INT64               mSeekTimeUs;
 } FFNodeDemuxerCtx;
 
 void* ff_demuxer_loop(void* ptr_node) {
@@ -202,8 +205,12 @@ RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** mediaBuf) {
     } else {
         RtMutex::RtAutolock autoLock(pktLock);
         if (RT_NULL != *mediaBuf) {
-            fa_format_packet_parse(raw_pkt, &rt_pkt);
+            fa_format_packet_parse(ctx->mFormatCtx, raw_pkt, &rt_pkt);
             array_list_remove_at(pktList, 0);
+
+            if (rt_pkt.mSize <= 0) {
+                return RT_ERR_UNKNOWN;
+            }
 
             // RT_LOGD("RTPacket(ptr=0x%p, size=%d) MediaBuffer=0x%p type: %d", \
             //            rt_pkt.mRawPtr, rt_pkt.mSize, *mediaBuf, type);
@@ -235,6 +242,8 @@ RT_RET FFNodeDemuxer::runCmd(RT_NODE_CMD cmd, RtMetaData *metaData) {
         this->onPause();
         break;
     case RT_NODE_CMD_SEEK:
+        RT_LOGD("seek to xxxx");
+        this->onSeek(metaData);
         break;
     case RT_NODE_CMD_RESET:
         this->onReset();
@@ -244,6 +253,19 @@ RT_RET FFNodeDemuxer::runCmd(RT_NODE_CMD cmd, RtMetaData *metaData) {
         break;
     }
     return RT_OK;
+}
+
+RT_RET FFNodeDemuxer::onSeek(RtMetaData *options) {
+    FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
+    INT64 seekTimeUs = 0ll;
+    if (!options->findInt64(kKeySeekTimeUs, &seekTimeUs)) {
+        RT_LOGE("seek timeUs get failed, seek failed");
+        return RT_ERR_UNKNOWN;
+    }
+
+    ctx->mNeedSeek = 1;
+    ctx->mSeekTimeUs = seekTimeUs;
+    
 }
 
 RT_RET FFNodeDemuxer::setEventLooper(RTMsgLooper* eventLooper) {
@@ -386,7 +408,7 @@ RT_RET FFNodeDemuxer::onFlush() {
         while (ctx->mVideoPktList->size > 0) {
             RtMutex::RtAutolock autoLock(ctx->mLockVideoPacket);
             void* raw_pkt = array_list_get_data(ctx->mVideoPktList, 0);
-            fa_format_packet_parse(raw_pkt, &rt_pkt);
+            fa_format_packet_parse(ctx->mFormatCtx, raw_pkt, &rt_pkt);
             rt_utils_packet_free(&rt_pkt);
             array_list_remove_at(ctx->mVideoPktList, 0);
         }
@@ -395,7 +417,7 @@ RT_RET FFNodeDemuxer::onFlush() {
         while (ctx->mAudioPktList->size > 0) {
             RtMutex::RtAutolock autoLock(ctx->mLockAudioPacket);
             void* raw_pkt = array_list_get_data(ctx->mAudioPktList, 0);
-            fa_format_packet_parse(raw_pkt, &rt_pkt);
+            fa_format_packet_parse(ctx->mFormatCtx, raw_pkt, &rt_pkt);
             rt_utils_packet_free(&rt_pkt);
             array_list_remove_at(ctx->mAudioPktList, 0);
         }
@@ -406,37 +428,46 @@ RT_RET FFNodeDemuxer::onFlush() {
 }
 
 RT_RET FFNodeDemuxer::runTask() {
-    FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
-    void* raw_pkt = RT_NULL;
-    RT_LOGD_IF(DEBUG_FLAG, "cache_thread begin");
-    while ((!ctx->mEosFlag) && (THREAD_LOOP == ctx->mThread->getState())) {
-        INT32 err = fa_format_packet_read(ctx->mFormatCtx, &raw_pkt);
-        if (err < 0) {
-            RT_LOGE("%s read end", __FUNCTION__);
-            ctx->mEosFlag = RT_TRUE;
-            continue;
+    FFNodeDemuxerCtx    *ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
+    void                *raw_pkt = RT_NULL;
+    INT32                err = 0;
+
+    RT_LOGD_IF(DEBUG_FLAG, "task begin");
+    while (THREAD_LOOP == ctx->mThread->getState()) {
+        if (ctx->mNeedSeek > 0) {
+            RT_LOGD("do seek, seek to %lld us", ctx->mSeekTimeUs);
+            int flags = 0;
+            fa_format_seek_to(ctx->mFormatCtx, -1, ctx->mSeekTimeUs, flags);
+            onFlush();
+            RT_LOGD("flush compelete");
+            ctx->mEosFlag = RT_FALSE;
+            ctx->mNeedSeek = 0;
         }
 
-        #if TODO_FLAG
-            int flags = 0;
-            ret = avformat_seek_file(ctx->mFormatCtx, 0/*seekStrmIdx*/,
-                                     RT_INT64_MIN, 0/*timeus*/, RT_INT64_MAX, flags);
-        #endif
-        do {
-            INT32 stream_index = fa_format_packet_type(raw_pkt);
-            if (stream_index == ctx->mIndexVideo) {
-                RtMutex::RtAutolock autoLock(ctx->mLockVideoPacket);
-                array_list_add(ctx->mVideoPktList, raw_pkt);
-                RT_LOGD_IF(DEBUG_FLAG, "read video packet");
-            } else if (stream_index == ctx->mIndexAudio) {
-                RtMutex::RtAutolock autoLock(ctx->mLockAudioPacket);
-                array_list_add(ctx->mAudioPktList, raw_pkt);
-                RT_LOGD_IF(DEBUG_FLAG, "read audio packet");
-            } else {
-                RT_LOGE("FFPacket(0x%p), track=%d, but select(v=%d,a=%d)",
-                         raw_pkt, stream_index, ctx->mIndexVideo, ctx->mIndexAudio);
+        if (!ctx->mEosFlag) {
+            err = fa_format_packet_read(ctx->mFormatCtx, &raw_pkt);
+            if (err < 0) {
+                RT_LOGE("%s read end", __FUNCTION__);
+                ctx->mEosFlag = RT_TRUE;
+                continue;
             }
-        } while (0);
+
+            do {
+                INT32 stream_index = fa_format_packet_type(raw_pkt);
+                if (stream_index == ctx->mIndexVideo) {
+                    RtMutex::RtAutolock autoLock(ctx->mLockVideoPacket);
+                    array_list_add(ctx->mVideoPktList, raw_pkt);
+                    // RT_LOGD("read video packet");
+                } else if (stream_index == ctx->mIndexAudio) {
+                    RtMutex::RtAutolock autoLock(ctx->mLockAudioPacket);
+                    array_list_add(ctx->mAudioPktList, raw_pkt);
+                    // RT_LOGD("read audio packet");
+                } else {
+                    RT_LOGE("FFPacket(0x%p), track=%d, but select(v=%d,a=%d)",
+                             raw_pkt, stream_index, ctx->mIndexVideo, ctx->mIndexAudio);
+                }
+            } while (0);
+        }
         RtTime::sleepUs(2000);
     }
     RT_LOGD_IF(DEBUG_FLAG, "cache_thread done");

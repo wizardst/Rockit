@@ -159,12 +159,16 @@ INT32  fa_format_packet_type(void* raw_pkt) {
     return -1;
 }
 
-INT32 fa_format_packet_parse(void* raw_pkt, RTPacket* rt_pkt) {
+INT32 fa_format_packet_parse(FAFormatContext* fc, void* raw_pkt, RTPacket* rt_pkt) {
     rt_memset(rt_pkt, 0, sizeof(RTPacket));
     AVPacket* ff_pkt = reinterpret_cast<AVPacket*>(raw_pkt);
+    AVStream *stream = fc->mAvfc->streams[ff_pkt->stream_index];
+    INT64 startTimeUs = stream->start_time == AV_NOPTS_VALUE ? 0 :
+        av_rescale_q(stream->start_time, stream->time_base, AV_TIME_BASE_Q);
+
     if (RT_NULL != ff_pkt) {
-        rt_pkt->mPts      = ff_pkt->pts;
-        rt_pkt->mDts      = ff_pkt->dts;
+        rt_pkt->mPts      = av_rescale_q(ff_pkt->pts, stream->time_base, AV_TIME_BASE_Q) - startTimeUs;
+        rt_pkt->mDts      = av_rescale_q(ff_pkt->dts, stream->time_base, AV_TIME_BASE_Q) - startTimeUs;
         rt_pkt->mPos      = ff_pkt->pos;
         rt_pkt->mData     = ff_pkt->data;
         rt_pkt->mSize     = ff_pkt->size;
@@ -215,6 +219,8 @@ void fa_format_build_track_meta(const AVStream* stream, RTTrackParms* track) {
     track->mAudioTrailingPadding    = cpar->trailing_padding;
     track->mAudiobitsPerCodedSample = cpar->bits_per_coded_sample;
     track->mAudiobitsPerRawSample   = cpar->bits_per_raw_sample;
+    RT_LOGD("audio params: channels %d, sample_rate %d, block_align %d, bits_per_coded_sample %d, bits_per_raw_sample %d",
+             cpar->channels, cpar->sample_rate, cpar->block_align, cpar->bits_per_coded_sample, cpar->bits_per_raw_sample);
 }
 
 INT32 fa_format_query_track(FAFormatContext* fc, UINT32 idx, \

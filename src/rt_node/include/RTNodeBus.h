@@ -58,7 +58,7 @@ class RTNodeBus {
     RT_RET      autoBuild(RTMediaUri* mediaUri);
     RT_RET      releaseNodes();
     RTNode*     getRootNode(BUS_LINE_TYPE lType);
-    RT_RET      excuteCommand(RT_NODE_CMD cmd);
+    RT_RET      excuteCommand(RT_NODE_CMD cmd, RtMetaData *option = RT_NULL);
 
     /* node manager */
     RT_RET      summary(INT32 fd, RT_BOOL full = RT_FALSE);

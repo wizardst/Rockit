@@ -60,6 +60,7 @@ class FFNodeDemuxer : public RTNodeDemuxer {
     virtual RT_RET onStop();
     virtual RT_RET onReset();
     virtual RT_RET onFlush();
+    virtual RT_RET onSeek(RtMetaData *options);
 };
 
 extern struct RTNodeStub ff_node_demuxer;
