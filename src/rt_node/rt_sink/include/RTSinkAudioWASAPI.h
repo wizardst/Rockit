@@ -47,10 +47,10 @@ class RTSinkAudioWASAPI : public RTNodeAudioSink {
 
  public:
     // override RTNodeAudioSink methods
-    virtual RT_RET  SetVolume(int volume);
-    virtual INT32   GetVolume();
-    virtual RT_BOOL GetMute();
-    virtual RT_RET  Mute(RT_BOOL muted);
+    virtual RT_RET   setVolume(int volume);
+    virtual INT32    getVolume();
+    virtual RT_BOOL  getMute();
+    virtual RT_RET   setMute(RT_BOOL muted);
 
  protected:
     // override RTNode methods

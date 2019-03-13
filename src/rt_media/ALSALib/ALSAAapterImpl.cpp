@@ -291,10 +291,16 @@ ALSASinkContext* alsa_snd_create(const char *name, RtMetaData *metadata) {
 
     ctx->mAlsaParamsCtx = rt_malloc(AlsaParamsContext);
     params_ctx = ctx->mAlsaParamsCtx;
+    INT32 channels;
+    metadata->findInt32(kKeyACodecChannels, &channels);
+    INT32 samplerate;
+    metadata->findInt32(kKeyACodecSampleRate, &samplerate);
+
+    RT_LOGD("alsa_snd_create channels =%d,samplerate =%d",channels,samplerate);
 
     params_ctx->format = SND_PCM_FORMAT_S16_LE;
-    params_ctx->channels = 2;
-    params_ctx->sampleRate = DEFAULT_SAMPLE_RATE;
+    params_ctx->channels = channels;
+    params_ctx->sampleRate = samplerate;
     params_ctx->latency = DEFAULT_OUT_LATENCY;
     params_ctx->periodSize = DEFAULT_OUT_PERIODSIZE;
     params_ctx->bufferSize = DEFAULT_OUT_BUFFERSIZE;

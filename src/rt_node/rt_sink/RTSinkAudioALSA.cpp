@@ -30,7 +30,7 @@
 #define DEBUG_FLAG 0x0
 
 #include "RTSinkAudioALSA.h"   // NOLINT
-#include "rt_metaData.h"       // NOLINT
+#include "rt_metadata.h"       // NOLINT
 #include "RTMediaMetaKeys.h"   // NOLINT
 #include "RTMediaBuffer.h"     // NOLINT
 #include "rt_message.h"        // NOLINT
@@ -47,21 +47,19 @@ RTSinkAudioALSA::RTSinkAudioALSA() {
     mDeque = deque_create(10);
     RT_ASSERT(RT_NULL != mDeque);
     mVolManager = new ALSAVolumeManager();
+    mALSASinkCtx = RT_NULL;
 }
 
 RTSinkAudioALSA::~RTSinkAudioALSA() {
     release();
-    mNodeContext = RT_NULL;
 }
 
 RT_RET RTSinkAudioALSA::init(RtMetaData *metaData) {
-    mHDMICard = 1;
-    if (RT_OK != openSoundCard(mHDMICard, 0, metaData)) {
-        RT_LOGE("Fail to openSoundCard");
-    }
+    return RT_OK;
 }
 
 RT_RET RTSinkAudioALSA::release() {
+    onStop();
     delete(mThread);
     mThread = RT_NULL;
 
@@ -70,6 +68,7 @@ RT_RET RTSinkAudioALSA::release() {
     }
 
     if (mVolManager) {
+        delete mVolManager;
         mVolManager = NULL;
     }
 
@@ -147,21 +146,21 @@ RTNodeStub* RTSinkAudioALSA::queryStub() {
     return &rt_sink_audio_alsa;
 }
 
-RT_RET  RTSinkAudioALSA::SetVolume(int user_vol) {
+RT_RET  RTSinkAudioALSA::setVolume(int user_vol) {
     RT_LOGD("SetVolume user_vol = %d", user_vol);
     if (mVolManager) {
-        mVolManager->ISetVolume(user_vol);
+        mVolManager->setVolume(user_vol);
     } else {
         RT_LOGE("mVolManager is NULL");
     }
     return RT_OK;
 }
 
-INT32 RTSinkAudioALSA::GetVolume() {
+INT32 RTSinkAudioALSA::getVolume() {
     int user_vol = 0;
 
     if (mVolManager) {
-        user_vol = mVolManager->IGetVolume();
+        user_vol = mVolManager->getVolume();
     } else {
         RT_LOGE("mVolManager is NULL");
     }
@@ -170,21 +169,21 @@ INT32 RTSinkAudioALSA::GetVolume() {
     return user_vol;
 }
 
-RT_RET RTSinkAudioALSA::Mute(RT_BOOL muted) {
+RT_RET RTSinkAudioALSA::setMute(RT_BOOL muted) {
     RT_LOGD("set Mute muted = %d", muted);
     if (mVolManager) {
-        mVolManager->IMute(muted);
+        mVolManager->setMute(muted);
     } else {
         RT_LOGE("mVolManager is NULL");
     }
     return RT_OK;
 }
 
-RT_BOOL RTSinkAudioALSA::GetMute() {
+RT_BOOL RTSinkAudioALSA::getMute() {
     RT_BOOL muted = RT_FALSE;
 
     if (mVolManager) {
-        muted = mVolManager->IGetMute();
+        muted = mVolManager->getMute();
     } else {
         RT_LOGE("mVolManager is NULL");
     }
@@ -202,7 +201,10 @@ RT_RET RTSinkAudioALSA::onStart() {
 
 RT_RET RTSinkAudioALSA::onStop() {
     RT_RET err = RT_OK;
-    mThread->join();
+    if (mThread) {
+        mThread->requestInterruption();
+        mThread->join();
+    }
     return err;
 }
 
@@ -218,9 +220,8 @@ RT_RET RTSinkAudioALSA::onReset() {
     return RT_OK;
 }
 
-RT_RET RTSinkAudioALSA::openSoundCard(int card, int devices, RtMetaData *metaData) {
+RT_RET RTSinkAudioALSA::openSoundCard(RtMetaData *metaData) {
     RT_RET err = RT_OK;
-    char devicename[10] = "";
 
     mALSASinkCtx = alsa_snd_create(WRITE_DEVICE_NAME, metaData);
 
@@ -255,9 +256,17 @@ RT_RET RTSinkAudioALSA::closeSoundCard() {
     }
 }
 
+RT_VOID RTSinkAudioALSA::usleepData(RTMediaBuffer *input) {
+    INT32 samplerate;
+    INT32 channels;
+    input->getMetaData()->findInt32(kKeyACodecSampleRate, &samplerate);
+    input->getMetaData()->findInt32(kKeyACodecChannels, &channels);
+    RtTime::sleepUs((input->getLength() * 1000000) / (2*channels) / samplerate);
+}
+
 RT_RET RTSinkAudioALSA::runTask() {
     RTMediaBuffer *input = NULL;
-
+    int ret;
     while (THREAD_LOOP == mThread->getState()) {
         RT_RET err = RT_OK;
         if (!input) {
@@ -269,8 +278,18 @@ RT_RET RTSinkAudioALSA::runTask() {
             continue;
         }
 
+        if (!mALSASinkCtx) {
+            if (RT_OK != openSoundCard(input->getMetaData())) {
+                usleepData(input);
+                RT_LOGE("openSoundCard fail!");
+            }
+        }
+
         if (mALSASinkCtx) {
-            alsa_snd_write_data(mALSASinkCtx, reinterpret_cast<void *>(input->getData()), input->getLength());
+            ret = alsa_snd_write_data(mALSASinkCtx, reinterpret_cast<void *>(input->getData()), input->getLength());
+            if (ret != input->getLength()) {
+                usleepData(input);
+            }
         }
 
         INT32 eos = 0;
@@ -288,9 +307,6 @@ RT_RET RTSinkAudioALSA::runTask() {
             mEventLooper->post(eosMsg);
             return RT_OK;
         }
-
-        // dump AVFrame
-        RtTime::sleepMs(5);
 
         input = NULL;
     }

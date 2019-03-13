@@ -219,7 +219,7 @@ RTNodeStub* RTSinkAudioWASAPI::queryStub() {
 }
 
 // override RTNodeAudioSink methods
-RT_RET RTSinkAudioWASAPI::SetVolume(INT32 volume) {
+RT_RET RTSinkAudioWASAPI::setVolume(INT32 volume) {
     RTSinkAudioCtx* ctx = reinterpret_cast<RTSinkAudioCtx*>(mNodeContext);
     RT_ASSERT(RT_NULL != ctx);
 
@@ -228,7 +228,7 @@ RT_RET RTSinkAudioWASAPI::SetVolume(INT32 volume) {
 }
 
 // override RTNodeAudioSink methods
-INT32 RTSinkAudioWASAPI::GetVolume() {
+INT32 RTSinkAudioWASAPI::getVolume() {
     RTSinkAudioCtx* ctx = reinterpret_cast<RTSinkAudioCtx*>(mNodeContext);
     RT_ASSERT(RT_NULL != ctx);
 
@@ -236,7 +236,7 @@ INT32 RTSinkAudioWASAPI::GetVolume() {
 }
 
 // override RTNodeAudioSink methods
-RT_BOOL RTSinkAudioWASAPI::GetMute() {
+RT_BOOL RTSinkAudioWASAPI::getMute() {
     RTSinkAudioCtx* ctx = reinterpret_cast<RTSinkAudioCtx*>(mNodeContext);
     RT_ASSERT(RT_NULL != ctx);
 
@@ -244,7 +244,7 @@ RT_BOOL RTSinkAudioWASAPI::GetMute() {
 }
 
 // override RTNodeAudioSink methods
-RT_RET RTSinkAudioWASAPI::Mute(RT_BOOL muted) {
+RT_RET RTSinkAudioWASAPI::setMute(RT_BOOL muted) {
     RTSinkAudioCtx* ctx = reinterpret_cast<RTSinkAudioCtx*>(mNodeContext);
     RT_ASSERT(RT_NULL != ctx);
 

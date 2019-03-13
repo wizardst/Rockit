@@ -34,10 +34,10 @@ class RTNodeAudioSink : public RTNode {
     RTNode  *callback_ptr;
     AudioQueueCodecBuffer  queueCodecBuffer;
 
-    virtual RT_RET  SetVolume(int volume) = 0;
-    virtual INT32   GetVolume() = 0;
-    virtual RT_BOOL GetMute() = 0;
-    virtual RT_RET  Mute(RT_BOOL mute) = 0;
+    virtual RT_RET   setVolume(int volume) = 0;
+    virtual INT32    getVolume() = 0;
+    virtual RT_BOOL  getMute() = 0;
+    virtual RT_RET   setMute(RT_BOOL mute) = 0;
 };
 
 #ifdef  __cplusplus

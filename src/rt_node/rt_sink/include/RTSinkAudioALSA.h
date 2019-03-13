@@ -50,10 +50,10 @@ class RTSinkAudioALSA : public RTNodeAudioSink {
 
  public:
     // override RTNodeAudioSink methods
-    virtual RT_RET   SetVolume(int volume);
-    virtual INT32    GetVolume();
-    virtual RT_BOOL  GetMute();
-    virtual RT_RET   Mute(RT_BOOL muted);
+    virtual RT_RET   setVolume(int volume);
+    virtual INT32    getVolume();
+    virtual RT_BOOL  getMute();
+    virtual RT_RET   setMute(RT_BOOL muted);
 
  protected:
     // override RTNode methods
@@ -64,8 +64,9 @@ class RTSinkAudioALSA : public RTNodeAudioSink {
     virtual RT_RET onReset();
 
  private:
-    RT_RET openSoundCard(int card, int devices, RtMetaData *metadata);
+    RT_RET openSoundCard(RtMetaData *metadata);
     RT_RET closeSoundCard();
+    RT_VOID usleepData(RTMediaBuffer *input);
 
     RT_Deque          *mDeque;
     ALSASinkContext   *mALSASinkCtx;
@@ -75,7 +76,6 @@ class RTSinkAudioALSA : public RTNodeAudioSink {
     RTObjectPool      *mPoolBuffer;
     INT32              mCodecId;
     INT32              mProfile;
-    INT32              mHDMICard;
     UINT32             mSize;
     RT_BOOL            mStart;
     UINT32             mCountPull;

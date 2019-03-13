@@ -40,12 +40,12 @@ class ALSAVolumeManager {
  public:
     ALSAVolumeManager();
     virtual ~ALSAVolumeManager();
-    bool IGetMute();
-    RT_VOID IMute(bool mute);
-    INT32 IGetVolume();
-    RT_VOID  ISetVolume(int user_vol);
+    bool getMute();
+    RT_VOID setMute(bool mute);
+    INT32 getVolume();
+    RT_VOID  setVolume(int user_vol);
     int softVolume(int value, audio_vol_mode mode);
-    RT_VOID  SetVolumeUtil(int user_vol);
+    RT_VOID  setVolumeUtil(int user_vol);
 
  private:
 };

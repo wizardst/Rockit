@@ -154,41 +154,41 @@ RT_RET unit_test_node_audio_decoder_proc() {
                     RT_LOGD("unit_test_node_audio_decoder_proc test counter=%d", counter);
 
                     if (counter == 100) {
-                        is_muted = audiosink->GetMute();
-                        vol = audiosink->GetVolume();
+                        is_muted = audiosink->getMute();
+                        vol = audiosink->getVolume();
                         RT_LOGD("get vol = %d,counter = %d", vol, counter);
                         RT_LOGD("get is_muted = %d,counter = %d", is_muted, counter);
-                        audiosink->SetVolume(40);
+                        audiosink->setVolume(40);
                     }
 
                     if (counter == 400) {
-                        vol = audiosink->GetVolume();
+                        vol = audiosink->getVolume();
                         RT_LOGD("get vol = %d,counter = %d", vol, counter);
-                        audiosink->Mute(true);
-                        is_muted = audiosink->GetMute();
-                        vol = audiosink->GetVolume();
+                        audiosink->setMute(true);
+                        is_muted = audiosink->getMute();
+                        vol = audiosink->getVolume();
                         RT_LOGD("get vol = %d,counter = %d", vol, counter);
                         RT_LOGD("get is_muted = %d,counter = %d", is_muted, counter);
                     }
 
                     if (counter == 600) {
-                        audiosink->Mute(false);
-                        is_muted = audiosink->GetMute();
-                        vol = audiosink->GetVolume();
+                        audiosink->setMute(false);
+                        is_muted = audiosink->getMute();
+                        vol = audiosink->getVolume();
                         RT_LOGD("get vol = %d,counter = %d", vol, counter);
                         RT_LOGD("get is_muted = %d,counter = %d", is_muted, counter);
                     }
 
                     if (counter == 800) {
-                        audiosink->Mute(true);
+                        audiosink->setMute(true);
                         RT_LOGD("get is_muted = %d,counter = %d", is_muted, counter);
                     }
 
                     if (counter == 1000) {
-                        audiosink->Mute(false);
-                        audiosink->SetVolume(10);
-                        is_muted = audiosink->GetMute();
-                        vol = audiosink->GetVolume();
+                        audiosink->setMute(false);
+                        audiosink->setVolume(10);
+                        is_muted = audiosink->getMute();
+                        vol = audiosink->getVolume();
                         RT_LOGD("get vol = %d,counter = %d", vol, counter);
                         RT_LOGD("get is_muted = %d,counter = %d", is_muted, counter);
                     }

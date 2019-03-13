@@ -449,24 +449,27 @@ RT_RET fa_audio_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
                 data_size, frame->channels, frame->nb_samples, frame->pts, ret, frame->format,
                 frame->channel_layout, frame->sample_rate);
 
-        /* TODO(): dst audio params should can be set */
+        /*TODO: check audio info change. just change format*/
         {
             dec_channel_layout =
                 (frame->channel_layout && frame->channels == av_get_channel_layout_nb_channels(frame->channel_layout)) ?
                 frame->channel_layout : av_get_default_channel_layout(frame->channels);
 
-            if (frame->format != fc->mAudioSrc.fmt) {
-                swr_free(&fc->mSwrCtx);
+            if (frame->format != AV_SAMPLE_FMT_S16) {
+                if (fc->mSwrCtx) {
+                    swr_free(&fc->mSwrCtx);
+                }
+
                 fc->mSwrCtx = swr_alloc_set_opts(NULL,
-                                                 dec_channel_layout, AV_SAMPLE_FMT_S16, 44100,
+                                                 dec_channel_layout, AV_SAMPLE_FMT_S16, frame->sample_rate,
                                                  dec_channel_layout, (AVSampleFormat)frame->format, frame->sample_rate,
                                                  0, NULL);
                 if (!fc->mSwrCtx || swr_init(fc->mSwrCtx) < 0) {
                     RT_LOGE(
                            "Cannot create sample rate converter for conversion of "
-                           "%d Hz %s %d channels to %d Hz %s %d channels!\n",
-                            frame->sample_rate, av_get_sample_fmt_name(AVSampleFormat(frame->format)), frame->channels,
-                            44100, av_get_sample_fmt_name(AV_SAMPLE_FMT_S16), 2);
+                           "%s  to  %s\n",
+                            av_get_sample_fmt_name(AVSampleFormat(frame->format)),
+                            av_get_sample_fmt_name(AV_SAMPLE_FMT_S16));
                     swr_free(&fc->mSwrCtx);
                     return RT_ERR_UNKNOWN;
                 }
@@ -496,6 +499,8 @@ RT_RET fa_audio_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
 
         buffer->setRange(0, data_size);
         meta->setInt64(kKeyFramePts, frame->pts);
+        meta->setInt32(kKeyACodecChannels, frame->channels);
+        meta->setInt32(kKeyACodecSampleRate, frame->sample_rate);
     }
     if (ret == AVERROR_EOF) {
         RT_LOGE("reach EOS!");

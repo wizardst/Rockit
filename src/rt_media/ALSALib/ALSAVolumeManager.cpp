@@ -33,7 +33,7 @@ ALSAVolumeManager::ALSAVolumeManager() {
 ALSAVolumeManager::~ALSAVolumeManager() {
 }
 
-RT_VOID  ALSAVolumeManager::SetVolumeUtil(int user_vol) {
+RT_VOID  ALSAVolumeManager::setVolumeUtil(int user_vol) {
     double k, audio_vol;
 
     user_vol = check_range(user_vol, USER_VOL_MIN, USER_VOL_MAX);
@@ -67,15 +67,15 @@ int ALSAVolumeManager::softVolume(int value, audio_vol_mode mode) {
     return ret;
 }
 
-RT_VOID  ALSAVolumeManager::ISetVolume(int user_vol) {
+RT_VOID  ALSAVolumeManager::setVolume(int user_vol) {
     if (user_volume.is_mute) {
        RT_LOGD("Cannot setVolume, Now volume is muted = %d", user_volume.is_mute);
     } else {
-       SetVolumeUtil(user_vol);
+       setVolumeUtil(user_vol);
     }
 }
 
-INT32 ALSAVolumeManager::IGetVolume() {
+INT32 ALSAVolumeManager::getVolume() {
     double k, offset, audio_vol;
     int user_vol = 0;
 
@@ -84,7 +84,7 @@ INT32 ALSAVolumeManager::IGetVolume() {
     return user_vol;
 }
 
-RT_VOID ALSAVolumeManager::IMute(bool mute) {
+RT_VOID ALSAVolumeManager::setMute(bool mute) {
     if (mute && !user_volume.is_mute) {
         user_volume.is_mute = true;
 
@@ -92,11 +92,11 @@ RT_VOID ALSAVolumeManager::IMute(bool mute) {
 
     } else if (!mute && user_volume.is_mute) {
         /* set volume will unmute */
-        SetVolumeUtil(0);
+        setVolumeUtil(0);
     }
 }
 
-bool ALSAVolumeManager::IGetMute() {
+bool ALSAVolumeManager::getMute() {
     return user_volume.is_mute;
 }
 
