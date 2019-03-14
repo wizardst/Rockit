@@ -121,8 +121,12 @@ RT_RET RTNodeBus::autoBuild(RTMediaUri* mediaUri) {
         RT_LOGE("fail to find and init node-demuxer");
         return RT_ERR_NULL_PTR;
     }
+    return RT_OK;
+}
 
+RT_RET RTNodeBus::autoBuildCodecSink() {
     // create [codecs] by meta from demxuer
+    RT_LOGD("RTNodeBus::autoBuildCodecSink");
     RTNode *codec_v = bus_find_and_add_codec(this, mBusCtx->mDemuxer, \
                                        RTTRACK_TYPE_VIDEO, BUS_LINE_VIDEO);
     nodeChainAppend(codec_v, BUS_LINE_VIDEO);
@@ -150,8 +154,7 @@ RT_RET RTNodeBus::autoBuild(RTMediaUri* mediaUri) {
     nodeChainDumper(BUS_LINE_VIDEO);
     nodeChainDumper(BUS_LINE_AUDIO);
     nodeChainDumper(BUS_LINE_SUBTE);
-
-    return RT_OK;
+    RT_LOGD("RTNodeBus::autoBuildCodecSink OUT");
 }
 
 RTNode* RTNodeBus::getRootNode(BUS_LINE_TYPE lType) {
@@ -404,23 +407,33 @@ RTNode* bus_find_and_add_demuxer(RTNodeBus *pNodeBus, RTMediaUri *setting) {
 
 RTNode* bus_find_and_add_codec(RTNodeBus *pNodeBus, RTNode *demuxer, \
                          RTTrackType tType, BUS_LINE_TYPE lType) {
-    if ((RT_NULL == pNodeBus) || (RT_NULL == demuxer)) {
+    if (RT_NULL == pNodeBus) {
         RT_LOGE("%-16s -> invalid demuxer, can't create codec", mBusLineNames[lType].name);
         return RT_NULL;
     }
-    RTNodeDemuxer *pDemuxer = reinterpret_cast<RTNodeDemuxer*>(demuxer);
-    INT32       track_idx   = pDemuxer->queryTrackUsed(tType);
+
     RtMetaData *node_meta   = RT_NULL;
     RTNodeStub *node_stub   = RT_NULL;
     RTNode     *node_codec  = RT_NULL;
 
-    if (BUS_LINE_AUDIO == lType) {
-        RT_LOGE("%-16s -> audio track (id=%d)", mBusLineNames[lType].name, track_idx);
-    }
+    if (RT_NULL != demuxer) {
+        RTNodeDemuxer *pDemuxer = reinterpret_cast<RTNodeDemuxer*>(demuxer);
+        INT32       track_idx   = pDemuxer->queryTrackUsed(tType);
+        if (BUS_LINE_AUDIO == lType) {
+            RT_LOGE("%-16s -> audio track (id=%d)", mBusLineNames[lType].name, track_idx);
+        }
 
-    if (track_idx >= 0) {
-        node_meta = pDemuxer->queryTrackMeta(track_idx, tType);
-        rt_utils_dump_track(node_meta);
+        if (track_idx >= 0) {
+            node_meta = pDemuxer->queryTrackMeta(track_idx, tType);
+            rt_utils_dump_track(node_meta);
+        }
+    } else {
+        node_meta = new RtMetaData();
+        node_meta->setInt32(kKeyCodecByePass, 1);
+        node_meta->setInt32(kKeyCodecType, tType);
+        node_meta->setInt32(kKeyCodecID, RT_VIDEO_ID_AVC);
+        node_meta->setInt32(kKeyVCodecWidth, 1280);
+        node_meta->setInt32(kKeyVCodecHeight, 720);
     }
 
     if (RT_NULL != node_meta) {
@@ -436,7 +449,7 @@ RTNode* bus_find_and_add_codec(RTNodeBus *pNodeBus, RTNode *demuxer, \
         RTNodeAdapter::init(node_codec, node_meta);
         pNodeBus->registerNode(node_codec);
     } else {
-        RT_LOGE("%-16s -> invalid codec(track=%d)", mBusLineNames[lType].name, track_idx);
+        RT_LOGE("%-16s -> invalid codec()", mBusLineNames[lType].name);
     }
     return node_codec;
 }

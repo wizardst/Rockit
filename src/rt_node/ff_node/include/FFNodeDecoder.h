@@ -82,6 +82,7 @@ class FFNodeDecoder : public RTNodeCodec {
     UINT32               mCountPull;
     UINT32               mCountPush;
     RT_BOOL              mUsePool;
+    RT_BOOL              mByPass;
 };
 
 extern struct RTNodeStub ff_node_decoder;

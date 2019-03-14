@@ -56,6 +56,7 @@ class RTNodeBus {
 
     /* use metadata to init node_bus */
     RT_RET      autoBuild(RTMediaUri* mediaUri);
+    RT_RET      autoBuildCodecSink();
     RT_RET      releaseNodes();
     RTNode*     getRootNode(BUS_LINE_TYPE lType);
     RT_RET      excuteCommand(RT_NODE_CMD cmd, RtMetaData *option = RT_NULL);

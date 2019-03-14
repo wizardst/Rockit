@@ -183,6 +183,7 @@ RT_RET RTNDKNodePlayer::prepare() {
         RTStateUtil::dumpStateError(curState, __FUNCTION__);
         return RT_OK;
     }
+    RT_RET err = mNodeBus->autoBuildCodecSink();
 
     setCurState(RT_STATE_PREPARING);
 

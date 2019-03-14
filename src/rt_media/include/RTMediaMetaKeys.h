@@ -37,6 +37,7 @@ enum {
     kKeyCodecBitrate     = MKTAG('c', 'b', 'i', 't'),     // INT64
     kKeyCodecExtraData      = MKTAG('v', 'd', 'a', 't'),  // void *
     kKeyCodecExtraSize      = MKTAG('v', 's', 'i', 'z'),  // INT32
+    kKeyCodecByePass     = MKTAG('c', 'b', 'p', 's'),  // INT32
 
     /* video track features*/
     kKeyVCodecWidth          = MKTAG('v', 'w', 'i', 'd'),

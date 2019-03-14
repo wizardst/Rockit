@@ -68,6 +68,7 @@ FFNodeDecoder::FFNodeDecoder()
     mUsedInputPort    = RT_NULL;
     mUnusedOutputPort = RT_NULL;
     mUsedOutputPort   = RT_NULL;
+    mByPass           = RT_FALSE;
     mUnusedInputPort  = new RTObjectPool(allocInputBuffer, MAX_INPUT_BUFFER_COUNT);
     mUsedInputPort    = new RTObjectPool(NULL, MAX_INPUT_BUFFER_COUNT);
     mUnusedOutputPort = new RTObjectPool(allocOutputBuffer, MAX_OUTPUT_BUFFER_COUNT);
@@ -90,6 +91,8 @@ RT_RET FFNodeDecoder::init(RtMetaData *metadata) {
         RT_LOGE("track type is unset!!");
         return RT_ERR_UNKNOWN;
     }
+    metadata->findInt32(kKeyCodecByePass, reinterpret_cast<INT32 *>(&mByPass));
+    RT_LOGD("FFNodeDecoder::init bypass  %d", mByPass);
 
     mFFCodec = fa_decode_create(metadata, mTrackType);
     if (!mFFCodec) {
@@ -284,24 +287,32 @@ RT_RET FFNodeDecoder::runTask() {
             continue;
         }
 
-        RT_LOGD_IF(DEBUG_FLAG, "input and output ready, go to decode!");
-        err = fa_decode_send_packet(mFFCodec, input);
-        if (err) {
-            if (err == RT_ERR_TIMEOUT) {
-                input = NULL;
-            }
-            continue;
-        } else {
+        if (mByPass == RT_TRUE) {
+            memcpy(output->getData(), input->getData(), output->getSize());
             mUnusedInputPort->returnObj(input);
             input = NULL;
-        }
-        err = fa_decode_get_frame(mFFCodec, output);
-        if (err) {
-            continue;
+            mUsedOutputPort->returnObj(output);
+            output = NULL;
         } else {
-            if (output->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
-                mUsedOutputPort->returnObj(output);
-                output = NULL;
+            RT_LOGD_IF(DEBUG_FLAG, "input and output ready, go to decode!");
+            err = fa_decode_send_packet(mFFCodec, input);
+            if (err) {
+                if (err == RT_ERR_TIMEOUT) {
+                    input = NULL;
+                }
+                continue;
+            } else {
+                mUnusedInputPort->returnObj(input);
+                input = NULL;
+            }
+            err = fa_decode_get_frame(mFFCodec, output);
+            if (err) {
+                continue;
+            } else {
+                if (output->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
+                    mUsedOutputPort->returnObj(output);
+                    output = NULL;
+                }
             }
         }
     }
