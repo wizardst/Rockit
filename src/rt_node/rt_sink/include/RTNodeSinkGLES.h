@@ -31,14 +31,14 @@ class RTNodeSinkGLES : public RTNode {
 
  public:
     // override RTNode public methods
-    virtual RT_RET init(RtMetaData *metadata);
+    virtual RT_RET init(RtMetaData *metaData);
     virtual RT_RET release();
 
     // SinkDisplay is consumer only, not producer
-    virtual RT_RET pullBuffer(RTMediaBuffer **media_buf);
-    virtual RT_RET pushBuffer(RTMediaBuffer*  media_buf);
+    virtual RT_RET pullBuffer(RTMediaBuffer **mediaBuf);
+    virtual RT_RET pushBuffer(RTMediaBuffer*  mediaBuf);
 
-    virtual RT_RET runCmd(RT_NODE_CMD cmd, RtMetaData *metadata);
+    virtual RT_RET runCmd(RT_NODE_CMD cmd, RtMetaData *metaData);
     virtual RT_RET setEventLooper(RTMsgLooper* eventLooper);
 
     virtual RtMetaData* queryFormat(RTPortType port);

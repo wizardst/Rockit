@@ -29,13 +29,14 @@
 #endif
 #define DEBUG_FLAG 0x0
 
-#include "RTSinkAudioALSA.h" // NOLINT
-#include "rt_metadata.h" // NOLINT
-#include "RTMediaMetaKeys.h" // NOLINT
-#include "RTMediaBuffer.h"
+#include "RTSinkAudioALSA.h"   // NOLINT
+#include "rt_metaData.h"       // NOLINT
+#include "RTMediaMetaKeys.h"   // NOLINT
+#include "RTMediaBuffer.h"     // NOLINT
+#include "rt_message.h"        // NOLINT
 
-void* sink_audio_alsa_loop(void* ptr_node) {
-    RTSinkAudioALSA* audiosink = reinterpret_cast<RTSinkAudioALSA*>(ptr_node);
+void* sink_audio_alsa_loop(void* ptrNode) {
+    RTSinkAudioALSA* audiosink = reinterpret_cast<RTSinkAudioALSA*>(ptrNode);
     audiosink->runTask();
     return RT_NULL;
 }
@@ -53,9 +54,9 @@ RTSinkAudioALSA::~RTSinkAudioALSA() {
     mNodeContext = RT_NULL;
 }
 
-RT_RET RTSinkAudioALSA::init(RtMetaData *metadata) {
+RT_RET RTSinkAudioALSA::init(RtMetaData *metaData) {
     mHDMICard = 1;
-    if (RT_OK != openSoundCard(mHDMICard, 0, metadata)) {
+    if (RT_OK != openSoundCard(mHDMICard, 0, metaData)) {
         RT_LOGE("Fail to openSoundCard");
     }
 }
@@ -76,13 +77,13 @@ RT_RET RTSinkAudioALSA::release() {
     return RT_OK;
 }
 
-RT_RET RTSinkAudioALSA::pullBuffer(RTMediaBuffer** media_buf) {
-    *media_buf = RT_NULL;
+RT_RET RTSinkAudioALSA::pullBuffer(RTMediaBuffer** mediaBuf) {
+    *mediaBuf = RT_NULL;
     RT_RET  err = RT_ERR_NULL_PTR;
     RT_DequeEntry entry = deque_pop(mDeque);
 
     if (RT_NULL != entry.data) {
-        *media_buf = reinterpret_cast<RTMediaBuffer*>(entry.data);
+        *mediaBuf = reinterpret_cast<RTMediaBuffer*>(entry.data);
         err = RT_OK;
     } else {
         err = RT_ERR_NULL_PTR;
@@ -91,23 +92,23 @@ RT_RET RTSinkAudioALSA::pullBuffer(RTMediaBuffer** media_buf) {
     return err;
 }
 
-RT_RET RTSinkAudioALSA::pushBuffer(RTMediaBuffer* media_buf) {
+RT_RET RTSinkAudioALSA::pushBuffer(RTMediaBuffer* mediaBuf) {
     mCountPush++;
     RT_RET  err = RT_ERR_NULL_PTR;
 
-    if (RT_NULL != media_buf) {
-        err = deque_push_tail(mDeque, media_buf);
+    if (RT_NULL != mediaBuf) {
+        err = deque_push_tail(mDeque, mediaBuf);
     }
 
     return err;
 }
 
-RT_RET RTSinkAudioALSA::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
+RT_RET RTSinkAudioALSA::runCmd(RT_NODE_CMD cmd, RtMetaData *metaData) {
     RT_RET err = RT_OK;
 
     switch (cmd) {
     case RT_NODE_CMD_INIT:
-        err = this->init(metadata);
+        err = this->init(metaData);
         break;
     case RT_NODE_CMD_START:
         err = this->onStart();
@@ -217,11 +218,11 @@ RT_RET RTSinkAudioALSA::onReset() {
     return RT_OK;
 }
 
-RT_RET RTSinkAudioALSA::openSoundCard(int card, int devices, RtMetaData *metadata) {
+RT_RET RTSinkAudioALSA::openSoundCard(int card, int devices, RtMetaData *metaData) {
     RT_RET err = RT_OK;
     char devicename[10] = "";
 
-    mALSASinkCtx = alsa_snd_create(WRITE_DEVICE_NAME, metadata);
+    mALSASinkCtx = alsa_snd_create(WRITE_DEVICE_NAME, metaData);
 
     if (RT_NULL == mALSASinkCtx) {
         RT_LOGE("Fail to alsa_snd_create");
@@ -272,10 +273,20 @@ RT_RET RTSinkAudioALSA::runTask() {
             alsa_snd_write_data(mALSASinkCtx, reinterpret_cast<void *>(input->getData()), input->getLength());
         }
 
+        INT32 eos = 0;
+        input->getMetaData()->findInt32(kKeyFrameEOS, &eos);
+
         if (callback_ptr) {
             queueCodecBuffer(callback_ptr, input);
         } else {
             RT_LOGE("callback_ptr is NULL!");
+        }
+
+        if (eos && (RT_NULL != mEventLooper)) {
+            RT_LOGD("render EOS Flag, post EOS message");
+            RTMessage* eosMsg = new RTMessage(RT_MEDIA_PLAYBACK_COMPLETE, nullptr, nullptr);
+            mEventLooper->post(eosMsg);
+            return RT_OK;
         }
 
         // dump AVFrame

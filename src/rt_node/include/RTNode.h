@@ -59,15 +59,15 @@ class RTNode {
  public:
     virtual ~RTNode() {}
     // core api for media plugins
-    virtual RT_RET init(RtMetaData *metadata) = 0;
+    virtual RT_RET init(RtMetaData *metaData) = 0;
     virtual RT_RET release() = 0;
 
     // pull buffer from last node, then push to next node
-    virtual RT_RET pullBuffer(RTMediaBuffer** data) = 0;
-    virtual RT_RET pushBuffer(RTMediaBuffer*  data) = 0;
+    virtual RT_RET pullBuffer(RTMediaBuffer** mediaBuf) = 0;
+    virtual RT_RET pushBuffer(RTMediaBuffer*  mediaBuf) = 0;
 
     // use the command to distribute control flow
-    virtual RT_RET runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) = 0;
+    virtual RT_RET runCmd(RT_NODE_CMD cmd, RtMetaData *metaData) = 0;
 
     // notify event for node-bus
     virtual RT_RET setEventLooper(RTMsgLooper* eventLooper) = 0;

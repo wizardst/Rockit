@@ -34,13 +34,13 @@ class FFNodeDemuxer : public RTNodeDemuxer {
     RT_RET runTask();
 
     // override RTNode public methods
-    virtual RT_RET init(RtMetaData *metadata);
+    virtual RT_RET init(RtMetaData *metaData);
     virtual RT_RET release();
 
-    virtual RT_RET pullBuffer(RTMediaBuffer** packet);
-    virtual RT_RET pushBuffer(RTMediaBuffer* data);
+    virtual RT_RET pullBuffer(RTMediaBuffer** mediaBuf);
+    virtual RT_RET pushBuffer(RTMediaBuffer*  mediaBuf);
 
-    virtual RT_RET runCmd(RT_NODE_CMD cmd, RtMetaData *metadata);
+    virtual RT_RET runCmd(RT_NODE_CMD cmd, RtMetaData *metaData);
     virtual RT_RET setEventLooper(RTMsgLooper* eventLooper);
 
     virtual RtMetaData* queryFormat(RTPortType port);

@@ -30,7 +30,7 @@
 #define DEBUG_FLAG 0x0
 
 #include "RTSinkAudioWASAPI.h" // NOLINT
-#include "rt_metadata.h"       // NOLINT
+#include "rt_metaData.h"       // NOLINT
 #include "rt_message.h"        // NOLINT
 #include "RTMediaMetaKeys.h"   // NOLINT
 #include "RTMediaBuffer.h"     // NOLINT
@@ -46,8 +46,8 @@ typedef struct _RTSinkAudioCtx {
 } RTSinkAudioCtx;
 
 
-void* sink_audio_was_loop(void* ptr_node) {
-    RTSinkAudioWASAPI* audiosink = reinterpret_cast<RTSinkAudioWASAPI*>(ptr_node);
+void* sink_audio_was_loop(void* ptrNode) {
+    RTSinkAudioWASAPI* audiosink = reinterpret_cast<RTSinkAudioWASAPI*>(ptrNode);
     audiosink->runTask();
     return RT_NULL;
 }
@@ -75,9 +75,9 @@ RTSinkAudioWASAPI::~RTSinkAudioWASAPI() {
 }
 
 // override RTNode methods
-RT_RET RTSinkAudioWASAPI::init(RtMetaData *metadata) {
+RT_RET RTSinkAudioWASAPI::init(RtMetaData *metaData) {
     RTSinkAudioCtx* ctx = reinterpret_cast<RTSinkAudioCtx*>(mNodeContext);
-    ctx->mMetaInput = metadata;
+    ctx->mMetaInput = metaData;
     return RT_OK;
 }
 
@@ -133,11 +133,11 @@ RT_RET RTSinkAudioWASAPI::pushBuffer(RTMediaBuffer* media_buf) {
     return err;
 }
 
-RT_RET RTSinkAudioWASAPI::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
+RT_RET RTSinkAudioWASAPI::runCmd(RT_NODE_CMD cmd, RtMetaData *metaData) {
     RT_RET err = RT_OK;
     switch (cmd) {
     case RT_NODE_CMD_INIT:
-        err = this->init(metadata);
+        err = this->init(metaData);
         break;
     case RT_NODE_CMD_START:
         err = this->onStart();

@@ -29,17 +29,17 @@
 #ifdef DEBUG_FLAG
 #undef DEBUG_FLAG
 #endif
-#define DEBUG_FLAG 0x1
+#define DEBUG_FLAG 0x0
 
-#include "FFNodeDemuxer.h" // NOLINT
-#include "FFMPEGAdapter.h" // NOLINT
-#include "rt_mem.h" // NOLINT
-#include "rt_array_list.h" // NOLINT
-#include "rt_thread.h" // NOLINT
+#include "FFNodeDemuxer.h"   // NOLINT
+#include "FFMPEGAdapter.h"   // NOLINT
+#include "rt_mem.h"          // NOLINT
+#include "rt_array_list.h"   // NOLINT
+#include "rt_thread.h"       // NOLINT
 #include "RTMediaMetaKeys.h" // NOLINT
-#include "rt_buffer.h" // NOLINT
-#include "rt_metadata.h" // NOLINT
-#include "rt_common.h" // NOLINT
+#include "rt_buffer.h"       // NOLINT
+#include "rt_metadata.h"     // NOLINT
+#include "rt_common.h"       // NOLINT
 
 typedef struct _FFNodeDemuxerCtx {
     FAFormatContext    *mFormatCtx;
@@ -104,14 +104,14 @@ INT32 updateDefaultTrack(FAFormatContext* fa_ctx, RTTrackType tType) {
     return bestIndex;
 }
 
-RT_RET FFNodeDemuxer::init(RtMetaData *metadata) {
+RT_RET FFNodeDemuxer::init(RtMetaData *metaData) {
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
 
     const char *uri;
-    metadata->findCString(kKeyFormatUri, &uri);
+    metaData->findCString(kKeyFormatUri, &uri);
     RT_ASSERT(RT_NULL != uri);
 
-    ctx->mMetaInput = metadata;
+    ctx->mMetaInput = metaData;
     ctx->mFormatCtx = fa_format_open(uri, FLAG_DEMUXER);
     if (RT_NULL == ctx->mFormatCtx) {
         RT_LOGE("demuxer open url err.\n");
@@ -129,30 +129,14 @@ RT_RET FFNodeDemuxer::release() {
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
     RT_ASSERT(RT_NULL != ctx);
 
-    if (ctx->mVideoPktList != RT_NULL) {
-        void* raw_pkt = array_list_get_data(ctx->mVideoPktList, 0);
-        while (RT_NULL != raw_pkt) {
-            array_list_remove_at(ctx->mVideoPktList, 0);
-            fa_format_packet_free(raw_pkt);
-        }
-        array_list_destroy(ctx->mVideoPktList);
-        ctx->mVideoPktList = RT_NULL;
-    }
-
-    if (ctx->mAudioPktList != RT_NULL) {
-        void* raw_pkt = array_list_get_data(ctx->mAudioPktList, 0);
-        while (RT_NULL != raw_pkt) {
-            array_list_remove_at(ctx->mAudioPktList, 0);
-            fa_format_packet_free(raw_pkt);
-        }
-        array_list_destroy(ctx->mAudioPktList);
-        ctx->mAudioPktList = RT_NULL;
-    }
-
     if (ctx->mThread != RT_NULL) {
         delete ctx->mThread;
         ctx->mThread = RT_NULL;
     }
+
+    // @review: code redundancy but logically reasonable
+    // @review: flush video&audio&subtitle packets
+    this->onFlush();
 
     if (ctx->mLockVideoPacket != RT_NULL) {
         delete ctx->mLockVideoPacket;
@@ -173,26 +157,26 @@ RT_RET FFNodeDemuxer::release() {
         ctx->mMetaOutput = RT_NULL;
     }
 
-    if (ctx->mFormatCtx != RT_NULL) {
-        fa_format_close(ctx->mFormatCtx);
-        ctx->mFormatCtx = RT_NULL;
-    }
+    // @review: close av_format of ffmpeg
+    this->onReset();
+
+    // @review: release memory of node context
     rt_safe_free(ctx);
 
     return RT_OK;
 }
 
 /* read/pull RTPacket from NodeDemuxer */
-RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** media_buf) {
+RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** mediaBuf) {
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
     RT_ASSERT(RT_NULL != ctx);
-    RT_ASSERT(RT_NULL != media_buf);
+    RT_ASSERT(RT_NULL != mediaBuf);
 
-    void*       raw_pkt  = RT_NULL;
-    RTPacket    rt_pkt   = {0};
-    RtMetaData *meta = (*media_buf)->getMetaData();
-    RtArrayList *list = RT_NULL;
-    RtMutex *lock = RT_NULL;
+    void*        raw_pkt  = RT_NULL;
+    RTPacket     rt_pkt   = {0};
+    RtMetaData*  meta     = (*mediaBuf)->getMetaData();
+    RtArrayList* pktList  = RT_NULL;
+    RtMutex*     pktLock  = RT_NULL;
     RTTrackType type;
     if (!meta->findInt32(kKeyCodecType, reinterpret_cast<INT32*>(&type))) {
         RT_LOGE("track  type is unset!!");
@@ -200,38 +184,31 @@ RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** media_buf) {
     }
 
     if (type == RTTRACK_TYPE_VIDEO) {
-        lock = ctx->mLockVideoPacket;
-        list = ctx->mVideoPktList;
+        pktLock = ctx->mLockVideoPacket;
+        pktList = ctx->mVideoPktList;
     } else if (type == RTTRACK_TYPE_AUDIO) {
-        lock = ctx->mLockAudioPacket;
-        list = ctx->mAudioPktList;
+        pktLock = ctx->mLockAudioPacket;
+        pktList = ctx->mAudioPktList;
     }
-    raw_pkt = array_list_get_data(list, 0);
+    raw_pkt = array_list_get_data(pktList, 0);
     if (RT_NULL == raw_pkt) {
         if (ctx->mEosFlag) {
             RT_LOGD("receive EOS buffer.");
-            (*media_buf)->setData(RT_NULL, 0);
+            (*mediaBuf)->setData(RT_NULL, 0);
             meta->setInt32(kKeyFrameEOS, 1);
             return RT_OK;
         }
         return RT_ERR_UNKNOWN;
     } else {
-        RtMutex::RtAutolock autoLock(lock);
-        if (RT_NULL != *media_buf) {
+        RtMutex::RtAutolock autoLock(pktLock);
+        if (RT_NULL != *mediaBuf) {
             fa_format_packet_parse(raw_pkt, &rt_pkt);
-            array_list_remove_at(list, 0);
+            array_list_remove_at(pktList, 0);
 
-            // @TODO design proper filter method
-          //  if (rt_pkt.mTrackIndex == 0x1) {
-                RT_LOGD("RTPacket(ptr=0x%p, size=%d) MediaBuffer=0x%p type: %d", \
-                          rt_pkt.mRawPtr, rt_pkt.mSize, *media_buf, type);
-                (*media_buf)->setData(rt_pkt.mData, rt_pkt.mSize);
-                rt_mediabuf_from_packet(*media_buf, &rt_pkt);
-         //   } else {
-                // @TODO Filter Video Only.
-         //       fa_format_packet_free(raw_pkt);
-          //      return RT_ERR_BAD;
-        //    }
+            // RT_LOGD("RTPacket(ptr=0x%p, size=%d) MediaBuffer=0x%p type: %d", \
+            //            rt_pkt.mRawPtr, rt_pkt.mSize, *mediaBuf, type);
+            (*mediaBuf)->setData(rt_pkt.mData, rt_pkt.mSize);
+            rt_mediabuf_from_packet(*mediaBuf, &rt_pkt);
         }
         return RT_OK;
     }
@@ -242,11 +219,11 @@ RT_RET FFNodeDemuxer::pushBuffer(RTMediaBuffer* data) {
     return RT_ERR_UNIMPLIMENTED;
 }
 
-RT_RET FFNodeDemuxer::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
-    // RT_LOGD(" cmd = %d; metadata = %p", cmd, metadata);
+RT_RET FFNodeDemuxer::runCmd(RT_NODE_CMD cmd, RtMetaData *metaData) {
+    // RT_LOGD(" cmd = %d; metaData = %p", cmd, metaData);
     switch (cmd) {
     case RT_NODE_CMD_INIT:
-        this->init(metadata);
+        this->init(metaData);
         break;
     case RT_NODE_CMD_START:
         this->onStart();
@@ -364,6 +341,7 @@ RT_RET FFNodeDemuxer::onStart() {
 }
 
 RT_RET FFNodeDemuxer::onStop() {
+    RT_LOGD_IF(DEBUG_FLAG, "call, stop");
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
     ctx->mEosFlag = RT_TRUE;
     ctx->mThread->requestInterruption();
@@ -377,7 +355,7 @@ RT_RET FFNodeDemuxer::onStop() {
         ctx->mFormatCtx = RT_NULL;
     }
 
-    avformat_network_deinit();
+    RT_LOGD_IF(DEBUG_FLAG, "done, stop");
     return RT_OK;
 }
 
@@ -386,6 +364,18 @@ RT_RET FFNodeDemuxer::onPause() {
 }
 
 RT_RET FFNodeDemuxer::onReset() {
+    RT_LOGD_IF(DEBUG_FLAG, "call, reset");
+    FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
+    RT_ASSERT(RT_NULL != ctx);
+
+    // @review: code redundancy but logically reasonable
+    // @review: flush video&audio&subtitle packets
+    this->onFlush();
+    if (ctx->mFormatCtx != RT_NULL) {
+        fa_format_close(ctx->mFormatCtx);
+        ctx->mFormatCtx = RT_NULL;
+    }
+    RT_LOGD_IF(DEBUG_FLAG, "done, reset");
     return RT_OK;
 }
 
@@ -410,6 +400,8 @@ RT_RET FFNodeDemuxer::onFlush() {
             array_list_remove_at(ctx->mAudioPktList, 0);
         }
     }
+    RT_LOGD_IF(DEBUG_FLAG, "done, flush");
+
     return RT_OK;
 }
 

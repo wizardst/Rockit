@@ -118,6 +118,7 @@ void fa_format_close(FAFormatContext* fc) {
     default:
         break;
     }
+    avformat_network_deinit();
     rt_safe_free(fc);
 }
 

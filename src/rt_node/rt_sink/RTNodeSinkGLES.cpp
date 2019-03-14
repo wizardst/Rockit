@@ -37,16 +37,16 @@ typedef struct _RTSinkGLESCtx {
     UINT32              mLoop;
 } RTSinkGLESCtx;
 
-void* render_loop(void* ptr_node) {
-    RTNodeSinkGLES* sink = reinterpret_cast<RTNodeSinkGLES*>(ptr_node);
+void* render_loop(void* prtNode) {
+    RTNodeSinkGLES* sink = reinterpret_cast<RTNodeSinkGLES*>(prtNode);
     if (RT_NULL != sink) {
         sink->runTask();
     }
     return RT_NULL;
 }
 
-void FrameUpdate(void* ptr_node, RT_FLOAT interval) {
-    RTNodeSinkGLES* sink = reinterpret_cast<RTNodeSinkGLES*>(ptr_node);
+void FrameUpdate(void* prtNode, RT_FLOAT interval) {
+    RTNodeSinkGLES* sink = reinterpret_cast<RTNodeSinkGLES*>(prtNode);
     if (RT_NULL != sink) {
         sink->onFireFrame();
     }
@@ -89,12 +89,12 @@ RTNodeSinkGLES::~RTNodeSinkGLES() {
 
 // override RTSinkDisplay public methods
 RT_RET RTNodeSinkGLES::onFireFrame() {
-    RTMediaBuffer*     media_buf = RT_NULL;
+    RTMediaBuffer*     mediaBuf = RT_NULL;
     RTFrame            rt_frame  = {0};
     RTSinkGLESCtx*  ctx       = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
-    pullBuffer(&media_buf);
-    if (RT_NULL != media_buf) {
-        rt_mediabuf_goto_frame(media_buf, &rt_frame);
+    pullBuffer(&mediaBuf);
+    if (RT_NULL != mediaBuf) {
+        rt_mediabuf_goto_frame(mediaBuf, &rt_frame);
         // RT_LOGE("RTFrame(%p) %dx%d", rt_frame.mData, rt_frame.mFrameW, rt_frame.mFrameH);
         ctx->mGLApp->updateFrame(reinterpret_cast<unsigned char*>(rt_frame.mData), rt_frame.mFrameW, rt_frame.mFrameH);
         return RT_OK;
@@ -103,11 +103,11 @@ RT_RET RTNodeSinkGLES::onFireFrame() {
 }
 
 // override RTNode public methods
-RT_RET RTNodeSinkGLES::init(RtMetaData *metadata) {
+RT_RET RTNodeSinkGLES::init(RtMetaData *metaData) {
     INT32 video_w = 0;
     INT32 video_h = 0;
     RTSinkGLESCtx* ctx = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
-    ctx->mMetaInput = metadata;
+    ctx->mMetaInput = metaData;
     ctx->mMetaInput->findInt32(kKeyFrameW, &video_w);
     ctx->mMetaInput->findInt32(kKeyFrameH, &video_h);
 
@@ -137,40 +137,40 @@ RT_RET RTNodeSinkGLES::release() {
     return RT_OK;
 }
 
-RT_RET RTNodeSinkGLES::pullBuffer(RTMediaBuffer **media_buf) {
-    // make media_buf RT_NULL only.NodeSink doesn't allocate buffer
-    *media_buf  = RT_NULL;
-    RT_RET  err = RT_ERR_NULL_PTR;
+RT_RET RTNodeSinkGLES::pullBuffer(RTMediaBuffer **mediaBuf) {
+    // make mediaBuf RT_NULL only.NodeSink doesn't allocate buffer
+    *mediaBuf  = RT_NULL;
+    RT_RET err = RT_ERR_NULL_PTR;
     RTSinkGLESCtx*  ctx   = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
     RT_DequeEntry   entry = deque_pop(ctx->mDequePacket);
     if (RT_NULL != entry.data) {
-         *media_buf = reinterpret_cast<RTMediaBuffer*>(entry.data);
+         *mediaBuf = reinterpret_cast<RTMediaBuffer*>(entry.data);
          err = RT_OK;
     }
     return err;
 }
 
-RT_RET RTNodeSinkGLES::pushBuffer(RTMediaBuffer*  media_buf) {
+RT_RET RTNodeSinkGLES::pushBuffer(RTMediaBuffer*  mediaBuf) {
     RTFrame rt_frame;
     RT_RET  err = RT_ERR_NULL_PTR;
     RTSinkGLESCtx* ctx = reinterpret_cast<RTSinkGLESCtx*>(mNodeContext);
     RT_ASSERT(RT_NULL != ctx);
 
-    if (RT_NULL != media_buf) {
-        rt_mediabuf_goto_frame(media_buf, &rt_frame);
+    if (RT_NULL != mediaBuf) {
+        rt_mediabuf_goto_frame(mediaBuf, &rt_frame);
         RT_LOGE("rt_frame(%p - %dx%d)\n", rt_frame.mData,
                   rt_frame.mFrameW,  rt_frame.mFrameH);
-        err = deque_push_tail(ctx->mDequePacket, media_buf);
+        err = deque_push_tail(ctx->mDequePacket, mediaBuf);
     }
 
     return err;
 }
 
-RT_RET RTNodeSinkGLES::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
+RT_RET RTNodeSinkGLES::runCmd(RT_NODE_CMD cmd, RtMetaData *metaData) {
     RT_RET err = RT_OK;
     switch (cmd) {
     case RT_NODE_CMD_INIT:
-        err = this->init(metadata);
+        err = this->init(metaData);
         break;
     case RT_NODE_CMD_START:
         err = this->onStart();
