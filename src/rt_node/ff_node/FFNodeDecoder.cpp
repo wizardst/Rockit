@@ -284,7 +284,7 @@ RT_RET FFNodeDecoder::runTask() {
             continue;
         }
 
-        RT_LOGD("input and output ready, go to decode!");
+        RT_LOGD_IF(DEBUG_FLAG, "input and output ready, go to decode!");
         err = fa_decode_send_packet(mFFCodec, input);
         if (err) {
             if (err == RT_ERR_TIMEOUT) {

@@ -35,7 +35,7 @@
 #ifdef DEBUG_FLAG
 #undef DEBUG_FLAG
 #endif
-#define DEBUG_FLAG 0x1
+#define DEBUG_FLAG 0x0
 
 FACodecContext* fa_video_decode_create(RtMetaData *meta) {
     INT32 err = 0;
@@ -313,7 +313,7 @@ static RT_RET fa_init_av_packet(AVPacket *pkt, RTMediaBuffer *buffer) {
         pkt->dts = AV_NOPTS_VALUE;
     }
 
-    RT_LOGD("pkt->data: %p, size: %d pts: %lld", pkt->data, pkt->size, pkt->pts);
+    RT_LOGD_IF(DEBUG_FLAG, "pkt->data: %p, size: %d pts: %lld", pkt->data, pkt->size, pkt->pts);
 
     return RT_OK;
 }
@@ -444,10 +444,8 @@ RT_RET fa_audio_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
         data_size = av_samples_get_buffer_size(NULL, frame->channels,
                 frame->nb_samples, (enum AVSampleFormat)frame->format, 1);
 
-        RT_LOGD("sample data size:%d, channels: %d, nb_samples:%d, timstamps: %lld ret: %d, frame->format: %d"
-                "channel_layout: %lld, sample_rate:%d",
-                data_size, frame->channels, frame->nb_samples, frame->pts, ret, frame->format,
-                frame->channel_layout, frame->sample_rate);
+        RT_LOGD_IF(DEBUG_FLAG, "pcm_data(size:%d, channels:%d, nb_samples:%d,timstamps:%lld,sample_rate:%d)",
+                data_size, frame->channels, frame->nb_samples, frame->pts, frame->sample_rate);
 
         /*TODO: check audio info change. just change format*/
         {

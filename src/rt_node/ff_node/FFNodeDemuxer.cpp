@@ -427,11 +427,11 @@ RT_RET FFNodeDemuxer::runTask() {
             if (stream_index == ctx->mIndexVideo) {
                 RtMutex::RtAutolock autoLock(ctx->mLockVideoPacket);
                 array_list_add(ctx->mVideoPktList, raw_pkt);
-                RT_LOGD("read video packet");
+                RT_LOGD_IF(DEBUG_FLAG, "read video packet");
             } else if (stream_index == ctx->mIndexAudio) {
                 RtMutex::RtAutolock autoLock(ctx->mLockAudioPacket);
                 array_list_add(ctx->mAudioPktList, raw_pkt);
-                RT_LOGD("read audio packet");
+                RT_LOGD_IF(DEBUG_FLAG, "read audio packet");
             } else {
                 RT_LOGE("FFPacket(0x%p), track=%d, but select(v=%d,a=%d)",
                          raw_pkt, stream_index, ctx->mIndexVideo, ctx->mIndexAudio);

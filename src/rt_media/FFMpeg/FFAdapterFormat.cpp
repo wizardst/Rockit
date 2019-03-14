@@ -45,6 +45,10 @@ struct FAFormatContext {
 };
 
 static void ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_list vl) {
+    if (level != AV_LOG_ERROR) {
+        return;
+    }
+
     char mesg[1024];
     vsprintf(mesg, fmt, vl);
     size_t len = strlen(mesg);
@@ -56,6 +60,7 @@ static void ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_list v
 }
 
 void fa_ffmpeg_runtime_init() {
+    av_log_set_level(AV_LOG_ERROR);
     av_log_set_callback(ffmpeg_log_callback);
 }
 

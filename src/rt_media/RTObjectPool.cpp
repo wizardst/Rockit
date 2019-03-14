@@ -28,7 +28,7 @@
 #ifdef DEBUG_FLAG
 #undef DEBUG_FLAG
 #endif
-#define DEBUG_FLAG 0x1
+#define DEBUG_FLAG 0x0
 
 RTObjectPool::RTObjectPool(AllocListener listener, UINT32 maxNum, void *listener_ctx) {
     RTObject::trace(this->getName(), this, sizeof(RTObjectPool));

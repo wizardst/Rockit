@@ -263,7 +263,7 @@ RT_BOOL RtMetaData::findData(
         char string_key[8];
         memset(string_key, 0, sizeof(string_key));
         MakeFourCCString(key, string_key);
-        RT_LOGD("find data failed! key: %s", string_key);
+        // RT_LOGD("find data failed! key: %s", string_key);
         return RT_FALSE;
     }
 

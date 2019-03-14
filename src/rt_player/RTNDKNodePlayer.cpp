@@ -36,7 +36,7 @@
 #ifdef DEBUG_FLAG
 #undef DEBUG_FLAG
 #endif
-#define DEBUG_FLAG 0x1
+#define DEBUG_FLAG 0x0
 
 struct NodePlayerContext {
     RTNodeBus*          mNodeBus;
@@ -459,11 +459,9 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
                     INT32 track_index = 0;
                     esPacket->getMetaData()->findInt32(kKeyPacketIndex, &track_index);
 
-                    RT_LOGD("track_index: %d, audio_idx: %d", track_index, audio_idx);
                     if (track_index == audio_idx) {
-                        // UINT8 *data = reinterpret_cast<UINT8 *>(esPacket->getData());
                         UINT32 size = esPacket->getSize();
-                        RT_LOGD("NEW audio MediaBuffer(ptr=0x%p, size=%d)", esPacket, size);
+                        RT_LOGD_IF(DEBUG_FLAG, "audio es-packet(ptr=0x%p, size=%d)", esPacket, size);
                         got_pkt = RT_TRUE;
                     } else {
                         /* pass other packet */
@@ -487,9 +485,7 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
 
             if (frame) {
                 if (frame->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
-                    RT_LOGD("NEW Frame(ptr=0x%p, size=%d)", frame->getData(), frame->getLength());
-                    // char* data = reinterpret_cast<char *>(frame->getData());
-
+                    RT_LOGD_IF(DEBUG_FLAG, "audio frame(ptr=0x%p, size=%d)", frame->getData(), frame->getLength());
                     RTNodeAdapter::pushBuffer(audiosink, frame);
                 }
               //  RTNodeAdapter::queueCodecBuffer(decoder, frame, RT_PORT_OUTPUT);
