@@ -145,9 +145,6 @@
 		<Unit filename="../../src/rt_media/GLRender/RTSpriteVideo.cpp" />
 		<Unit filename="../../src/rt_media/GLRender/RTSpriteVideo.h" />
 		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorBase.cpp" />
-		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorDrm.cpp" />
-		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorGralloc.cpp" />
-		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorIon.cpp" />
 		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorMalloc.cpp" />
 		<Unit filename="../../src/rt_media/RTAllocator/RTAllocatorStore.cpp" />
 		<Unit filename="../../src/rt_media/RTBuffer.cpp" />

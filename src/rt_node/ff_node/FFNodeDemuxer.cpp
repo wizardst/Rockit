@@ -138,8 +138,8 @@ RT_RET FFNodeDemuxer::release() {
     }
 
     // @review: code redundancy but logically reasonable
-    // @review: flush video&audio&subtitle packets
-    this->onFlush();
+    // @review: flush video&audio&subtitle packets and close av_format
+    this->onReset();
 
     if (ctx->mLockVideoPacket != RT_NULL) {
         delete ctx->mLockVideoPacket;
@@ -148,6 +148,16 @@ RT_RET FFNodeDemuxer::release() {
     if (ctx->mLockAudioPacket != RT_NULL) {
         delete ctx->mLockAudioPacket;
         ctx->mLockAudioPacket = RT_NULL;
+    }
+
+    if (ctx->mVideoPktList != RT_NULL) {
+        array_list_destroy(ctx->mVideoPktList);
+        ctx->mVideoPktList = RT_NULL;
+    }
+
+    if (ctx->mAudioPktList != RT_NULL) {
+        array_list_destroy(ctx->mAudioPktList);
+        ctx->mAudioPktList = RT_NULL;
     }
 
     if (ctx->mMetaInput != RT_NULL) {
@@ -159,9 +169,6 @@ RT_RET FFNodeDemuxer::release() {
         delete ctx->mMetaOutput;
         ctx->mMetaOutput = RT_NULL;
     }
-
-    // @review: close av_format of ffmpeg
-    this->onReset();
 
     // @review: release memory of node context
     rt_safe_free(ctx);
@@ -265,6 +272,7 @@ RT_RET FFNodeDemuxer::onSeek(RtMetaData *options) {
 
     ctx->mNeedSeek   = 1;
     ctx->mSeekTimeUs = seekTimeUs;
+    return RT_OK;
 }
 
 RT_RET FFNodeDemuxer::setEventLooper(RTMsgLooper* eventLooper) {

@@ -78,37 +78,37 @@ RT_RET RTAllocatorStore::priorAvailLinearAllocator(RtMetaData* config, RTAllocat
 }
 
 RTAllocator *RTAllocatorStore::fetchIonAllocator(RtMetaData *config) {
-    RTAllocator *allocator = NULL;
+    RTAllocator *allocator = RT_NULL;
+    #if OS_LINUX
     RT_BOOL avail = RTAllocatorIon::checkAvail();
     if (avail) {
         allocator = new RTAllocatorIon(config);
     }
+    #endif
     return allocator;
 }
 
 RTAllocator* RTAllocatorStore::fetchDrmAllocator(RtMetaData *config) {
-    RTAllocator* allocator = NULL;
+    RTAllocator* allocator = RT_NULL;
+    #ifdef OS_LINUX
     RT_BOOL avail = RTAllocatorDrm::checkAvail();
     if (avail) {
-        #ifdef OS_LINUX
         allocator = new RTAllocatorDrm(config);
-        #endif
     }
+    #endif
     return allocator;
 }
 
 RTAllocator* RTAllocatorStore::fetchGrallocAllocator(RtMetaData *config) {
+
+    RTAllocator* allocator = RT_NULL;
     #if TODO_FLAG
-    RTAllocator* allocator = NULL;
     RT_BOOL avail = RTAllocatorGralloc::checkAvail();
     if (avail) {
         allocator = new RTAllocatorGralloc(config);
     }
-    return allocator;
-    // TODO(graphic allocator)
-    #else
-    return RT_NULL;
     #endif
+    return allocator;
 }
 
 RTAllocator* RTAllocatorStore::fetchMallocAllocator(RtMetaData *config) {

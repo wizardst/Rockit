@@ -17,23 +17,24 @@
  *   date: 2018/11/05
  */
 
-#include "rt_base/rt_base_tests.h" // NOLINT
+#include "rt_base/rt_base_tests.h"   // NOLINT
 #include "rt_media/rt_media_tests.h" // NOLINT
-#include "rt_node/rt_node_tests.h" // NOLINT
+#include "rt_node/rt_node_tests.h"   // NOLINT
 #include "rt_node/rt_ffmpeg_tests.h" // NOLINT
-#include "rt_task/rt_task_tests.h" // NOLINT
-#include "rt_check.h" // NOLINT
-#include "RTObject.h"   // NOLINT
+#include "rt_task/rt_task_tests.h"   // NOLINT
+#include "rt_check.h"                // NOLINT
+#include "RTObject.h"                // NOLINT
 
 #include "rt_player/RTPairAudioCases.h"   // NOLINT
 
+#define TEST_URI "E:\\CloudSync\\low-used\\videos\\start.mp3"
 
-RT_RET unit_test_best_practice() {
+RT_RET unit_test_best_practice(const char* uri) {
     rt_mem_record_reset();
     RTObject::resetTraces();
 
     /* your unit test */
-    unit_test_node_decoder_with_render(0, 0);
+    unit_test_pair_audio_player_case_easy(uri, uri);
 
     rt_mem_record_dump();
     RTObject::dumpTraces();
@@ -42,5 +43,6 @@ RT_RET unit_test_best_practice() {
 }
 
 int main(int argc, char **argv) {
-    return unit_test_best_practice();
+    const char* media_name = (argc > 1)? argv[1]:TEST_URI;
+    return unit_test_best_practice(media_name);
 }
