@@ -50,6 +50,9 @@ struct NodePlayerContext {
     INT64               mWantSeekTimeUs;
     INT64               mCurTimeUs;
     INT64               mSaveSeekTimeUs;
+    RT_CALLBACK_T       mRT_Callback;
+    INT32               mRT_Callback_Type;
+    void *              mRT_Callback_Data;
 };
 
 void* thread_deliver_proc(void* pNodePlayer) {
@@ -445,6 +448,14 @@ void   RTNDKNodePlayer::onMessageReceived(struct RTMessage* msg) {
 
 RT_RET RTNDKNodePlayer::startDataLooper() {
     mNodeBus->excuteCommand(RT_NODE_CMD_START);
+    return RT_OK;
+}
+
+RT_RET RTNDKNodePlayer::setCallBack(RT_CALLBACK_T callback, int p_event, void *p_data) {
+    RT_ASSERT(RT_NULL != mPlayerCtx);
+    mPlayerCtx->mRT_Callback = callback;
+    mPlayerCtx->mRT_Callback_Type = p_event;
+    mPlayerCtx->mRT_Callback_Data = p_data;
     return RT_OK;
 }
 

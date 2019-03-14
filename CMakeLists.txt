@@ -5,6 +5,7 @@ set(RT_MEDIA_STATIC rt_media_static)
 set(RT_NODE_STATIC rt_node_static)
 set(RT_TASK_STATIC rt_task_static)
 set(RT_PLAYER_STATIC rt_player_static)
+set(RT_PLAYER_SHARED rt_player_shared)
 
 if (OS_WINDOWS)
     add_definitions(-DOS_WINDOWS)

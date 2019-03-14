@@ -45,6 +45,8 @@ typedef void*        RT_PTR;
 typedef void         RT_VOID;
 typedef float        RT_FLOAT;
 
+typedef void ( *RT_CALLBACK_T )( int p_event, void *p_data);
+
 #define RtToBool(cond)  ((cond) != 0)
 #define RtToS8(x)     ((INT8)(x))
 #define RtToU8(x)    ((UINT8)(x))

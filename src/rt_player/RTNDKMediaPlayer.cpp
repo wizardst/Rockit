@@ -276,3 +276,12 @@ rt_status RTNDKMediaPlayer::setAuxEffectSendLevel(float level) {
 rt_status RTNDKMediaPlayer::attachAuxEffect(int effectId)  {
     return RTE_UNSUPPORTED;
 }
+
+
+rt_status RTNDKMediaPlayer::setCallBack(RT_CALLBACK_T callback, int p_event, void *p_data) {
+    if (RT_NULL != mPlayerCtx) {
+        mPlayerCtx->mNodePlayer->setCallBack(callback, p_event, p_data);
+        return RT_OK;
+    }
+    return RTE_BAD_VALUE;
+}

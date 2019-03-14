@@ -28,7 +28,7 @@ extern "C" {
 #include <sys/types.h>
 #include <inttypes.h>
 #include "RTMediaError.h"
-
+#include "rt_header.h"         // NOLINT
 typedef int32_t rt_status;
 
 #ifndef uid_t
@@ -90,6 +90,11 @@ class RTNDKMediaPlayer {
     rt_status setVolume(float leftVolume, float rightVolume);
     rt_status setAuxEffectSendLevel(float level);
     rt_status attachAuxEffect(int effectId);
+
+    /*
+     * callback
+     */
+    rt_status setCallBack(RT_CALLBACK_T callback, int p_event, void *p_data);
 
  private:
     struct RtNDKPlayerContext* mPlayerCtx;

@@ -55,6 +55,10 @@ class RTNDKNodePlayer : public RTMsgHandler {
     void      onMessageReceived(struct RTMessage* msg);
     RT_RET    startDataLooper();
     RT_RET    startAudioPlayerProc();
+    /*
+     * callback
+     */
+    RT_RET setCallBack(RT_CALLBACK_T callback, int p_event, void *p_data);
 
  private:
     RT_RET    postSeekIfNecessary();
