@@ -59,7 +59,8 @@ RTObject *allocFFInputBuffer(void *arg) {
 
 FFNodeDecoder::FFNodeDecoder()
         : mTrackType(RTTRACK_TYPE_UNKNOWN),
-          mFramePool(RT_NULL) {
+          mFramePool(RT_NULL),
+          mStarted(RT_FALSE) {
     mProcThread = new RtThread(ff_codec_loop, reinterpret_cast<void*>(this));
     mProcThread->setName("FFDecoder");
 
@@ -286,6 +287,8 @@ RT_RET FFNodeDecoder::runCmd(RT_NODE_CMD cmd, RtMetaData *metadata) {
     case RT_NODE_CMD_RESET:
         err = this->onReset();
         break;
+    case RT_NODE_CMD_PREPARE:
+        err = this->onPrepare();
     default:
         RT_LOGE("unkown command: %d", cmd);
         err = RT_ERR_UNKNOWN;
@@ -326,10 +329,21 @@ RTNodeStub* FFNodeDecoder::queryStub() {
 }
 
 RT_RET FFNodeDecoder::runTask() {
-    RTMediaBuffer *input = NULL;
-    RTMediaBuffer *output = NULL;
+    RTMediaBuffer *input = RT_NULL;
+    RTMediaBuffer *output = RT_NULL;
     while (THREAD_LOOP == mProcThread->getState()) {
         RT_RET err = RT_OK;
+        if (!mStarted) {
+            if (input) {
+                input->release();
+                mUnusedInputPort->returnObj(input);
+                input = RT_NULL;
+            }
+            if (output) {
+                output->release();
+                output = RT_NULL;
+            }
+        }
         if (!input) {
             RtMutex::RtAutolock autoLock(mLockPacketQ);
             RT_DequeEntry entry = deque_pop(mPacketQ);
@@ -341,7 +355,7 @@ RT_RET FFNodeDecoder::runTask() {
             mFramePool->acquireBuffer(&output, RT_TRUE);
         }
 
-        if (!input || !output || mPause) {
+        if (!input || !output) {
             RtTime::sleepMs(5);
             continue;
         }
@@ -354,13 +368,13 @@ RT_RET FFNodeDecoder::runTask() {
         err = fa_decode_send_packet(mFFCodec, input);
         if (err) {
             if (err == RT_ERR_TIMEOUT) {
-                input = NULL;
+                input = RT_NULL;
             }
             continue;
         } else {
             input->release();
             mUnusedInputPort->returnObj(input);
-            input = NULL;
+            input = RT_NULL;
         }
         err = fa_decode_get_frame(mFFCodec, output);
         if (err) {
@@ -369,30 +383,39 @@ RT_RET FFNodeDecoder::runTask() {
             if (output->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
                 RtMutex::RtAutolock autoLock(mLockFrameQ);
                 deque_push(mFrameQ, output);
-                output = NULL;
+                output = RT_NULL;
             }
         }
     }
+
+    if (input) {
+        input->release();
+        mUnusedInputPort->returnObj(input);
+        input = RT_NULL;
+    }
+    if (output) {
+        output->release();
+        output = RT_NULL;
+    }
+    RT_LOGD("exit ffmpeg decode run task");
     return RT_OK;
 }
 
 RT_RET FFNodeDecoder::onStart() {
     RT_RET err = RT_OK;
-    if (THREAD_LOOP != mProcThread->getState()) {
-        mProcThread->start();
-    }
-    mPause = RT_FALSE;
+    mStarted = RT_TRUE;
     return err;
 }
 
 RT_RET FFNodeDecoder::onPause() {
     RT_LOGD("pause");
-    mPause = RT_TRUE;
+    mStarted = RT_FALSE;
     return RT_OK;
 }
 
 RT_RET FFNodeDecoder::onStop() {
     RT_RET err = RT_OK;
+    mStarted = RT_FALSE;
     mProcThread->requestInterruption();
     mProcThread->join();
     return err;
@@ -403,10 +426,17 @@ RT_RET FFNodeDecoder::onReset() {
     return onFlush();
 }
 
+RT_RET FFNodeDecoder::onPrepare() {
+    RT_LOGD("call, prepare.");
+    mProcThread->start();
+    return RT_OK;
+}
+
 RT_RET FFNodeDecoder::onFlush() {
     RT_LOGD("flush");
     RT_RET ret = RT_OK;
     INT32 i = 0;
+    mStarted = RT_FALSE;
     while (deque_size(mPacketQ) > 0) {
         RtMutex::RtAutolock autoLock(mLockPacketQ);
         RTMediaBuffer *pkt = RT_NULL;

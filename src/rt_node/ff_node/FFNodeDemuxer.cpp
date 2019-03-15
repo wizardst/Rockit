@@ -221,7 +221,7 @@ RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** mediaBuf) {
 
              RT_LOGD_IF(DEBUG_FLAG, "RTPacket(ptr=0x%p, size=%d) MediaBuffer=0x%p type: %d", \
                         rt_pkt.mRawPtr, rt_pkt.mSize, *mediaBuf, type);
-            (*mediaBuf)->setData(rt_pkt.mData, rt_pkt.mSize);
+            (*mediaBuf)->setData(rt_pkt.mData, rt_pkt.mSize, rt_pkt.mFuncFree);
             rt_mediabuf_from_packet(*mediaBuf, &rt_pkt);
         }
         return RT_OK;
