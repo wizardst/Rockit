@@ -71,8 +71,14 @@ int Rockit_PlayerPlay(void *player) {
     }
     return RT_ERR_UNKNOWN;
 }
-
 int Rockit_WriteData(void *player, const char * data, const unsigned int length) {
+    RTNDKMediaPlayer * rtplayer = reinterpret_cast<RTNDKMediaPlayer *>(player);
+    if (NULL != rtplayer) {
+       RT_LOGD("RockitPlayer WriteData");
+       rtplayer->writeData(data, length, 0/*PCM stream*/, 0/*only es use*/);
+       RT_LOGD("RockitPlayer WriteData done");
+       return RT_OK;
+    }
     return RT_ERR_UNKNOWN;
 }
 

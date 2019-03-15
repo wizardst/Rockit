@@ -333,17 +333,6 @@ RT_RET FFNodeDecoder::runTask() {
     RTMediaBuffer *output = RT_NULL;
     while (THREAD_LOOP == mProcThread->getState()) {
         RT_RET err = RT_OK;
-        if (!mStarted) {
-            if (input) {
-                input->release();
-                mUnusedInputPort->returnObj(input);
-                input = RT_NULL;
-            }
-            if (output) {
-                output->release();
-                output = RT_NULL;
-            }
-        }
         if (!input) {
             RtMutex::RtAutolock autoLock(mLockPacketQ);
             RT_DequeEntry entry = deque_pop(mPacketQ);
@@ -355,35 +344,41 @@ RT_RET FFNodeDecoder::runTask() {
             mFramePool->acquireBuffer(&output, RT_TRUE);
         }
 
-        if (!input || !output) {
+        if (!input || !output || !mStarted) {
             RtTime::sleepMs(5);
             continue;
         }
 
-        if (mByPass == RT_TRUE) {
+       if (mByPass == RT_TRUE) {
             memcpy(output->getData(), input->getData(), output->getSize());
-        }
-
-        RT_LOGD_IF(DEBUG_FLAG, "input and output ready, go to decode!");
-        err = fa_decode_send_packet(mFFCodec, input);
-        if (err) {
-            if (err == RT_ERR_TIMEOUT) {
-                input = RT_NULL;
-            }
-            continue;
-        } else {
             input->release();
             mUnusedInputPort->returnObj(input);
-            input = RT_NULL;
-        }
-        err = fa_decode_get_frame(mFFCodec, output);
-        if (err) {
-            continue;
+            input = NULL;
+            output->setStatus(RT_MEDIA_BUFFER_STATUS_READY);
+            deque_push(mFrameQ, output);
+            output = NULL;
         } else {
-            if (output->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
-                RtMutex::RtAutolock autoLock(mLockFrameQ);
-                deque_push(mFrameQ, output);
-                output = RT_NULL;
+            RT_LOGD_IF(DEBUG_FLAG, "input and output ready, go to decode!");
+            err = fa_decode_send_packet(mFFCodec, input);
+            if (err) {
+                if (err == RT_ERR_TIMEOUT) {
+                    input = NULL;
+                }
+                continue;
+            } else {
+                input->release();
+                mUnusedInputPort->returnObj(input);
+                input = NULL;
+            }
+            err = fa_decode_get_frame(mFFCodec, output);
+            if (err) {
+                continue;
+            } else {
+                if (output->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
+                    RtMutex::RtAutolock autoLock(mLockFrameQ);
+                    deque_push(mFrameQ, output);
+                    output = NULL;
+                }
             }
         }
     }

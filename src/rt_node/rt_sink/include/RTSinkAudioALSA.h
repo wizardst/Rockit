@@ -87,11 +87,11 @@ class RTSinkAudioALSA : public RTNodeAudioSink {
     INT32              mDataSize;
 
     typedef enum _audio_play_status {
-        PLAY_STOPPED = 0,  // Playback stopped or has not started yet.
-        PLAY_START,        // add for start
-        PLAY_PLAYING,      // Playback started & player is actively decoding.
-        PLAY_PAUSED,       // Playback paused; player is actively decoding but no new data is given out.
-        PLAY_CLOSED,       // Playback is stopped and player is closing.
+        PLAY_STOPPED = 0,  ///  < Playback stopped or has not started yet.
+        PLAY_START,        ///  < Pllayback add for start
+        PLAY_PLAYING,      ///  < Playback started & player is actively decoding.
+        PLAY_PAUSED,       ///  < Playback paused; player is actively decoding but no new data is given out.
+        PLAY_CLOSED,       ///  < Playback is stopped and player is closing.
     } AudioPlayStatus;
     AudioPlayStatus    mPlayStatus;
 };

@@ -55,6 +55,8 @@ class RTNDKNodePlayer : public RTMsgHandler {
     void      onMessageReceived(struct RTMessage* msg);
     RT_RET    startDataLooper();
     RT_RET    startAudioPlayerProc();
+    //  flag: PCM ES TS  type: video audio
+    RT_RET    writeData(const char * data, const UINT32 length, int flag, int type);
     /*
      * callback
      */

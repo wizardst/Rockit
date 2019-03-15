@@ -277,6 +277,13 @@ rt_status RTNDKMediaPlayer::attachAuxEffect(int effectId)  {
     return RTE_UNSUPPORTED;
 }
 
+rt_status RTNDKMediaPlayer::writeData(const char * data, const UINT32 length, int flag, int type) {
+    if (RT_NULL != mPlayerCtx) {
+        mPlayerCtx->mNodePlayer->writeData(data, length, flag, type);
+        return RT_OK;
+    }
+    return RTE_BAD_VALUE;
+}
 
 rt_status RTNDKMediaPlayer::setCallBack(RT_CALLBACK_T callback, int p_event, void *p_data) {
     if (RT_NULL != mPlayerCtx) {

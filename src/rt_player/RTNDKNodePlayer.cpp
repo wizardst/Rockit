@@ -387,6 +387,7 @@ RT_RET RTNDKNodePlayer::onPlaybackDone() {
     mNodeBus->excuteCommand(RT_NODE_CMD_PAUSE);
     mNodeBus->excuteCommand(RT_NODE_CMD_FLUSH);
     mNodeBus->excuteCommand(RT_NODE_CMD_RESET);
+    mPlayerCtx->mRT_Callback(mPlayerCtx->mRT_Callback_Type, mPlayerCtx->mRT_Callback_Data);
     RT_LOGE("done, onPlaybackDone");
 
     return RT_OK;
@@ -449,6 +450,33 @@ RT_RET RTNDKNodePlayer::startDataLooper() {
     return RT_OK;
 }
 
+RT_RET RTNDKNodePlayer::writeData(const char * data, const UINT32 length, int flag, int type) {
+    RT_ASSERT(RT_NULL != mPlayerCtx);
+    if (RT_WRITEDATA_PCM == flag) {
+        RTMediaBuffer* esPacket;
+        RTNode* decoder   = mNodeBus->getRootNode(BUS_LINE_AUDIO);
+        if (decoder != RT_NULL) {
+            RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
+            if (RT_NULL != esPacket) {
+                char *tempdata = rt_malloc_size(char, length);
+                rt_memcpy(tempdata, data, length);
+                esPacket->setData(tempdata, length);
+                RTNodeAdapter::pushBuffer(decoder, esPacket);
+            } else {
+                RT_LOGD("writeData list null");
+            }
+        } else {
+            RT_LOGD("writeData decoder null");
+        }
+    } else if (RT_WRITEDATA_TS == flag) {
+    } else {
+        if (RTTRACK_TYPE_VIDEO == type) {
+        } else {
+        }
+    }
+    return RT_OK;
+}
+
 RT_RET RTNDKNodePlayer::setCallBack(RT_CALLBACK_T callback, int p_event, void *p_data) {
     RT_ASSERT(RT_NULL != mPlayerCtx);
     mPlayerCtx->mRT_Callback = callback;
@@ -468,44 +496,46 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
         decoder->setEventLooper(mPlayerCtx->mLooper);
         audiosink->setEventLooper(mPlayerCtx->mLooper);
     }
-    INT32 audio_idx  = demuxer->queryTrackUsed(RTTRACK_TYPE_AUDIO);
 
-    if ((RT_NULL != demuxer)&&(RT_NULL != decoder)) {
+    if (RT_NULL != decoder) {
         RTMediaBuffer *frame = RT_NULL;
         RTMediaBuffer* esPacket;
 
         while (mPlayerCtx->mDeliverThread->getState() == THREAD_LOOP) {
+            if (demuxer != RT_NULL) {
             // deqeue buffer from object pool
-            RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
-            if (RT_NULL != esPacket) {
-                RT_BOOL got_pkt = RT_FALSE;
-                while (!got_pkt) {
-                    // save es-packet to buffer
-                    while (RTNodeAdapter::pullBuffer(demuxer, &esPacket) != RT_OK) {
-                        RtTime::sleepMs(10);
-                    }
-                    INT32 track_index = 0;
-                    esPacket->getMetaData()->findInt32(kKeyPacketIndex, &track_index);
-
-                    if (track_index == audio_idx) {
-                        UINT32 size = esPacket->getSize();
-                        RT_LOGD_IF(DEBUG_FLAG, "audio es-packet(ptr=0x%p, size=%d)", esPacket, size);
-                        got_pkt = RT_TRUE;
-                    } else {
-                        /* pass other packet */
-                        esPacket->getMetaData()->findInt32(kKeyFrameEOS, &eosFlag);
-                        if (eosFlag) {
-                            RT_LOGD("receive eos , break");
-                            break;
+                INT32 audio_idx  = demuxer->queryTrackUsed(RTTRACK_TYPE_AUDIO);
+                RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
+                if (RT_NULL != esPacket) {
+                    RT_BOOL got_pkt = RT_FALSE;
+                    while (!got_pkt) {
+                        // save es-packet to buffer
+                        while (RTNodeAdapter::pullBuffer(demuxer, &esPacket) != RT_OK) {
+                            RtTime::sleepMs(10);
                         }
-                        continue;
-                    }
+                        INT32 track_index = 0;
+                        esPacket->getMetaData()->findInt32(kKeyPacketIndex, &track_index);
+
+                        if (track_index == audio_idx) {
+                            UINT32 size = esPacket->getSize();
+                            RT_LOGD_IF(DEBUG_FLAG, "audio es-packet(ptr=0x%p, size=%d)", esPacket, size);
+                            got_pkt = RT_TRUE;
+                        } else {
+                            /* pass other packet */
+                            esPacket->getMetaData()->findInt32(kKeyFrameEOS, &eosFlag);
+                            if (eosFlag) {
+                                RT_LOGD("receive eos , break");
+                                break;
+                            }
+                            continue;
+                        }
+                     }
+                } else {
+                    continue;
                 }
-             } else {
-                 continue;
-             }
-            // push es-packet to decoder
-            RTNodeAdapter::pushBuffer(decoder, esPacket);
+                // push es-packet to decoder
+                RTNodeAdapter::pushBuffer(decoder, esPacket);
+            }
 
             // pull av-frame from decoder
             RTNodeAdapter::pullBuffer(decoder, &frame);

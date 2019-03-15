@@ -62,8 +62,6 @@ RTSinkAudioALSA::~RTSinkAudioALSA() {
 }
 
 RT_RET RTSinkAudioALSA::init(RtMetaData *metaData) {
-    // @review: not used, delete directly.
-    rt_safe_delete(metaData);
     return RT_OK;
 }
 

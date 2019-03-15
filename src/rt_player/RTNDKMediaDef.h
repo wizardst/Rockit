@@ -91,6 +91,13 @@ typedef struct _RTMediaUri {
     char   mVersion[32];
 } RTMediaUri;
 
+
+enum RTWriteDataType {
+    RT_WRITEDATA_PCM = 0,
+    RT_WRITEDATA_TS,
+    RT_WRITEDATA_ES,
+};
+
 class RTStateUtil {
  public:
     static const char* getStateName(UINT32 player_state);

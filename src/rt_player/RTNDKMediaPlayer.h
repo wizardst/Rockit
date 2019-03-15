@@ -90,7 +90,7 @@ class RTNDKMediaPlayer {
     rt_status setVolume(float leftVolume, float rightVolume);
     rt_status setAuxEffectSendLevel(float level);
     rt_status attachAuxEffect(int effectId);
-
+    rt_status writeData(const char * data, const UINT32 length, int flag, int type);
     /*
      * callback
      */

@@ -460,6 +460,8 @@ RTNode* bus_find_and_add_codec(RTNodeBus *pNodeBus, RTNode *demuxer, \
 }
 
 RTNode* bus_find_and_add_sink(RTNodeBus *pNodeBus, RTNode *codec, BUS_LINE_TYPE lType) {
+    RT_RET      err         = RT_OK;
+
     if ((RT_NULL == pNodeBus) || (RT_NULL == codec)) {
         RT_LOGE("%-16s -> invalid codec, can't create sink", mBusLineNames[lType].name);
         return RT_NULL;
@@ -472,7 +474,11 @@ RTNode* bus_find_and_add_sink(RTNodeBus *pNodeBus, RTNode *codec, BUS_LINE_TYPE 
     RTNode     *nSink = (RT_NULL != nStub)?nStub->mCreateNode():RT_NULL;
 
     if ((RT_NULL != nSink) && (RT_NULL != nMeta)) {
-        RTNodeAdapter::init(nSink, nMeta);
+        err = RTNodeAdapter::init(nSink, nMeta);
+        if (RT_OK != err) {
+            rt_safe_delete(nSink);
+            return RT_NULL;
+        }
         pNodeBus->registerNode(nSink);
         rt_utils_dump_track(nMeta);
     } else {
