@@ -219,8 +219,8 @@ RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** mediaBuf) {
                 return RT_ERR_UNKNOWN;
             }
 
-            // RT_LOGD("RTPacket(ptr=0x%p, size=%d) MediaBuffer=0x%p type: %d", \
-            //            rt_pkt.mRawPtr, rt_pkt.mSize, *mediaBuf, type);
+             RT_LOGD_IF(DEBUG_FLAG, "RTPacket(ptr=0x%p, size=%d) MediaBuffer=0x%p type: %d", \
+                        rt_pkt.mRawPtr, rt_pkt.mSize, *mediaBuf, type);
             (*mediaBuf)->setData(rt_pkt.mData, rt_pkt.mSize);
             rt_mediabuf_from_packet(*mediaBuf, &rt_pkt);
         }
@@ -365,7 +365,9 @@ RT_RET FFNodeDemuxer::onStart() {
     RT_RET            err = RT_OK;
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
     ctx->mEosFlag = RT_FALSE;
-    ctx->mThread->start();
+    if (THREAD_LOOP != ctx->mThread->getState()) {
+        ctx->mThread->start();
+    }
     return err;
 }
 
@@ -451,7 +453,7 @@ RT_RET FFNodeDemuxer::runTask() {
             ctx->mNeedSeek = 0;
         }
 
-        if (!ctx->mEosFlag) {
+        if (!ctx->mEosFlag && array_list_get_size(ctx->mAudioPktList) < 30) {
             err = fa_format_packet_read(ctx->mFormatCtx, &raw_pkt);
             if (err < 0) {
                 RT_LOGE("%s read end", __FUNCTION__);
@@ -464,11 +466,9 @@ RT_RET FFNodeDemuxer::runTask() {
                 if (stream_index == ctx->mIndexVideo) {
                     RtMutex::RtAutolock autoLock(ctx->mLockVideoPacket);
                     array_list_add(ctx->mVideoPktList, raw_pkt);
-                    // RT_LOGD("read video packet");
                 } else if (stream_index == ctx->mIndexAudio) {
                     RtMutex::RtAutolock autoLock(ctx->mLockAudioPacket);
                     array_list_add(ctx->mAudioPktList, raw_pkt);
-                    // RT_LOGD("read audio packet");
                 } else {
                     RT_LOGE("FFPacket(0x%p), track=%d, but select(v=%d,a=%d)",
                              raw_pkt, stream_index, ctx->mIndexVideo, ctx->mIndexAudio);

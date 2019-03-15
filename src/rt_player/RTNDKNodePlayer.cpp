@@ -231,8 +231,9 @@ RT_RET RTNDKNodePlayer::pause() {
         break;
       case RT_STATE_STARTED:
         // @TODO: do pause player
+        mNodeBus->excuteCommand(RT_NODE_CMD_PAUSE);
 
-        msg = new RTMessage(RT_STATE_PAUSED, RT_NULL, this);
+        msg = new RTMessage(RT_MEDIA_PAUSED, RT_NULL, this);
         mPlayerCtx->mLooper->send(msg, 0);
         break;
       default:

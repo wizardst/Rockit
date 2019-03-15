@@ -31,17 +31,24 @@ void *seek_test_loop(void* param) {
     int seekCount = 0;
     while (seekCount < MAX_SEEK_COUNT) {
         RtTime::sleepMs(5 * 1000);
-        RT_LOGD("now seek to 10s");
-        player->seekTo(10 * 1000 * 1000);
-        player->seekTo(11 * 1000 * 1000);
-        player->seekTo(12 * 1000 * 1000);
-        RtTime::sleepMs(7 * 1000);
+        RT_LOGD("now pause");
+        player->pause();
+        //player->seekTo(10 * 1000 * 1000);
+        //player->seekTo(11 * 1000 * 1000);
+        //player->seekTo(12 * 1000 * 1000);
+        RtTime::sleepMs(5 * 1000);
+        RT_LOGD("now start");
+        player->start();
+        RtTime::sleepMs(10 * 1000);
+        player->seekTo(5 * 1000 * 1000);
+        player->seekTo(6 * 1000 * 1000);
+        player->seekTo(7 * 1000 * 1000);
         seekCount++;
     }
     return RT_NULL;
 }
 
-#define HAVE_UI_OPT 0
+#define HAVE_UI_OPT 1
 RT_RET unit_test_pair_audio_player_case_easy(const char* media_one, const char* media_two) {
     RtThread*            uiThread = RT_NULL;
     RTPairAudioPlayer*   aPlayer = new RTPairAudioPlayer();

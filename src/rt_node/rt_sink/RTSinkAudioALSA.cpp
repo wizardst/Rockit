@@ -47,7 +47,14 @@ RTSinkAudioALSA::RTSinkAudioALSA() {
     mDeque = deque_create(10);
     RT_ASSERT(RT_NULL != mDeque);
     mVolManager = new ALSAVolumeManager();
+
+    mLockBuffer = new RtMutex();
+    RT_ASSERT(RT_NULL != mLockBuffer);
+
     mALSASinkCtx = RT_NULL;
+    mSampleRate  = 48000;
+    mChannels    = 2;
+    mDataSize    = 4096;
 }
 
 RTSinkAudioALSA::~RTSinkAudioALSA() {
@@ -60,17 +67,14 @@ RT_RET RTSinkAudioALSA::init(RtMetaData *metaData) {
 
 RT_RET RTSinkAudioALSA::release() {
     onStop();
-    delete(mThread);
-    mThread = RT_NULL;
 
     if (mDeque != NULL) {
         deque_destory(&mDeque);
     }
 
-    if (mVolManager) {
-        delete mVolManager;
-        mVolManager = NULL;
-    }
+    rt_safe_delete(mThread);
+    rt_safe_delete(mVolManager);
+    rt_safe_delete(mLockBuffer);
 
     closeSoundCard();
     return RT_OK;
@@ -94,7 +98,7 @@ RT_RET RTSinkAudioALSA::pullBuffer(RTMediaBuffer** mediaBuf) {
 RT_RET RTSinkAudioALSA::pushBuffer(RTMediaBuffer* mediaBuf) {
     mCountPush++;
     RT_RET  err = RT_ERR_NULL_PTR;
-
+    RtMutex::RtAutolock autoLock(mLockBuffer);
     if (RT_NULL != mediaBuf) {
         err = deque_push_tail(mDeque, mediaBuf);
     }
@@ -195,12 +199,16 @@ RT_BOOL RTSinkAudioALSA::getMute() {
 RT_RET RTSinkAudioALSA::onStart() {
     RT_RET err = RT_OK;
     RT_LOGD("Audio Sink Thread... begin");
-    mThread->start();
+    if (THREAD_LOOP != mThread->getState()) {
+        mThread->start();
+    }
+    mPlayStatus = PLAY_START;
     return err;
 }
 
 RT_RET RTSinkAudioALSA::onStop() {
     RT_RET err = RT_OK;
+    mPlayStatus = PLAY_STOPPED;
     if (mThread) {
         mThread->requestInterruption();
         mThread->join();
@@ -209,14 +217,30 @@ RT_RET RTSinkAudioALSA::onStop() {
 }
 
 RT_RET RTSinkAudioALSA::onPause() {
+    mPlayStatus = PLAY_PAUSED;
     return RT_OK;
 }
 
 RT_RET RTSinkAudioALSA::onFlush() {
+    int i;
+    RTMediaBuffer *mediaBuf = NULL;
+    if (mDeque) {
+        RtMutex::RtAutolock autoLock(mLockBuffer);
+        RT_LOGD("deque_size(mDeque) = %d",deque_size(mDeque));
+        for (i = 0; i < deque_size(mDeque); i++) {
+            pullBuffer(&mediaBuf);
+
+            if (mediaBuf && callback_ptr) {
+                queueCodecBuffer(callback_ptr, mediaBuf);
+                mediaBuf = NULL;
+            }
+        }
+    }
     return RT_OK;
 }
 
 RT_RET RTSinkAudioALSA::onReset() {
+    mPlayStatus = PLAY_STOPPED;
     return RT_OK;
 }
 
@@ -256,12 +280,8 @@ RT_RET RTSinkAudioALSA::closeSoundCard() {
     }
 }
 
-RT_VOID RTSinkAudioALSA::usleepData(RTMediaBuffer *input) {
-    INT32 samplerate;
-    INT32 channels;
-    input->getMetaData()->findInt32(kKeyACodecSampleRate, &samplerate);
-    input->getMetaData()->findInt32(kKeyACodecChannels, &channels);
-    RtTime::sleepUs((input->getLength() * 1000000) / (2*channels) / samplerate);
+RT_VOID RTSinkAudioALSA::usleepData(INT32 samplerate, INT32 channels, INT32 bytes) {
+    RtTime::sleepUs((bytes * 1000000) / (2*channels) / samplerate);
 }
 
 RT_RET RTSinkAudioALSA::runTask() {
@@ -269,7 +289,13 @@ RT_RET RTSinkAudioALSA::runTask() {
     int ret;
     while (THREAD_LOOP == mThread->getState()) {
         RT_RET err = RT_OK;
+        if (mPlayStatus == PLAY_PAUSED) {
+            // RT_LOGD("%s,%d,now runtask is pause",__FUNCTION__,__LINE__);
+            usleepData(mSampleRate, mChannels, mDataSize);
+            continue;
+        }
         if (!input) {
+            RtMutex::RtAutolock autoLock(mLockBuffer);
             pullBuffer(&input);
         }
 
@@ -279,8 +305,11 @@ RT_RET RTSinkAudioALSA::runTask() {
         }
 
         if (!mALSASinkCtx) {
+            input->getMetaData()->findInt32(kKeyACodecSampleRate, &mSampleRate);
+            input->getMetaData()->findInt32(kKeyACodecChannels, &mChannels);
+            mDataSize = input->getLength();
             if (RT_OK != openSoundCard(input->getMetaData())) {
-                usleepData(input);
+                usleepData(mSampleRate, mChannels, mDataSize);
                 RT_LOGE("openSoundCard fail!");
             }
         }
@@ -288,7 +317,7 @@ RT_RET RTSinkAudioALSA::runTask() {
         if (mALSASinkCtx) {
             ret = alsa_snd_write_data(mALSASinkCtx, reinterpret_cast<void *>(input->getData()), input->getLength());
             if (ret != input->getLength()) {
-                usleepData(input);
+                usleepData(mSampleRate, mChannels, mDataSize);
             }
         }
 

@@ -66,7 +66,7 @@ class RTSinkAudioALSA : public RTNodeAudioSink {
  private:
     RT_RET openSoundCard(RtMetaData *metadata);
     RT_RET closeSoundCard();
-    RT_VOID usleepData(RTMediaBuffer *input);
+    RT_VOID usleepData(INT32 samplerate, INT32 channels, INT32 bytes);
 
     RT_Deque          *mDeque;
     ALSASinkContext   *mALSASinkCtx;
@@ -82,6 +82,18 @@ class RTSinkAudioALSA : public RTNodeAudioSink {
     UINT32             mCountPush;
     RTMsgLooper       *mEventLooper;
     ALSAVolumeManager *mVolManager;
+    INT32              mSampleRate;
+    INT32              mChannels;
+    INT32              mDataSize;
+
+    typedef enum _audio_play_status {
+        PLAY_STOPPED = 0, ///< Playback stopped or has not started yet.
+        PLAY_START,           /// add for start 
+        PLAY_PLAYING,     ///< Playback started & player is actively decoding.
+        PLAY_PAUSED,      ///< Playback paused; player is actively decoding but no new data is given out.
+        PLAY_CLOSED,      ///< Playback is stopped and player is closing.
+    } AudioPlayStatus;
+    AudioPlayStatus    mPlayStatus;
 };
 
 extern struct RTNodeStub rt_sink_audio_alsa;
