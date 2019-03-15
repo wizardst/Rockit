@@ -33,9 +33,6 @@ void *seek_test_loop(void* param) {
         RtTime::sleepMs(5 * 1000);
         RT_LOGD("now pause");
         player->pause();
-        //player->seekTo(10 * 1000 * 1000);
-        //player->seekTo(11 * 1000 * 1000);
-        //player->seekTo(12 * 1000 * 1000);
         RtTime::sleepMs(5 * 1000);
         RT_LOGD("now start");
         player->start();

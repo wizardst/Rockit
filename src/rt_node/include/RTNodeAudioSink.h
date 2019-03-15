@@ -31,9 +31,6 @@ typedef void (*AudioQueueCodecBuffer) (RTNode* pNode, RTMediaBuffer* data);
 
 class RTNodeAudioSink : public RTNode {
  public:
-    RTNode  *callback_ptr;
-    AudioQueueCodecBuffer  queueCodecBuffer;
-
     virtual RT_RET   setVolume(int volume) = 0;
     virtual INT32    getVolume() = 0;
     virtual RT_BOOL  getMute() = 0;

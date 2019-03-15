@@ -52,10 +52,6 @@ RTNode* createRTNode(RT_NODE_TYPE node_type, BUS_LINE_TYPE lType) {
     return node;
 }
 
-RT_VOID audioCodecBufferCallback(RTNode* pNode, RTMediaBuffer* data) {
-    RTNodeAdapter::queueCodecBuffer(pNode, data, RT_PORT_OUTPUT);
-}
-
 RT_RET unit_test_node_audio_decoder_proc() {
     FILE          *write_fd = 0;
     RTMediaBuffer *media_buf = RT_NULL;
@@ -84,9 +80,6 @@ RT_RET unit_test_node_audio_decoder_proc() {
         RT_LOGE("RTTRACK_TYPE_AUDIO audio_idx:%d", audio_idx);
         RT_LOGE("RTTRACK_TYPE_VIDEO video_idx:%d", video_idx);
         decoder_meta = demuxer->queryTrackMeta(0, RTTRACK_TYPE_AUDIO);
-
-        audiosink->queueCodecBuffer = audioCodecBufferCallback;
-        audiosink->callback_ptr = decoder;
 
         RTNodeAdapter::init(decoder, decoder_meta);
         RTNodeAdapter::init(audiosink, NULL);

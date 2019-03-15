@@ -37,14 +37,14 @@ RTObjectPool::RTObjectPool(AllocListener listener, UINT32 maxNum, void *listener
     mObjNum    = 0;
     mAllocObj  = listener;
     mListenerCtx = listener_ctx;
-    mIdleDeque = deque_create(mMaxNum);
+    mObjQeque = deque_create(mMaxNum);
     mLock      = new RtMutex();
 }
 
 RTObjectPool::~RTObjectPool() {
     RTObject::untrace(this->getName(), this);
 
-    deque_destory(&mIdleDeque);
+    deque_destory(&mObjQeque);
     delete mLock;
     mLock  = RT_NULL;
 }
@@ -54,7 +54,7 @@ RTObject* RTObjectPool::borrowObj() {
     RTObject* result = RT_NULL;
     if (mObjNum < mMaxNum) {
        mObjNum++;
-       RT_DequeEntry entry = deque_pop(mIdleDeque);
+       RT_DequeEntry entry = deque_pop(mObjQeque);
        if (RT_NULL != entry.data) {
            // return reused object from idle object pool
            result = reinterpret_cast<RTObject*>(entry.data);
@@ -73,7 +73,7 @@ RTObject* RTObjectPool::borrowObj() {
 RT_RET RTObjectPool::returnObj(RTObject* obj) {
     RtAutoMutex autolock(mLock);
     if (RT_NULL != obj) {
-        deque_push_tail(mIdleDeque, reinterpret_cast<void*>(obj));
+        deque_push_tail(mObjQeque, reinterpret_cast<void*>(obj));
         mObjNum--;
         RT_LOGD_IF(DEBUG_FLAG, "object = %p mObjNum %d", obj, mObjNum);
     }
@@ -81,7 +81,7 @@ RT_RET RTObjectPool::returnObj(RTObject* obj) {
 }
 
 UINT32 RTObjectPool::getNumIdle() {
-    return deque_size(mIdleDeque);
+    return deque_size(mObjQeque);
 }
 
 UINT32 RTObjectPool::getNumUsed() {
@@ -89,7 +89,7 @@ UINT32 RTObjectPool::getNumUsed() {
 }
 
 void RTObjectPool::dump() {
-    for (UINT32 idx = 0; idx < deque_size(mIdleDeque); idx++) {
-        RT_LOGD_IF(DEBUG_FLAG, "objects[%02d]=%p", idx, deque_get(mIdleDeque, idx));
+    for (UINT32 idx = 0; idx < deque_size(mObjQeque); idx++) {
+        RT_LOGD_IF(DEBUG_FLAG, "objects[%02d]=%p", idx, deque_get(mObjQeque, idx));
     }
 }

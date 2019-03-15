@@ -21,6 +21,11 @@
 #include "RTMediaBuffer.h"          // NOLINT
 #include "RTAllocatorBase.h"        // NOLINT
 
+#ifdef LOG_TAG
+#undef LOG_TAG
+#endif
+#define LOG_TAG "RTMediaBuffer"
+
 RTMediaBuffer::RTMediaBuffer(void* data, UINT32 size) {
     RTObject::trace(this->getName(), this, sizeof(RTMediaBuffer));
 
@@ -166,7 +171,10 @@ INT32 RTMediaBuffer::refsCount() {
     return mRefCount;
 }
 
-void RTMediaBuffer::release() {
+void RTMediaBuffer::release(bool debug) {
+    if(debug) {
+        RT_LOGE("mObserver=%p, mFuncFree=%p, refs=%d", mObserver, mFuncFree, mRefCount);
+    }
     if (mObserver == RT_NULL && mRefCount == 0) {
         if (mAllocator != RT_NULL) {
             RTMediaBuffer *this_tmp = this;

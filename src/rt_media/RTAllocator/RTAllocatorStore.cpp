@@ -100,7 +100,6 @@ RTAllocator* RTAllocatorStore::fetchDrmAllocator(RtMetaData *config) {
 }
 
 RTAllocator* RTAllocatorStore::fetchGrallocAllocator(RtMetaData *config) {
-
     RTAllocator* allocator = RT_NULL;
     #if TODO_FLAG
     RT_BOOL avail = RTAllocatorGralloc::checkAvail();

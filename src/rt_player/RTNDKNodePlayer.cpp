@@ -65,10 +65,6 @@ void* thread_deliver_proc(void* pNodePlayer) {
     return RT_NULL;
 }
 
-RT_VOID audio_sink_feed_callback(RTNode* pNode, RTMediaBuffer* data) {
-    RTNodeAdapter::queueCodecBuffer(pNode, data, RT_PORT_OUTPUT);
-}
-
 RTNDKNodePlayer::RTNDKNodePlayer() {
     mPlayerCtx = rt_malloc(NodePlayerContext);
     rt_memset(mPlayerCtx, 0, sizeof(NodePlayerContext));
@@ -469,8 +465,6 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
     RTNodeAudioSink* audiosink = RT_NULL;
     if (RT_NULL != decoder) {
         audiosink = reinterpret_cast<RTNodeAudioSink*>(decoder->mNext);
-        audiosink->queueCodecBuffer = audio_sink_feed_callback;
-        audiosink->callback_ptr     = decoder;
         decoder->setEventLooper(mPlayerCtx->mLooper);
         audiosink->setEventLooper(mPlayerCtx->mLooper);
     }

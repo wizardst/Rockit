@@ -86,6 +86,20 @@ FFNodeDecoder::FFNodeDecoder()
 
 FFNodeDecoder::~FFNodeDecoder() {
     onFlush();
+
+    // @review: remove all objects in object-pool
+    RTMediaBuffer* pkt = RT_NULL;
+    do {
+        if(RT_NULL != mUnusedInputPort) {
+            pkt = ( RTMediaBuffer*)(mUnusedInputPort->borrowObj());
+            if (RT_NULL != pkt) {
+                pkt->release(true);
+                delete(pkt);
+                mUnusedInputPort->returnObj(RT_NULL);
+            }
+        }
+    } while (RT_NULL != pkt);
+
     rt_safe_free(mLockPacketQ);
     rt_safe_free(mLockFrameQ);
     deque_destory(&mPacketQ);
@@ -321,7 +335,7 @@ RT_RET FFNodeDecoder::runTask() {
             RT_DequeEntry entry = deque_pop(mPacketQ);
             if (entry.data) {
                 input = reinterpret_cast<RTMediaBuffer *>(entry.data);
-            } 
+            }
         }
         if (!output) {
             mFramePool->acquireBuffer(&output, RT_TRUE);
@@ -335,7 +349,7 @@ RT_RET FFNodeDecoder::runTask() {
         if (mByPass == RT_TRUE) {
             memcpy(output->getData(), input->getData(), output->getSize());
         }
- 
+
         RT_LOGD_IF(DEBUG_FLAG, "input and output ready, go to decode!");
         err = fa_decode_send_packet(mFFCodec, input);
         if (err) {
@@ -401,7 +415,8 @@ RT_RET FFNodeDecoder::onFlush() {
             pkt = reinterpret_cast<RTMediaBuffer *>(entry.data);
         }
         if (pkt) {
-            pkt->release();
+            pkt->release(true);
+            mUnusedInputPort->returnObj(pkt);
         }
     }
     while (deque_size(mFrameQ) > 0) {
@@ -414,7 +429,6 @@ RT_RET FFNodeDecoder::onFlush() {
         if (frame) {
             frame->release();
         }
-        
     }
 
     return ret;

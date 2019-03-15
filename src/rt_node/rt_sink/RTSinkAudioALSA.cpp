@@ -62,6 +62,8 @@ RTSinkAudioALSA::~RTSinkAudioALSA() {
 }
 
 RT_RET RTSinkAudioALSA::init(RtMetaData *metaData) {
+    // @review: not used, delete directly.
+    rt_safe_delete(metaData);
     return RT_OK;
 }
 
@@ -226,12 +228,13 @@ RT_RET RTSinkAudioALSA::onFlush() {
     RTMediaBuffer *mediaBuf = NULL;
     if (mDeque) {
         RtMutex::RtAutolock autoLock(mLockBuffer);
-        RT_LOGD("deque_size(mDeque) = %d",deque_size(mDeque));
+        RT_LOGD("deque_size(mDeque) = %d", deque_size(mDeque));
         for (i = 0; i < deque_size(mDeque); i++) {
             pullBuffer(&mediaBuf);
 
-            if (mediaBuf && callback_ptr) {
-                queueCodecBuffer(callback_ptr, mediaBuf);
+            // @review: return buffer to media-buffer-pool
+            if (RT_NULL != mediaBuf) {
+                mediaBuf->release();
                 mediaBuf = NULL;
             }
         }
@@ -324,10 +327,10 @@ RT_RET RTSinkAudioALSA::runTask() {
         INT32 eos = 0;
         input->getMetaData()->findInt32(kKeyFrameEOS, &eos);
 
-        if (callback_ptr) {
-            queueCodecBuffer(callback_ptr, input);
-        } else {
-            RT_LOGE("callback_ptr is NULL!");
+        // @review: return buffer to media-buffer-pool
+        if (RT_NULL != input) {
+            input->release();
+            input = NULL;
         }
 
         if (eos && (RT_NULL != mEventLooper)) {

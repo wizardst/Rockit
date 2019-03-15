@@ -43,9 +43,8 @@ class RtMutex;
 class RTObjectPool : public RTObject {
  public:
     RTObjectPool(AllocListener listener, UINT32 maxNum, void *listener_ctx = RT_NULL);
-    virtual ~RTObjectPool();
+    virtual   ~RTObjectPool();
     RTObject* borrowObj();
-    RTObject* useObj();
     RT_RET    returnObj(RTObject* obj);
     UINT32    getNumIdle();
     UINT32    getNumUsed();
@@ -57,10 +56,9 @@ class RTObjectPool : public RTObject {
     virtual void dump();
 
  private:
-    INT32    mMaxNum;
-    INT32    mObjNum;
-    RT_Deque* mUsedDeque;
-    RT_Deque* mIdleDeque;
+    INT32     mMaxNum;
+    INT32     mObjNum;
+    RT_Deque* mObjQeque;
     AllocListener mAllocObj;
     void* mListenerCtx;
     RtMutex*  mLock;

@@ -465,7 +465,7 @@ RTNode* bus_find_and_add_sink(RTNodeBus *pNodeBus, RTNode *codec, BUS_LINE_TYPE 
         return RT_NULL;
     }
 
-    RtMetaData *nMeta = codec->queryFormat(RT_PORT_INPUT);
+    RtMetaData *nMeta = codec->queryFormat(RT_PORT_OUTPUT);
 
     // @TODO create codec by MIME
     RTNodeStub *nStub = findStub(RT_NODE_TYPE_SINK, lType);

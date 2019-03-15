@@ -85,10 +85,9 @@ RT_RET RTSinkAudioWASAPI::release() {
     RTSinkAudioCtx* ctx = reinterpret_cast<RTSinkAudioCtx*>(mNodeContext);
     RT_ASSERT(RT_NULL != ctx);
 
-    if (RT_NULL != ctx->mDataLock) {
-        delete ctx->mDataLock;
-        ctx->mDataLock = RT_NULL;
-    }
+    rt_safe_delete(ctx->mDataLock);
+    rt_safe_delete(ctx->mThread);
+    rt_safe_delete(ctx->mMetaInput);
 
     if (ctx->mThread != RT_NULL) {
         delete ctx->mThread;
@@ -178,11 +177,10 @@ RT_RET RTSinkAudioWASAPI::runTask() {
         INT32 eos = 0;
         input->getMetaData()->findInt32(kKeyFrameEOS, &eos);
 
-        if (callback_ptr) {
-            queueCodecBuffer(callback_ptr, input);
+        // @review: return buffer to media-buffer-pool
+        if (RT_NULL != input) {
+            input->release();
             input = NULL;
-        } else {
-            RT_LOGE("callback_ptr is NULL!");
         }
 
         if (eos && (RT_NULL != ctx->mEventLooper)) {
@@ -281,9 +279,22 @@ RT_RET RTSinkAudioWASAPI::onPause() {
 
 // override RTNode methods
 RT_RET RTSinkAudioWASAPI::onFlush()  {
-    RT_RET err = RT_OK;
-    RT_LOGD("call, flush packet and frame in audio sink");
-    return err;
+    int i;
+    RTMediaBuffer *mediaBuf = NULL;
+    if (mDeque) {
+        RtMutex::RtAutolock autoLock(mLockBuffer);
+        RT_LOGD("deque_size(mDeque) = %d", deque_size(mDeque));
+        for (i = 0; i < deque_size(mDeque); i++) {
+            pullBuffer(&mediaBuf);
+
+            // @review: return buffer to media-buffer-pool
+            if (RT_NULL != mediaBuf) {
+                mediaBuf->release();
+                mediaBuf = NULL;
+            }
+        }
+    }
+    return RT_OK;
 }
 
 // override RTNode methods

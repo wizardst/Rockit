@@ -44,10 +44,6 @@
 #define VIDEO_TEST_OUTPUT_FILE      "/data/video_output.bin"
 #define AUDIO_TEST_OUTPUT_FILE      "/data/audio_output.bin"
 
-RT_VOID simpleAudioCodecBufferCallback(RTNode* pNode, RTMediaBuffer* data) {
-    RTNodeAdapter::queueCodecBuffer(pNode, data, RT_PORT_OUTPUT);
-}
-
 class SimplePlayer: public RTMsgHandler {
  public:
     SimplePlayer();
@@ -163,8 +159,6 @@ RT_RET SimplePlayer::init(const char *uri) {
         RT_ASSERT(mAudioDecoderMeta);
 
         /* init audio sink */
-        mAudioSink->queueCodecBuffer = simpleAudioCodecBufferCallback;
-        mAudioSink->callback_ptr = mAudioDecoder;
         RTNodeAdapter::init(mAudioSink, NULL);
         RTNodeAdapter::init(mAudioDecoder, mAudioDecoderMeta);
         mLooper->setHandler(this);
