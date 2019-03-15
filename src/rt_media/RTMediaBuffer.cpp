@@ -25,6 +25,7 @@ RTMediaBuffer::RTMediaBuffer(void* data, UINT32 size) {
     RTObject::trace(this->getName(), this, sizeof(RTMediaBuffer));
 
     mMetaData = RT_NULL;
+    mFuncFree = RT_NULL;
     setData(data, size);
 }
 
@@ -82,12 +83,24 @@ void RTMediaBuffer::setData(void* data, UINT32 size) {
     mSize = size;
     setRange(0, size);
     mOwnsData = RT_FALSE;
-    mRefCount = 0;
     if (RT_NULL != mMetaData) {
         mMetaData->clear();
     } else {
         mMetaData = new RtMetaData();
     }
+}
+
+void RTMediaBuffer::setData(void *data, UINT32 size, RT_RAW_FREE freeFunc) {
+    mData = data;
+    mSize = size;
+    setRange(0, size);
+    mOwnsData = RT_FALSE;
+    if (RT_NULL != mMetaData) {
+        mMetaData->clear();
+    } else {
+        mMetaData = new RtMetaData();
+    }
+    mFuncFree = freeFunc;
 }
 
 void RTMediaBuffer::setPhyAddr(UINT32 phyaddr) {
@@ -158,6 +171,12 @@ void RTMediaBuffer::release() {
         if (mAllocator != RT_NULL) {
             RTMediaBuffer *this_tmp = this;
             mAllocator->freeBuffer(&this_tmp);
+        } else if (mFuncFree != RT_NULL) {
+            void *raw_ptr = RT_NULL;
+            mMetaData->findPointer(kKeyPacketPtr, &raw_ptr);
+            if (raw_ptr) {
+                mFuncFree(raw_ptr);
+            }
         }
         return;
     }

@@ -24,6 +24,7 @@
 #include "RTObject.h"               // NOLINT
 #include "rt_metadata.h"            // NOLINT
 #include "RTMediaBufferPool.h"      // NOLINT
+#include "RTMediaData.h"            // NOLINT
 
 enum RtMediaBufferStatus {
     RT_MEDIA_BUFFER_STATUS_UNKONN = 0,
@@ -65,6 +66,7 @@ class RTMediaBuffer : public RTObject {
     INT32  getHandle() const;
     UINT32 getPhyAddr() const;
     void   setData(void* data, UINT32 size);
+    void   setData(void *data, UINT32 size, RT_RAW_FREE freeFunc);
     void   setPhyAddr(UINT32 phyaddr);
     void   setRange(UINT32 offset, UINT32 length);
     void   setStatus(RtMediaBufferStatus status);
@@ -91,6 +93,8 @@ class RTMediaBuffer : public RTObject {
     RtMetaData     *mMetaData;
     RTAllocator    *mAllocator;
     INT32           mRefCount;
+
+    RT_RAW_FREE     mFuncFree;
 
     RtMediaBufferStatus     mStatus;
     RTMediaBufferObserver  *mObserver;

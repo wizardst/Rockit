@@ -35,6 +35,8 @@ class RTPairAudioPlayer {
     rt_status seekTo(int64_t usec);
     rt_status playUri(const char* uri);
     rt_status playPcm(const char* pcm);
+    rt_status pause();
+    rt_status start();
     rt_status deinit();
  private:
     rt_status swapAudio();

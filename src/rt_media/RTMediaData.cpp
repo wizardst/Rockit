@@ -21,6 +21,7 @@
 #include "RTMediaData.h"
 #include "RTMediaMetaKeys.h"
 #include "FFAdapterUtils.h"
+#include "RTMediaBuffer.h"
 
 #ifdef LOG_TAG
 #undef LOG_TAG

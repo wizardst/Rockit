@@ -69,15 +69,23 @@ class FFNodeDecoder : public RTNodeCodec {
  private:
     FACodecContext      *mFFCodec;
     RtThread            *mProcThread;
+
     RTObjectPool        *mUnusedInputPort;
-    RTObjectPool        *mUsedInputPort;
-    RTObjectPool        *mUnusedOutputPort;
-    RTObjectPool        *mUsedOutputPort;
+    RTMediaBufferPool   *mFramePool;
+    rt_deque            *mPacketQ;
+    rt_deque            *mFrameQ;
+    RtMutex             *mLockPacketQ;
+    RtMutex             *mLockFrameQ;
+
+    RTAllocator         *mLinearAllocator;
+
     RTMsgLooper         *mEventLooper;
     RtMetaData          *mMetaInput;
     RtMetaData          *mMetaOutput;
     RTTrackParms        *mTrackParms;
     RTTrackType          mTrackType;
+
+    RT_BOOL              mPause;
 
     UINT32               mCountPull;
     UINT32               mCountPush;

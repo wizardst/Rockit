@@ -21,7 +21,6 @@
 #define SRC_RT_MEDIA_INCLUDE_RTMEDIADATA_H_
 
 #include "RTMediaDef.h"
-#include "RTMediaBuffer.h"
 #include "RTMediaMetaKeys.h"
 #include "RTMediaPixel.h"
 
@@ -60,6 +59,8 @@ typedef struct _RTFrame {
     void*   mRawPtr;
     RT_RAW_FREE mFuncFree;
 } RTFrame;
+
+class RTMediaBuffer;
 
 /* utils for rt_packet */
 RT_RET rt_utils_packet_free(RTPacket* rt_pkt);

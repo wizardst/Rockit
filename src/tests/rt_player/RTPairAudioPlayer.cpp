@@ -41,6 +41,19 @@ rt_status RTPairAudioPlayer::seekTo(int64_t usec) {
     }
 }
 
+rt_status RTPairAudioPlayer::pause() {
+    if (RT_NULL != mAudioCur) {
+        mAudioCur->pause();
+    }
+}
+
+rt_status RTPairAudioPlayer::start() {
+    if (RT_NULL != mAudioCur) {
+        mAudioCur->start();
+    }
+}
+
+
 rt_status RTPairAudioPlayer::wait() {
     if (RT_NULL != mAudioCur) {
         mAudioCur->wait();

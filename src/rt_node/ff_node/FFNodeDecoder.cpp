@@ -31,16 +31,18 @@
 #endif
 #define DEBUG_FLAG 0x0
 
-#include "FFNodeDecoder.h" // NOLINT
-#include "RTObjectPool.h" // NOLINT
-#include "FFMPEGAdapter.h" // NOLINT
-#include "rt_metadata.h" // NOLINT
-#include "RTMediaMetaKeys.h" // NOLINT
-#include "rt_thread.h" // NOLINT
-#include "rt_dequeue.h" // NOLINT
-#include "RTMediaBuffer.h" // NOLINT
-#include "FFAdapterCodec.h" // NOLINT
-#include "rt_message.h"     // NOLINT
+#include "FFNodeDecoder.h"          // NOLINT
+#include "RTObjectPool.h"           // NOLINT
+#include "FFMPEGAdapter.h"          // NOLINT
+#include "rt_metadata.h"            // NOLINT
+#include "RTMediaMetaKeys.h"        // NOLINT
+#include "rt_thread.h"              // NOLINT
+#include "rt_dequeue.h"             // NOLINT
+#include "RTMediaBuffer.h"          // NOLINT
+#include "FFAdapterCodec.h"         // NOLINT
+#include "rt_message.h"             // NOLINT
+#include "RTAllocatorStore.h"       // NOLINT
+#include "RTAllocatorBase.h"        // NOLINT
 
 #define MAX_INPUT_BUFFER_COUNT      30
 #define MAX_OUTPUT_BUFFER_COUNT     8
@@ -51,28 +53,30 @@ void* ff_codec_loop(void* ptr_node) {
     return RT_NULL;
 }
 
-RTObject *allocInputBuffer(void *) {
+RTObject *allocFFInputBuffer(void *arg) {
     return new RTMediaBuffer(NULL, 0);
 }
 
-RTObject *allocOutputBuffer(void *) {
-    return new RTMediaBuffer(1920 * 1088 * 3 / 2);
-}
-
 FFNodeDecoder::FFNodeDecoder()
-        : mTrackType(RTTRACK_TYPE_UNKNOWN) {
+        : mTrackType(RTTRACK_TYPE_UNKNOWN),
+          mFramePool(RT_NULL) {
     mProcThread = new RtThread(ff_codec_loop, reinterpret_cast<void*>(this));
     mProcThread->setName("FFDecoder");
 
     mUnusedInputPort  = RT_NULL;
-    mUsedInputPort    = RT_NULL;
-    mUnusedOutputPort = RT_NULL;
-    mUsedOutputPort   = RT_NULL;
     mByPass           = RT_FALSE;
-    mUnusedInputPort  = new RTObjectPool(allocInputBuffer, MAX_INPUT_BUFFER_COUNT);
-    mUsedInputPort    = new RTObjectPool(NULL, MAX_INPUT_BUFFER_COUNT);
-    mUnusedOutputPort = new RTObjectPool(allocOutputBuffer, MAX_OUTPUT_BUFFER_COUNT);
-    mUsedOutputPort   = new RTObjectPool(RT_NULL, MAX_OUTPUT_BUFFER_COUNT);
+
+    mPacketQ = deque_create();
+    RT_ASSERT(RT_NULL != mPacketQ);
+
+    mFrameQ = deque_create();
+    RT_ASSERT(RT_NULL != mFrameQ);
+
+    mLockPacketQ = new RtMutex();
+    RT_ASSERT(RT_NULL != mLockPacketQ);
+
+    mLockFrameQ = new RtMutex();
+    RT_ASSERT(RT_NULL != mLockFrameQ);
 
     mTrackParms       = rt_malloc(RTTrackParms);
 
@@ -81,12 +85,18 @@ FFNodeDecoder::FFNodeDecoder()
 }
 
 FFNodeDecoder::~FFNodeDecoder() {
+    onFlush();
+    rt_safe_free(mLockPacketQ);
+    rt_safe_free(mLockFrameQ);
+    deque_destory(&mPacketQ);
+    deque_destory(&mFrameQ);
     release();
     rt_safe_free(mTrackParms);
     mNodeContext = RT_NULL;
 }
 
 RT_RET FFNodeDecoder::init(RtMetaData *metadata) {
+    RT_LOGE("init in");
     if (!metadata->findInt32(kKeyCodecType, reinterpret_cast<INT32 *>(&mTrackType))) {
         RT_LOGE("track type is unset!!");
         return RT_ERR_UNKNOWN;
@@ -106,6 +116,14 @@ RT_RET FFNodeDecoder::init(RtMetaData *metadata) {
     mMetaOutput->setInt32(kKeyFrameW,   mTrackParms->mVideoWidth);
     mMetaOutput->setInt32(kKeyFrameH,   mTrackParms->mVideoHeight);
 
+    // TODO(frame count): max frame count should set by config.
+    mFramePool = new RTMediaBufferPool(MAX_OUTPUT_BUFFER_COUNT);
+    RTAllocatorStore::priorAvailLinearAllocator(metadata, &mLinearAllocator);
+    RT_ASSERT(RT_NULL != mLinearAllocator);
+    mUnusedInputPort  = new RTObjectPool(allocFFInputBuffer,
+                                         MAX_INPUT_BUFFER_COUNT,
+                                         mLinearAllocator);
+
     allocateBuffersOnPort(RT_PORT_INPUT);
     allocateBuffersOnPort(RT_PORT_OUTPUT);
 
@@ -114,6 +132,7 @@ RT_RET FFNodeDecoder::init(RtMetaData *metadata) {
 
 RT_RET FFNodeDecoder::allocateBuffersOnPort(RTPortType port) {
     UINT32 i = 0;
+    RT_RET ret = RT_OK;
     switch (port) {
         case RT_PORT_INPUT: {
             RTMediaBuffer *buffer[MAX_INPUT_BUFFER_COUNT];
@@ -128,10 +147,23 @@ RT_RET FFNodeDecoder::allocateBuffersOnPort(RTPortType port) {
         case RT_PORT_OUTPUT: {
             RTMediaBuffer *buffer[MAX_OUTPUT_BUFFER_COUNT];
             for (i = 0; i < MAX_OUTPUT_BUFFER_COUNT; i++) {
-                buffer[i] = reinterpret_cast<RTMediaBuffer *>(mUnusedOutputPort->borrowObj());
+                INT32 buf_size = 0;
+                if (mTrackType == RTTRACK_TYPE_VIDEO) {
+                    buf_size = mTrackParms->mVideoWidth * mTrackParms->mVideoHeight * 3 / 2;
+                } else if (mTrackType == RTTRACK_TYPE_AUDIO) {
+                    buf_size = 9216 * 2;
+                } else {
+                    RT_LOGE("unknown track type: %d", mTrackType);
+                    return RT_ERR_UNKNOWN;
+                }
+                ret = mLinearAllocator->newBuffer(buf_size, &(buffer[i]));
+                if (RT_OK != ret) {
+                    RT_LOGE("allocator new buffer failed");
+                    return RT_ERR_UNKNOWN;
+                }
             }
             for (i = 0; i < MAX_OUTPUT_BUFFER_COUNT; i++) {
-                mUnusedOutputPort->returnObj(buffer[i]);
+                mFramePool->registerBuffer(buffer[i]);
             }
         }
             break;
@@ -147,11 +179,9 @@ RT_RET FFNodeDecoder::release() {
     fa_video_decode_destroy(&mFFCodec);
 
     rt_safe_delete(mUnusedInputPort);
-    rt_safe_delete(mUsedInputPort);
+    rt_safe_delete(mFramePool);
     rt_safe_delete(mMetaInput);
-
-    rt_safe_delete(mUnusedOutputPort);
-    rt_safe_delete(mUsedOutputPort);
+    rt_safe_delete(mLinearAllocator);
 
     // thread release
     rt_safe_delete(mProcThread);
@@ -159,46 +189,57 @@ RT_RET FFNodeDecoder::release() {
     return RT_OK;
 }
 
-RT_RET FFNodeDecoder::dequeBuffer(RTMediaBuffer **buffer, RTPortType type) {
-    switch (type) {
-        case RT_PORT_INPUT:
-            *buffer = reinterpret_cast<RTMediaBuffer *>(mUnusedInputPort->borrowObj());
-            break;
-        case RT_PORT_OUTPUT:
-            *buffer = reinterpret_cast<RTMediaBuffer *>(mUsedOutputPort->borrowObj());
-            break;
-        default:
-            RT_LOGE("unknown port! port: %d", type);
-            return RT_ERR_UNKNOWN;
-    }
-    if (!*buffer) {
-        return RT_ERR_UNKNOWN;
-    }
-
-    (*buffer)->getMetaData()->setInt32(kKeyCodecType, mTrackType);
-    return RT_OK;
-}
-
-RT_RET FFNodeDecoder::queueBuffer(RTMediaBuffer *buffer, RTPortType type) {
+RT_RET FFNodeDecoder::dequeBuffer(RTMediaBuffer **data, RTPortType port) {
     RT_RET ret = RT_OK;
-    switch (type) {
+    RT_DequeEntry entry;
+    switch (port) {
         case RT_PORT_INPUT:
-            ret = mUsedInputPort->returnObj(buffer);
+            *data = reinterpret_cast<RTMediaBuffer *>(mUnusedInputPort->borrowObj());
+            if (*data) {
+                (*data)->getMetaData()->setInt32(kKeyCodecType, mTrackType);
+            }
             break;
-        case RT_PORT_OUTPUT:
-            ret = mUnusedOutputPort->returnObj(buffer);
+        case RT_PORT_OUTPUT: {
+            RtMutex::RtAutolock autoLock(mLockFrameQ);
+            entry = deque_pop(mFrameQ);
+            if (entry.data) {
+                *data = reinterpret_cast<RTMediaBuffer *>(entry.data);
+                (*data)->getMetaData()->setInt32(kKeyCodecType, mTrackType);
+            } else {
+                ret = RT_ERR_LIST_EMPTY;
+            }
+        }
             break;
         default:
-            RT_LOGE("unknown port! port: %d", type);
+            RT_LOGE("unknown port! port: %d", port);
             return RT_ERR_UNKNOWN;
     }
-    if (!buffer) {
-        return ret;
-    }
 
-    return RT_OK;
+    return ret;
 }
 
+RT_RET FFNodeDecoder::queueBuffer(RTMediaBuffer* data, RTPortType port) {
+    RT_RET ret = RT_OK;
+    switch (port) {
+        case RT_PORT_INPUT:
+            if (data) {
+                RtMutex::RtAutolock autoLock(mLockPacketQ);
+                deque_push(mPacketQ, reinterpret_cast<void *>(data));
+            } else {
+                RT_LOGE("data is NULL!");
+                ret = RT_ERR_UNKNOWN;
+            }
+            break;
+        case RT_PORT_OUTPUT:
+            data->release();
+            break;
+        default:
+            RT_LOGE("unknown port! port: %d", port);
+            return RT_ERR_UNKNOWN;
+    }
+
+    return ret;
+}
 
 RT_RET FFNodeDecoder::pullBuffer(RTMediaBuffer** data) {
     mCountPull++;
@@ -276,43 +317,45 @@ RT_RET FFNodeDecoder::runTask() {
     while (THREAD_LOOP == mProcThread->getState()) {
         RT_RET err = RT_OK;
         if (!input) {
-            input = reinterpret_cast<RTMediaBuffer *>(mUsedInputPort->borrowObj());
+            RtMutex::RtAutolock autoLock(mLockPacketQ);
+            RT_DequeEntry entry = deque_pop(mPacketQ);
+            if (entry.data) {
+                input = reinterpret_cast<RTMediaBuffer *>(entry.data);
+            } 
         }
         if (!output) {
-            output = reinterpret_cast<RTMediaBuffer *>(mUnusedOutputPort->borrowObj());
+            mFramePool->acquireBuffer(&output, RT_TRUE);
         }
 
-        if (!input || !output) {
+        if (!input || !output || mPause) {
             RtTime::sleepMs(5);
             continue;
         }
 
         if (mByPass == RT_TRUE) {
             memcpy(output->getData(), input->getData(), output->getSize());
-            mUnusedInputPort->returnObj(input);
-            input = NULL;
-            mUsedOutputPort->returnObj(output);
-            output = NULL;
-        } else {
-            RT_LOGD_IF(DEBUG_FLAG, "input and output ready, go to decode!");
-            err = fa_decode_send_packet(mFFCodec, input);
-            if (err) {
-                if (err == RT_ERR_TIMEOUT) {
-                    input = NULL;
-                }
-                continue;
-            } else {
-                mUnusedInputPort->returnObj(input);
+        }
+ 
+        RT_LOGD_IF(DEBUG_FLAG, "input and output ready, go to decode!");
+        err = fa_decode_send_packet(mFFCodec, input);
+        if (err) {
+            if (err == RT_ERR_TIMEOUT) {
                 input = NULL;
             }
-            err = fa_decode_get_frame(mFFCodec, output);
-            if (err) {
-                continue;
-            } else {
-                if (output->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
-                    mUsedOutputPort->returnObj(output);
-                    output = NULL;
-                }
+            continue;
+        } else {
+            input->release();
+            mUnusedInputPort->returnObj(input);
+            input = NULL;
+        }
+        err = fa_decode_get_frame(mFFCodec, output);
+        if (err) {
+            continue;
+        } else {
+            if (output->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
+                RtMutex::RtAutolock autoLock(mLockFrameQ);
+                deque_push(mFrameQ, output);
+                output = NULL;
             }
         }
     }
@@ -321,11 +364,16 @@ RT_RET FFNodeDecoder::runTask() {
 
 RT_RET FFNodeDecoder::onStart() {
     RT_RET err = RT_OK;
-    mProcThread->start();
+    if (THREAD_LOOP != mProcThread->getState()) {
+        mProcThread->start();
+    }
+    mPause = RT_FALSE;
     return err;
 }
 
 RT_RET FFNodeDecoder::onPause() {
+    RT_LOGD("pause");
+    mPause = RT_TRUE;
     return RT_OK;
 }
 
@@ -342,9 +390,34 @@ RT_RET FFNodeDecoder::onReset() {
 }
 
 RT_RET FFNodeDecoder::onFlush() {
-    RT_RET err = RT_OK;
-    RT_LOGD("call, flush packet and frame in decoder!");
-    return err;
+    RT_LOGD("flush");
+    RT_RET ret = RT_OK;
+    INT32 i = 0;
+    while (deque_size(mPacketQ) > 0) {
+        RtMutex::RtAutolock autoLock(mLockPacketQ);
+        RTMediaBuffer *pkt = RT_NULL;
+        RT_DequeEntry entry = deque_pop(mPacketQ);
+        if (entry.data) {
+            pkt = reinterpret_cast<RTMediaBuffer *>(entry.data);
+        }
+        if (pkt) {
+            pkt->release();
+        }
+    }
+    while (deque_size(mFrameQ) > 0) {
+        RtMutex::RtAutolock autoLock(mLockFrameQ);
+        RTMediaBuffer *frame = RT_NULL;
+        RT_DequeEntry entry = deque_pop(mFrameQ);
+        if (entry.data) {
+            frame = reinterpret_cast<RTMediaBuffer *>(entry.data);
+        }
+        if (frame) {
+            frame->release();
+        }
+        
+    }
+
+    return ret;
 }
 
 static RTNode* createFFDecoder() {

@@ -49,6 +49,8 @@ RTMediaBufferPool::RTMediaBufferPool(UINT32 max_buffer_count)
 
     mBufferList->mBuffers = array_list_create_with_capacity(max_buffer_count);
     RT_ASSERT(RT_NULL != mBufferList->mBuffers);
+    mBufferList->mMaxBufferCount = max_buffer_count;
+    mBufferList->mBufferSize = RT_MaxU32;
 }
 
 RTMediaBufferPool::RTMediaBufferPool(UINT32 max_buffer_count, UINT32 buffer_size)

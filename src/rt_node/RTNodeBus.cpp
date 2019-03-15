@@ -415,6 +415,7 @@ RTNode* bus_find_and_add_codec(RTNodeBus *pNodeBus, RTNode *demuxer, \
     RtMetaData *node_meta   = RT_NULL;
     RTNodeStub *node_stub   = RT_NULL;
     RTNode     *node_codec  = RT_NULL;
+    RT_RET      err         = RT_OK;
 
     if (RT_NULL != demuxer) {
         RTNodeDemuxer *pDemuxer = reinterpret_cast<RTNodeDemuxer*>(demuxer);
@@ -446,7 +447,11 @@ RTNode* bus_find_and_add_codec(RTNodeBus *pNodeBus, RTNode *demuxer, \
     }
 
     if (RT_NULL != node_codec) {
-        RTNodeAdapter::init(node_codec, node_meta);
+         err = RTNodeAdapter::init(node_codec, node_meta);
+        if (RT_OK != err) {
+            rt_safe_delete(node_codec);
+            return RT_NULL;
+        }
         pNodeBus->registerNode(node_codec);
     } else {
         RT_LOGE("%-16s -> invalid codec()", mBusLineNames[lType].name);
