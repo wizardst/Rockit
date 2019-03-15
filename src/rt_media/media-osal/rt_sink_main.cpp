@@ -68,7 +68,7 @@ void testcase_display_sink(int dst_w, int dst_h) {
     RT_LOGD_IF(DEBUG_FLAG, "\r\n =============================================");
     if (pSurface == NULL) {
         ALOGE("Fail to create native Surface");
-        return NULL;
+        return ;
     }
     pBufferProducer = pSurface->getIGraphicBufferProducer();
     RT_LOGD_IF(DEBUG_FLAG, "%24s: pSurfaceControl = %p", __FUNCTION__, pSurfaceControl.get());
