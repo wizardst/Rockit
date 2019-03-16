@@ -97,10 +97,9 @@ RT_RET RTMediaBufferPool::registerBuffer(RTMediaBuffer *buffer) {
 }
 
 RT_BOOL RTMediaBufferPool::hasBuffer() {
-    INT32 i = 0;
-    for (i = 0; i < array_list_get_size(mBufferList->mBuffers); i++) {
+    for (UINT32 idx = 0; idx < array_list_get_size(mBufferList->mBuffers); idx++) {
         RTMediaBuffer *buffer = reinterpret_cast<RTMediaBuffer *>
-                                    (array_list_get_data(mBufferList->mBuffers, i));
+                                    (array_list_get_data(mBufferList->mBuffers, idx));
         if (buffer && buffer->refsCount() == 0) {
             return RT_TRUE;
         }
@@ -116,15 +115,14 @@ RT_RET RTMediaBufferPool::acquireBuffer(
 
     while (1) {
         RTMediaBuffer *buffer = RT_NULL;
-        INT32 i = 0;
 
         if (array_list_get_size(mBufferList->mBuffers) == 0) {
             RT_LOGE("pool is empty! no buffer acquire.");
             return RT_ERR_LIST_EMPTY;
         }
-        for (i = 0; i < array_list_get_size(mBufferList->mBuffers); i++) {
+        for (UINT32 idx = 0; idx < array_list_get_size(mBufferList->mBuffers); idx++) {
             RTMediaBuffer *it = reinterpret_cast<RTMediaBuffer *>
-                                    (array_list_get_data(mBufferList->mBuffers, i));
+                                    (array_list_get_data(mBufferList->mBuffers, idx));
             if (it && it->refsCount() == 0
                   && it->getSize() > request_size) {
                 buffer = it;
@@ -156,16 +154,13 @@ void RTMediaBufferPool::signalBufferReturned(RTMediaBuffer *buffer) {
 
 RT_RET RTMediaBufferPool::releaseAllBuffers() {
     RT_RET          ret = RT_OK;
-    UINT32          list_size = 0;
-    INT32           i = 0;
 
-    list_size = array_list_get_size(mBufferList->mBuffers);
-    for (i = 0; i < list_size; i++) {
+    for (UINT32 idx = 0; idx < array_list_get_size(mBufferList->mBuffers); idx++) {
         RTMediaBuffer *buffer = reinterpret_cast<RTMediaBuffer *>
                                     (array_list_get_data(mBufferList->mBuffers, 0));
         if (buffer->refsCount() != 0) {
             RT_LOGD("has buffer still in used, buffer: %p, index: %d, refsCount: %d",
-                     buffer, i, buffer->refsCount());
+                     buffer, idx, buffer->refsCount());
         }
         buffer->setObserver(RT_NULL);
         buffer->release();

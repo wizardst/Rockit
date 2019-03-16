@@ -54,7 +54,7 @@ RT_RET         deque_push(RT_Deque *list,
 RT_RET         deque_insert(RT_Deque *list, RT_DequeEntry* entry, const void *data);
 RT_RET         deque_push_tail(RT_Deque *list, const void *data);
 RT_RET         deque_push_head(RT_Deque *list, const void *data);
-RT_RET         deque_del_index(RT_Deque *list, int index);
+RT_RET         deque_del_index(RT_Deque *list, UINT32 index);
 
 #define deque_size(list) ((list)->size)
 #define deque_head(list) ((list)->head)

@@ -58,8 +58,8 @@ RTObject *allocFFInputBuffer(void *arg) {
 }
 
 FFNodeDecoder::FFNodeDecoder()
-        : mTrackType(RTTRACK_TYPE_UNKNOWN),
-          mFramePool(RT_NULL),
+        : mFramePool(RT_NULL),
+          mTrackType(RTTRACK_TYPE_UNKNOWN),
           mStarted(RT_FALSE) {
     mProcThread = new RtThread(ff_codec_loop, reinterpret_cast<void*>(this));
     mProcThread->setName("FFDecoder");
@@ -92,7 +92,7 @@ FFNodeDecoder::~FFNodeDecoder() {
     // @review: remove all objects in object-pool
     RTMediaBuffer* pkt = RT_NULL;
     do {
-        if(RT_NULL != mUnusedInputPort) {
+        if (RT_NULL != mUnusedInputPort) {
             pkt = ( RTMediaBuffer*)(mUnusedInputPort->borrowObj());
             if (RT_NULL != pkt) {
                 pkt->release(true);
@@ -430,7 +430,6 @@ RT_RET FFNodeDecoder::onPrepare() {
 RT_RET FFNodeDecoder::onFlush() {
     RT_LOGD("flush");
     RT_RET ret = RT_OK;
-    INT32 i = 0;
     mStarted = RT_FALSE;
     while (deque_size(mPacketQ) > 0) {
         RtMutex::RtAutolock autoLock(mLockPacketQ);

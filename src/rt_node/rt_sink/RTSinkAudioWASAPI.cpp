@@ -89,11 +89,6 @@ RT_RET RTSinkAudioWASAPI::release() {
     rt_safe_delete(ctx->mThread);
     rt_safe_delete(ctx->mMetaInput);
 
-    if (ctx->mThread != RT_NULL) {
-        delete ctx->mThread;
-        ctx->mThread = RT_NULL;
-    }
-
     if (ctx->mDequeFrame != NULL) {
         deque_destory(&ctx->mDequeFrame);
     }
@@ -279,12 +274,13 @@ RT_RET RTSinkAudioWASAPI::onPause() {
 
 // override RTNode methods
 RT_RET RTSinkAudioWASAPI::onFlush()  {
-    int i;
+    RTSinkAudioCtx* ctx = reinterpret_cast<RTSinkAudioCtx*>(mNodeContext);
+    RT_ASSERT(RT_NULL != ctx);
+
     RTMediaBuffer *mediaBuf = NULL;
-    if (mDeque) {
-        RtMutex::RtAutolock autoLock(mLockBuffer);
-        RT_LOGD("deque_size(mDeque) = %d", deque_size(mDeque));
-        for (i = 0; i < deque_size(mDeque); i++) {
+    if (RT_NULL != ctx->mDequeFrame) {
+        // RtMutex::RtAutolock autoLock(mLockBuffer);
+        for (UINT32 i = 0; i < deque_size(ctx->mDequeFrame); i++) {
             pullBuffer(&mediaBuf);
 
             // @review: return buffer to media-buffer-pool

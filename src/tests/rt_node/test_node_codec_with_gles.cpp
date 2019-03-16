@@ -138,7 +138,6 @@ RT_RET unit_test_node_decoder_proc() {
                     RtTime::sleepMs(10);
                 }
 
-                UINT8 *data = reinterpret_cast<UINT8 *>(esPacket->getData());
                 UINT32 size = esPacket->getSize();
                 RT_LOGD("NEW MediaBuffer(ptr=0x%p, size=%d)", esPacket, size);
             }

@@ -55,7 +55,7 @@ class FFNodeDecoder : public RTNodeCodec {
     virtual RT_RET onStop();
     virtual RT_RET onReset();
     virtual RT_RET onFlush();
-    virtual RT_RET onPrepare(); 
+    virtual RT_RET onPrepare();
 
     RT_RET allocateBuffersOnPort(RTPortType port);
 

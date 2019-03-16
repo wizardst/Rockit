@@ -39,18 +39,21 @@ rt_status RTPairAudioPlayer::seekTo(int64_t usec) {
     if (RT_NULL != mAudioCur) {
         mAudioCur->seekTo(usec);
     }
+    return RTE_NO_ERROR;
 }
 
 rt_status RTPairAudioPlayer::pause() {
     if (RT_NULL != mAudioCur) {
         mAudioCur->pause();
     }
+    return RTE_NO_ERROR;
 }
 
 rt_status RTPairAudioPlayer::start() {
     if (RT_NULL != mAudioCur) {
         mAudioCur->start();
     }
+    return RTE_NO_ERROR;
 }
 
 
@@ -58,6 +61,7 @@ rt_status RTPairAudioPlayer::wait() {
     if (RT_NULL != mAudioCur) {
         mAudioCur->wait();
     }
+    return RTE_NO_ERROR;
 }
 
 rt_status RTPairAudioPlayer::playUri(const char* uri) {

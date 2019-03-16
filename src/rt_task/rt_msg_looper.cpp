@@ -209,7 +209,7 @@ RT_RET RTMsgLooper::flush() {
     return RT_OK;
 }
 
-RT_RET RTMsgLooper::flush_message(INT32 mWhat) {
+RT_RET RTMsgLooper::flush_message(UINT32 mWhat) {
     RtMutex::RtAutolock autoLock(mDataLock);
     RT_DequeEntry* head = deque_head(mEventQueue);
     RT_DequeEntry* it   = head;

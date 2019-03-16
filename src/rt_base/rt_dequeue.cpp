@@ -172,7 +172,7 @@ RT_RET deque_push_head(RT_Deque *list, const void *data) {
     return deque_push(list, data, header);
 }
 
-RT_RET deque_del_index(RT_Deque *list, int index) {
+RT_RET deque_del_index(RT_Deque *list, UINT32 index) {
     RT_DequeEntry* entry = list->head;
     if (deque_size(list) == 1) {
         list->head = NULL;

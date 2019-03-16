@@ -46,7 +46,7 @@ struct RTMsgLooper {
     RT_RET  start(INT32 priority = 0);
     RT_RET  stop();
     RT_RET  flush();
-    RT_RET  flush_message(INT32 mWhat);
+    RT_RET  flush_message(UINT32 mWhat);
     RT_RET  post(RTMessage* msg, INT64 delayUs = 0);   // async handler
     RT_RET  send(RTMessage* msg, INT64 delayUs = 0);   //  sync handler
     RT_RET  requestExit();

@@ -118,6 +118,7 @@ RT_BOOL RtThread::start() {
             data->mTid        = 0;
         }
     }
+    return (err == RT_OK);
 }
 
 INT32 RtThread::getState() {

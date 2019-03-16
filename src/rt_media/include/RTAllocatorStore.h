@@ -53,7 +53,7 @@ class RTAllocatorStore : public RTObject {
     virtual void summary(INT32 fd) {}
 
     RTAllocatorStore();
-    ~RTAllocatorStore();
+    virtual ~RTAllocatorStore();
 
     RT_RET fetchAllocator(RTAllocatorType type, RtMetaData* config, RTAllocator **allocator);
     static RT_RET priorAvailLinearAllocator(RtMetaData* config, RTAllocator **allocator);

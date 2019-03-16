@@ -179,6 +179,9 @@ RT_RET RTNDKNodePlayer::prepare() {
         return RT_OK;
     }
     RT_RET err = mNodeBus->autoBuildCodecSink();
+    if (RT_OK != err) {
+        RT_LOGE("fail to use node-bus to build codec sink");
+    }
 
     setCurState(RT_STATE_PREPARING);
 
@@ -282,7 +285,6 @@ RT_RET RTNDKNodePlayer::wait() {
 RT_RET RTNDKNodePlayer::seekTo(INT64 usec) {
     RT_LOGE("seek %lld us", usec);
     UINT32 curState = this->getCurState();
-    RTMessage* msg  = RT_NULL;
     switch (curState) {
       case RT_STATE_IDLE:
       case RT_STATE_INITIALIZED:
@@ -343,6 +345,8 @@ RT_RET RTNDKNodePlayer::postSeekIfNecessary() {
 
     mPlayerCtx->mWantSeekTimeUs = -1;
     mPlayerCtx->mSaveSeekTimeUs = -1;
+
+    return RT_OK;
 }
 
 RT_RET RTNDKNodePlayer::summary(INT32 fd) {
@@ -380,6 +384,7 @@ RT_RET RTNDKNodePlayer::onSeekTo(INT64 usec) {
     mPlayerCtx->mLooper->post(msg, 0);
     RT_LOGE("done, seek to target:%lldms", usec/1000);
     #endif
+    return RT_OK;
 }
 
 RT_RET RTNDKNodePlayer::onPlaybackDone() {

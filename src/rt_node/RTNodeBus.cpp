@@ -155,6 +155,8 @@ RT_RET RTNodeBus::autoBuildCodecSink() {
     nodeChainDumper(BUS_LINE_AUDIO);
     nodeChainDumper(BUS_LINE_SUBTE);
     RT_LOGD("RTNodeBus::autoBuildCodecSink OUT");
+
+    return RT_OK;
 }
 
 RTNode* RTNodeBus::getRootNode(BUS_LINE_TYPE lType) {

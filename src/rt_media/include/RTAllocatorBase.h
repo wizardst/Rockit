@@ -34,7 +34,7 @@ class RTAllocator : public RTObject {
     } RTBufferUsage;
 
     RTAllocator() {}
-    ~RTAllocator() {}
+    virtual ~RTAllocator() {}
 
     virtual const char* getName() { return "RTAllocatorBase"; }
     virtual void summary(INT32 fd) {}
