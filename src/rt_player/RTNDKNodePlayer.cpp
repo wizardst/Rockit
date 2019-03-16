@@ -101,16 +101,15 @@ RT_RET RTNDKNodePlayer::release() {
     RT_ASSERT(RT_NULL != mNodeBus);
     RT_ASSERT(RT_NULL != mPlayerCtx->mLooper);
 
-    rt_safe_delete(mNodeBus);
-    if (RT_NULL != mPlayerCtx->mLooper) {
-        mPlayerCtx->mLooper->stop();
-        rt_safe_delete(mPlayerCtx->mLooper);
-    }
-    if (RT_NULL != mPlayerCtx->mDirector) {
-        rt_safe_delete(mPlayerCtx->mDirector);
-    }
-    rt_safe_free(mPlayerCtx->mCmdOptions);
+    // @review: release resources in player context
+    mPlayerCtx->mLooper->stop();
+    rt_safe_delete(mPlayerCtx->mLooper);
+    rt_safe_delete(mPlayerCtx->mDirector);
+    rt_safe_delete(mPlayerCtx->mCmdOptions);
     rt_safe_free(mPlayerCtx);
+
+    // @review: release node bus
+    rt_safe_delete(mNodeBus);
     return RT_OK;
 }
 
@@ -266,6 +265,7 @@ RT_RET RTNDKNodePlayer::wait() {
     do {
         curState = this->getCurState();
         switch (curState) {
+          case RT_STATE_IDLE:
           case RT_STATE_STATE_ERROR:
           case RT_STATE_COMPLETE:
             loopFlag = 0;
@@ -383,11 +383,11 @@ RT_RET RTNDKNodePlayer::onSeekTo(INT64 usec) {
 }
 
 RT_RET RTNDKNodePlayer::onPlaybackDone() {
-    // workflow: pause flush (cache maybe) start
+    // workflow: pause flush (cache maybe) reset
     mNodeBus->excuteCommand(RT_NODE_CMD_PAUSE);
     mNodeBus->excuteCommand(RT_NODE_CMD_FLUSH);
     mNodeBus->excuteCommand(RT_NODE_CMD_RESET);
-    mPlayerCtx->mRT_Callback(mPlayerCtx->mRT_Callback_Type, mPlayerCtx->mRT_Callback_Data);
+    // mPlayerCtx->mRT_Callback(mPlayerCtx->mRT_Callback_Type, mPlayerCtx->mRT_Callback_Data);
     RT_LOGE("done, onPlaybackDone");
 
     return RT_OK;

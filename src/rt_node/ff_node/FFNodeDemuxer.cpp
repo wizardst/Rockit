@@ -141,15 +141,6 @@ RT_RET FFNodeDemuxer::release() {
     // @review: flush video&audio&subtitle packets and close av_format
     this->onReset();
 
-    if (ctx->mLockVideoPacket != RT_NULL) {
-        delete ctx->mLockVideoPacket;
-        ctx->mLockVideoPacket = RT_NULL;
-    }
-    if (ctx->mLockAudioPacket != RT_NULL) {
-        delete ctx->mLockAudioPacket;
-        ctx->mLockAudioPacket = RT_NULL;
-    }
-
     if (ctx->mVideoPktList != RT_NULL) {
         array_list_destroy(ctx->mVideoPktList);
         ctx->mVideoPktList = RT_NULL;
@@ -160,17 +151,11 @@ RT_RET FFNodeDemuxer::release() {
         ctx->mAudioPktList = RT_NULL;
     }
 
-    if (ctx->mMetaInput != RT_NULL) {
-        delete ctx->mMetaInput;
-        ctx->mMetaInput = RT_NULL;
-    }
-
-    if (ctx->mMetaOutput != RT_NULL) {
-        delete ctx->mMetaOutput;
-        ctx->mMetaOutput = RT_NULL;
-    }
-
     // @review: release memory of node context
+    rt_safe_delete(ctx->mLockVideoPacket);
+    rt_safe_delete(ctx->mLockAudioPacket);
+    rt_safe_delete(ctx->mMetaInput);
+    rt_safe_delete(ctx->mMetaOutput);
     rt_safe_free(ctx);
 
     return RT_OK;

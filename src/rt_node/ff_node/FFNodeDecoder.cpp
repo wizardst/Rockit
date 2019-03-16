@@ -64,6 +64,7 @@ FFNodeDecoder::FFNodeDecoder()
     mProcThread = new RtThread(ff_codec_loop, reinterpret_cast<void*>(this));
     mProcThread->setName("FFDecoder");
 
+    mNodeContext      = RT_NULL;
     mUnusedInputPort  = RT_NULL;
     mByPass           = RT_FALSE;
 
@@ -101,13 +102,12 @@ FFNodeDecoder::~FFNodeDecoder() {
         }
     } while (RT_NULL != pkt);
 
+    release();
+    rt_safe_free(mTrackParms);
     rt_safe_free(mLockPacketQ);
     rt_safe_free(mLockFrameQ);
     deque_destory(&mPacketQ);
     deque_destory(&mFrameQ);
-    release();
-    rt_safe_free(mTrackParms);
-    mNodeContext = RT_NULL;
 }
 
 RT_RET FFNodeDecoder::init(RtMetaData *metadata) {

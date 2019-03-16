@@ -71,9 +71,13 @@ RTMediaBufferPool::RTMediaBufferPool(UINT32 max_buffer_count, UINT32 buffer_size
 
 RTMediaBufferPool::~RTMediaBufferPool() {
     releaseAllBuffers();
-    array_list_destroy(mBufferList->mBuffers);
+
+    if (RT_NULL != mBufferList->mBuffers) {
+        array_list_destroy(mBufferList->mBuffers);
+        mBufferList->mBuffers = RT_NULL;
+    }
+
     rt_safe_delete(mBufferList->mLock);
-    rt_safe_delete(mBufferList->mBuffers);
     rt_safe_delete(mBufferList->mCondition);
     rt_safe_delete(mBufferList);
 }

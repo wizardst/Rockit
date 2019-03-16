@@ -45,8 +45,8 @@ RTObjectPool::~RTObjectPool() {
     RTObject::untrace(this->getName(), this);
 
     deque_destory(&mObjQeque);
-    delete mLock;
-    mLock  = RT_NULL;
+
+    rt_safe_delete(mLock);
 }
 
 RTObject* RTObjectPool::borrowObj() {

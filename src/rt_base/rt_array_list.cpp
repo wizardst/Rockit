@@ -45,9 +45,7 @@ RtArrayList* array_list_create_with_capacity(UINT32 min_capacity) {
     alist->min_capacity = min_capacity;
     alist->entries      = rt_malloc_array(RtArrayListEntry, alist->capacity);
     if (RT_NULL == alist->entries) {
-        rt_free(alist);
-        alist = RT_NULL;
-        return RT_NULL;
+        rt_safe_free(alist);
     }
     return alist;
 }
@@ -178,8 +176,7 @@ INT8 array_list_set(RtArrayList* self, size_t index, void* element) {
 }
 
 INT8 array_list_destroy(RtArrayList *self) {
-    rt_free(self->entries);
-    self->entries = RT_NULL;
+    rt_safe_free(self->entries);
     rt_safe_free(self);
     return RT_OK;
 }
