@@ -469,6 +469,7 @@ RTNode* bus_find_and_add_codec(RTNodeBus *pNodeBus, RTNode *demuxer, \
     if (RT_NULL != node_codec) {
          err = RTNodeAdapter::init(node_codec, node_meta);
         if (RT_OK != err) {
+            rt_safe_delete(node_meta);
             rt_safe_delete(node_codec);
             return RT_NULL;
         }
@@ -496,6 +497,7 @@ RTNode* bus_find_and_add_sink(RTNodeBus *pNodeBus, RTNode *codec, BUS_LINE_TYPE 
     if ((RT_NULL != nSink) && (RT_NULL != nMeta)) {
         err = RTNodeAdapter::init(nSink, nMeta);
         if (RT_OK != err) {
+            rt_safe_delete(nMeta);
             rt_safe_delete(nSink);
             return RT_NULL;
         }
