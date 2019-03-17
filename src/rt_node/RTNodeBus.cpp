@@ -90,6 +90,7 @@ RTNodeBus::RTNodeBus() {
     mBusCtx->mSetting = RT_NULL;
     mBusCtx->mDemuxer = RT_NULL;
 
+    clearNodeBus();
     registerCoreStubs();
 }
 
@@ -308,6 +309,8 @@ RT_RET RTNodeBus::releaseNodes() {
         }
     }
     rt_hash_table_clear(pNodeBus);
+    clearNodeBus();
+
     return RT_OK;
 }
 
@@ -374,6 +377,16 @@ RT_RET RTNodeBus::excuteCommand(RT_NODE_CMD cmd, RtMetaData *option) {
     return RT_OK;
 }
 
+
+RT_RET RTNodeBus::clearNodeBus() {
+    // @review: nodes be released when reset, NEED to clear root nodes.
+    mBusCtx->mRootNodes[BUS_LINE_ROOT]  = RT_NULL;
+    mBusCtx->mRootNodes[BUS_LINE_VIDEO] = RT_NULL;
+    mBusCtx->mRootNodes[BUS_LINE_AUDIO] = RT_NULL;
+    mBusCtx->mRootNodes[BUS_LINE_SUBTE] = RT_NULL;
+}
+
+
 RT_BOOL check_setting(RTMediaUri *setting) {
     // @TODO NEED more checks...
     if (RT_NULL == setting->mUri) {
@@ -434,7 +447,11 @@ RTNode* bus_find_and_add_codec(RTNodeBus *pNodeBus, RTNode *demuxer, \
         node_meta = new RtMetaData();
         node_meta->setInt32(kKeyCodecByePass, 1);
         node_meta->setInt32(kKeyCodecType, tType);
-        node_meta->setInt32(kKeyCodecID, RT_VIDEO_ID_AVC);
+        if (tType == RTTRACK_TYPE_VIDEO) {
+            node_meta->setInt32(kKeyCodecID, RT_VIDEO_ID_AVC);
+        } else if (tType == RTTRACK_TYPE_AUDIO) {
+            node_meta->setInt32(kKeyCodecID, RT_AUDIO_ID_MP3);
+        }
         node_meta->setInt32(kKeyVCodecWidth, 1280);
         node_meta->setInt32(kKeyVCodecHeight, 720);
     }

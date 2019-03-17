@@ -74,6 +74,7 @@ class RTNodeBus {
     RT_RET      nodeChainAppend(RTNode *pNode, BUS_LINE_TYPE lType);
     RT_RET      nodeChainDriver(RTNode *pNode, BUS_LINE_TYPE lType);
     RT_RET      nodeChainDumper(BUS_LINE_TYPE lType);
+    RT_RET      clearNodeBus();
 
  private:
     struct NodeBusContext* mBusCtx;
