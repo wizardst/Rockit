@@ -46,6 +46,7 @@ ROCKIT_TOP=${ROCKIT_PWD}/../../..
 
 PLATFORM=$ANDROID_NDK/platforms/android-21/arch-arm
 
+# OS_LINUX + HAVE_NATIVE = ANDROID_NDK
 cmake   -DCMAKE_TOOLCHAIN_FILE=../android.toolchain.cmake                     \
         -DCMAKE_BUILD_TYPE=Debug                                              \
         -DANDROID_FORCE_ARM_BUILD=ON                                          \
@@ -54,10 +55,10 @@ cmake   -DCMAKE_TOOLCHAIN_FILE=../android.toolchain.cmake                     \
         -DANDROID_ABI="armeabi-v7a with NEON"                                 \
         -DANDROID_TOOLCHAIN_NAME="arm-linux-androideabi-4.8"                  \
         -DANDROID_NATIVE_API_LEVEL=android-21                                 \
-        -DHAVE_PTHREAD=ON                                                     \
         -DHAVE_MPI=OFF                                                        \
         -DHAVE_GLES=ON                                                        \
         -DHAVE_DRM=ON                                                         \
+        -DHAVE_NDK=ON                                                         \
         -DOS_LINUX=ON                                                         \
         -DFFMPEG_SINGLE=ON                                                    \
         ${ROCKIT_TOP}

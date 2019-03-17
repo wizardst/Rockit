@@ -263,8 +263,8 @@ typedef struct {
  * Applications.
  */
 typedef struct {
-    int32_t timeLow;
-    int16_t timeMid;
+    uint32_t timeLow;
+    uint16_t timeMid;
     uint16_t timeHiAndVersion;
     uint8_t clockSeqAndNode[8];
 } TEEC_UUID;

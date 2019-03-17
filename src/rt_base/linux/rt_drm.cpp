@@ -22,6 +22,9 @@
 
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
 
 #include "rt_drm.h"         // NOLINT
 #include "drm.h"            // NOLINT

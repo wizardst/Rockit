@@ -22,7 +22,13 @@
 #define SRC_RT_BASE_INCLUDE_RT_ION_H_
 
 #include "rt_header.h"      // NOLINT
+#if defined(HAVE_NDK)
 #include <linux/ion.h>      // NOLINT
+#elif defined(ARMLINUX)
+#include <ion.h>
+#else
+#include "ion.h"            // NOLINT
+#endif
 
 static const char *ION_DEV_NAME = "/dev/ion";
 

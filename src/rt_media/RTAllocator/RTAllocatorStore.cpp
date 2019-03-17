@@ -90,7 +90,7 @@ RTAllocator *RTAllocatorStore::fetchIonAllocator(RtMetaData *config) {
 
 RTAllocator* RTAllocatorStore::fetchDrmAllocator(RtMetaData *config) {
     RTAllocator* allocator = RT_NULL;
-    #ifdef OS_LINUX
+    #ifdef HAVE_DRM
     RT_BOOL avail = RTAllocatorDrm::checkAvail();
     if (avail) {
         allocator = new RTAllocatorDrm(config);

@@ -172,7 +172,7 @@ INT32 RTMediaBuffer::refsCount() {
 }
 
 void RTMediaBuffer::release(bool debug) {
-    if(debug) {
+    if (debug) {
         RT_LOGE("mObserver=%p, mFuncFree=%p, refs=%d", mObserver, mFuncFree, mRefCount);
     }
     if (mObserver == RT_NULL && mRefCount == 0) {

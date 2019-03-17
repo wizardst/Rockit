@@ -19,6 +19,7 @@
 
 #include <dlfcn.h>
 #include <fcntl.h>
+#include <string.h>
 #include "rt_trust.h" // NOLINT
 
 

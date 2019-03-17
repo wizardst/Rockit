@@ -7,14 +7,19 @@ set(RT_BUFFER_SRC
     rt_buffer/rt_buffer.cpp
 )
 
+if (HAVE_NDK)
+    add_definitions(-DHAVE_NDK)
+    message(STATUS "build with HAVE_NDK")
+endif()
+
 add_definitions(-DOS_LINUX)
 
 if (HAVE_DRM)
     add_definitions(-DHAVE_DRM)
     set(DRM_FILES linux/rt_drm.cpp)
-    message(STATUS "build with DRM Support")
+    message(STATUS "build with DRM support")
 else()
-    message(STATUS "build without DRM Support")
+    message(STATUS "build without DRM support")
 endif()
 
 set(RT_BASE_LINUX_SRC

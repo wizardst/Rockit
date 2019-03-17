@@ -12,9 +12,18 @@ if (HAVE_MPI)
     set(MPI_FILES
             Mpi/MpiAdapterUtils.cpp
             Mpi/MpiAdapterCodec.cpp)
-    message(STATUS "build with RK-MPI Support")
+    message(STATUS "build with RK-MPI support")
 else()
-    message(STATUS "build without RK-MPI Support")
+    message(STATUS "build without RK-MPI support")
+endif()
+
+if (HAVE_DRM)
+    add_definitions(-DHAVE_DRM)
+    set(DRM_FILES
+            RTAllocator/RTAllocatorDrm.cpp)
+    message(STATUS "build with drm allocator support")
+else()
+    message(STATUS "build without drm allocator support")
 endif()
 
 if (HAVE_GLES)
@@ -35,9 +44,9 @@ if (HAVE_GLES)
             GLRender/RTScheduler.cpp
             GLRender/RTSprite.cpp
     )
-    message(STATUS "build with GLES-EGL Support")
+    message(STATUS "build with GLES-EGL support")
 else()
-    message(STATUS "build without GLES-EGL Support")
+    message(STATUS "build without GLES-EGL support")
 endif()
 
 set(RT_MEDIA_SRC
@@ -53,7 +62,6 @@ set(RT_MEDIA_SRC
     ${GLES_FILES}
     RTAllocator/RTAllocatorBase.cpp
     RTAllocator/RTAllocatorMalloc.cpp
-    RTAllocator/RTAllocatorDrm.cpp
     RTAllocator/RTAllocatorIon.cpp
     RTAllocator/RTAllocatorStore.cpp
     ${MPI_FILES}
