@@ -155,20 +155,25 @@ RT_RET RTNDKNodePlayer::reset() {
 
 RT_RET RTNDKNodePlayer::setDataSource(RTMediaUri *mediaUri) {
     RT_ASSERT(RT_NULL != mNodeBus);
-    RT_RET err = mNodeBus->autoBuild(mediaUri);
-    if (RT_OK != err) {
-        if (RT_NULL == mNodeBus->getRootNode(BUS_LINE_ROOT)) {
-            RT_LOGE("fail to init demuxer");
-            mPlayerCtx->mLooper->flush();
-            RTMessage* msg = new RTMessage(RT_MEDIA_ERROR, RT_NULL, this);
-            mPlayerCtx->mLooper->send(msg, 0);
-            mPlayerCtx->mLooper->requestExit();
-            return RT_ERR_UNKNOWN;
-        }
-    } else {
-        this->setCurState(RT_STATE_INITIALIZED);
-    }
+    RT_RET err = RT_OK;
 
+    if (mediaUri->mUri[0] == RT_NULL) {
+        this->setCurState(RT_STATE_INITIALIZED);
+    } else {
+        err = mNodeBus->autoBuild(mediaUri);
+        if (RT_OK != err) {
+            if (RT_NULL == mNodeBus->getRootNode(BUS_LINE_ROOT)) {
+                RT_LOGE("fail to init demuxer");
+                mPlayerCtx->mLooper->flush();
+                RTMessage* msg = new RTMessage(RT_MEDIA_ERROR, RT_NULL, this);
+                mPlayerCtx->mLooper->send(msg, 0);
+                mPlayerCtx->mLooper->requestExit();
+                return RT_ERR_UNKNOWN;
+            }
+        } else {
+            this->setCurState(RT_STATE_INITIALIZED);
+        }
+    }
     return err;
 }
 
@@ -243,6 +248,7 @@ RT_RET RTNDKNodePlayer::pause() {
 
 RT_RET RTNDKNodePlayer::stop() {
     UINT32 curState = this->getCurState();
+    RTMessage* msg  = RT_NULL;
     switch (curState) {
       case RT_STATE_STOPPED:
         RTStateUtil::dumpStateError(curState, __FUNCTION__);
@@ -256,6 +262,8 @@ RT_RET RTNDKNodePlayer::stop() {
         // @TODO: do stop player
         mNodeBus->excuteCommand(RT_NODE_CMD_STOP);
         mPlayerCtx->mLooper->flush();
+        msg = new RTMessage(RT_MEDIA_STOPPED, RT_NULL, this);
+        mPlayerCtx->mLooper->send(msg, 0);
         break;
     }
 

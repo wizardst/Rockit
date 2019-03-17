@@ -79,7 +79,9 @@ rt_status RTNDKMediaPlayer::setDataSource(const char *url, const char *headers) 
 
     // configure node bus and summary
     RTMediaUri setting = {0};
-    rt_str_snprintf(setting.mUri, sizeof(setting.mUri), "%s", url);
+    if (RT_NULL != url) {
+        rt_str_snprintf(setting.mUri, sizeof(setting.mUri), "%s", url);
+    }
     if (NULL != headers) {
         rt_str_snprintf(setting.mUserAgent, sizeof(setting.mUserAgent), "%s", headers);
     }

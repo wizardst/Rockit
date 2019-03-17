@@ -37,6 +37,11 @@
 #endif
 #define DEBUG_FLAG 0x0
 
+#ifndef API_HAVE_AV_REGISTER_ALL
+#define API_HAVE_AV_REGISTER_ALL (LIBAVFORMAT_VERSION_MAJOR < 58)
+#endif
+
+
 FACodecContext* fa_video_decode_create(RtMetaData *meta) {
     INT32 err = 0;
     AVCodecContext *codec_ctx = NULL;
@@ -254,6 +259,9 @@ __FAILED:
 FACodecContext *fa_decode_create(RtMetaData *meta, RTTrackType type) {
     FACodecContext *ctx = RT_NULL;
     CHECK_IS_NULL(meta);
+    #if API_HAVE_AV_REGISTER_ALL
+    av_register_all();
+    #endif
 
     switch (type) {
     case RTTRACK_TYPE_VIDEO:
