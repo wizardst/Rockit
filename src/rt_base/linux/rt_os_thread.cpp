@@ -53,9 +53,9 @@ static void* thread_looping(void* arg) {
     RtThread*     thread = static_cast<RtThread*>(arg);
     RtThreadData* data   = static_cast<RtThreadData*>(thread->mData);
     // Call entry point only if thread was not canceled before starting.
-    INT64 tid = (INT64)(data->mTid);
+    UINT32 tid = (INT32)(data->mTid);
     data->mLoopState = THREAD_LOOP;
-    RT_LOGD_IF(DEBUG_FLAG, "call, pthread_looper(name:%-010s tid:%lld)", data->mName, tid%10000);
+    RT_LOGD_IF(DEBUG_FLAG, "call, pthread_looper(name:%-010s tid:%lu)", data->mName, tid%10000);
 
     if (RT_NULL != data->mTaskSlot) {
         data->mTaskSlot(data->mPtrData);
@@ -65,7 +65,7 @@ static void* thread_looping(void* arg) {
         data->mRunnable->run(data->mPtrData);
     }
 
-    RT_LOGD_IF(DEBUG_FLAG, "done, pthread_looper(name:%-010s tid:%lld)", data->mName, tid%10000);
+    RT_LOGD_IF(DEBUG_FLAG, "done, pthread_looper(name:%-010s tid:%lu)", data->mName, tid%10000);
     pthread_exit(0);
     return NULL;
 }
@@ -99,9 +99,7 @@ RtThread::RtThread(RtRunnable* runnable, void* ptr_data) {
 RtThread::~RtThread() {
     if (RT_NULL != mData) {
         RtThreadData* data = static_cast<RtThreadData*>(mData);
-        if (data->mTid > 0) {
-            this->join();
-        }
+        this->join();
         rt_safe_free(mData);
     }
 }
@@ -132,12 +130,14 @@ INT32 RtThread::getState() {
 void RtThread::join() {
     if (RT_NULL != mData) {
         RtThreadData* data = static_cast<RtThreadData*>(mData);
-        INT64 tid = (INT64)(data->mTid);
-        RT_LOGD_IF(DEBUG_FLAG, "call, pthread_join(name:%-010s tid:%lld)", data->mName, tid%10000);
-        pthread_join(data->mTid, RT_NULL);
-        RT_LOGD_IF(DEBUG_FLAG, "done, pthread_join(name:%-010s tid:%lld)", data->mName, tid%10000);
-        data->mLoopState =  THREAD_EXIT;
-        data->mTid   = 0;
+        if (data->mTid > 0) {
+            UINT32 tid = (UINT32)(data->mTid);
+            RT_LOGD_IF(DEBUG_FLAG, "call, pthread_join(name:%-010s tid:%lu)", data->mName, tid%10000);
+            pthread_join(data->mTid, RT_NULL);
+            RT_LOGD_IF(DEBUG_FLAG, "done, pthread_join(name:%-010s tid:%lu)", data->mName, tid%10000);
+            data->mLoopState =  THREAD_EXIT;
+            data->mTid   = 0;
+        }
     }
 }
 
