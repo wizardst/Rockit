@@ -27,10 +27,8 @@
 #define LOG_TAG "RTMediaBuffer"
 
 RTMediaBuffer::RTMediaBuffer(void* data, UINT32 size) {
-    RTObject::trace(this->getName(), this, sizeof(RTMediaBuffer));
+    this->baseInit();
 
-    mMetaData = RT_NULL;
-    mFuncFree = RT_NULL;
     setData(data, size);
 }
 
@@ -40,30 +38,38 @@ RTMediaBuffer::RTMediaBuffer(
         INT32 handle,
         INT32 fd,
         RTAllocator *alloctor) {
-    RTObject::trace(this->getName(), this, sizeof(RTMediaBuffer));
+    this->baseInit();
 
-    mMetaData = RT_NULL;
-    mHandle = handle;
-    mFd = fd;
+    mHandle    = handle;
+    mFd        = fd;
     mAllocator = alloctor;
     setData(data, size);
 }
 
 RTMediaBuffer::RTMediaBuffer(UINT32 size) {
-    RTObject::trace(this->getName(), this, sizeof(RTMediaBuffer));
+    this->baseInit();
 
-    mMetaData = RT_NULL;
     mData = rt_malloc_size(void*, size);
     setData(mData, size);
     mOwnsData = RT_TRUE;
 }
 
 RTMediaBuffer::RTMediaBuffer(const RTMediaBuffer* data) {
-    RTObject::trace(this->getName(), this, sizeof(RTMediaBuffer));
+    this->baseInit();
 
-    mMetaData = RT_NULL;
     setData(data->getData(), data->getSize());
     setRange(data->getOffset(), data->getLength());
+}
+
+void RTMediaBuffer::baseInit() {
+    RTObject::trace(this->getName(), this, sizeof(RTMediaBuffer));
+
+    mRefCount  = 0;
+    mFuncFree  = RT_NULL;
+    mMetaData  = RT_NULL;
+    mObserver  = RT_NULL;
+    mAllocator = RT_NULL;
+    mOwnsData  = RT_FALSE;
 }
 
 RTMediaBuffer::~RTMediaBuffer() {

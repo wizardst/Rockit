@@ -52,18 +52,19 @@ RTSinkAudioALSA::RTSinkAudioALSA() {
     RT_ASSERT(RT_NULL != mLockBuffer);
 
     mALSASinkCtx = RT_NULL;
+    mInputMeta = RT_NULL;
     mSampleRate  = 48000;
     mChannels    = 2;
     mDataSize    = 4096;
 }
 
 RTSinkAudioALSA::~RTSinkAudioALSA() {
+    rt_safe_delete(mInputMeta);
     release();
 }
 
 RT_RET RTSinkAudioALSA::init(RtMetaData *metaData) {
-    // @review: not used, remove directly
-    rt_safe_delete(metaData);
+    mInputMeta = metaData;
     return RT_OK;
 }
 

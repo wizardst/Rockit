@@ -82,6 +82,9 @@ class RTMediaBuffer : public RTObject {
     void reset();
 
  private:
+    void baseInit();
+
+ private:
     void*           mData;
     UINT32          mSize;
     UINT32          mRangeOffset;
