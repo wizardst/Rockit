@@ -155,7 +155,8 @@ void RTMediaBufferPool::signalBufferReturned(RTMediaBuffer *buffer) {
 RT_RET RTMediaBufferPool::releaseAllBuffers() {
     RT_RET          ret = RT_OK;
 
-    for (UINT32 idx = 0; idx < array_list_get_size(mBufferList->mBuffers); idx++) {
+    UINT32 size = array_list_get_size(mBufferList->mBuffers);
+    for (UINT32 idx = 0; idx < size; idx++) {
         RTMediaBuffer *buffer = reinterpret_cast<RTMediaBuffer *>
                                     (array_list_get_data(mBufferList->mBuffers, 0));
         if (buffer->refsCount() != 0) {

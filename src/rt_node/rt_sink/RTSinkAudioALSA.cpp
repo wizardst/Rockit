@@ -69,6 +69,7 @@ RT_RET RTSinkAudioALSA::init(RtMetaData *metaData) {
 }
 
 RT_RET RTSinkAudioALSA::release() {
+    onFlush();
     onStop();
 
     if (mDeque != NULL) {
@@ -229,8 +230,9 @@ RT_RET RTSinkAudioALSA::onFlush() {
     RTMediaBuffer *mediaBuf = NULL;
     if (mDeque) {
         RtMutex::RtAutolock autoLock(mLockBuffer);
-        RT_LOGD("deque_size(mDeque) = %d", deque_size(mDeque));
-        for (i = 0; i < deque_size(mDeque); i++) {
+        UINT32 size = deque_size(mDeque);
+        RT_LOGE("deque_size(mDeque) = %d", deque_size(mDeque));
+        for (i = 0; i < size; i++) {
             pullBuffer(&mediaBuf);
 
             // @review: return buffer to media-buffer-pool
