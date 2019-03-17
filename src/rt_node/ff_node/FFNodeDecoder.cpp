@@ -83,7 +83,7 @@ FFNodeDecoder::FFNodeDecoder()
     mTrackParms       = rt_malloc(RTTrackParms);
 
     mMetaInput  = RT_NULL;
-    mMetaOutput = new RtMetaData;
+    mMetaOutput = RT_NULL;
 }
 
 FFNodeDecoder::~FFNodeDecoder() {
@@ -127,6 +127,10 @@ RT_RET FFNodeDecoder::init(RtMetaData *metadata) {
 
     mMetaInput = metadata;
     rt_medatdata_goto_trackpar(metadata, mTrackParms);
+
+    // @review: delayed initialization of MetaOutput, 
+    //          because no sink node release meta when node failed to init 
+    mMetaOutput = new RtMetaData;
     mMetaOutput->clear();
     mMetaOutput->setInt32(kKeyFrameW,   mTrackParms->mVideoWidth);
     mMetaOutput->setInt32(kKeyFrameH,   mTrackParms->mVideoHeight);
