@@ -104,8 +104,8 @@ FFNodeDecoder::~FFNodeDecoder() {
 
     release();
     rt_safe_free(mTrackParms);
-    rt_safe_free(mLockPacketQ);
-    rt_safe_free(mLockFrameQ);
+    rt_safe_delete(mLockPacketQ);
+    rt_safe_delete(mLockFrameQ);
     deque_destory(&mPacketQ);
     deque_destory(&mFrameQ);
 }
