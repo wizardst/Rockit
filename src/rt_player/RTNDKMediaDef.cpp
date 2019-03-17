@@ -31,7 +31,7 @@ typedef struct _rt_media_state {
 
 #define RT_STATE_MAX  9
 static const rt_media_state gStateNames[] = {
-    { RT_STATE_STATE_ERROR,     "STATE_ERROR" },
+    { RT_STATE_ERROR,           "STATE_ERROR" },
     { RT_STATE_IDLE,            "STATE_IDLE" },
     { RT_STATE_INITIALIZED,     "STATE_INITIALIZED" },
     { RT_STATE_PREPARING,       "STATE_PREPARING" },

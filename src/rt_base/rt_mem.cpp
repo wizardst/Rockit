@@ -67,7 +67,7 @@ void *rt_mem_calloc(const char *caller, size_t size) {
 }
 
 void *rt_mem_realloc(const char *caller, void *ptr, size_t size) {
-    void *ret;
+    void *ptr_new;
 
     if (NULL == ptr)
         return rt_mem_malloc(caller, size);
@@ -80,12 +80,14 @@ void *rt_mem_realloc(const char *caller, void *ptr, size_t size) {
     size_t size_align = MEM_ALIGNED(size);
     void *ptr_real = reinterpret_cast<UINT8 *>(ptr) - MEM_HEAD_ROOM(debug);
 
-    rt_os_realloc(ptr_real, &ret, MEM_ALIGN, size_align);
+    rt_os_realloc(ptr_real, &ptr_new, MEM_ALIGN, size_align);
 
     // TODO(debug) : debug memory
-    // _gMemService->dump();
+    UINT32 old_size;
+    _gMemService.removeNode(ptr, &old_size);
+    _gMemService.addNode(caller, ptr_new, size);
 
-    return ret;
+    return ptr_new;
 }
 
 void rt_mem_free(const char *caller, void *ptr) {

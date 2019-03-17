@@ -384,6 +384,7 @@ RT_RET RTNodeBus::clearNodeBus() {
     mBusCtx->mRootNodes[BUS_LINE_VIDEO] = RT_NULL;
     mBusCtx->mRootNodes[BUS_LINE_AUDIO] = RT_NULL;
     mBusCtx->mRootNodes[BUS_LINE_SUBTE] = RT_NULL;
+    return RT_OK;
 }
 
 

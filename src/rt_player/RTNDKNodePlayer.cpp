@@ -110,6 +110,7 @@ RT_RET RTNDKNodePlayer::release() {
 
     // @review: release node bus
     rt_safe_delete(mNodeBus);
+
     return RT_OK;
 }
 
@@ -258,7 +259,7 @@ RT_RET RTNDKNodePlayer::stop() {
       case RT_STATE_STARTED:
       case RT_STATE_PAUSED:
       case RT_STATE_COMPLETE:
-      case RT_STATE_STATE_ERROR:
+      case RT_STATE_ERROR:
         // @TODO: do stop player
         mNodeBus->excuteCommand(RT_NODE_CMD_STOP);
         mPlayerCtx->mLooper->flush();
@@ -277,7 +278,7 @@ RT_RET RTNDKNodePlayer::wait() {
         curState = this->getCurState();
         switch (curState) {
           case RT_STATE_IDLE:
-          case RT_STATE_STATE_ERROR:
+          case RT_STATE_ERROR:
           case RT_STATE_COMPLETE:
             loopFlag = 0;
             break;
@@ -373,7 +374,10 @@ RT_RET RTNDKNodePlayer::setCurState(UINT32 newState) {
 
 UINT32 RTNDKNodePlayer::getCurState() {
     RT_ASSERT(RT_NULL != mPlayerCtx);
-    return mPlayerCtx->mState;
+    if (RT_NULL != mPlayerCtx) {
+        return mPlayerCtx->mState;
+    }
+    return RT_STATE_ERROR;
 }
 
 RT_RET RTNDKNodePlayer::onSeekTo(INT64 usec) {
@@ -427,7 +431,7 @@ void   RTNDKNodePlayer::onMessageReceived(struct RTMessage* msg) {
         setCurState(RT_STATE_PAUSED);
         break;
       case RT_MEDIA_ERROR:
-        setCurState(RT_STATE_STATE_ERROR);
+        setCurState(RT_STATE_ERROR);
         break;
       case RT_MEDIA_STOPPED:
         setCurState(RT_STATE_STOPPED);

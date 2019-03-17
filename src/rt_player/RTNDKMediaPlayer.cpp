@@ -216,7 +216,7 @@ rt_status RTNDKMediaPlayer::getState() {
     if (RT_NULL != mPlayerCtx) {
         return mPlayerCtx->mState;
     }
-    return RT_STATE_STATE_ERROR;
+    return RT_STATE_ERROR;
 }
 
 rt_status RTNDKMediaPlayer::getCurrentPosition(int64_t *usec) {

@@ -27,7 +27,7 @@
 #define DEBUG_LEVEL_LOW  0
 
 enum RTMediaState {
-    RT_STATE_STATE_ERROR        = 0,
+    RT_STATE_ERROR              = 0,
     RT_STATE_IDLE               = 1 << 0,
     RT_STATE_INITIALIZED        = 1 << 1,
     RT_STATE_PREPARING          = 1 << 2,
