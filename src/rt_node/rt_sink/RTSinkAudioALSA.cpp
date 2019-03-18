@@ -267,6 +267,7 @@ RT_RET RTSinkAudioALSA::openSoundCard(RtMetaData *metaData) {
 
         if (mALSASinkCtx)
             alsa_snd_destroy(mALSASinkCtx);
+        return err;
     }
 
     err = alsa_set_snd_sw_params(mALSASinkCtx);

@@ -33,6 +33,14 @@
 #endif
 #define DEBUG_FLAG 0x0
 
+INT32 check_snd_pcm_sw_error(INT32 err, const char* caller) {
+    if (err < 0) {
+        RT_LOGE("fail to %s, error:%s", caller, snd_strerror(err));
+        return err;
+    }
+    return RT_OK;
+}
+
 RT_RET alsa_set_snd_hw_params(ALSASinkContext *ctx, int flag) {
     snd_pcm_hw_params_t *hardwareParams;
     int err;
@@ -52,39 +60,25 @@ RT_RET alsa_set_snd_hw_params(ALSASinkContext *ctx, int flag) {
     const char *formatName = validFormat ? snd_pcm_format_name(ctx->mAlsaParamsCtx->format)
                              : "UNKNOWN";
 
-    if (snd_pcm_hw_params_malloc(&hardwareParams) < 0) {
-        RT_LOGE("Failed to allocate ALSA hardware parameters!");
-        return RT_ERR_INIT;
-    }
+    err = snd_pcm_hw_params_malloc(&hardwareParams);
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_malloc")) goto done;
 
-    if (snd_pcm_hw_params_any(ctx->theInstance, hardwareParams) < 0) {
-        RT_LOGE("Unable to configure hardware: %s", snd_strerror(err));
-        goto done;
-    }
+    err = snd_pcm_hw_params_any(ctx->theInstance, hardwareParams);
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_any")) goto done;
 
     // Set the interleaved read and write format.
     err = snd_pcm_hw_params_set_access(ctx->theInstance, hardwareParams, SND_PCM_ACCESS_RW_INTERLEAVED);
-    if (err < 0) {
-        RT_LOGE("Error setting interleaved mode: %s", snd_strerror(err));
-        goto done;
-    }
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_set_access")) goto done;
 
     err = snd_pcm_hw_params_set_format(ctx->theInstance, hardwareParams, ctx->mAlsaParamsCtx->format);
-    if (err < 0) {
-        RT_LOGE("Unable to configure PCM format %s (%s): %s", formatName, formatDesc, snd_strerror(err));
-        goto done;
-    }
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_set_format")) goto done;
 
     RT_LOGD("Set PCM format to %s (%s)",  formatName, formatDesc);
 
     err = snd_pcm_hw_params_set_channels(ctx->theInstance, hardwareParams, ctx->mAlsaParamsCtx->channels);
-    if (err < 0) {
-        RT_LOGE("Unable to set channel count to %i: %s", ctx->mAlsaParamsCtx->channels, snd_strerror(err));
-        goto done;
-    }
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_set_channels")) goto done;
 
     err = snd_pcm_hw_params_set_rate_near(ctx->theInstance, hardwareParams, &requestedRate, 0);
-
     if (err < 0)
         RT_LOGE("Unable to set sample rate to %u: %s", ctx->mAlsaParamsCtx->sampleRate, snd_strerror(err));
     else if (requestedRate != ctx->mAlsaParamsCtx->sampleRate)
@@ -98,63 +92,38 @@ RT_RET alsa_set_snd_hw_params(ALSASinkContext *ctx, int flag) {
 
     // Make sure we have at least the size we originally wanted
     err = snd_pcm_hw_params_set_buffer_size_near(ctx->theInstance, hardwareParams, &bufferSize);
-
-    if (err < 0) {
-        RT_LOGE("Unable to set buffer size to %d:  %s", (int)bufferSize, snd_strerror(err));
-        goto done;
-    }
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_set_buffer_size_near")) goto done;
 
     err = snd_pcm_hw_params_set_period_size_near(ctx->theInstance, hardwareParams, &periodSize, NULL);
-    if (err < 0) {
-        RT_LOGE("Unable to set buffer size to %d:  %s", (int)periodSize, snd_strerror(err));
-        goto done;
-    }
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_set_period_size_near")) goto done;
 
     // Setup buffers for latency
     err = snd_pcm_hw_params_set_buffer_time_near(ctx->theInstance, hardwareParams, &latency, NULL);
-
     if (err < 0) {
         /* That didn't work, set the period instead */
         unsigned int periodTime = latency / periods;
         err = snd_pcm_hw_params_set_period_time_near(ctx->theInstance, hardwareParams, &periodTime, NULL);
-        if (err < 0) {
-            RT_LOGE("Unable to set the period time for latency: %s", snd_strerror(err));
-            goto done;
-        }
+        if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_set_period_time_near")) goto done;
 
         err = snd_pcm_hw_params_get_period_size(hardwareParams, &periodSize, NULL);
-        if (err < 0) {
-            RT_LOGE("Unable to get the period size for latency: %s", snd_strerror(err));
-            goto done;
-        }
+        if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_get_period_size")) goto done;
+
         bufferSize = periodSize * periods;
         if (bufferSize < ctx->mAlsaParamsCtx->bufferSize) bufferSize = ctx->mAlsaParamsCtx->bufferSize;
         err = snd_pcm_hw_params_set_buffer_size_near(ctx->theInstance, hardwareParams, &bufferSize);
-        if (err < 0) {
-            RT_LOGE("Unable to set the buffer size for latency: %s", snd_strerror(err));
-            goto done;
-        }
+        if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_set_buffer_size_near")) goto done;
     } else {
         // OK, we got buffer time near what we expect. See what that did for bufferSize.
         err = snd_pcm_hw_params_get_buffer_size(hardwareParams, &bufferSize);
-        if (err < 0) {
-            RT_LOGE("Unable to get the buffer size for latency: %s", snd_strerror(err));
-            goto done;
-        }
-        // Does set_buffer_time_near change the passed value? It should.
+        if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_get_buffer_size")) goto done;
 
+        // Does set_buffer_time_near change the passed value? It should.
         err = snd_pcm_hw_params_get_buffer_time(hardwareParams, &latency, NULL);
-        if (err < 0) {
-            RT_LOGE("Unable to get the buffer time for latency: %s", snd_strerror(err));
-            goto done;
-        }
+        if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_get_buffer_time")) goto done;
 
         periodTime = latency/periods;
         err = snd_pcm_hw_params_set_period_time_near(ctx->theInstance, hardwareParams, &periodTime, NULL);
-        if ( err < 0 ) {
-            RT_LOGE("Unable to set the period time for latency: %s", snd_strerror(err));
-            goto done;
-        }
+        if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_hw_params_set_period_time_near")) goto done;
     }
 
     RT_LOGD("audio type flag: %d\n", flag);
@@ -180,7 +149,7 @@ done:
 }
 
 RT_RET alsa_set_snd_sw_params(ALSASinkContext *ctx) {
-    snd_pcm_sw_params_t * softwareParams;
+    snd_pcm_sw_params_t* softwareParams = NULL;
     int err;
 
     snd_pcm_uframes_t bufferSize = 0;
@@ -188,17 +157,13 @@ RT_RET alsa_set_snd_sw_params(ALSASinkContext *ctx) {
     snd_pcm_uframes_t startThreshold, stopThreshold;
     snd_pcm_tstamp_t tstamp_mode = SND_PCM_TSTAMP_ENABLE;
 
-    if (snd_pcm_sw_params_malloc(&softwareParams) < 0) {
-        RT_LOGE("Failed to allocate ALSA software parameters!");
-        return RT_ERR_INIT;
-    }
+    err = snd_pcm_sw_params_malloc(&softwareParams);
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_sw_params_malloc")) goto done;
 
     // Get the current software parameters
+    RT_LOGE("call,snd_pcm_sw_params_current(h=%p, %p)", ctx->theInstance, softwareParams);
     err = snd_pcm_sw_params_current(ctx->theInstance, softwareParams);
-    if (err < 0) {
-        RT_LOGE("Unable to get software parameters: %s", snd_strerror(err));
-        goto done;
-    }
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_sw_params_current")) goto done;
 
     // Configure ALSA to start the transfer when the buffer is almost full.
     snd_pcm_get_params(ctx->theInstance, &bufferSize, &periodSize);
@@ -207,37 +172,27 @@ RT_RET alsa_set_snd_sw_params(ALSASinkContext *ctx) {
     stopThreshold = bufferSize;
 
     err = snd_pcm_sw_params_set_start_threshold(ctx->theInstance, softwareParams, startThreshold);
-    if (err < 0) {
-        RT_LOGE("Unable to set start threshold to %lu frames: %s", startThreshold, snd_strerror(err));
-        goto done;
-    }
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_sw_params_set_start_threshold")) goto done;
 
     err = snd_pcm_sw_params_set_stop_threshold(ctx->theInstance, softwareParams, stopThreshold);
-    if (err < 0) {
-        RT_LOGE("Unable to set stop threshold to %lu frames: %s", stopThreshold, snd_strerror(err));
-        goto done;
-    }
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_sw_params_set_stop_threshold")) goto done;
 
     // Allow the transfer to start when at least periodSize samples can be
     // processed.
     err = snd_pcm_sw_params_set_avail_min(ctx->theInstance, softwareParams, periodSize);
-    if (err < 0) {
-        RT_LOGE("Unable to configure available minimum to %lu: %s", periodSize, snd_strerror(err));
-        goto done;
-    }
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_sw_params_set_avail_min")) goto done;
 
     err = snd_pcm_sw_params_set_tstamp_mode(ctx->theInstance, softwareParams, tstamp_mode);
-    if (err < 0) {
-        RT_LOGE("Unable to set tstamp mode to %s: %s", tstamp_mode, snd_strerror(err));
-        goto done;
-    }
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_sw_params_set_tstamp_mode")) goto done;
 
     // Commit the software parameters back to the device.
     err = snd_pcm_sw_params(ctx->theInstance, softwareParams);
-    if (err < 0) RT_LOGE("Unable to configure software parameters: %s", snd_strerror(err));
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_sw_params")) goto done;
 
     return RT_OK;
+
 done:
+    RT_LOGE("fail to alsa_set_snd_sw_params(%p)", softwareParams);
     snd_pcm_sw_params_free(softwareParams);
     return RT_ERR_INIT;
 }
@@ -307,25 +262,17 @@ ALSASinkContext* alsa_snd_create(const char *name, RtMetaData *metadata) {
     params_ctx->periods = DEFAULT_OUT_PERIODS;
 
     snd_pcm_t *pHandle;
-    int rc = snd_pcm_open(&pHandle, name, SND_PCM_STREAM_PLAYBACK, 0);
-    if (rc < 0) {
-        RT_LOGE("Failed to snd_pcm_open device: %s", strerror(rc));
-        goto __FAILED;
-    }
+    int err = snd_pcm_open(&pHandle, name, SND_PCM_STREAM_PLAYBACK, 0);
+    if (RT_OK != check_snd_pcm_sw_error(err, "snd_pcm_open")) goto __FAILED;
+
     ctx->theInstance = pHandle;
+    RT_LOGE("done, snd_pcm_open(handle=%p)", pHandle);
 
     return ctx;
 
 __FAILED:
-    if (ctx->mAlsaParamsCtx) {
-        rt_free(ctx->mAlsaParamsCtx);
-        ctx->mAlsaParamsCtx = RT_NULL;
-    }
-
-    if (ctx) {
-        rt_free(ctx);
-        ctx = RT_NULL;
-    }
+    rt_safe_free(ctx->mAlsaParamsCtx);
+    rt_safe_free(ctx);
 
     return RT_NULL;
 }
@@ -334,23 +281,14 @@ RT_VOID alsa_snd_destroy(ALSASinkContext *ctx) {
     snd_pcm_t *pHandle = ctx->theInstance;
     int err;
     ctx->theInstance = RT_NULL;
+     RT_LOGE("call, snd_pcm_close(handle=%p)", pHandle);
     if (pHandle) {
         err = snd_pcm_close(pHandle);
-
-        if (err < 0) {
-            RT_LOGE("Failed snd_pcm_close! err = %s", strerror(err));
-        }
+        check_snd_pcm_sw_error(err, "snd_pcm_close");
     }
 
-    if (ctx->mAlsaParamsCtx) {
-        rt_free(ctx->mAlsaParamsCtx);
-        ctx->mAlsaParamsCtx = RT_NULL;
-    }
-
-    if (ctx) {
-        rt_free(ctx);
-        ctx = RT_NULL;
-    }
+    rt_safe_free(ctx->mAlsaParamsCtx);
+    rt_safe_free(ctx);
 }
 
 int alsa_amixer_cset_vol_impl(char *audio_vol, bool roflag) {
