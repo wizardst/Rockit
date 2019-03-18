@@ -46,8 +46,9 @@ FACodecContext* fa_video_decode_create(RtMetaData *meta) {
     INT32 err = 0;
     AVCodecContext *codec_ctx = NULL;
     FACodecContext *ctx = rt_malloc(FACodecContext);
-    ctx->mTrackType = RTTRACK_TYPE_VIDEO;
-    ctx->mAvCodecCtx = avcodec_alloc_context3(NULL);
+    ctx->mTrackType     = RTTRACK_TYPE_VIDEO;
+    ctx->mAvCodecCtx    = avcodec_alloc_context3(NULL);
+    ctx->mFrame         = RT_NULL;
     CHECK_IS_NULL(ctx->mAvCodecCtx);
     codec_ctx = ctx->mAvCodecCtx;
 
@@ -96,6 +97,7 @@ FACodecContext* fa_video_decode_create(RtMetaData *meta) {
     }
     RT_LOGD("Success to open ffmpeg decoder(%s)!", avcodec_get_name(codec_ctx->codec_id));
 
+    ctx->mFrame = RT_NULL;
     return ctx;
 
 __FAILED:
@@ -118,6 +120,7 @@ FACodecContext* fa_audio_decode_create(RtMetaData *meta) {
     ctx->mTrackType     = RTTRACK_TYPE_AUDIO;
     ctx->mSwrCtx        = RT_NULL;
     ctx->mAvCodecCtx    = RT_NULL;
+    ctx->mFrame         = RT_NULL;
     // codec_ctx = ctx->mAvCodecCtx;
 
     // necessary parameters
@@ -152,6 +155,7 @@ FACodecContext* fa_audio_decode_create(RtMetaData *meta) {
     RT_LOGD("Success to open ffmpeg decoder(%s)!", avcodec_get_name(av_codec_id));
 
     ctx->mAudioSrc.fmt = AV_SAMPLE_FMT_S16;
+    ctx->mFrame = RT_NULL;
 
     return ctx;
 
@@ -173,6 +177,7 @@ FACodecContext* fa_video_encode_create(RtMetaData *meta) {
     const AVCodec  *codec     = RT_NULL;
     FACodecContext *ctx       = rt_malloc(FACodecContext);
     ctx->mAvCodecCtx          = RT_NULL;
+    ctx->mFrame               = RT_NULL;
 
     // necessary parameters
     RTCodecID codecID   = RT_VIDEO_ID_Unused;
@@ -281,6 +286,10 @@ __FAILED:
 }
 
 void fa_video_decode_destroy(FACodecContext **fc) {
+    if (*fc && (*fc)->mFrame) {
+        av_frame_unref((*fc)->mFrame);
+    }
+
     if (*fc && (*fc)->mAvCodecCtx) {
         avcodec_free_context(&((*fc)->mAvCodecCtx));
     }
@@ -292,6 +301,10 @@ void fa_video_decode_destroy(FACodecContext **fc) {
 }
 
 void fa_video_encode_destroy(FACodecContext **fc) {
+    if (*fc && (*fc)->mFrame) {
+        av_frame_unref((*fc)->mFrame);
+    }
+
     if (*fc && (*fc)->mAvCodecCtx) {
         avcodec_free_context(&((*fc)->mAvCodecCtx));
     }
@@ -379,7 +392,11 @@ RT_RET fa_video_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
     INT32 ret = 0;
     RtMetaData *meta = NULL;
 
-    AVFrame *frame = av_frame_alloc();
+    AVFrame *frame = RT_NULL;
+    if (!fc->mFrame) {
+        fc->mFrame = av_frame_alloc();
+    }
+    frame = fc->mFrame;
     if (frame) {
         ret = avcodec_receive_frame(fc->mAvCodecCtx, frame);
         if (ret == AVERROR(EAGAIN)) {
@@ -434,7 +451,11 @@ RT_RET fa_audio_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
     RtMetaData *meta = NULL;
     INT32 data_size = 0;
     INT32 ret = 0;
-    AVFrame *frame = av_frame_alloc();
+    AVFrame *frame = RT_NULL;
+    if (!fc->mFrame) {
+        fc->mFrame = av_frame_alloc();
+    }
+    frame = fc->mFrame;
     if (frame) {
         ret = avcodec_receive_frame(fc->mAvCodecCtx, frame);
         if (ret == AVERROR(EAGAIN)) {

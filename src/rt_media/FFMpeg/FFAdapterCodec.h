@@ -38,6 +38,7 @@ struct FACodecContext {
     AudioParams      mAudioSrc;
     AudioParams      mAudioTgt;
     SwrContext      *mSwrCtx;
+    AVFrame         *mFrame;
 };
 
 class RtMetaData;
