@@ -93,6 +93,7 @@ typedef enum {
      RT_AUDIO_ID_WMA,         /**< Any variant of WMA encoded data */
      RT_AUDIO_ID_RA,          /**< Any variant of RA encoded data */
      RT_AUDIO_ID_MIDI,        /**< Any variant of MIDI encoded data */
+     RT_AUDIO_ID_FLAC,        /**< Any variant of FLAC encoded data */
      RT_AUDIO_ID_APE = 0x50000000,
      /**< Reserved region for introducing Khronos Standard Extensions */
      RT_AUDIO_CodingKhronosExtensions = 0x6F000000,
