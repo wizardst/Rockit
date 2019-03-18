@@ -58,15 +58,21 @@ RTObject *allocFFInputBuffer(void *arg) {
 }
 
 FFNodeDecoder::FFNodeDecoder()
-        : mFramePool(RT_NULL),
+        : mFFCodec(RT_NULL),
+          mUnusedInputPort(RT_NULL),
+          mFramePool(RT_NULL),
+          mLinearAllocator(RT_NULL),
+          mEventLooper(RT_NULL),
+          mMetaInput(RT_NULL),
+          mMetaOutput(RT_NULL),
           mTrackType(RTTRACK_TYPE_UNKNOWN),
-          mStarted(RT_FALSE) {
+          mStarted(RT_FALSE),
+          mCountPull(0),
+          mCountPush(0),
+          mUsePool(RT_FALSE),
+          mByPass(RT_FALSE) {
     mProcThread = new RtThread(ff_codec_loop, reinterpret_cast<void*>(this));
     mProcThread->setName("FFDecoder");
-
-    mNodeContext      = RT_NULL;
-    mUnusedInputPort  = RT_NULL;
-    mByPass           = RT_FALSE;
 
     mPacketQ = deque_create();
     RT_ASSERT(RT_NULL != mPacketQ);
@@ -81,9 +87,6 @@ FFNodeDecoder::FFNodeDecoder()
     RT_ASSERT(RT_NULL != mLockFrameQ);
 
     mTrackParms       = rt_malloc(RTTrackParms);
-
-    mMetaInput  = RT_NULL;
-    mMetaOutput = RT_NULL;
 }
 
 FFNodeDecoder::~FFNodeDecoder() {

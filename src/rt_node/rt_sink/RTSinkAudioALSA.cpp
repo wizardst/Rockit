@@ -41,7 +41,21 @@ void* sink_audio_alsa_loop(void* ptrNode) {
     return RT_NULL;
 }
 
-RTSinkAudioALSA::RTSinkAudioALSA() {
+RTSinkAudioALSA::RTSinkAudioALSA()
+        : mALSASinkCtx(RT_NULL),
+          mQueueBuffer(RT_NULL),
+          mPoolBuffer(RT_NULL),
+          mCodecId(0),
+          mProfile(0),
+          mSize(0),
+          mStart(RT_FALSE),
+          mCountPull(0),
+          mCountPush(0),
+          mEventLooper(RT_NULL),
+          mSampleRate(48000),
+          mChannels(2),
+          mDataSize(4096),
+          mInputMeta(RT_NULL) {
     mThread = new RtThread(sink_audio_alsa_loop, reinterpret_cast<void*>(this));
     mThread->setName("SinkAlsa");
     mDeque = deque_create(10);
@@ -50,12 +64,6 @@ RTSinkAudioALSA::RTSinkAudioALSA() {
 
     mLockBuffer = new RtMutex();
     RT_ASSERT(RT_NULL != mLockBuffer);
-
-    mALSASinkCtx = RT_NULL;
-    mInputMeta = RT_NULL;
-    mSampleRate  = 48000;
-    mChannels    = 2;
-    mDataSize    = 4096;
 }
 
 RTSinkAudioALSA::~RTSinkAudioALSA() {
