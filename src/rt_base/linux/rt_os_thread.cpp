@@ -130,8 +130,8 @@ INT32 RtThread::getState() {
 void RtThread::join() {
     if (RT_NULL != mData) {
         RtThreadData* data = static_cast<RtThreadData*>(mData);
-        if (data->mTid > 0) {
-            UINT32 tid = (UINT32)(data->mTid);
+        UINT32 tid = (UINT32)(data->mTid);
+        if (tid > 0) {
             RT_LOGD_IF(DEBUG_FLAG, "call, pthread_join(name:%-010s tid:%lu)", data->mName, tid%10000);
             pthread_join(data->mTid, RT_NULL);
             RT_LOGD_IF(DEBUG_FLAG, "done, pthread_join(name:%-010s tid:%lu)", data->mName, tid%10000);

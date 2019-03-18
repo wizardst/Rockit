@@ -165,8 +165,8 @@ RT_BOOL RTMsgLooper::msgLoop() {
         }
 
         // Handler callback will handle this message
-        RT_LOGD_IF(DEBUG_FLAG, "call, deliver message(msg=%p; what=%d)", msg, msg->getWhat());
         if (RT_NULL != msg) {
+            RT_LOGD_IF(DEBUG_FLAG, "call, deliver message(msg=%p; what=%d)", msg, msg->getWhat());
             if (msg->getTarget() == RT_NULL && mHandler) {
                 msg->setTarget(mHandler);
             }

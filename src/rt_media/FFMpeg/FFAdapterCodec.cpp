@@ -121,7 +121,6 @@ FACodecContext* fa_audio_decode_create(RtMetaData *meta) {
     ctx->mSwrCtx        = RT_NULL;
     ctx->mAvCodecCtx    = RT_NULL;
     ctx->mFrame         = RT_NULL;
-    // codec_ctx = ctx->mAvCodecCtx;
 
     // necessary parameters
     INT32 rt_codec_id;
