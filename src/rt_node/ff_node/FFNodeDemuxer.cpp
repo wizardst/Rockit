@@ -442,6 +442,7 @@ RT_RET FFNodeDemuxer::runTask() {
             err = fa_format_packet_read(ctx->mFormatCtx, &raw_pkt);
             if (err < 0) {
                 RT_LOGE("%s read end", __FUNCTION__);
+                fa_format_packet_free(raw_pkt);
                 ctx->mEosFlag = RT_TRUE;
                 continue;
             }

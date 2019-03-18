@@ -544,6 +544,7 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
                                 RT_LOGD("receive eos , break");
                                 break;
                             }
+                            esPacket->release(RT_TRUE);
                             continue;
                         }
                      }
