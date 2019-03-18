@@ -35,11 +35,11 @@
 #ifdef OS_WINDOWS
 #define TEST_URI "E:\\CloudSync\\low-used\\videos\\h264-1080p.mp4"
 #else
-#define TEST_URI "test_720.mp4"
+#define TEST_URI "5.aac"
 #endif
 
-#define DUMP_VIDEO_OUTPUT       1
-#define DUMP_AUDIO_OUTPUT       1
+#define DUMP_VIDEO_OUTPUT       0
+#define DUMP_AUDIO_OUTPUT       0
 
 #define VIDEO_TEST_OUTPUT_FILE      "/data/video_output.bin"
 #define AUDIO_TEST_OUTPUT_FILE      "/data/audio_output.bin"

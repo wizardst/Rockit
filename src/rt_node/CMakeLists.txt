@@ -68,6 +68,6 @@ endif()
 add_library(${RT_NODE_STATIC} STATIC ${RT_NODE_SRC})
 add_definitions(-std=c++11)
 set_target_properties(${RT_NODE_STATIC} PROPERTIES FOLDER "rt_node")
-target_link_libraries(${RT_NODE_STATIC} ${RT_BASE_STATIC} ${RT_MEDIA_STATIC} -lmedia_osal)
+target_link_libraries(${RT_NODE_STATIC} ${RT_BASE_STATIC} ${RT_MEDIA_STATIC})
 
 message(STATUS "cmake version ${CMAKE_VERSION} [@@]config library: rt_node")

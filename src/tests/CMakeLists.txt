@@ -37,9 +37,10 @@ set(ROCKIT_TEST_SRC
 )
 
 if (HAVE_MPI)
-    set( MPI_LIBS -lmpp -lsink_osal)
+    set( MPI_LIBS -lmpp -lmedia_osal)
     message(STATUS "build with RK-MPI Support")
 else()
+    set( MPI_LIBS )
     message(STATUS "build without RK-MPI Support")
 endif()
 
