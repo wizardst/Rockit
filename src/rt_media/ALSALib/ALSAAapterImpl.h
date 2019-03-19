@@ -28,9 +28,9 @@
 #include "ALSAAapterUtils.h" // NOLINT
 
 #define DEFAULT_OUT_LATENCY     139319
-#define DEFAULT_OUT_BUFFERSIZE  1536
-#define DEFAULT_OUT_PERIODSIZE  512
-#define DEFAULT_OUT_PERIODS     3
+#define DEFAULT_OUT_BUFFERSIZE  4096
+#define DEFAULT_OUT_PERIODSIZE  1024
+#define DEFAULT_OUT_PERIODS     4
 #define DEFAULT_SAMPLE_RATE     44100
 
 typedef struct AlsaParamsContext_ {
