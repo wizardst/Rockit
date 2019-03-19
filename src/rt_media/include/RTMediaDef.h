@@ -103,6 +103,8 @@ typedef enum {
      RT_AUDIO_ID_WMAV2,
      RT_AUDIO_ID_WMAPRO,
      RT_AUDIO_ID_WMALOSSLESS,
+     RT_AUDIO_ID_MP1,
+     RT_AUDIO_ID_MP2,
      RT_AUDIO_CodingMax = 0x7FFFFFFF
 } RTCodecID;
 

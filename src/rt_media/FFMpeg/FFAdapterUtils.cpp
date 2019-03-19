@@ -53,6 +53,8 @@ static FACodingTypeInfo kFdCodecMappingList[] = {
     { RT_AUDIO_ID_VORBIS,        AV_CODEC_ID_VORBIS },
     { RT_AUDIO_ID_PCM,           AV_CODEC_ID_PCM_S16LE },
     { RT_AUDIO_ID_FLAC,          AV_CODEC_ID_FLAC },
+    { RT_AUDIO_ID_MP1,           AV_CODEC_ID_MP1 },
+    { RT_AUDIO_ID_MP2,           AV_CODEC_ID_MP2 },
 };
 
 // trans AVCodecID to RTCodecID
