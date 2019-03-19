@@ -37,8 +37,6 @@ RTMsgLooper::RTMsgLooper() {
     mHandler    = RT_NULL;
     mThread     = RT_NULL;
     mDataLock   = new RtMutex();
-    mSyncLock   = new RtMutex();
-    mExecLock   = new RtMutex();
     mExecCond   = new RtCondition();
     mSyncCond   = new RtCondition();
     mExitFlag   = RT_FALSE;
@@ -51,8 +49,6 @@ RTMsgLooper::~RTMsgLooper() {
     mHandler    = RT_NULL;
     rt_safe_delete(mThread);
     rt_safe_delete(mDataLock);
-    rt_safe_delete(mSyncLock);
-    rt_safe_delete(mExecLock);
     rt_safe_delete(mExecCond);
     rt_safe_delete(mSyncCond);
     RT_LOGD_IF(DEBUG_FLAG, "~Destructor");
@@ -102,7 +98,9 @@ RT_RET RTMsgLooper::post(struct RTMessage* msg, INT64 delayUs /* = 0 */) {
         }
 
         msg->setWhenUs(whenUs);
-
+        if (RT_TRUE == msg->mSync) {
+            msg->mDoneListener = LooperDoneListener;
+        }
         if (0 == deque_size(mEventQueue)) {
             deque_push_head(mEventQueue, reinterpret_cast<void*>(msg));
         } else {
@@ -110,22 +108,19 @@ RT_RET RTMsgLooper::post(struct RTMessage* msg, INT64 delayUs /* = 0 */) {
         }
 #else
         msg->setWhenUs(whenUs);
+        if (RT_TRUE == msg->mSync) {
+            msg->mDoneListener = LooperDoneListener;
+        }
         deque_push_head(mEventQueue, reinterpret_cast<void*>(msg));
 #endif
+
+        if (RT_TRUE == msg->mSync) {
+            mExecCond->broadcast();
+            mSyncCond->wait(mDataLock);
+        } else {
+            mExecCond->broadcast();
+        }
     } while (0);
-
-    mExecCond->broadcast();
-
-    if (RT_TRUE == msg->mSync) {
-        RtMutex::RtAutolock autoLock(mSyncLock);
-        msg->mDoneListener = LooperDoneListener;
-        RT_LOGD_IF(DEBUG_FLAG, "call, condition->wait(lock=%p) for handled", mSyncLock);
-        mSyncCond->wait(mSyncLock);
-        RT_LOGD_IF(DEBUG_FLAG, "done, condition->wait(lock=%p) for handled", mSyncLock);
-        RT_LOGE("done, mSyncCond->wait(mSyncLock)");
-    }
-
-    RT_LOGD_IF(DEBUG_FLAG, "done, post message(msg=%p; what=%d)", msg, msg->getWhat());
 
     return RT_OK;
 }
@@ -135,12 +130,11 @@ RT_BOOL RTMsgLooper::msgLoop() {
         if (RT_NULL == mThread) {
             return RT_FALSE;
         }
-
-        if (0 == deque_size(mEventQueue)) {
-            RtMutex::RtAutolock autoLock(mExecLock);
-            RT_LOGD_IF(DEBUG_FLAG, "call, condition->wait(exec=%p) for new msg", mExecLock);
-            mExecCond->wait(mExecLock);
-            RT_LOGD_IF(DEBUG_FLAG, "done, condition->wait(exec=%p) for new msg", mExecLock);
+        {
+            RtMutex::RtAutolock autoLock(mDataLock);
+            if (0 == deque_size(mEventQueue)) {
+                mExecCond->wait(mDataLock);
+            }
         }
 
         struct RTMessage* msg = RT_NULL;
@@ -159,8 +153,8 @@ RT_BOOL RTMsgLooper::msgLoop() {
             INT64 nowUs  = getNowUs();
             if (whenUs > nowUs) {
                 INT64 delayUs = whenUs - nowUs;
-                mExecCond->timedwait(mExecLock, delayUs);
-                RT_LOGD_IF(DEBUG_FLAG, "done, condition->wait(exec=%p) for timeout", mExecLock);
+                mExecCond->timedwait(mDataLock, delayUs);
+                RT_LOGD_IF(DEBUG_FLAG, "done, condition->wait(exec=%p) for timeout", mDataLock);
             }
         }
 

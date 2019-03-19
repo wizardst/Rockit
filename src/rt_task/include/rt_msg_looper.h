@@ -66,8 +66,6 @@ struct RTMsgLooper {
     struct RTMsgHandler *mHandler;
     RtThread*            mThread;
     RtMutex*             mDataLock;
-    RtMutex*             mSyncLock;
-    RtMutex*             mExecLock;
     RtCondition*         mExecCond;
 
  public:
