@@ -225,6 +225,7 @@ RT_RET RTSinkAudioALSA::onStop() {
         mThread->requestInterruption();
         mThread->join();
     }
+    onFlush();
     return err;
 }
 

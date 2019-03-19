@@ -36,6 +36,8 @@ class RTPairAudioPlayer {
     rt_status playUri(const char* uri);
     rt_status playPcm(const char* pcm);
     rt_status pause();
+    rt_status stop();
+    rt_status prepare();
     rt_status start();
     rt_status deinit();
  private:

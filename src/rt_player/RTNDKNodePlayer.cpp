@@ -184,9 +184,12 @@ RT_RET RTNDKNodePlayer::prepare() {
         RTStateUtil::dumpStateError(curState, __FUNCTION__);
         return RT_OK;
     }
-    RT_RET err = mNodeBus->autoBuildCodecSink();
-    if (RT_OK != err) {
-        RT_LOGE("fail to use node-bus to build codec sink");
+
+    if (RT_STATE_INITIALIZED == curState) {
+        RT_RET err = mNodeBus->autoBuildCodecSink();
+        if (RT_OK != err) {
+            RT_LOGE("fail to use node-bus to build codec sink");
+        }
     }
 
     setCurState(RT_STATE_PREPARING);

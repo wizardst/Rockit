@@ -240,6 +240,8 @@ RT_RET FFNodeDemuxer::runCmd(RT_NODE_CMD cmd, RtMetaData *metaData) {
     case RT_NODE_CMD_RESET:
         this->onReset();
         break;
+    case RT_NODE_CMD_PREPARE:
+        this->onPrepare();
     default:
         RT_LOGE("demuxer not support the cmd\n");
         break;
@@ -350,26 +352,17 @@ RT_RET FFNodeDemuxer::onStart() {
     RT_RET            err = RT_OK;
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
     ctx->mEosFlag = RT_FALSE;
-    if (THREAD_LOOP != ctx->mThread->getState()) {
-        ctx->mThread->start();
-    }
     return err;
 }
 
 RT_RET FFNodeDemuxer::onStop() {
     RT_LOGD_IF(DEBUG_FLAG, "call, stop");
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
-    ctx->mEosFlag = RT_TRUE;
     ctx->mThread->requestInterruption();
     ctx->mThread->join();
 
     // flush all packets in the caches
     onFlush();
-
-    if (ctx->mFormatCtx != RT_NULL) {
-        fa_format_close(ctx->mFormatCtx);
-        ctx->mFormatCtx = RT_NULL;
-    }
 
     RT_LOGD_IF(DEBUG_FLAG, "done, stop");
     return RT_OK;
@@ -421,6 +414,11 @@ RT_RET FFNodeDemuxer::onFlush() {
     return RT_OK;
 }
 
+RT_RET FFNodeDemuxer::onPrepare() {
+    FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
+    ctx->mThread->start();
+}
+
 RT_RET FFNodeDemuxer::runTask() {
     FFNodeDemuxerCtx    *ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
     void                *raw_pkt = RT_NULL;
@@ -437,7 +435,6 @@ RT_RET FFNodeDemuxer::runTask() {
             ctx->mEosFlag = RT_FALSE;
             ctx->mNeedSeek = 0;
         }
-
         if (!ctx->mEosFlag && array_list_get_size(ctx->mAudioPktList) < 30) {
             err = fa_format_packet_read(ctx->mFormatCtx, &raw_pkt);
             if (err < 0) {
