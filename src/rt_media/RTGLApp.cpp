@@ -36,6 +36,7 @@ RTGLApp::RTGLApp() {
     RTObject::trace(getName(), this, sizeof(RTGLApp));
     mGLView = new RTGLView();
     mWndPtr = 0;
+    mScene  = NULL;
 }
 
 RTGLApp::~RTGLApp() {
@@ -151,7 +152,7 @@ HWND native_window_create(const char* title, INT32 width, INT32 height) {
     #else
     // HINSTANCE hInstance = GetModuleHandle(NULL);
 
-    HWND preWnd = NULL;//GetShellWindow();
+    HWND preWnd = NULL;  //  GetShellWindow();
     HWND hwd    = CreateWindowEx(0,       // window extensive style
                             WC_DIALOG,    // class name
                             "Rockit",     // caption name

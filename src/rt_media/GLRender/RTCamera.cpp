@@ -33,6 +33,8 @@ RTCamera::RTCamera() {
     mPerspective->identity();
     mModelView   = new MathMat4();
     mModelView->identity();
+    mWidth = mHeight = 0;
+    mViewAngle = mAspect = mNear = mFar = 0;
 }
 
 RTCamera::~RTCamera() {

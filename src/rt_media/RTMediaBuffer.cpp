@@ -64,12 +64,20 @@ RTMediaBuffer::RTMediaBuffer(const RTMediaBuffer* data) {
 void RTMediaBuffer::baseInit() {
     RTObject::trace(this->getName(), this, sizeof(RTMediaBuffer));
 
+    mData      = RT_NULL;
+    mSize      = 0;
+    mRangeOffset = 0;
+    mRangeLength = 0;
+    mHandle    = 0;
+    mFd        = 0;
+    mPhyAddr   = 0;
+    mOwnsData  = RT_FALSE;
+    mMetaData  = RT_NULL;
+    mAllocator = RT_NULL;
     mRefCount  = 0;
     mFuncFree  = RT_NULL;
-    mMetaData  = RT_NULL;
+    mStatus    = RT_MEDIA_BUFFER_STATUS_UNKONN;
     mObserver  = RT_NULL;
-    mAllocator = RT_NULL;
-    mOwnsData  = RT_FALSE;
 }
 
 RTMediaBuffer::~RTMediaBuffer() {

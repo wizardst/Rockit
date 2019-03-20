@@ -28,6 +28,10 @@ RTScene::RTScene() {
     RTObject::trace(getName(), this, sizeof(RTScene));
 
     mChildren = RT_NULL;
+    mParent   = RT_NULL;
+    mUserData = RT_NULL;
+    mCamera   = RT_NULL;
+    mActionManager = RT_NULL;
 }
 
 RTScene::~RTScene() {

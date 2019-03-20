@@ -31,7 +31,8 @@ RTAllocatorIon::RTAllocatorIon(RtMetaData *config)
     : mAlign(4096),
       mHeapMask(0),
       mFlags(0),
-      mUsage(0) {
+      mUsage(0),
+      mIonFd(0) {
     init(config);
 }
 

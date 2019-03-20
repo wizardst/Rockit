@@ -22,7 +22,12 @@
 #include "rt_metadata.h"            // NOLINT
 #include "RTAllocatorMalloc.h"      // NOLINT
 
-RTAllocatorMalloc::RTAllocatorMalloc(RtMetaData *config) {
+RTAllocatorMalloc::RTAllocatorMalloc(RtMetaData *config)
+      : mAlign(4096),
+        mHeapMask(0),
+        mFlags(0),
+        mUsage(0),
+        mDrmFd(0) {
     init(config);
 }
 

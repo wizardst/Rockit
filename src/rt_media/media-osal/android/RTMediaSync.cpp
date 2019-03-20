@@ -52,6 +52,7 @@ RTMediaSync::RTMediaSync(CallBackFun callRender) {
     }
     else { //  TODO: add Timer callback here later
         ALOGE("choose another method for avsync...");
+        mVsync = NULL;
     }
 }
 

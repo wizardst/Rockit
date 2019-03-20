@@ -25,6 +25,8 @@ RTBuffer::RTBuffer(void *data, UINT32 size, INT32 handle, INT32 fd) {
     mSize = size;
     mHandle = handle;
     mFd = fd;
+    mRangeOffset = 0;
+    mRangeLength = 0;
 }
 
 void*  RTBuffer::getData() const {
