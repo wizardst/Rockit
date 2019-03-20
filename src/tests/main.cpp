@@ -25,8 +25,6 @@
 #include "rt_check.h"                // NOLINT
 #include "RTObject.h"                // NOLINT
 
-#include "rt_player/RTPairAudioCases.h"   // NOLINT
-
 #define TEST_URI "E:\\CloudSync\\low-used\\videos\\start.mp3"
 
 RT_RET unit_test_best_practice(const char* uri) {
@@ -34,7 +32,6 @@ RT_RET unit_test_best_practice(const char* uri) {
     RTObject::resetTraces();
 
     /* your unit test */
-    unit_test_pair_audio_player_case_easy(uri, uri);
 
     rt_mem_record_dump();
     RTObject::dumpTraces();

@@ -17,11 +17,22 @@
  *   date: 2019/02/27
  */
 
-#include "RTPairAudioCases.h"   // NOLINT
+#ifndef SRC_TESTS_RT_PLAYER_PLAYER_TEST_UTILS_H_
+#define SRC_TESTS_RT_PLAYER_PLAYER_TEST_UTILS_H_
 
-#define TEST_AUDIO_FILE "start.mp3"
+#include "rt_header.h"          // NOLINT
+#include "rt_test_header.h"     // NOLINT
 
-int main(int argc, char **argv) {
-    const char* media_name = (argc > 1)? argv[1]:TEST_AUDIO_FILE;
-    return unit_test_pair_audio_player_case_easy(media_name, media_name);
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
+class RTNDKMediaPlayer;
+void player_utils_dispatch_cmd(RTNDKMediaPlayer* player);
+void player_utils_help(const char* bin_name);
+
+#ifdef  __cplusplus
 }
+#endif
+
+#endif  // SRC_TESTS_RT_PLAYER_PLAYER_TEST_UTILS_H_

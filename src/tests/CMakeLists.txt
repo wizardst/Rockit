@@ -30,8 +30,6 @@ set(ROCKIT_TEST_SRC
     rt_node/test_node_codec_with_render.cpp
     rt_node/test_node_data_flow.cpp
     # Testcase for RT_PLAYER
-    rt_player/RTPairAudioCases.cpp
-    rt_player/RTPairAudioPlayer.cpp
     # Testcase for RT_TASK
     rt_task/test_task_taskpool.cpp
 )
