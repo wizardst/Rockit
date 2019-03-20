@@ -36,6 +36,7 @@ class RTNodeDemuxer : public RTNode {
     virtual INT32       queryTrackUsed(RTTrackType tType) = 0;
     virtual INT32       queryDrmFlag()  { return 0; }
     virtual INT32       querySeekFlag() { return 0; }
+    virtual INT64       queryDuration() { return 0; }
 };
 
 #ifdef  __cplusplus

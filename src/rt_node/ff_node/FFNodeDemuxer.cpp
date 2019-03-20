@@ -348,6 +348,15 @@ INT32 FFNodeDemuxer::queryTrackUsed(RTTrackType tType) {
     return used_idx;
 }
 
+INT64 FFNodeDemuxer::queryDuration() {
+    INT64 duration = 0;
+    FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
+    if ((RT_NULL != ctx) && (RT_NULL != ctx->mFormatCtx)) {
+        duration = fa_format_get_duraton(ctx->mFormatCtx);
+    }
+    return duration;
+}
+
 RT_RET FFNodeDemuxer::onStart() {
     RT_RET            err = RT_OK;
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
@@ -417,6 +426,7 @@ RT_RET FFNodeDemuxer::onFlush() {
 RT_RET FFNodeDemuxer::onPrepare() {
     FFNodeDemuxerCtx* ctx = reinterpret_cast<FFNodeDemuxerCtx*>(mNodeContext);
     ctx->mThread->start();
+    return RT_OK;
 }
 
 RT_RET FFNodeDemuxer::runTask() {

@@ -45,6 +45,14 @@ typedef struct RtNDKPlayerContext {
     RTNDKNodePlayer*  mNodePlayer;
 } RTNDKPlayerContext;
 
+rt_status checkRuntime(RTNDKPlayerContext* ctx, const char* caller) {
+    if ((RT_NULL == ctx) || (RT_NULL == ctx->mNodePlayer)) {
+        RT_LOGE("fail to %s, context in null", caller);
+        return RTE_NO_MEMORY;
+    }
+    return RTE_NO_ERROR;
+}
+
 /*
  * construction and destructor
  */
@@ -61,17 +69,19 @@ RTNDKMediaPlayer::~RTNDKMediaPlayer() {
 }
 
 rt_status RTNDKMediaPlayer::setUID(uid_t uid) {
-    if (RT_NULL != mPlayerCtx) {
-        mPlayerCtx->mUid = uid;
-        return RTE_NO_ERROR;
+    rt_status err = checkRuntime(mPlayerCtx, "setUID");
+    if (RTE_NO_ERROR != err) {
+        return err;
     }
-    return RTE_UNKNOWN;
+
+    mPlayerCtx->mUid = uid;
+    return err;
 }
 
 rt_status RTNDKMediaPlayer::setDataSource(const char *url, const char *headers) {
-    RT_RET  ret = RT_OK;
-    if ((RT_NULL == mPlayerCtx) || (RT_NULL == mPlayerCtx->mNodePlayer)) {
-        return RTE_NO_MEMORY;
+    rt_status err = checkRuntime(mPlayerCtx, "setDataSource");
+    if (RTE_NO_ERROR != err) {
+        return err;
     }
 
     mPlayerCtx->mUri     = url;
@@ -87,14 +97,14 @@ rt_status RTNDKMediaPlayer::setDataSource(const char *url, const char *headers) 
     }
 
     // auto build node bus and initialization
-    ret = mPlayerCtx->mNodePlayer->setDataSource(&setting);
-    if (RT_OK != ret) {
+    err = mPlayerCtx->mNodePlayer->setDataSource(&setting);
+    if (RTE_NO_ERROR != err) {
         RT_LOGE("setDataSource fail\n");
         return RT_ERR_UNKNOWN;
     }
     mPlayerCtx->mNodePlayer->summary(0);
 
-    return RTE_NO_ERROR;
+    return err;
 }
 
 rt_status RTNDKMediaPlayer::setDataSource(int fd, int64_t offset, int64_t length) {
@@ -105,11 +115,13 @@ rt_status RTNDKMediaPlayer::setDataSource(int fd, int64_t offset, int64_t length
 }
 
 rt_status RTNDKMediaPlayer::setLooping(int loop) {
-    if (RT_NULL != mPlayerCtx) {
-        mPlayerCtx->mLooping  = loop;
-        return RTE_NO_ERROR;
+    rt_status err = checkRuntime(mPlayerCtx, "setDataSource");
+    if (RTE_NO_ERROR != err) {
+        return err;
     }
-    return RTE_UNKNOWN;
+
+    mPlayerCtx->mLooping  = loop;
+    return err;
 }
 
 rt_status RTNDKMediaPlayer::setVideoSurfaceTexture(void* bufferProducer) {
@@ -121,15 +133,16 @@ rt_status RTNDKMediaPlayer::setVideoSurface(void* surface) {
 }
 
 rt_status RTNDKMediaPlayer::initCheck() {
-    if ((RT_NULL == mPlayerCtx) || (RT_NULL == mPlayerCtx->mNodePlayer)) {
-        return RTE_NO_MEMORY;
+    rt_status err = checkRuntime(mPlayerCtx, "initCheck");
+    if (RTE_NO_ERROR != err) {
+        return err;
     }
-    mPlayerCtx->mState = mPlayerCtx->mNodePlayer->getCurState();
 
+    mPlayerCtx->mState = mPlayerCtx->mNodePlayer->getCurState();
     if ((RT_NULL != mPlayerCtx) && (mPlayerCtx->mState >= RT_STATE_INITIALIZED)) {
-        return RTE_NO_ERROR;
+        err = RTE_NO_ERROR;
     }
-    return RTE_UNKNOWN;
+    return err;
 }
 
 rt_status RTNDKMediaPlayer::prepare() {
@@ -213,26 +226,30 @@ rt_status RTNDKMediaPlayer::wait() {
 }
 
 rt_status RTNDKMediaPlayer::getState() {
-    if (RT_NULL != mPlayerCtx) {
-        return mPlayerCtx->mState;
+    int32_t err = checkRuntime(mPlayerCtx, "getState");
+    if (RTE_NO_ERROR != err) {
+        return err;
     }
-    return RT_STATE_ERROR;
+
+    return mPlayerCtx->mNodePlayer->getCurState();
 }
 
 rt_status RTNDKMediaPlayer::getCurrentPosition(int64_t *usec) {
     *usec = 0;
-    if (RT_NULL != mPlayerCtx) {
-        *usec = mPlayerCtx->mUsCurPosition;
+    int32_t err = initCheck();
+    if (RTE_NO_ERROR != err) {
+        return err;
     }
-    return RTE_NO_ERROR;
+    return mPlayerCtx->mNodePlayer->getCurrentPosition(usec);
 }
 
 rt_status RTNDKMediaPlayer::getDuration(int64_t *usec) {
     *usec = 0;
-    if (RT_NULL != mPlayerCtx) {
-        *usec = mPlayerCtx->mUsDuration;
+    int32_t err = initCheck();
+    if (RTE_NO_ERROR != err) {
+        return err;
     }
-    return RTE_NO_ERROR;
+    return mPlayerCtx->mNodePlayer->getDuration(usec);
 }
 
 rt_status RTNDKMediaPlayer::dump(int fd, const char* args) {
@@ -282,7 +299,7 @@ rt_status RTNDKMediaPlayer::attachAuxEffect(int effectId)  {
 rt_status RTNDKMediaPlayer::writeData(const char * data, const UINT32 length, int flag, int type) {
     if (RT_NULL != mPlayerCtx) {
         mPlayerCtx->mNodePlayer->writeData(data, length, flag, type);
-        return RT_OK;
+        return RTE_NO_ERROR;
     }
     return RTE_BAD_VALUE;
 }
@@ -290,7 +307,7 @@ rt_status RTNDKMediaPlayer::writeData(const char * data, const UINT32 length, in
 rt_status RTNDKMediaPlayer::setCallBack(RT_CALLBACK_T callback, int p_event, void *p_data) {
     if (RT_NULL != mPlayerCtx) {
         mPlayerCtx->mNodePlayer->setCallBack(callback, p_event, p_data);
-        return RT_OK;
+        return RTE_NO_ERROR;
     }
     return RTE_BAD_VALUE;
 }

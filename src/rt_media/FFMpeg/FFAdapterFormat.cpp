@@ -42,6 +42,7 @@
 struct FAFormatContext {
     AVFormatContext  *mAvfc;
     FC_FLAG          mFcFlag;
+    INT64            mDuration;
 };
 
 static void ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_list vl) {
@@ -59,6 +60,13 @@ static void ffmpeg_log_callback(void *ptr, int level, const char *fmt, va_list v
     RT_LOGD("ffmpeg-%d: %s", LIBAVFORMAT_VERSION_MAJOR, mesg);
 }
 
+INT32 check_av_format_ctx(FAFormatContext* fc) {
+    if ((RT_NULL == fc) || (RT_NULL == fc->mAvfc)) {
+        return -1;
+    }
+    return 0;
+}
+
 void fa_ffmpeg_runtime_init() {
     av_log_set_level(AV_LOG_ERROR);
     av_log_set_callback(ffmpeg_log_callback);
@@ -69,6 +77,7 @@ FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag /*FLAG_DEMUXER*/) 
     FAFormatContext* fafc = rt_malloc(FAFormatContext);
     fafc->mAvfc           = RT_NULL;
     fafc->mFcFlag         = flag;
+    fafc->mDuration       = 0;
     AVDictionary*    opts = NULL;
 
     RT_LOGE_IF(DEBUG_FLAG, "uri = %s", uri);
@@ -94,6 +103,7 @@ FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag /*FLAG_DEMUXER*/) 
         if (fa_utils_check_error(err, "avformat_find_stream_info") < 0) {
             goto error_func;
         }
+        fafc->mDuration = fafc->mAvfc->duration;
         break;
       case FLAG_MUXER:
         fafc->mAvfc = avformat_alloc_context();
@@ -113,7 +123,12 @@ error_func:
     return RT_NULL;
 }
 
-void fa_format_close(FAFormatContext* fc) {
+INT32 fa_format_close(FAFormatContext* fc) {
+    INT32 err = check_av_format_ctx(fc);
+    if (-1 == err) {
+        return err;
+    }
+
     switch (fc->mFcFlag) {
     case FLAG_DEMUXER:
         avformat_close_input(&(fc->mAvfc));
@@ -125,16 +140,27 @@ void fa_format_close(FAFormatContext* fc) {
     }
     avformat_network_deinit();
     rt_safe_free(fc);
+    return err;
 }
 
-void fa_format_seek_to(FAFormatContext* fc, INT32 track_id, UINT64 ts, UINT32 flags) {
-    INT32 err = 0;
+INT32 fa_format_seek_to(FAFormatContext* fc, INT32 track_id, UINT64 ts, UINT32 flags) {
+    INT32 err = check_av_format_ctx(fc);
+    if (-1 == err) {
+        return err;
+    }
+
+
     err = avformat_seek_file(fc->mAvfc, track_id, RT_INT64_MIN, ts, RT_INT64_MAX, flags);
     fa_utils_check_error(err, "avformat_seek_file");
+    return err;
 }
 
 INT32 fa_format_packet_read(FAFormatContext* fc, void** raw_pkt) {
-    INT32 err = 0;
+    INT32 err = check_av_format_ctx(fc);
+    if (-1 == err) {
+        return err;
+    }
+
     AVPacket *avPacket = av_packet_alloc();
     av_init_packet(avPacket);
     err = av_read_frame(fc->mAvfc, avPacket);
@@ -160,7 +186,16 @@ INT32  fa_format_packet_type(void* raw_pkt) {
 }
 
 INT32 fa_format_packet_parse(FAFormatContext* fc, void* raw_pkt, RTPacket* rt_pkt) {
+    if ((RT_NULL == rt_pkt) || (RT_NULL == raw_pkt)) {
+        return -1;
+    }
+
     rt_memset(rt_pkt, 0, sizeof(RTPacket));
+    INT32 err = check_av_format_ctx(fc);
+    if (-1 == err) {
+        return err;
+    }
+
     AVPacket* ff_pkt = reinterpret_cast<AVPacket*>(raw_pkt);
     AVStream *stream = fc->mAvfc->streams[ff_pkt->stream_index];
     INT64 startTimeUs = stream->start_time == AV_NOPTS_VALUE ? 0 :
@@ -178,7 +213,15 @@ INT32 fa_format_packet_parse(FAFormatContext* fc, void* raw_pkt, RTPacket* rt_pk
         rt_pkt->mTrackIndex = ff_pkt->stream_index;
         return 0;
     }
-    return -1;
+    return err;
+}
+
+INT64 fa_format_get_duraton(FAFormatContext* fc) {
+    INT64 duration = 0;
+    if (0 == check_av_format_ctx(fc)) {
+        duration = fc->mDuration;
+    }
+    return duration;
 }
 
 void fa_format_build_track_meta(const AVStream* stream, RTTrackParms* track) {

@@ -33,12 +33,13 @@ class RtMetaData;
 
 // some operations for read and seek
 FAFormatContext* fa_format_open(const char* uri, FC_FLAG flag = FLAG_DEMUXER);
-void   fa_format_close(FAFormatContext* fc);
-void   fa_format_seek_to(FAFormatContext* fc, INT32 track_id, UINT64 ts, UINT32 flags);
+INT32  fa_format_close(FAFormatContext* fc);
+INT32  fa_format_seek_to(FAFormatContext* fc, INT32 track_id, UINT64 ts, UINT32 flags);
 INT32  fa_format_packet_read(FAFormatContext* fc, void** raw_pkt);
 INT32  fa_format_packet_parse(FAFormatContext* fc, void* raw_pkt, RTPacket* rt_pkt);
 INT32  fa_format_packet_type(void*  raw_pkt);
 INT32  fa_format_packet_free(void*  raw_pkt);
+INT64  fa_format_get_duraton(FAFormatContext* fc);
 
 
 // some operations for media tracks

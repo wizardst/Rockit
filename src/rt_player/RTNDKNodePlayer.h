@@ -47,7 +47,10 @@ class RTNDKNodePlayer : public RTMsgHandler {
     RT_RET    stop();
     RT_RET    wait();
     RT_RET    seekTo(INT64 usec);
+
     RT_RET    summary(INT32 fd);
+    RT_RET    getCurrentPosition(int64_t *usec);
+    RT_RET    getDuration(int64_t *usec);
     RT_RET    setCurState(UINT32 newState);
     UINT32    getCurState();
 
@@ -66,6 +69,8 @@ class RTNDKNodePlayer : public RTMsgHandler {
     RT_RET    postSeekIfNecessary();
     RT_RET    onSeekTo(INT64 usec);
     RT_RET    onPlaybackDone();
+    RT_RET    onPreparedDone();
+    RT_RET    checkRuntime(const char* caller);
 
  private:
     struct NodePlayerContext* mPlayerCtx;

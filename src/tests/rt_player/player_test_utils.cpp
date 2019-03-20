@@ -59,6 +59,9 @@ void player_utils_dispatch_cmd(RTNDKMediaPlayer* player) {
     switch (cmd) {
       case PC_CMD_NOP:
       case PC_CMD_TIME:
+        player->getCurrentPosition(&position);
+        player->getDuration(&duration);
+        RT_LOGD("position=%lldms; duration=%lldms", position/1000, duration/1000);
         RtTime::sleepMs(500);
         break;
       case PC_CMD_PAUSE:
