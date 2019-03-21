@@ -32,10 +32,11 @@ typedef struct _RTPacket {
     INT64    mPos;
     INT32    mTrackIndex;
     INT32    mFlags;
-
+    INT64    mDuration;
     uint8_t *mData;
     INT32    mSize;
     void*    mRawPtr;
+    RTTrackType mType;
     RT_RAW_FREE mFuncFree;
 } RTPacket;
 

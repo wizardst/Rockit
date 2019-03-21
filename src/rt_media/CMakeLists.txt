@@ -54,6 +54,11 @@ set(MEDIA_OSAL_FILES
     media-osal/IMediaSync.cpp
 )
 
+set(RT_PACKET_SOURCE_SRC
+    RTPktSource/RTPktSourceBase.cpp
+    RTPktSource/RTPktSourceLocal.cpp
+)
+
 set(RT_MEDIA_SRC
     RTMediaBuffer.cpp
     RTMediaData.cpp
@@ -75,6 +80,7 @@ set(RT_MEDIA_SRC
     ALSALib/ALSAAapterImpl.cpp
     ALSALib/ALSAAapterUtils.cpp
     ALSALib/ALSAVolumeManager.cpp
+    ${RT_PACKET_SOURCE_SRC}
 )
 
 if (FFMPEG_SINGLE)

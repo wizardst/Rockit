@@ -43,7 +43,7 @@ typedef struct rt_deque {
 } RT_Deque;
 
 RT_Deque*      deque_create();
-RT_Deque*      deque_create(UINT8 max_size);
+RT_Deque*      deque_create(UINT32 max_size);
 void           deque_destory(RT_Deque **list);
 RT_DequeEntry* deque_entry_malloc(RT_Deque *list);
 RT_DequeEntry  deque_pop(RT_Deque *list);

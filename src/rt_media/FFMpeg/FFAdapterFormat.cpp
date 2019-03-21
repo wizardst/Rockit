@@ -161,11 +161,19 @@ INT32 fa_format_packet_read(FAFormatContext* fc, void** raw_pkt) {
         return err;
     }
 
+    INT32 ret = 0;
     AVPacket *avPacket = av_packet_alloc();
     av_init_packet(avPacket);
     err = av_read_frame(fc->mAvfc, avPacket);
+    if (err == AVERROR_EOF
+            || avio_feof(fc->mAvfc->pb)
+            || err == AVERROR_EXIT) {
+        ret = RT_ERR_END_OF_STREAM;
+    } else {
+        ret = err;
+    }
     *raw_pkt = avPacket;
-    return err;
+    return ret;
 }
 
 INT32 fa_format_packet_free(void* raw_pkt) {
@@ -204,6 +212,7 @@ INT32 fa_format_packet_parse(FAFormatContext* fc, void* raw_pkt, RTPacket* rt_pk
     if (RT_NULL != ff_pkt) {
         rt_pkt->mPts      = av_rescale_q(ff_pkt->pts, stream->time_base, AV_TIME_BASE_Q) - startTimeUs;
         rt_pkt->mDts      = av_rescale_q(ff_pkt->dts, stream->time_base, AV_TIME_BASE_Q) - startTimeUs;
+        rt_pkt->mDuration = av_rescale_q(ff_pkt->duration, stream->time_base, AV_TIME_BASE_Q);
         rt_pkt->mPos      = ff_pkt->pos;
         rt_pkt->mData     = ff_pkt->data;
         rt_pkt->mSize     = ff_pkt->size;
@@ -211,6 +220,7 @@ INT32 fa_format_packet_parse(FAFormatContext* fc, void* raw_pkt, RTPacket* rt_pk
         rt_pkt->mRawPtr   = raw_pkt;
         rt_pkt->mFuncFree   = fa_format_packet_free;
         rt_pkt->mTrackIndex = ff_pkt->stream_index;
+        rt_pkt->mType       = (RTTrackType)(stream->codecpar->codec_type);
         return 0;
     }
     return err;

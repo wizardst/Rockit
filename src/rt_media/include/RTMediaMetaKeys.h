@@ -102,6 +102,11 @@ enum {
     /* command options */
     kKeySeekTimeUs          = MKTAG('s', 't', 'u', 's'),  // INT64
     kKeySeekMode            = MKTAG('s', 'm', 'o', 'd'),  // INT32
+
+    /* media cache options */
+    kKeyMaxCacheCount       = MKTAG('m', 'c', 'c', 't'),  // INT32
+    kKeyMaxCacheSize        = MKTAG('m', 'c', 's', 'z'),  // INT32
+    kKeyMaxCacheDuration    = MKTAG('m', 'c', 'd', 'r'),  // INT64
 };
 
 #endif  // SRC_RT_MEDIA_INCLUDE_RTMEDIAMETAKEYS_H_

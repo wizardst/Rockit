@@ -38,7 +38,7 @@ RT_Deque* deque_create() {
     return list;
 }
 
-RT_Deque* deque_create(UINT8 max_size) {
+RT_Deque* deque_create(UINT32 max_size) {
     RT_Deque* list  = deque_create();
     RT_ASSERT(RT_NULL != list);
     list->max_size = max_size;

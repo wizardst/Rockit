@@ -40,6 +40,7 @@ typedef enum _RT_RET {
     RT_ERR_FATAL_THREAD        = RT_ERR_BASE - 2,
     RT_ERR_NOMEM               = RT_ERR_BASE - 3,
     RT_ERR_OUTOF_RANGE         = RT_ERR_BASE - 4,
+    RT_ERR_END_OF_STREAM       = RT_ERR_BASE - 5,
 
     /* The error in list */
     RT_ERR_LIST_BASE           = -128,
