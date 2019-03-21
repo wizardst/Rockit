@@ -23,7 +23,7 @@
  * (declared at frameworks/native/include/gui/Surface.h)
  */
 
-#include <utils/Trace.h>
+#include <utils/Trace.h>       // NOLINT
 #include <utils/CallStack.h>
 #include <utils/RefBase.h>
 #include <utils/Errors.h>

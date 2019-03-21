@@ -16,13 +16,16 @@
  * author: princejay.dai@rock-chips.com
  *   date: 2019/03/12
  */
+
+#include <inttypes.h>     // NOLINT
+#include "RTMediaSync.h"  // NOLINT
+
 #ifdef LOG_TAG
 #undef LOG_TAG
 #endif
 #define LOG_TAG "RTMediaSync"
-#include "RTMediaSync.h" // NOLINT
-#define USE_VSYNC_FLAG 1
 
+#define USE_VSYNC_FLAG 1
 
 static void * releaseRender() {   // Todo: common interface used for vsync or timer release
     /*	#if 0
@@ -43,14 +46,12 @@ void* RTMediaSync::onSyncEvent(void* ptr_node) {
     return 0;
 }
 
-
-
 RTMediaSync::RTMediaSync(CallBackFun callRender) {
     ALOGE("RTMediaSync() constructer now...");
     if (USE_VSYNC_FLAG) {
         mVsync = new Vsync(callRender);
-    }
-    else { //  TODO: add Timer callback here later
+    } else {
+        // TODO(dai): add Timer callback here later
         ALOGE("choose another method for avsync...");
         mVsync = NULL;
     }

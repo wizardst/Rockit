@@ -49,6 +49,11 @@ else()
     message(STATUS "build without GLES-EGL support")
 endif()
 
+set(MEDIA_OSAL_FILES
+    media-osal/RTMediaSync.cpp
+    media-osal/IMediaSync.cpp
+)
+
 set(RT_MEDIA_SRC
     RTMediaBuffer.cpp
     RTMediaData.cpp
@@ -66,6 +71,7 @@ set(RT_MEDIA_SRC
     RTAllocator/RTAllocatorStore.cpp
     ${DRM_FILES}
     ${MPI_FILES}
+    ${MEDIA_OSAL_FILES}
     ALSALib/ALSAAapterImpl.cpp
     ALSALib/ALSAAapterUtils.cpp
     ALSALib/ALSAVolumeManager.cpp

@@ -19,14 +19,15 @@
 					<Add directory="${SRC_ROOT}/src/rt_base/include" />
 					<Add directory="${SRC_ROOT}/src/rt_task/include" />
 					<Add directory="${SRC_ROOT}/src/rt_media/include" />
-					<Add directory="${SRC_ROOT}/src/rt_media/GLRender" />
 					<Add directory="${SRC_ROOT}/src/rt_media/FFMpeg" />
+					<Add directory="${SRC_ROOT}/src/rt_media/GLRender" />
+					<Add directory="${SRC_ROOT}/src/rt_media/media-osal" />					
 					<Add directory="${SRC_ROOT}/src/rt_node/rt_sink/include" />
 					<Add directory="${SRC_ROOT}/src/rt_node/ff_node/include" />
 					<Add directory="${SRC_ROOT}/src/rt_node/include" />
+					<Add directory="${SRC_ROOT}/src/rt_player" />
 					<Add directory="${SRC_ROOT}/third-party/prebuilt/headers/ffmpeg-4.0/include" />
 					<Add directory="${SRC_ROOT}/third-party/prebuilt/headers/angle/include" />
-					<Add directory="${SRC_ROOT}/src/rt_player" />
 				</Compiler>
 				<Linker>
 					<Add option="-lgdi32" />
@@ -177,6 +178,10 @@
 		<Unit filename="../../src/rt_media/include/RTObject.h" />
 		<Unit filename="../../src/rt_media/include/RTObjectPool.h" />
 		<Unit filename="../../src/rt_media/include/RTString.h" />
+		<Unit filename="../../src/rt_media/media-osal/IMediaSync.cpp" />
+		<Unit filename="../../src/rt_media/media-osal/IMediaSync.h" />
+		<Unit filename="../../src/rt_media/media-osal/RTMediaSync.cpp" />
+		<Unit filename="../../src/rt_media/media-osal/RTMediaSync.h" />
 		<Unit filename="../../src/rt_node/RTNode.cpp" />
 		<Unit filename="../../src/rt_node/RTNodeBus.cpp" />
 		<Unit filename="../../src/rt_node/RTNodeCodec.cpp" />
@@ -244,6 +249,7 @@
 		<Unit filename="../../src/tests/rt_media/unit_test_allocator.cpp" />
 		<Unit filename="../../src/tests/rt_media/unit_test_display_gles.cpp" />
 		<Unit filename="../../src/tests/rt_media/unit_test_ffmpeg_adapter.cpp" />
+		<Unit filename="../../src/tests/rt_media/unit_test_media_sync.cpp" />
 		<Unit filename="../../src/tests/rt_media/unit_test_mediabuffer_pool.cpp" />
 		<Unit filename="../../src/tests/rt_media/unit_test_object_pool.cpp" />
 		<Unit filename="../../src/tests/rt_node/rt_ffmpeg_tests.h" />

@@ -26,6 +26,8 @@ set(ROCKIT_TEST_SRC
     rt_base/test_base_linked_list.cpp
     rt_base/test_base_memory.cpp
     rt_base/test_base_mutex_thread.cpp
+    # Testcase for RT_MEDIA
+    rt_media/unit_test_media_sync.cpp
     # Testcase for RT_NODE
     rt_node/test_node_codec_with_render.cpp
     rt_node/test_node_data_flow.cpp

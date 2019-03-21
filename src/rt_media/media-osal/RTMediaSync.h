@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Rockchip Electronics Co. LTD
+ * Copyright 2019 Rockchip Electronics Co. LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: princejay.dai@rock-chips.com
- *   date: 2019/03/12
+ * author: martin.cheng@rock-chips.com
+ *   date: 2019/03/21
+ * module: RTMediaSync
  */
 
-#ifndef  SRC_RT_MEDIA_MEDIA_OSAL_ANDROID_RTMEDIASYNC_H_
-#define  SRC_RT_MEDIA_MEDIA_OSAL_ANDROID_RTMEDIASYNC_H_
+#ifndef SRC_RT_MEDIA_MEDIA_OSAL_RTMEDIASYNC_H_
+#define SRC_RT_MEDIA_MEDIA_OSAL_RTMEDIASYNC_H_
 
-#include "Vsync.h"
-#include <utils/Log.h>
-
-class Vsync;
-
-typedef void* (*CallBackFun)(void *);
+#include <inttypes.h>
+#include "IMediaSync.h"
 
 class RTMediaSync {
  public:
-    explicit RTMediaSync(CallBackFun callback);
+    RTMediaSync();
     ~RTMediaSync();
-    void* onSyncEvent(void* ptr_node);
+    IMediaSync* getSync() { return mSync; }
 
  private:
-    Vsync *mVsync;
+    IMediaSync* mSync;
 };
 
-
-#endif  // SRC_RT_MEDIA_MEDIA_OSAL_ANDROID_RTMEDIASYNC_H_
+#endif  // SRC_RT_MEDIA_MEDIA_OSAL_RTMEDIASYNC_H_

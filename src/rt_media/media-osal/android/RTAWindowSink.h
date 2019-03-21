@@ -18,8 +18,8 @@
  * module: RTAWindowSink
  */
 
-#ifndef SRC_RT_MEDIA_SINK_OSAL_ANDROID_RTAWINDOWSINK_H_
-#define SRC_RT_MEDIA_SINK_OSAL_ANDROID_RTAWINDOWSINK_H_
+#ifndef SRC_RT_MEDIA_MEDIA_OSAL_ANDROID_RTAWINDOWSINK_H_
+#define SRC_RT_MEDIA_MEDIA_OSAL_ANDROID_RTAWINDOWSINK_H_
 
 class RTAWindowSink : public RTVideoSink {
  public:
@@ -45,4 +45,4 @@ class RTAWindowSink : public RTVideoSink {
 
 void* createNativeSurface(RTDisplaySetting* setting);
 
-#endif  // SRC_RT_MEDIA_SINK_OSAL_ANDROID_RTAWINDOWSINK_H_
+#endif  // SRC_RT_MEDIA_MEDIA_OSAL_ANDROID_RTAWINDOWSINK_H_

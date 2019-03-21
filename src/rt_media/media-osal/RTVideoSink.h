@@ -18,8 +18,8 @@
  * module: RTVideoSink
  */
 
-#ifndef SRC_RT_MEDIA_SINK_OSAL_RTVIDEOSINK_H_
-#define SRC_RT_MEDIA_SINK_OSAL_RTVIDEOSINK_H_
+#ifndef SRC_RT_MEDIA_MEDIA_OSAL_RTVIDEOSINK_H_
+#define SRC_RT_MEDIA_MEDIA_OSAL_RTVIDEOSINK_H_
 
 #include <inttypes.h>
 
@@ -105,4 +105,4 @@ class RTVideoSink {
 }
 #endif
 
-#endif  // SRC_RT_MEDIA_SINK_OSAL_RTVIDEOSINK_H_
+#endif  // SRC_RT_MEDIA_MEDIA_OSAL_RTVIDEOSINK_H_

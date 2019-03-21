@@ -29,12 +29,11 @@
 
 typedef void* (*CallBackFun)(void *);
 
-using namespace android;
+using namespace android;   // NOLINT
 
 class Vsync : public RefBase {
-
  public:
-    Vsync(CallBackFun callback);  // init callback function here
+    explicit Vsync(CallBackFun callback);  // init callback function here
     void* onSyncEvent(void* ptr_node);
     CallBackFun mCallBack;
     static int receiver(int fd, int events, void* data);
@@ -52,6 +51,4 @@ class Vsync : public RefBase {
     // sp<Looper> mLooper;
 };
 
-
-
-#endif  // SRC_RT_MEDIA_MEDIA_OSAL_ANDROID_VSYNC_H_ 
+#endif  // SRC_RT_MEDIA_MEDIA_OSAL_ANDROID_VSYNC_H_

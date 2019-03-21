@@ -22,15 +22,16 @@
 #endif
 #define LOG_TAG "RTSync"
 
-#include "Vsync.h"
-#include <gui/DisplayEventReceiver.h>
-#include <utils/Looper.h>
+#include <gui/DisplayEventReceiver.h>    // NOLINT
 #include <sys/resource.h>
-#include "android/looper.h"
 #include <sys/ioctl.h>
-#include <utils/Log.h>
-#include "utils/CallStack.h"
 #include <sys/prctl.h>
+#include <utils/Log.h>
+#include <utils/Looper.h>
+
+#include "Vsync.h"                       // NOLINT
+#include "utils/CallStack.h"             // NOLINT
+#include "android/looper.h"              // NOLINT
 
 int64_t Vsync::phase = 0;  // only for test
 
@@ -41,8 +42,8 @@ int64_t GetNowUs() {
 }
 
 Vsync::Vsync(CallBackFun callback) {
-    mCallBack = callback;
-    mVsyncState = true ;
+    mCallBack   = callback;
+    mVsyncState = true;
     phase = 0;
     mLastVsyncTime = 0;
     mVsyncIntervalTimeUs = 0;
@@ -50,7 +51,8 @@ Vsync::Vsync(CallBackFun callback) {
     ALOGE("....Vsync() constructer %p ,%p...", callback, mCallBack);
 }
 
-void Vsync::computeFrameAbandonNum(float hdmirate) { //  TODO: temp use,to be added later
+void Vsync::computeFrameAbandonNum(float hdmirate) {
+    // TODO(princejay.dai): temp use,to be added later
     ALOGE("Vsync::computeFrameAbandonNum enter...");
     if (hdmirate < 61.5 && hdmirate > 58) {
         vsync_rate = 60;
@@ -78,13 +80,9 @@ int Vsync::FrameAlign(int64_t count, float rate) {
     return 0;
 }
 
-
-
-
-
 int Vsync::receiver(int fd, int events, void* data) {
     // ALOGE("Vsync::receiver enter ..%p",data);
-    Vsync* mvsync = (Vsync*)data;
+    Vsync* mvsync = reinterpret_cast<Vsync*>(data);
     if (mvsync == NULL) {
         ALOGE("Vsync::receiver NULL, return...");
         return NULL;
@@ -99,45 +97,42 @@ int Vsync::receiver(int fd, int events, void* data) {
     DisplayEventReceiver::Event buffer[1];
     static nsecs_t oldTimeStamp = 0;
     while ((n = q->getEvents(buffer, 1)) > 0) {
-        for (int i=0 ; i<n ; i++) {
+        for (int i = 0; i < n; i++) {
             if (buffer[i].header.type == DisplayEventReceiver::DISPLAY_EVENT_VSYNC) {
                 ALOGE("==============event vsync: count=%d\t", buffer[i].vsync.count);
             }
-            if (mLastVsyncTime/*mvsync->mVsyncState*/) { ALOGE("Vsync::receiver framealign enter...");
-                float t = float(buffer[i].header.timestamp - mLastVsyncTime) / s2ns(1);
+            if (mLastVsyncTime/*mvsync->mVsyncState*/) {
+                ALOGE("Vsync::receiver framealign enter...");
+                float t = (float)(buffer[i].header.timestamp - mLastVsyncTime) / s2ns(1);  // NOLINT
                 if (mvsync) {
                     phase = GetNowUs() - buffer[i].header.timestamp / 1000;
-                    if ((float)(phase/1000.00f) < t*1000) {
+                    if ((float)(phase/1000.00f) < t*1000) {  // NOLINT
                         mvsync->FrameAlign(buffer[i].vsync.count, 1.0/t);
                         mvsync->mVsyncIntervalTimeUs = (int64_t)(t*1000*1000);
+                    } else {
+                        ALOGE("timeout [this=%p]%f ms (%f Hz), buffer[%d].count = %d phase %lld\n", \
+                               mvsync, t*1000, 1.0/t, i, buffer[i].vsync.count, phase);
                     }
-                else
-                    ALOGE("timeout [this=%p]%f ms (%f Hz), buffer[%d].count = %d phase %lld\n", mvsync, t*1000, 1.0/t, i, buffer[i].vsync.count, phase);
                 }
-            }
-            else {
+            } else {
                 usleep(5*1000);
             }
             mLastVsyncTime = buffer[i].header.timestamp;
             ALOGE("Vsync::receiver mLastVsyncTime is %lld now...", mLastVsyncTime);
         }
-    }    ¡i
-    if (n<0) {
+    }
+    if (n < 0) {
         printf("error reading events (%s)\n", strerror(-n));
     }
     return 1;
 }
-
-
-
-
 
 void* Vsync::onSyncEvent(void* ptr_node) {
     if (!myDisplayEvent.getFd()) {
         ALOGD("Vsync::onSyncEvent getFd error...");
         return NULL;
     }
-    prctl(PR_SET_NAME, (unsigned long)"Vsync", 0, 0, 0);
+    prctl(PR_SET_NAME, (unsigned long)"Vsync", 0, 0, 0);  // NOLINT
     sp<Looper> loop = new Looper(false);
     loop->addFd(myDisplayEvent.getFd(), 0, ALOOPER_EVENT_INPUT, Vsync::receiver, this);
     myDisplayEvent.setVsyncRate(1);
@@ -145,23 +140,23 @@ void* Vsync::onSyncEvent(void* ptr_node) {
     do {
         int32_t ret = loop->pollOnce(100);
         switch (ret) {
-        case  ALOOPER_POLL_WAKE:
+         case  ALOOPER_POLL_WAKE:
             printf("ALOOPER_POLL_WAKE\n");
-        break;
-        case  ALOOPER_POLL_CALLBACK:
+            break;
+         case  ALOOPER_POLL_CALLBACK:
             printf("ALOOPER_POLL_CALLBACK\n");
-        break;
-        case  ALOOPER_POLL_TIMEOUT:
-    printf("ALOOPER_POLL_TIMEOUT\n");
-    break;
-    case  ALOOPER_POLL_ERROR:
-    printf("ALOOPER_POLL_TIMEOUT\n");
-    break;
-    default:
-    printf("ugh? poll returned %d\n", ret);
-    break;
-    }
-    }while (mVsyncState);
+            break;
+         case  ALOOPER_POLL_TIMEOUT:
+            printf("ALOOPER_POLL_TIMEOUT\n");
+            break;
+         case  ALOOPER_POLL_ERROR:
+            printf("ALOOPER_POLL_TIMEOUT\n");
+            break;
+         default:
+            printf("ugh? poll returned %d\n", ret);
+            break;
+        }
+    } while (mVsyncState);
 
     if (loop.get()) {
         loop->removeFd(myDisplayEvent.getFd());
