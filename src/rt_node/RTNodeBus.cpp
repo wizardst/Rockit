@@ -266,6 +266,7 @@ RT_RET RTNodeBus::registerNode(RTNode *pNode) {
 
     INT32 nType  = pNode->queryStub()->mNodeType;
     pNode->mNext = RT_NULL;
+    pNode->mPrev = RT_NULL;
     rt_hash_table_insert(mBusCtx->mNodeBus, reinterpret_cast<void*>(nType), pNode);
     return RT_OK;
 }
@@ -295,20 +296,24 @@ RTNode* RTNodeBus::findNode(RT_NODE_TYPE nType, BUS_LINE_TYPE lType) {
 }
 
 RT_RET RTNodeBus::releaseNodes() {
-    struct rt_hash_node *list, *node;
-    RTNode*      plugin   = NULL;
-    RtHashTable* pNodeBus = mBusCtx->mNodeBus;
-
-    for (UINT32 idx = 0; idx < rt_hash_table_get_num_buckets(pNodeBus); idx++) {
-        list = rt_hash_table_get_bucket(pNodeBus, idx);
-        for (node = list->next; node != RT_NULL; node = node->next) {
-            plugin = reinterpret_cast<RTNode*>(node->data);
-            if (RT_NULL != plugin) {
-                rt_safe_delete(plugin);
-            }
+    int i;
+    for (i = 0; i < BUS_LINE_MAX; i++) {
+        RTNode* pHead = mBusCtx->mRootNodes[i];
+        RTNode* pNode = RT_NULL;
+        // run commands in all nodes of active node-chain
+        if (pHead == RT_NULL) {
+            continue;
         }
+        while (pHead->mNext != RT_NULL) {
+            pNode = pHead;
+            while (pNode->mNext != RT_NULL) {
+                pNode = pNode->mNext;
+            }
+            pNode->mPrev->mNext = RT_NULL;
+            rt_safe_delete(pNode);
+        }
+        rt_safe_delete(pHead);
     }
-    rt_hash_table_clear(pNodeBus);
     clearNodeBus();
 
     return RT_OK;
@@ -324,10 +329,12 @@ RT_RET RTNodeBus::nodeChainAppend(RTNode *pNode, BUS_LINE_TYPE lType) {
     RTNode **nRoot = RT_NULL;
     nRoot = &(mBusCtx->mRootNodes[lType]);
     pNode->mNext = RT_NULL;
+    pNode->mPrev = RT_NULL;
     if (RT_NULL == *nRoot) {
         *nRoot = pNode;
     } else {
         (*nRoot)->mNext = pNode;
+        pNode->mPrev = *nRoot;
     }
     RT_LOGE("%-16s -> add RTNode(ptr=0x%p, name=%s)", mBusLineNames[lType].name,
                pNode, pNode->queryStub()->mNodeName);
@@ -413,7 +420,7 @@ RTNode* bus_find_and_add_demuxer(RTNodeBus *pNodeBus, RTMediaUri *setting) {
             rt_safe_delete(demuxer);
             return RT_NULL;
         }
-        pNodeBus->registerNode(demuxer);
+        //  pNodeBus->registerNode(demuxer);
     } else {
         RT_LOGE("Fail to create demxuer(uri=0x%p), invalid par...", setting->mUri);
     }
@@ -473,7 +480,7 @@ RTNode* bus_find_and_add_codec(RTNodeBus *pNodeBus, RTNode *demuxer, \
             rt_safe_delete(node_codec);
             return RT_NULL;
         }
-        pNodeBus->registerNode(node_codec);
+        //  pNodeBus->registerNode(node_codec);
     } else {
         RT_LOGE("%-16s -> invalid codec()", mBusLineNames[lType].name);
     }
@@ -501,7 +508,7 @@ RTNode* bus_find_and_add_sink(RTNodeBus *pNodeBus, RTNode *codec, BUS_LINE_TYPE 
             rt_safe_delete(nSink);
             return RT_NULL;
         }
-        pNodeBus->registerNode(nSink);
+        //  pNodeBus->registerNode(nSink);
         rt_utils_dump_track(nMeta);
     } else {
         RT_LOGE("%-16s -> valid codec, but found no sink", mBusLineNames[lType].name);

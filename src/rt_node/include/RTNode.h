@@ -88,6 +88,7 @@ class RTNode {
 
  public:
     RTNode  *mNext;
+    RTNode  *mPrev;
 };
 
 class RTNodeAdapter {

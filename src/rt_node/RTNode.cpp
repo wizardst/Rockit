@@ -45,6 +45,7 @@ RT_RET check_err(RTNode* pNode, RT_RET err, const char* func_name) {
 RT_RET RTNodeAdapter::init(RTNode* pNode, RtMetaData* metadata) {
     RT_RET  err  = pNode->init(metadata);
     pNode->mNext = RT_NULL;
+    pNode->mPrev = RT_NULL;
     return CHECK_ERR(pNode, err);
 }
 
