@@ -55,7 +55,8 @@ RTSinkAudioALSA::RTSinkAudioALSA()
           mSampleRate(48000),
           mChannels(2),
           mDataSize(4096),
-          mInputMeta(RT_NULL) {
+          mInputMeta(RT_NULL),
+          mPlayStatus(PLAY_STOPPED) {
     mThread = new RtThread(sink_audio_alsa_loop, reinterpret_cast<void*>(this));
     mThread->setName("SinkAlsa");
     mDeque = deque_create(10);
