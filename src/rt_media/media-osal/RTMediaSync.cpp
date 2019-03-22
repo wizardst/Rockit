@@ -23,10 +23,11 @@
 #include "RTMediaSync.h"   // NOLINT
 #include "IMediaSync.h"    // NOLINT
 #include "rt_mem.h"        // NOLINT
+#include "android/Vsync.h"
 
 RTMediaSync::RTMediaSync() {
 #if OS_ANDROID
-    mSync = new RTTimerSync();
+    mSync = new Vsync();
 #else
     mSync = new RTTimerSync();
 #endif

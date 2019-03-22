@@ -21,12 +21,7 @@
 #include "rt_time.h"     // NOLINT
 #include "IMediaSync.h"  // NOLINT
 
-IMediaSync::IMediaSync() {
-    mCallback = NULL;
-    mTarget   = NULL;
-    mInterval     = 0;
-    mLastSchedule = 0;
-}
+
 
 void IMediaSync::setTarget(void* target, RTSyncCallback callback) {
     mCallback = callback;
@@ -34,7 +29,11 @@ void IMediaSync::setTarget(void* target, RTSyncCallback callback) {
     mLastSchedule = RtTime::getNowTimeUs();
 }
 
-RTTimerSync::RTTimerSync() : IMediaSync() {
+RTTimerSync::RTTimerSync() {
+    mCallback = NULL;
+    mTarget   = NULL;
+    mInterval     = 0;
+    mLastSchedule = 0;
     mLastSchedule = RtTime::getNowTimeUs();
 }
 

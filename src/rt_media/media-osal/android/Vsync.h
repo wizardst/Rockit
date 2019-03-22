@@ -19,36 +19,23 @@
 
 #ifndef SRC_RT_MEDIA_MEDIA_OSAL_ANDROID_VSYNC_H_
 #define SRC_RT_MEDIA_MEDIA_OSAL_ANDROID_VSYNC_H_
-#include <utils/Log.h>
-#include <utils/threads.h>
-#include <utils/Vector.h>
 
-#include <gui/DisplayEventReceiver.h>
-#include <semaphore.h>
-#include <inttypes.h>
+#include "IMediaSync.h"
 
 typedef void* (*CallBackFun)(void *);
 
-using namespace android;   // NOLINT
-
-class Vsync : public RefBase {
+struct VSyncContext;
+class Vsync : public IMediaSync {
  public:
-    explicit Vsync(CallBackFun callback);  // init callback function here
-    void* onSyncEvent(void* ptr_node);
-    CallBackFun mCallBack;
+    Vsync();
+    ~Vsync();
+    void schedule();
     static int receiver(int fd, int events, void* data);
     int FrameAlign(int64_t count, float rate);
     void computeFrameAbandonNum(float hdmirate);
-    bool mVsyncState;
-    DisplayEventReceiver myDisplayEvent;
-    static int64_t mLastVsyncTime;
-    static int64_t phase;
-    int64_t mVsyncIntervalTimeUs;
-    int vsync_rate;
-    ~Vsync();
-
+    void cancel();
  private:
-    // sp<Looper> mLooper;
+     struct VSyncContext* mContext;
 };
 
 #endif  // SRC_RT_MEDIA_MEDIA_OSAL_ANDROID_VSYNC_H_

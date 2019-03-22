@@ -65,6 +65,9 @@ class RTPktSourceBase : public RTObject {
     virtual RT_RET queueNullPacket(INT32 streamIndex, RTTrackType type) = 0;
     virtual RTPacket *dequeuePacket(RTTrackType type, RT_BOOL block = RT_TRUE) = 0;
     virtual RT_RET queueUnusedPacket(RTPacket *pkt) = 0;
+
+    // override pure virtual methods of RTObject class
+    virtual const char* getName() { return "RTPktSourceBase"; }
 };
 
 #endif  // SRC_RT_MEDIA_INCLUDE_RTPKTSOURCEBASE_H_

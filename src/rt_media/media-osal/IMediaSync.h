@@ -27,7 +27,6 @@ typedef void (*RTSyncCallback)(void* target, uint64_t time);
 
 class IMediaSync {
  public:
-    IMediaSync();
     virtual ~IMediaSync() {}
     virtual void schedule() = 0;
     virtual void cancel()  = 0;

@@ -28,7 +28,7 @@ RTMediaCache::RTMediaCache()
       mHighWaterCacheCount(0),
       mLowWaterCacheDuration(0ll),
       mLowWaterCacheCount(0) {
-    RTObject::trace(getName(), this, sizeof(RTScene));
+    RTObject::trace(getName(), this, sizeof(RTMediaCache));
 }
 
 RTMediaCache::~RTMediaCache() {
@@ -46,7 +46,7 @@ RT_BOOL RTMediaCache::isInsufficient() {
 }
 
 RTPktSourceBase::RTPktSourceBase() {
-    RTObject::trace(getName(), this, sizeof(RTScene));
+    RTObject::trace(getName(), this, sizeof(RTPktSourceBase));
 }
 
 RTPktSourceBase::~RTPktSourceBase() {
