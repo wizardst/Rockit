@@ -54,34 +54,31 @@ RT_RET unit_test_player_pair_rand(const char* uri, bool rand) {
     RtThread *cmdThreadA = RT_NULL;
     RtThread *cmdThreadB = RT_NULL;
     RTNDKMediaPlayer*  ndkPlayer = new RTNDKMediaPlayer();
-    const char*        name    = "cmd_rand";
-
-    if (rand) {
-        cmd_count  = 0;
-        cmdThreadA = new RtThread(control_stream_loop_xa, ndkPlayer);
-        cmdThreadA->setName(name);
-        cmdThreadB = new RtThread(control_stream_loop_xb, ndkPlayer);
-        cmdThreadB->setName(name);
-    }
 
     ndkPlayer->setDataSource(uri, RT_NULL);
     ndkPlayer->prepare();
     ndkPlayer->start();
 
     // simulation of control distribution
-    if ((RT_NULL != cmdThreadA) && (RT_NULL != cmdThreadB)) {
+    RtTime::sleepMs(1000);
+    if (rand) {
+        cmd_count  = 0;
+        cmdThreadA = new RtThread(control_stream_loop_xa, ndkPlayer);
+        cmdThreadA->setName("cmd_rand1");
         cmdThreadA->start();
+        cmdThreadB = new RtThread(control_stream_loop_xb, ndkPlayer);
+        cmdThreadB->setName("cmd_rand2");
         cmdThreadB->start();
     }
 
     // wait util of playback complete
-    ndkPlayer->wait();
+    ndkPlayer->wait(0);
     cmd_count = MAX_TEST_COUNT;
-
     ndkPlayer->pause();
+    ndkPlayer->stop();
     ndkPlayer->reset();
-    rt_safe_delete(ndkPlayer);
 
+    rt_safe_delete(ndkPlayer);
     rt_safe_delete(cmdThreadB);
     rt_safe_delete(cmdThreadA);
     return RT_OK;

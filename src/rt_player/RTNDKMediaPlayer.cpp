@@ -218,9 +218,9 @@ rt_status RTNDKMediaPlayer::reset() {
     return RTE_NO_ERROR;
 }
 
-rt_status RTNDKMediaPlayer::wait() {
-    RT_LOGD("call, wait until playback done");
-    mPlayerCtx->mNodePlayer->wait();
+rt_status RTNDKMediaPlayer::wait(int64_t timeUs) {
+    RT_LOGD("call, wait until playback done, max timetout = %lldms", timeUs/1000);
+    mPlayerCtx->mNodePlayer->wait(timeUs);
     RT_LOGD("done, playback has done...");
     return RTE_NO_ERROR;
 }

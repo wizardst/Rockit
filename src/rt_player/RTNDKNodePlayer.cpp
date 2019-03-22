@@ -22,12 +22,12 @@
 #include "RTNode.h"           // NOLINT
 #include "RTNodeDemuxer.h"    // NOLINT
 #include "RTNodeAudioSink.h"  // NOLINT
-#include "rt_header.h"       // NOLINT
-#include "rt_hash_table.h"   // NOLINT
-#include "rt_array_list.h"   // NOLINT
-#include "rt_message.h"      // NOLINT
-#include "rt_msg_handler.h"  // NOLINT
-#include "rt_msg_looper.h"   // NOLINT
+#include "rt_header.h"        // NOLINT
+#include "rt_hash_table.h"    // NOLINT
+#include "rt_array_list.h"    // NOLINT
+#include "rt_message.h"       // NOLINT
+#include "rt_msg_handler.h"   // NOLINT
+#include "rt_msg_looper.h"    // NOLINT
 
 #ifdef LOG_TAG
 #undef LOG_TAG
@@ -47,9 +47,9 @@ struct NodePlayerContext {
     UINT32              mState;
     RTSeekType          mSeekFlag;
     RtMetaData         *mCmdOptions;
+    INT64               mSaveSeekTimeUs;
     INT64               mWantSeekTimeUs;
     INT64               mCurTimeUs;
-    INT64               mSaveSeekTimeUs;
     INT64               mDuration;
     RT_CALLBACK_T       mRT_Callback;
     INT32               mRT_Callback_Type;
@@ -298,15 +298,18 @@ RT_RET RTNDKNodePlayer::stop() {
         mPlayerCtx->mLooper->flush();
         msg = new RTMessage(RT_MEDIA_STOPPED, RT_NULL, this);
         mPlayerCtx->mLooper->send(msg, 0);
+        mPlayerCtx->mCurTimeUs = 0;
+        mPlayerCtx->mDuration  = 0;
         break;
     }
 
     return err;
 }
 
-RT_RET RTNDKNodePlayer::wait() {
+RT_RET RTNDKNodePlayer::wait(int64_t timeUs) {
     UINT32 curState = RT_STATE_IDLE;
     UINT32 loopFlag = 1;
+    timeUs = (timeUs < 1000000)? 20000000:timeUs;
     do {
         curState = this->getCurState();
         switch (curState) {
@@ -319,9 +322,11 @@ RT_RET RTNDKNodePlayer::wait() {
             RtTime::sleepMs(5);
             break;
         }
-    } while (1 == loopFlag);
+    } while ((1 == loopFlag)&&(mPlayerCtx->mCurTimeUs < timeUs));
+    RT_LOGE("done, ndk-node-player completed playback! current:%lldms, timeout:%lldms",
+             mPlayerCtx->mCurTimeUs/1000, timeUs/1000);
+
     return RT_OK;
-    RT_LOGE("done, ndk-node-player completed playback!");
 }
 
 RT_RET RTNDKNodePlayer::seekTo(INT64 usec) {
@@ -607,6 +612,7 @@ RT_RET RTNDKNodePlayer::setCallBack(RT_CALLBACK_T callback, int p_event, void *p
 }
 
 RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
+    RT_RET           err       = RT_OK;
     INT32            eosFlag   = 0;
     RTNode*          root      = mNodeBus->getRootNode(BUS_LINE_ROOT);
     RTNodeDemuxer*   demuxer   = reinterpret_cast<RTNodeDemuxer*>(root);
@@ -618,67 +624,89 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
         audiosink->setEventLooper(mPlayerCtx->mLooper);
     }
 
-    if (RT_NULL != decoder) {
-        RTMediaBuffer *frame = RT_NULL;
-        RTMediaBuffer* esPacket;
+    if ((RT_NULL == decoder) || (RT_NULL == audiosink)) {
+        return RT_ERR_BAD;
+    }
 
-        while (mPlayerCtx->mDeliverThread->getState() == THREAD_LOOP) {
-            if (demuxer != RT_NULL && !eosFlag) {
+    RTMediaBuffer* frame   = RT_NULL;
+    RTMediaBuffer* esPacket;
+
+    while (mPlayerCtx->mDeliverThread->getState() == THREAD_LOOP) {
+        UINT32 curState = this->getCurState();
+        if (RT_STATE_STARTED != curState) {
+            RtTime::sleepMs(2);
+            continue;
+        }
+
+        if (demuxer != RT_NULL) {
             // deqeue buffer from object pool
-                INT32 audio_idx  = demuxer->queryTrackUsed(RTTRACK_TYPE_AUDIO);
-                RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
-                if (RT_NULL != esPacket) {
-                    RT_BOOL got_pkt = RT_FALSE;
-                    while (!got_pkt) {
-                        // save es-packet to buffer
-                        while (RTNodeAdapter::pullBuffer(demuxer, &esPacket) != RT_OK) {
-                            RtTime::sleepMs(10);
-                        }
-                        INT32 track_index = 0;
-                        esPacket->getMetaData()->findInt32(kKeyPacketIndex, &track_index);
+            INT32 audio_idx  = demuxer->queryTrackUsed(RTTRACK_TYPE_AUDIO);
+            RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
+            if (RT_NULL == esPacket) {
+                RtTime::sleepMs(2);
+                continue;
+            }
 
-                        if (track_index == audio_idx) {
-                            UINT32 size = esPacket->getSize();
-                            esPacket->getMetaData()->findInt32(kKeyFrameEOS, &eosFlag);
-                            RT_LOGD_IF(DEBUG_FLAG, "audio es-packet(ptr=0x%p, size=%d, eosFlag=%d)", \
-                                                    esPacket, size, eosFlag);
-                            got_pkt = RT_TRUE;
-                        } else {
-                            /* pass other packet */
-                            esPacket->getMetaData()->findInt32(kKeyFrameEOS, &eosFlag);
-                            if (eosFlag) {
-                                RT_LOGD("receive eos , break");
-                                break;
-                            }
-                            esPacket->release(RT_TRUE);
-                            continue;
-                        }
-                     }
+            RT_BOOL validPkt = RT_FALSE;
+            do {
+                do  {
+                    // save es-packet to buffer
+                    err      = RTNodeAdapter::pullBuffer(demuxer, &esPacket);
+                    curState = this->getCurState();
+                    if (RT_STATE_STARTED != curState) {
+                        break;
+                    } else {
+                        RtTime::sleepMs(2);
+                    }
+                } while ((RT_OK != err) && (RT_STATE_STARTED == curState));
+
+                INT32 track_index = 0;
+                esPacket->getMetaData()->findInt32(kKeyPacketIndex, &track_index);
+
+                if (track_index == audio_idx) {
+                    UINT32 size = esPacket->getSize();
+                    RT_LOGD_IF(DEBUG_FLAG, "audio es-packet(ptr=0x%p, size=%d)", esPacket, size);
+                    validPkt = RT_TRUE;
                 } else {
+                    /* pass other packet */
+                    esPacket->getMetaData()->findInt32(kKeyFrameEOS, &eosFlag);
+                    if (eosFlag) {
+                        RT_LOGD("receive eos , break");
+                        break;
+                    }
+                    esPacket->release(RT_TRUE);
                     continue;
                 }
-                // push es-packet to decoder
-                RTNodeAdapter::pushBuffer(decoder, esPacket);
-            }
+            } while (!validPkt);
 
-            // pull av-frame from decoder
-            RTNodeAdapter::pullBuffer(decoder, &frame);
-            if (frame) {
-                if (frame->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
-                    INT64 timeUs = 0ll;
-                    frame->getMetaData()->findInt64(kKeyFramePts, &timeUs);
-                    RT_LOGD_IF(DEBUG_FLAG, "audio frame(ptr=0x%p, size=%d, timeUs=%lldms)",
-                            frame->getData(), frame->getLength(), timeUs/1000);
-
-                    RTNodeAdapter::pushBuffer(audiosink, frame);
-                    mPlayerCtx->mCurTimeUs = timeUs;
-                }
-                frame = NULL;
-            }
-
-            // dump AVFrame
-            RtTime::sleepMs(5);
+            // push es-packet to decoder
+            RTNodeAdapter::pushBuffer(decoder, esPacket);
         }
+
+        // pull av-frame from decoder
+        RTNodeAdapter::pullBuffer(decoder, &frame);
+
+        if (frame) {
+            if (frame->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
+                INT64 timeUs = 0ll;
+                frame->getMetaData()->findInt64(kKeyFramePts, &timeUs);
+                RT_LOGD_IF(DEBUG_FLAG, "audio frame(ptr=0x%p, size=%d, timeUs=%lldms)",
+                        frame->getData(), frame->getLength(), timeUs/1000);
+
+                RTNodeAdapter::pushBuffer(audiosink, frame);
+                mPlayerCtx->mCurTimeUs = timeUs;
+            }
+            frame->getMetaData()->findInt32(kKeyFrameEOS, &eosFlag);
+            if (eosFlag) {
+                RT_LOGD("receive eos , break");
+                break;
+            }
+            frame = NULL;
+        }
+
+        // dump AVFrame
+        RtTime::sleepMs(5);
     }
+
     return RT_OK;
 }

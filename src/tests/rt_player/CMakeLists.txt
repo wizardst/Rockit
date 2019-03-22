@@ -26,5 +26,5 @@ macro(add_rockit_test module)
 endmacro()
 
 add_rockit_test(case_player_std)
-
 add_rockit_test(case_player_rand)
+add_rockit_test(case_player_stable)

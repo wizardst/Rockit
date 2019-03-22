@@ -18,14 +18,15 @@
  * module: RTNDKIPTVPlayer
  */
 
+#include <utils/Log.h>          // NOLINT
+#include <media/Metadata.h>     // NOLINT
+#include <media/stagefright/MediaExtractor.h>
+
 #include "RTMediaPlayer.h"      // NOLINT
 #include "RTMediaPlayerImpl.h"  // NOLINT
 
 // #define LOG_NDEBUG 0
 #define LOG_TAG "RTMediaPlayer"
-#include <utils/Log.h>
-#include <media/Metadata.h>
-#include <media/stagefright/MediaExtractor.h>
 
 RTMediaPlayer::RTMediaPlayer()
     : mPlayer(new RTMediaPlayerImpl) {

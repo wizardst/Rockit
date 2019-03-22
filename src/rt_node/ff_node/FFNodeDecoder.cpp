@@ -220,7 +220,7 @@ RT_RET FFNodeDecoder::dequeBuffer(RTMediaBuffer **data, RTPortType port) {
             if (*data) {
                 (*data)->getMetaData()->setInt32(kKeyCodecType, mTrackType);
             } else {
-                RT_LOGD("FFNodeDecoder::dequeBuffer NULL");
+                // RT_LOGD("FFNodeDecoder::dequeBuffer NULL");
                 ret   = RT_ERR_LIST_EMPTY;
             }
             break;

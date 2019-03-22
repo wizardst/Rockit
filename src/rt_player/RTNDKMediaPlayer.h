@@ -63,7 +63,7 @@ class RTNDKMediaPlayer {
     rt_status stop();
     rt_status pause();
     rt_status reset();
-    rt_status wait();       // waiting until playback done.
+    rt_status wait(int64_t timeUs = 0);  // waiting until playback done.
 
     /*
      * basic query operations

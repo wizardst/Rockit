@@ -18,14 +18,15 @@
  * module: RTMediaPlayerImpl
  */
 
+#include <utils/Log.h>          // NOLINT
+#include <media/Metadata.h>     // NOLINT
+#include <media/stagefright/MediaExtractor.h>
+
 #include "RTMediaPlayerImpl.h"  // NOLINT
 #include "RTNDKIPTVPlayer.h"    // NOLINT
 
 #define LOG_NDEBUG 0
 #define LOG_TAG "RTMediaPlayerImpl"
-#include <utils/Log.h>
-#include <media/Metadata.h>
-#include <media/stagefright/MediaExtractor.h>
 
 RTMediaPlayerImpl::RTMediaPlayerImpl() {
     ALOGE("+Constructor %p", this);

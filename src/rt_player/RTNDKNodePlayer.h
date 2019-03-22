@@ -45,7 +45,7 @@ class RTNDKNodePlayer : public RTMsgHandler {
     RT_RET    start();
     RT_RET    pause();
     RT_RET    stop();
-    RT_RET    wait();
+    RT_RET    wait(int64_t timeUs = 0);  // waiting until playback done.
     RT_RET    seekTo(INT64 usec);
 
     RT_RET    summary(INT32 fd);

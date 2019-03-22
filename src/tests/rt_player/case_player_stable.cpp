@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * author: martin.cheng@rock-chips.com
- *   date: 2019/02/27
+ * author: rimon.xu@rock-chips.com
+ *   date: 2019/03/20
  */
 
 #include "rt_header.h"          // NOLINT
@@ -41,9 +41,10 @@ void *control_stream_loop(void* param) {
     return RT_NULL;
 }
 
-RT_RET unit_test_player_with_thread(const char* uri, bool rand) {
-    RtThread*          cmdThread = RT_NULL;
+RT_RET unit_test_player_stable_rand(const char* uri, bool rand) {
+    RtThread *cmdThread = RT_NULL;
     RTNDKMediaPlayer*  ndkPlayer = new RTNDKMediaPlayer();
+    const char*        name      = "cmd_rand";
 
     ndkPlayer->setDataSource(uri, RT_NULL);
     ndkPlayer->prepare();
@@ -58,16 +59,24 @@ RT_RET unit_test_player_with_thread(const char* uri, bool rand) {
         cmdThread->start();
     }
 
-    // wait util of playback complete
-    ndkPlayer->wait(0);    // wait for timeout(ms)
-    #if 0
-    ndkPlayer->playPcm(media_two);
-    ndkPlayer->wait();
-    #endif
-    cmd_count = MAX_TEST_COUNT;
+    // wait util playback complete of first song
+    ndkPlayer->wait(20*1000*1000);    // wait for timeout(ms)
     ndkPlayer->pause();
     ndkPlayer->stop();
     ndkPlayer->reset();
+
+    // playe next song
+    ndkPlayer->setDataSource(uri, RT_NULL);
+    ndkPlayer->prepare();
+    ndkPlayer->start();
+
+    // wait util playback complete of second song
+    ndkPlayer->wait(10*1000*1000);    // wait for timeout(ms)
+    ndkPlayer->pause();
+    ndkPlayer->stop();
+    ndkPlayer->reset();
+
+    cmd_count = MAX_TEST_COUNT;
 
     rt_safe_delete(ndkPlayer);
     rt_safe_delete(cmdThread);
@@ -79,7 +88,6 @@ int main(int argc, char **argv) {
         player_utils_help(argv[0]);
         return 0;
     }
-
     const char* uri = NULL;
     bool  rand = false;
     switch (argc) {
@@ -97,10 +105,18 @@ int main(int argc, char **argv) {
     rt_mem_record_reset();
     RTObject::resetTraces();
 
+    /* your unit test */
+    int count = 0;
     if (NULL != uri) {
-        unit_test_player_with_thread(uri, rand);
+        do {
+            unit_test_player_stable_rand(uri, rand);
+            unit_test_player_stable_rand(uri, rand);
+            count++;
+        } while (count < 100);
     }
 
     rt_mem_record_dump();
     RTObject::dumpTraces();
+    return 0;
 }
+

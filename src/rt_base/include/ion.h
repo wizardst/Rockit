@@ -62,7 +62,7 @@ struct ion_handle_data {
 struct ion_custom_data {
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
   unsigned int cmd;
-  unsigned long arg;
+  unsigned long arg;    // NOLINT
 };
 #define ION_IOC_MAGIC 'I'
 /* WARNING: DO NOT EDIT, AUTO-GENERATED CODE - SEE TOP FOR INSTRUCTIONS */
