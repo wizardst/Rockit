@@ -109,6 +109,7 @@ RT_BOOL RtThread::start() {
     if (RT_NULL != mData) {
         RtThreadData* data = static_cast<RtThreadData*>(mData);
         err = pthread_create(&(data->mTid), RT_NULL, thread_looping, this);
+        pthread_setname_np(data->mTid, data->mName);
         RT_LOGD("done, pthread_create with name=%s, error=%s",
                    data->mName, strerror(err));
         if (err != RT_OK) {
