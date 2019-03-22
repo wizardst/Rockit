@@ -370,15 +370,16 @@ RT_RET fa_decode_send_packet(FACodecContext* fc, RTMediaBuffer *buffer) {
         return RT_ERR_VALUE;
     }
 
-    AVPacket pkt;
-    fa_init_av_packet(&pkt, buffer);
+    AVPacket* avPkt = av_packet_alloc();;
+    fa_init_av_packet(avPkt, buffer);
 
-    if (avcodec_send_packet(fc->mAvCodecCtx, &pkt) == AVERROR(EAGAIN)) {
+    if (avcodec_send_packet(fc->mAvCodecCtx, avPkt) == AVERROR(EAGAIN)) {
         RT_LOGE("send_packet returned EAGAIN, which is an API violation.\n");
         return RT_ERR_TIMEOUT;
     }
 
-    av_packet_unref(&pkt);
+    av_packet_unref(avPkt);
+    av_packet_free(&avPkt);
     return RT_OK;
 }
 
@@ -455,6 +456,7 @@ RT_RET fa_audio_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
         fc->mFrame = av_frame_alloc();
     }
     frame = fc->mFrame;
+
     if (frame) {
         ret = avcodec_receive_frame(fc->mAvCodecCtx, frame);
         if (ret == AVERROR(EAGAIN)) {
@@ -534,6 +536,7 @@ RT_RET fa_audio_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
         meta->setInt32(kKeyFrameEOS, 1);
     }
     av_frame_unref(frame);
+    // av_frame_free(&frame);
     buffer->setStatus(RT_MEDIA_BUFFER_STATUS_READY);
     return RT_OK;
 }

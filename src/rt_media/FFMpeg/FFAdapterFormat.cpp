@@ -180,6 +180,7 @@ INT32 fa_format_packet_free(void* raw_pkt) {
     AVPacket* ff_pkt = reinterpret_cast<AVPacket*>(raw_pkt);
     if (RT_NULL != ff_pkt) {
         av_packet_unref(ff_pkt);
+        av_packet_free(&ff_pkt);
         return 0;
     }
     return -1;

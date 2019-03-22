@@ -199,6 +199,7 @@ void RTMediaBuffer::release(bool debug) {
             mMetaData->findPointer(kKeyPacketPtr, &raw_ptr);
             if (raw_ptr) {
                 mFuncFree(raw_ptr);
+                mMetaData->setPointer(kKeyPacketPtr, RT_NULL);
             }
         }
         return;
