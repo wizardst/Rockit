@@ -102,7 +102,6 @@ rt_status RTNDKMediaPlayer::setDataSource(const char *url, const char *headers) 
         RT_LOGE("setDataSource fail\n");
         return RT_ERR_UNKNOWN;
     }
-    mPlayerCtx->mNodePlayer->summary(0);
 
     return err;
 }
@@ -153,6 +152,7 @@ rt_status RTNDKMediaPlayer::prepare() {
     // driver core data-flow
     RT_LOGD("NodePlayer prepare");
     mPlayerCtx->mNodePlayer->prepare();
+    mPlayerCtx->mNodePlayer->summary(0);
     return err;
 }
 

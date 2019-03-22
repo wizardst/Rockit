@@ -173,7 +173,7 @@ RT_RET FFNodeDecoder::allocateBuffersOnPort(RTPortType port) {
                 if (mTrackType == RTTRACK_TYPE_VIDEO) {
                     buf_size = mTrackParms->mVideoWidth * mTrackParms->mVideoHeight * 3 / 2;
                 } else if (mTrackType == RTTRACK_TYPE_AUDIO) {
-                    buf_size = 9216 * 2;
+                    buf_size = 1024 * 4 * 10;
                 } else {
                     RT_LOGE("unknown track type: %d", mTrackType);
                     return RT_ERR_UNKNOWN;
@@ -219,6 +219,9 @@ RT_RET FFNodeDecoder::dequeBuffer(RTMediaBuffer **data, RTPortType port) {
             *data = reinterpret_cast<RTMediaBuffer *>(mUnusedInputPort->borrowObj());
             if (*data) {
                 (*data)->getMetaData()->setInt32(kKeyCodecType, mTrackType);
+            } else {
+                RT_LOGD("FFNodeDecoder::dequeBuffer NULL");
+                ret   = RT_ERR_LIST_EMPTY;
             }
             break;
         case RT_PORT_OUTPUT: {
@@ -357,13 +360,21 @@ RT_RET FFNodeDecoder::runTask() {
         }
 
        if (mByPass == RT_TRUE) {
-            memcpy(output->getData(), input->getData(), output->getSize());
-            input->release();
-            mUnusedInputPort->returnObj(input);
-            input = NULL;
-            output->setStatus(RT_MEDIA_BUFFER_STATUS_READY);
-            deque_push(mFrameQ, output);
-            output = NULL;
+           if (output->getSize() < input->getSize()) {
+               memcpy(output->getData(), input->getData(), output->getSize());
+           } else {
+               memcpy(output->getData(), input->getData(), input->getSize());
+           }
+           output->setRange(0, input->getSize());
+           input->release();
+           mUnusedInputPort->returnObj(input);
+           input = NULL;
+           output->getMetaData()->setInt32(kKeyACodecSampleRate, 24000);
+           output->getMetaData()->setInt32(kKeyACodecChannels, 1);
+           output->setStatus(RT_MEDIA_BUFFER_STATUS_READY);
+           RtMutex::RtAutolock autoLock(mLockFrameQ);
+           deque_push(mFrameQ, output);
+           output = NULL;
         } else {
             RT_LOGD_IF(DEBUG_FLAG, "input and output ready, go to decode!");
             err = fa_decode_send_packet(mFFCodec, input);

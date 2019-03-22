@@ -82,7 +82,7 @@ RTNDKNodePlayer::RTNDKNodePlayer() {
 
     // thread used for data transfer between plugins
     mPlayerCtx->mDeliverThread = NULL;
-
+    mPlayerCtx->mRT_Callback   = NULL;
     mPlayerCtx->mCmdOptions = new RtMetaData();
 
     init();
@@ -484,7 +484,9 @@ RT_RET RTNDKNodePlayer::onPlaybackDone() {
     mNodeBus->excuteCommand(RT_NODE_CMD_PAUSE);
     mNodeBus->excuteCommand(RT_NODE_CMD_FLUSH);
     mNodeBus->excuteCommand(RT_NODE_CMD_RESET);
-    // mPlayerCtx->mRT_Callback(mPlayerCtx->mRT_Callback_Type, mPlayerCtx->mRT_Callback_Data);
+    if (mPlayerCtx->mRT_Callback != RT_NULL) {
+        mPlayerCtx->mRT_Callback(mPlayerCtx->mRT_Callback_Type, mPlayerCtx->mRT_Callback_Data);
+    }
     RT_LOGE("done, onPlaybackDone");
 
     return RT_OK;
