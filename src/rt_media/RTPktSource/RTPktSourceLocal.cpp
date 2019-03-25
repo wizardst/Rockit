@@ -127,6 +127,7 @@ RT_RET RTPktSourceLocal::start() {
 RT_RET RTPktSourceLocal::stop() {
     RT_RET ret = RT_OK;
     RT_LOGE("this: %p stop", this);
+    RtMutex::RtAutolock autoLock(mWaitLock);
     mCondition->signal();
     return ret;
 }
@@ -189,7 +190,8 @@ RTPacket *RTPktSourceLocal::dequeueUnusedPacket(RT_BOOL block) {
                  mAudioCache->mCurCacheCount, mAudioCache->mHighWaterCacheCount);
 
         if (block) {
-            RtTime::sleepMs(500);
+            RtMutex::RtAutolock autoLock(mWaitLock);
+            mCondition->wait(mWaitLock);
             return RT_NULL;
         } else {
             return RT_NULL;
@@ -265,6 +267,7 @@ RTPacket *RTPktSourceLocal::dequeuePacket(RTTrackType type, RT_BOOL block) {
         RT_LOGE("unknown type: %d, free pkt", pkt->mType);
     }
     if (pkt) {
+        RtMutex::RtAutolock autoLock(mWaitLock);
         mCondition->signal();
     }
     return pkt;
