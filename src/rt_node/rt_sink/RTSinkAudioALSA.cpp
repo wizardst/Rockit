@@ -351,7 +351,6 @@ RT_RET RTSinkAudioALSA::runTask() {
             RT_LOGD("render EOS Flag, post EOS message");
             RTMessage* eosMsg = new RTMessage(RT_MEDIA_PLAYBACK_COMPLETE, nullptr, nullptr);
             mEventLooper->post(eosMsg);
-            return RT_OK;
         }
 
         input = NULL;

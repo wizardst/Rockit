@@ -105,6 +105,6 @@ endif()
 
 add_library(${RT_MEDIA_STATIC} STATIC ${RT_MEDIA_SRC})
 set_target_properties(${RT_MEDIA_STATIC} PROPERTIES FOLDER "rt_media")
-target_link_libraries(${RT_MEDIA_STATIC} ${RT_BASE_STATIC} -lasound -pthread ${MPI_LIBS} ${FFMPEG_LIBS} -lmedia_osal)
+target_link_libraries(${RT_MEDIA_STATIC} ${RT_BASE_STATIC} -lasound -pthread ${MPI_LIBS} ${FFMPEG_LIBS})
 
 message(STATUS "cmake version ${CMAKE_VERSION} [@@]config library: rt_media")

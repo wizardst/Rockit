@@ -114,12 +114,13 @@ rt_status RTNDKMediaPlayer::setDataSource(int fd, int64_t offset, int64_t length
 }
 
 rt_status RTNDKMediaPlayer::setLooping(int loop) {
-    rt_status err = checkRuntime(mPlayerCtx, "setDataSource");
+    rt_status err = checkRuntime(mPlayerCtx, "setLooping");
     if (RTE_NO_ERROR != err) {
         return err;
     }
 
     mPlayerCtx->mLooping  = loop;
+    mPlayerCtx->mNodePlayer->setLooping(loop);
     return err;
 }
 
