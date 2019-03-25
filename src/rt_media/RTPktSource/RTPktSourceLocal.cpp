@@ -139,7 +139,6 @@ RT_RET RTPktSourceLocal::flush() {
         if (entry.data) {
             pkt = reinterpret_cast<RTPacket *>(entry.data);
         }
-        mMaxCacheSize -= pkt->mSize;
         mVideoCache->mCurCacheCount = deque_size(mVideoPktQ);
         mVideoCache->mCurCacheDuration -= pkt->mDuration;
         mVideoCache->mCurCacheSize -= pkt->mSize;
@@ -153,7 +152,6 @@ RT_RET RTPktSourceLocal::flush() {
         if (entry.data) {
             pkt = reinterpret_cast<RTPacket *>(entry.data);
         }
-        mMaxCacheSize -= pkt->mSize;
         mAudioCache->mCurCacheCount = deque_size(mAudioPktQ);
         mAudioCache->mCurCacheDuration -= pkt->mDuration;
         mAudioCache->mCurCacheSize -= pkt->mSize;
@@ -181,11 +179,14 @@ RTPacket *RTPktSourceLocal::dequeueUnusedPacket(RT_BOOL block) {
     while (getTotalCacheSize() >= mMaxCacheSize
             || mVideoCache->isFull()
             || mAudioCache->isFull()) {
-        RT_LOGD("cache is full, total size: %d, video(duration: %lld, count: %d),"
-                "audio(duration: %lld, count: %d)",
-                 getTotalCacheSize(), mVideoCache->mCurCacheDuration, \
-                 mVideoCache->mCurCacheCount, mAudioCache->mCurCacheDuration, \
-                 mAudioCache->mCurCacheCount);
+        RT_LOGD("cache is full, total size{cur: %d max: %d}, \n"
+                "video{duration(cur: %lld max: %lld), count(cur: %d max: %d)}, \n"
+                "audio{duration(cur: %lld max: %lld), count(cur: %d max: %d)}",
+                 getTotalCacheSize(), mMaxCacheSize,
+                 mVideoCache->mCurCacheDuration, mVideoCache->mHighWaterCacheDuration,
+                 mVideoCache->mCurCacheCount, mVideoCache->mHighWaterCacheCount,
+                 mAudioCache->mCurCacheDuration, mAudioCache->mHighWaterCacheDuration,
+                 mAudioCache->mCurCacheCount, mAudioCache->mHighWaterCacheCount);
 
         if (block) {
             RtTime::sleepMs(500);
