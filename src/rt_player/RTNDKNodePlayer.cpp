@@ -36,7 +36,7 @@
 #ifdef DEBUG_FLAG
 #undef DEBUG_FLAG
 #endif
-#define DEBUG_FLAG 0x0
+#define DEBUG_FLAG 0x1
 
 struct NodePlayerContext {
     RTNodeBus*          mNodeBus;
@@ -628,7 +628,6 @@ RT_RET RTNDKNodePlayer::setCallBack(RT_CALLBACK_T callback, int p_event, void *p
 
 RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
     RT_RET           err       = RT_OK;
-    INT32            eosFlag   = 0;
     RTNode*          root      = mNodeBus->getRootNode(BUS_LINE_ROOT);
     RTNodeDemuxer*   demuxer   = reinterpret_cast<RTNodeDemuxer*>(root);
     RTNode*          decoder   = mNodeBus->getRootNode(BUS_LINE_AUDIO);
@@ -647,33 +646,42 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
     RTMediaBuffer* esPacket = RT_NULL;
 
     while (mPlayerCtx->mDeliverThread->getState() == THREAD_LOOP) {
+        RT_BOOL validPkt = RT_FALSE;
+        RT_BOOL validAudioPkt = RT_FALSE;
         UINT32 curState = this->getCurState();
         if (RT_STATE_STARTED != curState) {
             RtTime::sleepMs(2);
             continue;
         }
 
+        /**
+         * 1. acquire avail audio packet from demuxer
+         */
         if (demuxer != RT_NULL) {
-            // deqeue buffer from object pool
             INT32 audio_idx  = demuxer->queryTrackUsed(RTTRACK_TYPE_AUDIO);
-            while (RT_NULL == esPacket) {
+            /**
+             * 1.1 deqeue buffer from decoder object pool
+             */
+            if (RT_NULL == esPacket) {
                 RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
                 RtTime::sleepMs(2);
             }
+            /**
+             * 1.2 deqeue avail packet from demuxer
+             */
+            if (RT_NULL != esPacket) {
+                err = RTNodeAdapter::pullBuffer(demuxer, &esPacket);
+                if (RT_OK == err) {
+                    validPkt = RT_TRUE;
+                } else if (RT_ERR_LIST_EMPTY != err) {
+                    RT_LOGE("pull buffer failed from demuxer. err: %d", err);
+                }
+            }
 
-            RT_BOOL validPkt = RT_FALSE;
-            do {
-                do  {
-                    // save es-packet to buffer
-                    err      = RTNodeAdapter::pullBuffer(demuxer, &esPacket);
-                    curState = this->getCurState();
-                    if (RT_STATE_STARTED != curState) {
-                        break;
-                    } else {
-                        RtTime::sleepMs(2);
-                    }
-                } while ((RT_OK != err) && (RT_STATE_STARTED == curState) && !eosFlag);
-
+            /**
+             * 1.3 select avail audio packet from track index
+             */
+            if (RT_TRUE == validPkt) {
                 INT32 track_index = 0;
                 esPacket->getMetaData()->findInt32(kKeyPacketIndex, &track_index);
 
@@ -681,33 +689,34 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
                     UINT32 size = esPacket->getSize();
                     INT32 eos = 0;
                     esPacket->getMetaData()->findInt32(kKeyFrameEOS, &eos);
-                    if (eos) {
-                        eosFlag = RT_TRUE;
-                    }
-                    RT_LOGD_IF(DEBUG_FLAG, "audio es-packet(ptr=0x%p, size=%d, eosFlag=%d)", esPacket, size, eosFlag);
-                    validPkt = RT_TRUE;
+                    RT_LOGD_IF(DEBUG_FLAG, "audio es-packet(ptr=%p, size=%d, eos=%d)", esPacket, size, eos);
+                    validAudioPkt = RT_TRUE;
                 } else {
                     /* pass other packet */
-                    INT32 eos = 0;
-                    esPacket->getMetaData()->findInt32(kKeyFrameEOS, &eos);
                     esPacket->release(RT_TRUE);
-                    if (eos) {
-                        RT_LOGD("receive eos , break");
-                        break;
-                    }
-                    continue;
+                    esPacket = RT_NULL;
                 }
-            } while (!validPkt && !eosFlag);
-
-            if (validPkt) {
-                // push es-packet to decoder
-                RTNodeAdapter::pushBuffer(decoder, esPacket);
-                esPacket = RT_NULL;
+                validPkt = RT_FALSE;
             }
         }
 
-        // pull av-frame from decoder
-        RTNodeAdapter::pullBuffer(decoder, &frame);
+        /**
+         * 2. push avail audio packet to decoder
+         */
+        if (validAudioPkt) {
+            // push es-packet to decoder
+            RTNodeAdapter::pushBuffer(decoder, esPacket);
+            esPacket = RT_NULL;
+            validAudioPkt = RT_FALSE;
+        }
+
+        /**
+         * 3. acquire avail frame from decoder
+         */
+        err = RTNodeAdapter::pullBuffer(decoder, &frame);
+        if (RT_OK != err && RT_ERR_LIST_EMPTY != err) {
+            RT_LOGE("pull buffer failed from decoder. err: %d", err);
+        }
 
         if (frame) {
             if (frame->getStatus() == RT_MEDIA_BUFFER_STATUS_READY) {
@@ -722,7 +731,6 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
                 if (eos) {
                     // get eos frame, reset eos flags
                     RT_LOGE("eos %d", eos);
-                    eosFlag = RT_FALSE;
                 } else {
                     mPlayerCtx->mCurTimeUs = timeUs;
                 }

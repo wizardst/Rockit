@@ -20,6 +20,7 @@
 #ifndef SRC_TESTS_RT_PLAYER_PLAYER_TEST_UTILS_H_
 #define SRC_TESTS_RT_PLAYER_PLAYER_TEST_UTILS_H_
 
+#include <string.h>             // NOLINT
 #include "rt_header.h"          // NOLINT
 #include "rt_test_header.h"     // NOLINT
 

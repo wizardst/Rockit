@@ -28,7 +28,7 @@
 #endif
 #define LOG_TAG "RTNode"
 
-#define DEBUG_FLAG   0x1
+#define DEBUG_FLAG   0x0
 
 RT_RET check_err(RTNode* pNode, RT_RET err, const char* func_name) {
     if (RT_OK != err) {
@@ -40,7 +40,18 @@ RT_RET check_err(RTNode* pNode, RT_RET err, const char* func_name) {
     return err;
 }
 
+RT_RET check_warn(RTNode* pNode, RT_RET err, const char* func_name) {
+    if (RT_OK != err) {
+        RTNodeStub* nStub = pNode->queryStub();
+        RT_LOGD_IF(DEBUG_FLAG, "%-12s { name:%-18s errno=%d, Fail to %s }", \
+                                rt_node_type_name(nStub->mNodeType), \
+                                nStub->mNodeName, err, func_name);
+    }
+    return err;
+}
+
 #define CHECK_ERR(pNode, err) check_err(pNode, err, __FUNCTION__)
+#define CHECK_WARN(pNode, err) check_warn(pNode, err, __FUNCTION__)
 
 RT_RET RTNodeAdapter::init(RTNode* pNode, RtMetaData* metadata) {
     RT_RET  err  = pNode->init(metadata);
@@ -56,12 +67,12 @@ RT_RET RTNodeAdapter::release(RTNode* pNode) {
 
 RT_RET RTNodeAdapter::pullBuffer(RTNode* pNode, RTMediaBuffer** data) {
     RT_RET err = pNode->pullBuffer(data);
-    return CHECK_ERR(pNode, err);
+    return CHECK_WARN(pNode, err);
 }
 
 RT_RET RTNodeAdapter::pushBuffer(RTNode* pNode, RTMediaBuffer* data) {
     RT_RET err = pNode->pushBuffer(data);
-    return CHECK_ERR(pNode, err);
+    return CHECK_WARN(pNode, err);
 }
 
 RT_RET RTNodeAdapter::dequeCodecBuffer(RTNode* pNode, RTMediaBuffer** data, RTPortType port) {

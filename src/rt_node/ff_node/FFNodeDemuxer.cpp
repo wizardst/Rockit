@@ -193,7 +193,7 @@ RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** mediaBuf) {
         ctx->mSource->queueUnusedPacket(pkt);
         return RT_OK;
     } else {
-        return RT_ERR_UNKNOWN;
+        return RT_ERR_LIST_EMPTY;
     }
     return RT_OK;
 }
