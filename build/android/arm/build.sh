@@ -29,8 +29,8 @@ then
 fi
 
 # Define and Check NDK toolchain
-ANDROID_NDK=/disk2/cmc/android_projects/android_build_env/android-ndk-r10d
-#ANDROID_NDK=~/ndk10/android-ndk-r10e/
+#ANDROID_NDK=/disk2/cmc/android_projects/android_build_env/android-ndk-r10d
+ANDROID_NDK=~/ndk10/android-ndk-r10e/
 
 if [ -d ${ANDROID_NDK} ]
 then
@@ -60,6 +60,7 @@ cmake   -DCMAKE_TOOLCHAIN_FILE=../android.toolchain.cmake                     \
         -DHAVE_DRM=ON                                                         \
         -DHAVE_NDK=ON                                                         \
         -DOS_LINUX=ON                                                         \
+        -DOS_ANDROID=ON                                                       \
         -DFFMPEG_SINGLE=ON                                                    \
         ${ROCKIT_TOP}
 

@@ -12,6 +12,10 @@ if (HAVE_MPI)
     set(MPI_FILES
             Mpi/MpiAdapterUtils.cpp
             Mpi/MpiAdapterCodec.cpp)
+    set(MEDIA_OSAL_FILES
+            media-osal/RTMediaSync.cpp
+            media-osal/IMediaSync.cpp
+    )
     message(STATUS "build with RK-MPI support")
 else()
     message(STATUS "build without RK-MPI support")
@@ -24,6 +28,11 @@ if (HAVE_DRM)
     message(STATUS "build with drm allocator support")
 else()
     message(STATUS "build without drm allocator support")
+endif()
+
+if (OS_ANDROID)
+    add_definitions(-DOS_ANDROID)
+    message(STATUS "build with ANDROID support")
 endif()
 
 if (HAVE_GLES)
@@ -48,11 +57,6 @@ if (HAVE_GLES)
 else()
     message(STATUS "build without GLES-EGL support")
 endif()
-
-set(MEDIA_OSAL_FILES
-    media-osal/RTMediaSync.cpp
-    media-osal/IMediaSync.cpp
-)
 
 set(RT_PACKET_SOURCE_SRC
     RTPktSource/RTPktSourceBase.cpp

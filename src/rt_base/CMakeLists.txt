@@ -13,6 +13,11 @@ if (HAVE_NDK)
 endif()
 
 add_definitions(-DOS_LINUX)
+if (OS_ANDROID)
+    add_definitions(-DOS_ANDROID)
+    set(ANDROID_LIB -llog)
+    message(STATUS "build with ANDROID support")
+endif()
 
 if (HAVE_DRM)
     add_definitions(-DHAVE_DRM)

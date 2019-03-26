@@ -26,8 +26,6 @@ set(ROCKIT_TEST_SRC
     rt_base/test_base_linked_list.cpp
     rt_base/test_base_memory.cpp
     rt_base/test_base_mutex_thread.cpp
-    # Testcase for RT_MEDIA
-    rt_media/unit_test_media_sync.cpp
     # Testcase for RT_NODE
     rt_node/test_node_codec_with_render.cpp
     rt_node/test_node_data_flow.cpp
@@ -35,6 +33,10 @@ set(ROCKIT_TEST_SRC
     # Testcase for RT_TASK
     rt_task/test_task_taskpool.cpp
 )
+
+if (OS_ANDROID)
+    set(ANDROID_LIBS -llog)
+endif()
 
 if (HAVE_MPI)
     set( MPI_LIBS -lmpp -lmedia_osal)
@@ -45,6 +47,6 @@ else()
 endif()
 
 add_executable(rockit_test ${ROCKIT_TEST_SRC})
-target_link_libraries(rockit_test ${RT_BASE_STATIC} ${RT_PLAYER_STATIC} ${RT_MEDIA_STATIC} ${RT_NODE_STATIC} ${RT_TASK_STATIC} -lasound -pthread ${MPI_LIBS} )
+target_link_libraries(rockit_test ${RT_BASE_STATIC} ${RT_PLAYER_STATIC} ${RT_MEDIA_STATIC} ${RT_NODE_STATIC} ${RT_TASK_STATIC} -lasound -pthread ${MPI_LIBS} ${ANDROID_LIBS})
 
 message(STATUS "cmake version ${CMAKE_VERSION} [@@]config testcase(rockit_test), [Done]")

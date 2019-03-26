@@ -31,9 +31,6 @@ RT_RET unit_test_best_practice(const char* uri) {
     rt_mem_record_reset();
     RTObject::resetTraces();
 
-    /* your unit test */
-    unit_test_media_sync(0, 0);
-
     rt_mem_record_dump();
     RTObject::dumpTraces();
 

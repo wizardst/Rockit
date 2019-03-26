@@ -27,10 +27,11 @@
 #include "rt_header.h" // NOLINT
 
 #define SOFTVOL_ELEM "name=Master Playback Volume"
-#ifdef OS_LINUX
-#define WRITE_DEVICE_NAME "default"
-#else
+
+#if defined(OS_ANDROID)
 #define WRITE_DEVICE_NAME "hw:1,0"
+#elif defined(OS_LINUX)
+#define WRITE_DEVICE_NAME "default"
 #endif
 
 #undef isdigit
