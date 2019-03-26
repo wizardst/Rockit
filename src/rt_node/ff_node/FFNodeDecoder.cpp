@@ -59,7 +59,7 @@ RTObject *allocFFInputBuffer(void *arg) {
 
 FFNodeDecoder::FFNodeDecoder()
         : mFFCodec(RT_NULL),
-          mUnusedInputPort(RT_NULL),
+          mPacketPool(RT_NULL),
           mFramePool(RT_NULL),
           mLinearAllocator(RT_NULL),
           mEventLooper(RT_NULL),
@@ -91,19 +91,6 @@ FFNodeDecoder::FFNodeDecoder()
 
 FFNodeDecoder::~FFNodeDecoder() {
     onFlush();
-
-    // @review: remove all objects in object-pool
-    RTMediaBuffer* pkt = RT_NULL;
-    do {
-        if (RT_NULL != mUnusedInputPort) {
-            pkt = ( RTMediaBuffer*)(mUnusedInputPort->borrowObj());
-            if (RT_NULL != pkt) {
-                pkt->release(true);
-                delete(pkt);
-                mUnusedInputPort->returnObj(RT_NULL);
-            }
-        }
-    } while (RT_NULL != pkt);
 
     release();
     rt_safe_free(mTrackParms);
@@ -140,11 +127,9 @@ RT_RET FFNodeDecoder::init(RtMetaData *metadata) {
 
     // TODO(frame count): max frame count should set by config.
     mFramePool = new RTMediaBufferPool(MAX_OUTPUT_BUFFER_COUNT);
+    mPacketPool = new RTMediaBufferPool(MAX_INPUT_BUFFER_COUNT);
     RTAllocatorStore::priorAvailLinearAllocator(metadata, &mLinearAllocator);
     RT_ASSERT(RT_NULL != mLinearAllocator);
-    mUnusedInputPort  = new RTObjectPool(allocFFInputBuffer,
-                                         MAX_INPUT_BUFFER_COUNT,
-                                         mLinearAllocator);
 
     allocateBuffersOnPort(RT_PORT_INPUT);
     allocateBuffersOnPort(RT_PORT_OUTPUT);
@@ -159,10 +144,8 @@ RT_RET FFNodeDecoder::allocateBuffersOnPort(RTPortType port) {
         case RT_PORT_INPUT: {
             RTMediaBuffer *buffer[MAX_INPUT_BUFFER_COUNT];
             for (i = 0; i < MAX_INPUT_BUFFER_COUNT; i++) {
-                buffer[i] = reinterpret_cast<RTMediaBuffer *>(mUnusedInputPort->borrowObj());
-            }
-            for (i = 0; i < MAX_INPUT_BUFFER_COUNT; i++) {
-                mUnusedInputPort->returnObj(buffer[i]);
+                buffer[i] = new RTMediaBuffer(RT_NULL, 0);
+                mPacketPool->registerBuffer(buffer[i]);
             }
         }
             break;
@@ -200,7 +183,7 @@ RT_RET FFNodeDecoder::allocateBuffersOnPort(RTPortType port) {
 RT_RET FFNodeDecoder::release() {
     fa_video_decode_destroy(&mFFCodec);
 
-    rt_safe_delete(mUnusedInputPort);
+    rt_safe_delete(mPacketPool);
     rt_safe_delete(mFramePool);
     rt_safe_delete(mMetaInput);
     rt_safe_delete(mLinearAllocator);
@@ -216,7 +199,7 @@ RT_RET FFNodeDecoder::dequeBuffer(RTMediaBuffer **data, RTPortType port) {
     RT_DequeEntry entry;
     switch (port) {
         case RT_PORT_INPUT:
-            *data = reinterpret_cast<RTMediaBuffer *>(mUnusedInputPort->borrowObj());
+            mPacketPool->acquireBuffer(data, RT_TRUE);
             if (*data) {
                 (*data)->getMetaData()->setInt32(kKeyCodecType, mTrackType);
             } else {
@@ -367,7 +350,6 @@ RT_RET FFNodeDecoder::runTask() {
            }
            output->setRange(0, input->getSize());
            input->release();
-           mUnusedInputPort->returnObj(input);
            input = NULL;
            output->getMetaData()->setInt32(kKeyACodecSampleRate, 24000);
            output->getMetaData()->setInt32(kKeyACodecChannels, 1);
@@ -385,7 +367,6 @@ RT_RET FFNodeDecoder::runTask() {
                 continue;
             } else {
                 input->release();
-                mUnusedInputPort->returnObj(input);
                 input = NULL;
             }
             err = fa_decode_get_frame(mFFCodec, output);
@@ -403,7 +384,6 @@ RT_RET FFNodeDecoder::runTask() {
 
     if (input) {
         input->release();
-        mUnusedInputPort->returnObj(input);
         input = RT_NULL;
     }
     if (output) {
@@ -458,8 +438,7 @@ RT_RET FFNodeDecoder::onFlush() {
             pkt = reinterpret_cast<RTMediaBuffer *>(entry.data);
         }
         if (pkt) {
-            pkt->release(true);
-            mUnusedInputPort->returnObj(pkt);
+            pkt->release();
         }
     }
     while (deque_size(mFrameQ) > 0) {

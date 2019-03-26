@@ -26,7 +26,7 @@
 #ifdef DEBUG_FLAG
 #undef DEBUG_FLAG
 #endif
-#define DEBUG_FLAG 0x1
+#define DEBUG_FLAG 0x0
 
 #include "RTPktSourceLocal.h"       // NOLINT
 
@@ -180,7 +180,7 @@ RTPacket *RTPktSourceLocal::dequeueUnusedPacket(RT_BOOL block) {
     while (getTotalCacheSize() >= mMaxCacheSize
             || mVideoCache->isFull()
             || mAudioCache->isFull()) {
-        RT_LOGD("cache is full, total size{cur: %d max: %d}, \n"
+        RT_LOGD_IF(DEBUG_FLAG, "cache is full, total size{cur: %d max: %d}, \n"
                 "video{duration(cur: %lld max: %lld), count(cur: %d max: %d)}, \n"
                 "audio{duration(cur: %lld max: %lld), count(cur: %d max: %d)}",
                  getTotalCacheSize(), mMaxCacheSize,

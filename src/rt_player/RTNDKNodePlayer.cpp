@@ -36,7 +36,7 @@
 #ifdef DEBUG_FLAG
 #undef DEBUG_FLAG
 #endif
-#define DEBUG_FLAG 0x1
+#define DEBUG_FLAG 0x0
 
 struct NodePlayerContext {
     RTNodeBus*          mNodeBus;
@@ -664,7 +664,6 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
              */
             if (RT_NULL == esPacket) {
                 RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
-                RtTime::sleepMs(2);
             }
             /**
              * 1.2 deqeue avail packet from demuxer
@@ -741,6 +740,10 @@ RT_RET RTNDKNodePlayer::startAudioPlayerProc() {
 
         // dump AVFrame
         RtTime::sleepMs(5);
+    }
+
+    if (esPacket) {
+        esPacket->release();
     }
 
     return RT_OK;

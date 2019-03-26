@@ -201,6 +201,9 @@ void RTMediaBuffer::release(bool debug) {
                 mFuncFree(raw_ptr);
                 mMetaData->setPointer(kKeyPacketPtr, RT_NULL);
             }
+            delete this;
+        } else {
+            delete this;
         }
         return;
     }
@@ -211,6 +214,14 @@ void RTMediaBuffer::release(bool debug) {
 
     int prevCount = __sync_fetch_and_sub(&mRefCount, 1);
     if (prevCount == 1) {
+         if (mFuncFree != RT_NULL) {
+            void *raw_ptr = RT_NULL;
+            mMetaData->findPointer(kKeyPacketPtr, &raw_ptr);
+            if (raw_ptr) {
+                mFuncFree(raw_ptr);
+                mMetaData->setPointer(kKeyPacketPtr, RT_NULL);
+            }
+        }
         if (mObserver == RT_NULL) {
             if (mAllocator != RT_NULL) {
                 RTMediaBuffer *this_tmp = this;

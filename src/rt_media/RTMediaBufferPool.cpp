@@ -124,7 +124,7 @@ RT_RET RTMediaBufferPool::acquireBuffer(
             RTMediaBuffer *it = reinterpret_cast<RTMediaBuffer *>
                                     (array_list_get_data(mBufferList->mBuffers, idx));
             if (it && it->refsCount() == 0
-                  && it->getSize() > request_size) {
+                  && it->getSize() >= request_size) {
                 buffer = it;
                 break;
             }

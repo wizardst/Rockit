@@ -40,11 +40,30 @@ endif()
 
 if (HAVE_MPI)
     set( MPI_LIBS -lmpp -lmedia_osal)
+    set( MEDIASYNC_FILES rt_media/unit_test_media_sync.cpp)
     message(STATUS "build with RK-MPI Support")
 else()
     set( MPI_LIBS )
     message(STATUS "build without RK-MPI Support")
 endif()
+
+set(ROCKIT_TEST_SRC
+    main.cpp
+    # Testcase for RT_BASE
+    rt_base/test_base_array_list.cpp
+    rt_base/test_base_deque.cpp
+    rt_base/test_base_hash_table.cpp
+    rt_base/test_base_linked_list.cpp
+    rt_base/test_base_memory.cpp
+    rt_base/test_base_mutex_thread.cpp
+    ${MEDIASYNC_FILES}
+    # Testcase for RT_NODE
+    rt_node/test_node_codec_with_render.cpp
+    rt_node/test_node_data_flow.cpp
+    # Testcase for RT_PLAYER
+    # Testcase for RT_TASK
+    rt_task/test_task_taskpool.cpp
+)
 
 add_executable(rockit_test ${ROCKIT_TEST_SRC})
 target_link_libraries(rockit_test ${RT_BASE_STATIC} ${RT_PLAYER_STATIC} ${RT_MEDIA_STATIC} ${RT_NODE_STATIC} ${RT_TASK_STATIC} -lasound -pthread ${MPI_LIBS} ${ANDROID_LIBS})

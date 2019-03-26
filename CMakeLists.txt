@@ -18,6 +18,10 @@ if (OS_LINUX)
     add_definitions(-DHAS_PTHREAD)
 endif (OS_LINUX)
 
+if (OS_ANDROID)
+    add_definitions(-DOS_ANDROID)
+endif (OS_ANDROID)
+
 include_directories(include)
 
 # include third-party pre-built headers

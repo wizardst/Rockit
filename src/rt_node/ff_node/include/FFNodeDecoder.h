@@ -71,7 +71,7 @@ class FFNodeDecoder : public RTNodeCodec {
     FACodecContext      *mFFCodec;
     RtThread            *mProcThread;
 
-    RTObjectPool        *mUnusedInputPort;
+    RTMediaBufferPool   *mPacketPool;
     RTMediaBufferPool   *mFramePool;
     rt_deque            *mPacketQ;
     rt_deque            *mFrameQ;
