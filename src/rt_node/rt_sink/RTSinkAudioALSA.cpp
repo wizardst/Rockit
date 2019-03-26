@@ -332,7 +332,7 @@ RT_RET RTSinkAudioALSA::runTask() {
             continue;
         }
 
-        if (mALSASinkCtx) {
+        if (mALSASinkCtx && input->getLength()) {
             ret = alsa_snd_write_data(mALSASinkCtx, reinterpret_cast<void *>(input->getData()), input->getLength());
             if (ret != input->getLength()) {
                 usleepData(mSampleRate, mChannels, mDataSize);

@@ -355,20 +355,31 @@ RT_RET FFNodeDecoder::runTask() {
         }
 
        if (mByPass == RT_TRUE) {
-           if (output->getSize() < input->getSize()) {
-               memcpy(output->getData(), input->getData(), output->getSize());
-           } else {
-               memcpy(output->getData(), input->getData(), input->getSize());
-           }
-           output->setRange(0, input->getSize());
-           input->release();
-           input = NULL;
-           output->getMetaData()->setInt32(kKeyACodecSampleRate, 24000);
-           output->getMetaData()->setInt32(kKeyACodecChannels, 1);
-           output->setStatus(RT_MEDIA_BUFFER_STATUS_READY);
-           RtMutex::RtAutolock autoLock(mLockFrameQ);
-           deque_push(mFrameQ, output);
-           output = NULL;
+            if (input->getSize() > 0) {
+                if (output->getSize() < input->getSize()) {
+                   memcpy(output->getData(), input->getData(), output->getSize());
+                } else {
+                   memcpy(output->getData(), input->getData(), input->getSize());
+                }
+                output->setRange(0, input->getSize());
+            } else {
+                INT32 eos = 0;
+                input->getMetaData()->findInt32(kKeyFrameEOS, &eos);
+                if (eos) {
+                    output->getMetaData()->setInt32(kKeyFrameEOS, 1);
+                }
+                output->setRange(0, 0);
+            }
+            RT_LOGD("FFNodeDecoder::runTask output = %p, output->getData() = %p", output, output->getData());
+            input->release();
+            input = NULL;
+            output->getMetaData()->setInt32(kKeyACodecSampleRate, 24000);
+            output->getMetaData()->setInt32(kKeyACodecChannels, 1);
+            output->setStatus(RT_MEDIA_BUFFER_STATUS_READY);
+            RtMutex::RtAutolock autoLock(mLockFrameQ);
+            RT_LOGD("deque_size(mFrameQ) = %d", deque_size(mFrameQ));
+            deque_push(mFrameQ, output);
+            output = NULL;
         } else {
             RT_LOGD_IF(DEBUG_FLAG, "input and output ready, go to decode!");
             err = fa_decode_send_packet(mFFCodec, input);

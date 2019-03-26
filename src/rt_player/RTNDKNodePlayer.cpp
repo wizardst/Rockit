@@ -52,6 +52,7 @@ struct NodePlayerContext {
     INT64               mWantSeekTimeUs;
     INT64               mCurTimeUs;
     INT64               mDuration;
+    RTProtocolType      mProtocolType;
     RT_CALLBACK_T       mRT_Callback;
     INT32               mRT_Callback_Type;
     void *              mRT_Callback_Data;
@@ -85,6 +86,7 @@ RTNDKNodePlayer::RTNDKNodePlayer() {
     mPlayerCtx->mDeliverThread = NULL;
     mPlayerCtx->mRT_Callback   = NULL;
     mPlayerCtx->mLooping       = RT_FALSE;
+    mPlayerCtx->mProtocolType  = RT_PROTOCOL_NONE;
     mPlayerCtx->mCmdOptions = new RtMetaData();
 
     init();
@@ -138,7 +140,7 @@ RT_RET RTNDKNodePlayer::reset() {
 
     UINT32 curState = this->getCurState();
     if (RT_STATE_IDLE == curState) {
-        RTStateUtil::dumpStateError(curState, __FUNCTION__);
+        RTMediaUtil::dumpStateError(curState, __FUNCTION__);
         return RT_OK;
     }
     if (RT_STATE_STOPPED != curState) {
@@ -173,6 +175,7 @@ RT_RET RTNDKNodePlayer::setDataSource(RTMediaUri *mediaUri) {
     if (mediaUri->mUri[0] == RT_NULL) {
         this->setCurState(RT_STATE_INITIALIZED);
     } else {
+        mPlayerCtx->mProtocolType = RTMediaUtil::getMediaProtocol(mediaUri->mUri);
         err = mNodeBus->autoBuild(mediaUri);
         if (RT_OK != err) {
             if (RT_NULL == mNodeBus->getRootNode(BUS_LINE_ROOT)) {
@@ -198,7 +201,7 @@ RT_RET RTNDKNodePlayer::prepare() {
 
     UINT32 curState = this->getCurState();
     if ((RT_STATE_INITIALIZED != curState) && (RT_STATE_STOPPED != curState)) {
-        RTStateUtil::dumpStateError(curState, __FUNCTION__);
+        RTMediaUtil::dumpStateError(curState, __FUNCTION__);
         return RT_OK;
     }
 
@@ -245,7 +248,7 @@ RT_RET RTNDKNodePlayer::start() {
         mPlayerCtx->mLooper->send(msg, 0);
         break;
       default:
-        RTStateUtil::dumpStateError(curState, __FUNCTION__);
+        RTMediaUtil::dumpStateError(curState, __FUNCTION__);
         break;
     }
     return err;
@@ -261,7 +264,7 @@ RT_RET RTNDKNodePlayer::pause() {
     RTMessage* msg  = RT_NULL;
     switch (curState) {
       case RT_STATE_PAUSED:
-        RTStateUtil::dumpStateError(curState, __FUNCTION__);
+        RTMediaUtil::dumpStateError(curState, __FUNCTION__);
         break;
       case RT_STATE_STARTED:
         // @TODO: do pause player
@@ -271,7 +274,7 @@ RT_RET RTNDKNodePlayer::pause() {
         mPlayerCtx->mLooper->send(msg, 0);
         break;
       default:
-        RTStateUtil::dumpStateError(curState, __FUNCTION__);
+        RTMediaUtil::dumpStateError(curState, __FUNCTION__);
         break;
     }
     return err;
@@ -287,7 +290,7 @@ RT_RET RTNDKNodePlayer::stop() {
     RTMessage* msg  = RT_NULL;
     switch (curState) {
       case RT_STATE_STOPPED:
-        RTStateUtil::dumpStateError(curState, __FUNCTION__);
+        RTMediaUtil::dumpStateError(curState, __FUNCTION__);
         break;
       case RT_STATE_PREPARING:
       case RT_STATE_PREPARED:
@@ -355,7 +358,7 @@ RT_RET RTNDKNodePlayer::seekTo(INT64 usec) {
         mPlayerCtx->mWantSeekTimeUs = -1;
         mPlayerCtx->mSaveSeekTimeUs = usec;
         RT_LOGE("seek %lld us", usec);
-        RTStateUtil::dumpStateError(curState, "seekTo, save only");
+        RTMediaUtil::dumpStateError(curState, "seekTo, save only");
         break;
       case RT_STATE_PREPARED:
       case RT_STATE_PAUSED:
@@ -378,7 +381,7 @@ RT_RET RTNDKNodePlayer::seekTo(INT64 usec) {
         }
         break;
       default:
-        RTStateUtil::dumpStateError(curState, __FUNCTION__);
+        RTMediaUtil::dumpStateError(curState, __FUNCTION__);
         break;
     }
 
@@ -454,8 +457,8 @@ RT_RET RTNDKNodePlayer::setCurState(UINT32 newState) {
     }
 
     RT_LOGE("done, switch state:%s to state:%s", \
-             RTStateUtil::getStateName(mPlayerCtx->mState), \
-             RTStateUtil::getStateName(newState));
+             RTMediaUtil::getStateName(mPlayerCtx->mState), \
+             RTMediaUtil::getStateName(newState));
     mPlayerCtx->mState = newState;
     return err;
 }
@@ -594,19 +597,32 @@ RT_RET RTNDKNodePlayer::startDataLooper() {
 
 RT_RET RTNDKNodePlayer::writeData(const char * data, const UINT32 length, int flag, int type) {
     RT_ASSERT(RT_NULL != mPlayerCtx);
+    RT_LOGD("RTNDKNodePlayer::writeData IN");
     if (RT_WRITEDATA_PCM == flag) {
+        RT_LOGD("RTNDKNodePlayer::writeData 1 length = %d", length);
         RTMediaBuffer* esPacket;
         RTNode* decoder   = mNodeBus->getRootNode(BUS_LINE_AUDIO);
         if (decoder != RT_NULL) {
-            RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
-            if (RT_NULL != esPacket) {
-                char *tempdata = rt_malloc_size(char, length);
-                rt_memcpy(tempdata, data, length);
-                esPacket->setData(tempdata, length);
-                RTNodeAdapter::pushBuffer(decoder, esPacket);
-            } else {
-                RT_LOGD("writeData list null");
-            }
+            RT_LOGD("RTNDKNodePlayer::writeData 2 length = %d", length);
+            {
+                RT_RET err = RTNodeAdapter::dequeCodecBuffer(decoder, &esPacket, RT_PORT_INPUT);
+                RT_LOGD("RTNDKNodePlayer::writeData err = %d", err);
+                if (RT_NULL != esPacket) {
+                    if (length > 0) {
+                        RT_LOGD("RTNDKNodePlayer::writeData 3");
+                        char *tempdata = rt_malloc_size(char, length);
+                        rt_memcpy(tempdata, data, length);
+                        esPacket->setData(tempdata, length);
+                    } else {
+                        RT_LOGD("RTNDKNodePlayer::writeData 4 eos");
+                        esPacket->setData(NULL, 0);
+                        esPacket->getMetaData()->setInt32(kKeyFrameEOS, 1);
+                    }
+                    RTNodeAdapter::pushBuffer(decoder, esPacket);
+                } else {
+                    RT_LOGD("writeData list null");
+                }
+        }
         } else {
             RT_LOGD("writeData decoder null");
         }
@@ -616,6 +632,7 @@ RT_RET RTNDKNodePlayer::writeData(const char * data, const UINT32 length, int fl
         } else {
         }
     }
+    RT_LOGD("RTNDKNodePlayer::writeData OUT");
     return RT_OK;
 }
 

@@ -98,10 +98,27 @@ enum RTWriteDataType {
     RT_WRITEDATA_ES,
 };
 
-class RTStateUtil {
+
+enum RTProtocolType {
+    RT_PROTOCOL_NONE = 0,
+    RT_PROTOCOL_LOCAL,
+    RT_PROTOCOL_HTTP,
+    RT_PROTOCOL_RTSP,
+    RT_PROTOCOL_SAMBA,
+    RT_PROTOCOL_HLS,
+    RT_PROTOCOL_RTP,
+    RT_PROTOCOL_UDP,
+    RT_PROTOCOL_MMS,
+    RT_PROTOCOL_MMSH,
+    RT_PROTOCOL_MMST,
+    RT_PROTOCOL_TTS,
+};
+
+class RTMediaUtil {
  public:
     static const char* getStateName(UINT32 player_state);
     static void  dumpStateError(UINT32 state, const char* caller);
+    static RTProtocolType getMediaProtocol(const char* uri);
 };
 
 enum RTLogLevel {

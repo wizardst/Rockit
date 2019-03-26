@@ -18,7 +18,8 @@
  *   Task: build player streamline with node bus.
  */
 
-#include "rt_header.h"          // NOLINT
+#include <string.h>           // NOLINT
+#include "rt_header.h"        // NOLINT
 #include "RTNDKNodePlayer.h"  // NOLINT
 #include "RTNDKMediaDef.h"    // NOLINT
 
@@ -42,7 +43,7 @@ static const rt_media_state gStateNames[] = {
     { RT_STATE_COMPLETE,        "STATE_COMPLETE" },
 };
 
-const char* RTStateUtil::getStateName(UINT32 state) {
+const char* RTMediaUtil::getStateName(UINT32 state) {
     for (UINT32 idx = 0; idx < RT_STATE_MAX; idx++) {
         if (gStateNames[idx].state == state) {
             return gStateNames[idx].name;
@@ -51,7 +52,7 @@ const char* RTStateUtil::getStateName(UINT32 state) {
     return "STATE_UNKOWN";
 }
 
-void RTStateUtil::dumpStateError(UINT32 state, const char* caller) {
+void RTMediaUtil::dumpStateError(UINT32 state, const char* caller) {
     switch (RTMediaDirector::getLogLevel()) {
       case RT_LOG_LEVEL_WARRING:
       case RT_LOG_LEVEL_ERROR:
@@ -64,6 +65,49 @@ void RTStateUtil::dumpStateError(UINT32 state, const char* caller) {
       default:
         break;
     }
+}
+
+RTProtocolType RTMediaUtil::getMediaProtocol(const char* uri) {
+    RTProtocolType protocol = RT_PROTOCOL_NONE;
+    if ((RT_NULL == uri) || (strlen(uri) < 4)) {
+        return protocol;
+    }
+
+    if (!strncasecmp("http://", uri, 7) || !strncasecmp("https://", uri, 8)) {
+        RT_LOGD("uri is with https or http protocol");
+        protocol = RT_PROTOCOL_HTTP;
+    } else if (!strncasecmp("rtsp://", uri, 7) || !strncasecmp("rtmp://", uri, 7)) {
+        RT_LOGD("uri is with rtsp or rtmp protocol");
+        protocol = RT_PROTOCOL_RTSP;
+    } else if (!strncasecmp("/data/smb/", uri, 10)) {
+        RT_LOGD("uri is with /data/smb protocol");
+        protocol = RT_PROTOCOL_SAMBA;
+    } else if (!strncasecmp("/data/nfs/", uri, 10)) {
+        RT_LOGD("uri is with /data/nfs protocol (signed as samba)");
+        protocol = RT_PROTOCOL_SAMBA;
+    } else if (strstr(uri, "m3u8")) {
+        RT_LOGD("uri is with m3u8 protocol");
+        protocol = RT_PROTOCOL_HLS;
+    } else if (!strncasecmp("rtp:", uri, 4)) {
+        RT_LOGD("uri is with rtp protocol");
+        protocol = RT_PROTOCOL_RTP;
+    } else if (!strncasecmp("udp:", uri, 4)) {
+        RT_LOGD("uri is with udp protocol");
+        protocol = RT_PROTOCOL_UDP;
+    } else if (!strncasecmp("mms://", uri, 6)) {
+        RT_LOGD("uri is with mms protocol");
+        protocol = RT_PROTOCOL_MMS;
+    } else if (!strncasecmp("mmsh://", uri, 7)) {
+        RT_LOGD("uri is with mmsh protocol");
+        protocol = RT_PROTOCOL_MMSH;
+    } else if (!strncasecmp("mmst://", uri, 7)) {
+        RT_LOGD("uri is with mmst protocol");
+        protocol = RT_PROTOCOL_MMST;
+    } else if (strstr(uri, "app_tts-cache")) {
+        RT_LOGD("uri is with tts protocol");
+        protocol = RT_PROTOCOL_TTS;
+    }
+    return protocol;
 }
 
 RTMediaDirector::RTMediaDirector() {
