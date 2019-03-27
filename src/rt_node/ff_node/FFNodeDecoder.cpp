@@ -122,11 +122,23 @@ RT_RET FFNodeDecoder::init(RtMetaData *metadata) {
     //          because no sink node release meta when node failed to init
     mMetaOutput = new RtMetaData;
     mMetaOutput->clear();
-    mMetaOutput->setInt32(kKeyFrameW,   mTrackParms->mVideoWidth);
-    mMetaOutput->setInt32(kKeyFrameH,   mTrackParms->mVideoHeight);
+    switch (mTrackParms->mCodecType) {
+      case RTTRACK_TYPE_VIDEO:
+        mMetaOutput->setInt32(kKeyCodecID,  mTrackParms->mCodecID);
+        mMetaOutput->setInt32(kKeyFrameW,   mTrackParms->mVideoWidth);
+        mMetaOutput->setInt32(kKeyFrameH,   mTrackParms->mVideoHeight);
+        break;
+      case RTTRACK_TYPE_AUDIO:
+        mMetaOutput->setInt32(kKeyCodecID,          mTrackParms->mCodecID);
+        mMetaOutput->setInt32(kKeyACodecChannels,   mTrackParms->mAudioChannels);
+        mMetaOutput->setInt32(kKeyACodecSampleRate, mTrackParms->mAudioSampleRate);
+        break;
+      default:
+        break;
+    }
 
     // TODO(frame count): max frame count should set by config.
-    mFramePool = new RTMediaBufferPool(MAX_OUTPUT_BUFFER_COUNT);
+    mFramePool  = new RTMediaBufferPool(MAX_OUTPUT_BUFFER_COUNT);
     mPacketPool = new RTMediaBufferPool(MAX_INPUT_BUFFER_COUNT);
     RTAllocatorStore::priorAvailLinearAllocator(metadata, &mLinearAllocator);
     RT_ASSERT(RT_NULL != mLinearAllocator);

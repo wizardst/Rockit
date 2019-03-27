@@ -443,7 +443,7 @@ RT_RET FFNodeDemuxer::runTask() {
                 }
             }
         }
-        RtTime::sleepUs(2000);
+        RtTime::sleepUs(2000llu);
     }
     RT_LOGD_IF(DEBUG_FLAG, "cache_thread done");
     return RT_OK;

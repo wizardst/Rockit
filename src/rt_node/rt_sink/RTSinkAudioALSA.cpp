@@ -74,6 +74,14 @@ RTSinkAudioALSA::~RTSinkAudioALSA() {
 
 RT_RET RTSinkAudioALSA::init(RtMetaData *metaData) {
     mInputMeta = metaData;
+    if (!mALSASinkCtx) {
+        metaData->findInt32(kKeyACodecSampleRate, &mSampleRate);
+        metaData->findInt32(kKeyACodecChannels, &mChannels);
+        if (RT_OK != openSoundCard(metaData)) {
+            usleepData(mSampleRate, mChannels, mDataSize);
+            RT_LOGE("openSoundCard fail!");
+        }
+    }
     return RT_OK;
 }
 
@@ -298,7 +306,10 @@ RT_RET RTSinkAudioALSA::closeSoundCard() {
 }
 
 RT_VOID RTSinkAudioALSA::usleepData(INT32 samplerate, INT32 channels, INT32 bytes) {
-    RtTime::sleepUs((bytes * 1000000) / (2*channels) / samplerate);
+    // @review pay special attention to the scope of the data type
+    //         INT32_MAX =((int32_t)2147483647); UINT32_MAX =((uint32_t)4294967295)
+    UINT64 duration = (bytes * 1000000llu) / (2*channels) / samplerate;
+    RtTime::sleepUs(duration);
 }
 
 RT_RET RTSinkAudioALSA::runTask() {
@@ -319,16 +330,6 @@ RT_RET RTSinkAudioALSA::runTask() {
         if (!input || !input->getData()) {
             RtTime::sleepMs(5);
             continue;
-        }
-
-        if (!mALSASinkCtx) {
-            input->getMetaData()->findInt32(kKeyACodecSampleRate, &mSampleRate);
-            input->getMetaData()->findInt32(kKeyACodecChannels, &mChannels);
-            mDataSize = input->getLength();
-            if (RT_OK != openSoundCard(input->getMetaData())) {
-                usleepData(mSampleRate, mChannels, mDataSize);
-                RT_LOGE("openSoundCard fail!");
-            }
         }
 
         if (mALSASinkCtx) {
