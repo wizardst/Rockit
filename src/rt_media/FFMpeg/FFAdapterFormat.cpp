@@ -166,7 +166,6 @@ INT32 fa_format_packet_read(FAFormatContext* fc, void** raw_pkt) {
     av_init_packet(avPacket);
     err = av_read_frame(fc->mAvfc, avPacket);
     if (err == AVERROR_EOF
-            || avio_feof(fc->mAvfc->pb)
             || err == AVERROR_EXIT) {
         ret = RT_ERR_END_OF_STREAM;
     } else {
