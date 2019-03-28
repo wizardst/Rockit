@@ -162,11 +162,8 @@ RT_RET FFNodeDemuxer::pullBuffer(RTMediaBuffer** mediaBuf) {
     RT_ASSERT(RT_NULL != ctx);
     RT_ASSERT(RT_NULL != mediaBuf);
 
-    void*        raw_pkt  = RT_NULL;
     RTPacket     *pkt     = RT_NULL;
     RtMetaData*  meta     = (*mediaBuf)->getMetaData();
-    RtArrayList* pktList  = RT_NULL;
-    RtMutex*     pktLock  = RT_NULL;
     RTTrackType type;
     if (!meta->findInt32(kKeyCodecType, reinterpret_cast<INT32*>(&type))) {
         RT_LOGE("track  type is unset!!");
@@ -218,7 +215,6 @@ RT_RET FFNodeDemuxer::runCmd(RT_NODE_CMD cmd, RtMetaData *metaData) {
         this->onPause();
         break;
     case RT_NODE_CMD_SEEK:
-        RT_LOGD("seek to xxxx");
         this->onSeek(metaData);
         break;
     case RT_NODE_CMD_RESET:

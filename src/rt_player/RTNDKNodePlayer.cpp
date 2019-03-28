@@ -519,6 +519,7 @@ RT_RET RTNDKNodePlayer::onPreparedDone() {
     if (RT_NULL != demuxer) {
         mPlayerCtx->mDuration = demuxer->queryDuration();
     }
+    return err;
 }
 
 RT_RET RTNDKNodePlayer::checkRuntime(const char* caller) {

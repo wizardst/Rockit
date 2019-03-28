@@ -98,7 +98,6 @@ RtThread::RtThread(RtRunnable* runnable, void* ptr_data) {
 
 RtThread::~RtThread() {
     if (RT_NULL != mData) {
-        RtThreadData* data = static_cast<RtThreadData*>(mData);
         this->join();
         rt_safe_free(mData);
     }

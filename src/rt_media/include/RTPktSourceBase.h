@@ -28,7 +28,7 @@
 class RTMediaCache : public RTObject {
  public:
     RTMediaCache();
-    ~RTMediaCache();
+    virtual ~RTMediaCache();
 
     RT_BOOL isFull();
     RT_BOOL isInsufficient();
@@ -49,7 +49,7 @@ class RTMediaCache : public RTObject {
 class RTPktSourceBase : public RTObject {
  public:
     RTPktSourceBase();
-    ~RTPktSourceBase();
+    virtual ~RTPktSourceBase();
 
     virtual RT_RET init(RtMetaData *config) = 0;
     virtual RT_RET release() = 0;

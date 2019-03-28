@@ -49,22 +49,24 @@ RT_RET unit_test_ff_node_demuxer(INT32 index, INT32 total) {
     RTNode* demuxer = nodestub->mCreateNode();
 
     RTNodeAdapter::init(demuxer, node_meta);
+    RTNodeAdapter::runCmd(demuxer, RT_NODE_CMD_PREPARE, node_meta);
     RTNodeAdapter::runCmd(demuxer, RT_NODE_CMD_START, node_meta);
 
     rt_buf = new RTMediaBuffer(RT_NULL, 0);
     while (count < 100) {
         rt_buf->reset();
+        rt_buf->getMetaData()->setInt32(kKeyCodecType,
+                (count%2 == 0) ? RTTRACK_TYPE_VIDEO : RTTRACK_TYPE_AUDIO);
         rt_err = demuxer->pullBuffer(&rt_buf);
-        // RTNodeAdapter::pullBuffer(demuxer, &rt_buf);
         if (rt_err == RT_OK) {
             rt_mediabuf_goto_packet(rt_buf, &rt_pkt);
             RT_LOGD(" --> RTPacket(ptr=0x%p, size=%d) MediaBuffer=0x%p", \
                       rt_pkt.mRawPtr, rt_pkt.mSize, rt_buf);
             rt_utils_packet_free(&rt_pkt);
             rt_buf->getMetaData()->clear();
-            count++;
-            RtTime::sleepUs(10);
         }
+        count++;
+        RtTime::sleepUs(5*1000llu);
     }
     RTNodeAdapter::runCmd(demuxer, RT_NODE_CMD_STOP, reinterpret_cast<RtMetaData *>(NULL));
     RTNodeAdapter::release(demuxer);
