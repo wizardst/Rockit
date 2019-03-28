@@ -100,9 +100,8 @@ RTNodeBus::~RTNodeBus() {
     RT_LOGD("call, ~RTNodeBus");
     rt_hash_table_destory(mBusCtx->mNodeBus);
     rt_hash_table_destory(mBusCtx->mNodeAll);
-
-    RT_ASSERT(RT_NULL == mBusCtx->mNodeBus);
-    RT_ASSERT(RT_NULL == mBusCtx->mNodeAll);
+    mBusCtx->mNodeBus = RT_NULL;
+    mBusCtx->mNodeAll = RT_NULL;
 
     // NodeBusSetting is released by its producer
     mBusCtx->mSetting = RT_NULL;
@@ -462,6 +461,8 @@ RTNode* bus_find_and_add_codec(RTNodeBus *pNodeBus, RTNode *demuxer, \
         }
         node_meta->setInt32(kKeyVCodecWidth, 1280);
         node_meta->setInt32(kKeyVCodecHeight, 720);
+        node_meta->setInt32(kKeyACodecSampleRate, 24000);
+        node_meta->setInt32(kKeyACodecChannels, 1);
     }
 
     if (RT_NULL != node_meta) {

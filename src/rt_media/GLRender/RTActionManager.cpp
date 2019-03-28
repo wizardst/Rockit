@@ -40,6 +40,7 @@ RTActionManager::~RTActionManager() {
     RTObject::untrace(getName(), this);
     rt_hash_table_clear(this->mActionTable);
     rt_hash_table_destory(this->mActionTable);
+    this->mActionTable = RT_NULL;
 }
 
 void RTActionManager::addAction(RTAction *action, RTSprite *target, RT_BOOL paused) {

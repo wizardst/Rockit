@@ -278,23 +278,19 @@ RT_RET RTSinkAudioALSA::openSoundCard(RtMetaData *metaData) {
         return RT_ERR_NULL_PTR;
     }
 
+    // try to config hw params of alsa.
     err = alsa_set_snd_hw_params(mALSASinkCtx, 0);
-
     if (err == RT_ERR_INIT) {
         RT_LOGE("Failed to set HW parameters!");
-
-        if (mALSASinkCtx)
-            alsa_snd_destroy(mALSASinkCtx);
+        closeSoundCard();
         return err;
     }
 
+    // try to config sw params of alsa.
     err = alsa_set_snd_sw_params(mALSASinkCtx);
-
     if (err == RT_ERR_INIT) {
         RT_LOGE("Failed to set SW parameters!");
-
-        if (mALSASinkCtx)
-            alsa_snd_destroy(mALSASinkCtx);
+        closeSoundCard();
     }
     return err;
 }
@@ -302,6 +298,7 @@ RT_RET RTSinkAudioALSA::openSoundCard(RtMetaData *metaData) {
 RT_RET RTSinkAudioALSA::closeSoundCard() {
     if (RT_NULL != mALSASinkCtx) {
         alsa_snd_destroy(mALSASinkCtx);
+        mALSASinkCtx = RT_NULL;
     }
 }
 
