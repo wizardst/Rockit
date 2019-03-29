@@ -529,6 +529,8 @@ RT_RET fa_audio_decode_get_frame(FACodecContext* fc, RTMediaBuffer *buffer) {
         meta->setInt64(kKeyFramePts, frame->pts);
         meta->setInt32(kKeyACodecChannels, frame->channels);
         meta->setInt32(kKeyACodecSampleRate, frame->sample_rate);
+    } else {
+        buffer->setRange(0, 0);
     }
     if (ret == AVERROR_EOF) {
         RT_LOGE("reach EOS!");
