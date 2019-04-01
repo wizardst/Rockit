@@ -67,7 +67,8 @@ typedef enum {
 
      RT_AUDIO_ID_Unused = 0x40000000,  /**< Placeholder value when coding is N/A  */
      RT_AUDIO_ID_AutoDetect,  /**< auto detection of audio format */
-     RT_AUDIO_ID_PCM,         /**< Any variant of PCM coding */
+     RT_AUDIO_ID_PCM_S16LE,   /**< Any variant of PCM_S16LE coding */
+     RT_AUDIO_ID_PCM_S24LE,   /**< Any variant of PCM_S24LE coding */
      RT_AUDIO_ID_ADPCM,       /**< Any variant of ADPCM encoded data */
      RT_AUDIO_ID_AMR,         /**< Any variant of AMR encoded data */
      RT_AUDIO_ID_GSMFR,       /**< Any variant of GSM fullrate (i.e. GSM610) */
