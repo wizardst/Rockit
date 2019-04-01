@@ -46,21 +46,24 @@ struct RockitContext {
     RTNDKMediaPlayer *pcm_player;
     RT_BOOL           player_select;
     RtMutex*          mDataLock;
+    RtMutex*          mPcmLock;
     RT_CALLBACK_T     mRT_Callback;
     void*             mRT_Callback_Data;
     int               mProtocolType;
 };
 
 void Rockit_Callback(int p_event, void *player) {
-    RT_LOGD("RockitPlayer1 Rockit_Callback!!!");
+    RT_LOGD("RockitPlayer1 Rockit_Callback!!! p_event = %d", p_event);
     RockitContext * rtplayer = reinterpret_cast<RockitContext *>(player);
     if (NULL != rtplayer) {
         if (p_event == Rockit_MediaPlayerEndReached_pcm) {
             rtplayer->mRT_Callback(Rockit_MediaPlayerEndReached_pcm, rtplayer->mRT_Callback_Data);
         } else {
            if (rtplayer->mProtocolType == PRO_LOCAL) {
+               RT_LOGD("RockitPlayer1 Rockit_Callback!!! PRO_LOCAL");
                rtplayer->mRT_Callback(Rockit_MediaPlayerEndReached_kit, rtplayer->mRT_Callback_Data);
            } else {
+               RT_LOGD("RockitPlayer1 Rockit_Callback!!! PRO_VLC");
                rtplayer->mRT_Callback(Rockit_MediaPlayerEndReached_vlc, rtplayer->mRT_Callback_Data);
            }
        }
@@ -78,6 +81,7 @@ void * Rockit_CreatePlayer() {
     mPlayerCtx->mProtocolType  = PRO_LOCAL;
     mPlayerCtx->mRT_Callback   = NULL;
     mPlayerCtx->mRT_Callback_Data = NULL;
+    mPlayerCtx->mPcmLock       = new RtMutex();
     RT_LOGD("RockitPlayer1 CreatePlayer Done");
     return reinterpret_cast<void *>(mPlayerCtx);
 }
@@ -102,10 +106,16 @@ int Rockit_PlayAudio_PCM(void *player) {
     RT_LOGD("RockitPlayer1 PCM");
     RockitContext * rtplayer = reinterpret_cast<RockitContext *>(player);
     rt_status ret;
-    RtMutex::RtAutolock autoLock(rtplayer->mDataLock);
 
     ret = rtplayer->pcm_player->getState();
-    RT_LOGD("RockitPlayer1 ret = %d", ret);
+    RT_LOGD("RockitPlayer1 PCM ret = %d", ret);
+    if (ret == RT_STATE_COMPLETE) {
+        RT_LOGD("RockitPlayer1 PCM PlayerStop1");
+        rtplayer->pcm_player->stop();
+        RT_LOGD("RockitPlayer1 PCM PlayerStop2");
+        rtplayer->pcm_player->reset();
+    }
+    ret = rtplayer->pcm_player->getState();
     if (NULL != rtplayer && (ret == RT_STATE_IDLE)) {
         rtplayer->player_select = PCM_PLAY;
         rtplayer->pcm_player->setDataSource(RT_NULL, RT_NULL);
@@ -138,22 +148,28 @@ int Rockit_ReleasePlayer(void *player) {
 }
 
 int Rockit_PlayAudio(void *player, const char* url, const int pcm) {
-    RT_LOGD("RockitPlayer1 url(%s) pcm = %d", url, pcm);
+    RT_LOGD("RockitPlayer1 Audio url = %s", url);
     RockitContext * rtplayer = reinterpret_cast<RockitContext *>(player);
     RtMutex::RtAutolock autoLock(rtplayer->mDataLock);
-    if (NULL != rtplayer) {
-        rtplayer->player_select = LOCAL_PLAY;
-        if (!strncasecmp("/oem", url, 4)) {
-            rtplayer->mProtocolType = PRO_LOCAL;
-        } else {
-            rtplayer->mProtocolType = PRO_HTTP;
+    rt_status ret;
+
+    ret = rtplayer->local_player->getState();
+    RT_LOGD("RockitPlayer1 Audio ret = %d", ret);
+    {
+        Rockit_PlayerStop(player);
+        if (NULL != rtplayer) {
+            rtplayer->player_select = LOCAL_PLAY;
+            if (!strncasecmp("/oem", url, 4)) {
+                rtplayer->mProtocolType = PRO_LOCAL;
+            } else {
+                rtplayer->mProtocolType = PRO_HTTP;
+            }
+            rtplayer->local_player->setDataSource(url, RT_NULL);
+            rtplayer->local_player->prepare();
+            RT_LOGD("RockitPlayer1 Audio  Done", url);
+            return RT_OK;
         }
-        rtplayer->local_player->setDataSource(url, RT_NULL);
-        rtplayer->local_player->prepare();
-        RT_LOGD("RockitPlayer1 url(%s) Done", url);
-        return RT_OK;
     }
-    RT_LOGD("RockitPlayer1 url(%s) err", url);
     return RT_ERR_UNKNOWN;
 }
 
@@ -172,7 +188,7 @@ int Rockit_PlayerPlay(void *player) {
 int Rockit_WriteData(void *player, const char * data, const unsigned int length) {
     RT_LOGD("RockitPlayer1 WriteData");
     RockitContext * rtplayer = reinterpret_cast<RockitContext *>(player);
-    //  RtMutex::RtAutolock autoLock(rtplayer->mDataLock);
+    RtMutex::RtAutolock autoLock(rtplayer->mPcmLock);
     if (NULL != rtplayer) {
        Rockit_PlayAudio_PCM(player);
        rtplayer->player_select = PCM_PLAY;
@@ -190,13 +206,9 @@ int Rockit_PlayerStop(void *player) {
     RtMutex::RtAutolock autoLock(rtplayer->mDataLock);
     if (NULL != rtplayer) {
         if (1) {
-            RT_LOGD("RockitPlayer1 PlayerStop1");
-            rtplayer->pcm_player->stop();
-            RT_LOGD("RockitPlayer1 PlayerStop2");
-            rtplayer->pcm_player->reset();
-            RT_LOGD("RockitPlayer1 PlayerStop3");
+            RT_LOGD("RockitPlayer1 PlayerStop 1");
             rtplayer->local_player->stop();
-            RT_LOGD("RockitPlayer1 PlayerStop4");
+            RT_LOGD("RockitPlayer1 PlayerStop 2");
             rtplayer->local_player->reset();
         }
         RT_LOGD("RockitPlayer1 PlayerStop done");
@@ -241,14 +253,13 @@ int Rockit_PlayerResume(void *player) {
 }
 
 int Rockit_PlayerSeek(void *player, const double time) {
-    RT_LOGD("RockitPlayer1 PlayerSeek");
+    RT_LOGD("RockitPlayer1 PlayerSeek time = %lf", time);
     RockitContext * rtplayer = reinterpret_cast<RockitContext *>(player);
     RtMutex::RtAutolock autoLock(rtplayer->mDataLock);
     if (NULL != rtplayer) {
-        if (rtplayer->player_select == PCM_PLAY) {
-            rtplayer->pcm_player->seekTo(time);
-        } else {
-            rtplayer->local_player->seekTo(time);
+        {
+            RT_LOGD("RockitPlayer1 PlayerSeek Local");
+            rtplayer->local_player->seekTo((int64_t)time);
         }
         RT_LOGD("RockitPlayer1 PlayerSeek done");
         return RT_OK;
