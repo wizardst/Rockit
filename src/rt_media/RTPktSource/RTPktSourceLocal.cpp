@@ -99,9 +99,7 @@ RT_RET RTPktSourceLocal::init(RtMetaData *config) {
 
 RT_RET RTPktSourceLocal::release() {
     RT_RET ret = RT_OK;
-    if (mVideoPktQ && mAudioPktQ) {
-        flush();
-    }
+    flush();
     if (mVideoPktQ) {
         deque_destory(&mVideoPktQ);
     }
@@ -134,7 +132,7 @@ RT_RET RTPktSourceLocal::stop() {
 
 RT_RET RTPktSourceLocal::flush() {
     RTPacket *pkt;
-    while (deque_size(mVideoPktQ) > 0) {
+    while (mVideoPktQ && deque_size(mVideoPktQ) > 0) {
         RtMutex::RtAutolock autoLock(mVideoQLock);
         RT_DequeEntry entry = deque_pop(mVideoPktQ);
         if (entry.data) {
@@ -147,7 +145,7 @@ RT_RET RTPktSourceLocal::flush() {
         rt_safe_free(pkt);
     }
 
-    while (deque_size(mAudioPktQ) > 0) {
+    while (mAudioPktQ && deque_size(mAudioPktQ) > 0) {
         RtMutex::RtAutolock autoLock(mAudioQLock);
         RT_DequeEntry entry = deque_pop(mAudioPktQ);
         if (entry.data) {
